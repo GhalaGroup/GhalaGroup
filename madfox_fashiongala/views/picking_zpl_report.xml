@@ -4,8 +4,19 @@
     <template id="stock_picking_zpl_report"
         inherit_id="stock.label_transfer_template_view_zpl">
         <xpath expr="." position="replace">
+<t>
+ <t t-set="uom_categ_unit" t-value="env.ref('uom.product_uom_categ_unit')"/>
+            <t t-foreach="docs" t-as="picking">
 
-                         <t t-foreach="range(qty)" t-as="item">
+                <t t-foreach="picking.move_lines" t-as="move">
+                    <t t-foreach="move.move_line_ids" t-as="move_line">
+                        <t t-if="move_line.product_uom_id.category_id == uom_categ_unit">
+                            <t t-set="qty" t-value="int(move_line.qty_done)"/>
+                        </t>
+                        <t t-else="">
+                            <t t-set="qty" t-value="1"/>
+                        </t>
+                        <t t-foreach="range(qty)" t-as="item">
                             <t t-translation="off">
 ^XA
 ^FO100,50
@@ -24,9 +35,11 @@
 ^XZ
                             </t>
                         </t>
+                    </t>
+                </t>
+            </t>
 
-
-
+</t>
         </xpath>
     </template>
 </data>
