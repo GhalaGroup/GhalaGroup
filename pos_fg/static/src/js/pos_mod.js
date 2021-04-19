@@ -23,10 +23,12 @@ const _super_paymentline = models.Paymentline.prototype;
 
 models.Paymentline = models.Paymentline.extend({
     export_as_JSON: function(){
-        const note = document.querySelector('input[name="popup_note"]')?.value ?? '';
+        const auth_code = document.querySelector('input[name="auth_code"]')?.value ?? '';
+        const note = document.querySelector('input[name="note"]')?.value ?? '';
 
         const json = _super_paymentline.export_as_JSON.apply(this, arguments);
-        json.transaction_id = note;
+        json.transaction_id = auth_code;
+        json.note = note;
 
         return json;
     },
