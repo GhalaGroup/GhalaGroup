@@ -5,6 +5,7 @@
         <template id="assets" inherit_id="point_of_sale.assets">
         <xpath expr="." position="inside">
                 <script type="text/javascript" src="/pos_fg/static/src/js/pos_mod.js"></script>
+             <script type="text/javascript" src="/pos_fg/static/src/js/bank_mod.js"></script>
         </xpath>
     </template>
 
