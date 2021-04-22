@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/scan_to_print/static/src/js/BrowserPrint-3.0.216.min.js"></script>
+                <script type="text/javascript" src="/scan_to_print/static/src/js/BrowserPrint-Zebra-1.0.216.min.js"></script>
+                <script type="text/javascript" src="/scan_to_print/static/src/js/stock_barcode.js"></script>
+                <link rel="stylesheet" type="text/scss" href="/scan_to_print/static/src/scss/stock_barcode.scss"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
