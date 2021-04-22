@@ -34,7 +34,7 @@
     'data': ['security/ir.model.access.csv',
              'views/scan_print_views.xml',
              'views/assets.xml'],
-    'qweb': ['static/src/xml/stock_barcode.xml'],
+    'qweb': ['static/src/xml/stock.xml'],
     'license': 'AGPL-3',
     'installable': True,
     'application': True,
