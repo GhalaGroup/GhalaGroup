@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="scan_to_print_action_main_menu" model="ir.actions.client">
+        <field name="name">Scan Print</field>
+        <field name="tag">scan_to_print_main_menu</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <menuitem
+        id="scan_to_print_menu"
+        action="scan_to_print_action_main_menu"
+        sequence="50"
+        groups="stock.group_stock_user" />
+
+</odoo>
