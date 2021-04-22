@@ -33,7 +33,6 @@
     'depends': ['barcodes', 'stock', 'web_tour'],
     'data': ['security/ir.model.access.csv',
              'views/scan_print_views.xml',
-             'views/stock_barcode_templates.xml',
              'views/assets.xml'],
     'qweb': ['static/src/xml/stock_barcode.xml'],
     'license': 'AGPL-3',
