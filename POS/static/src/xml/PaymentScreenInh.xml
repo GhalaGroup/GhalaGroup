@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="CustomFilterItem" t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension" owl="1">
+
+        <xpath expr="//div[@class='payment-controls']" position="replace">
+            <div class="payment-controls" style="display: flex; flex-direction: column">
+                                    <div t-if="env.pos.config.module_account" class="button js_invoice"
+                                        t-att-class="{ highlight: currentOrder.is_to_invoice() }"
+                                        t-on-click="toggleIsToInvoice">
+                                        <i class="fa fa-file-text-o" /> Invoice
+                                    </div>
+                                    <div t-if="env.pos.config.tip_product_id" class="button js_tip"
+                                        t-on-click="addTip">
+                                        <i class="fa fa-heart" /> Tip
+                                    </div>
+                                    <div t-if="env.pos.config.iface_cashdrawer" class="button js_cashdrawer"
+                                        t-on-click="openCashbox">
+                                        <i class="fa fa-archive" /> Open Cashbox
+                                    </div>
+                <input type='text'  name="auth_code" placeholder="Auth Code" disabled='true' style="width: 100%;
+                margin-top: 10px;
+                font-size: 1rem;
+                padding: 10px;
+                box-sizing: border-box;
+                border: 1px solid rgba(0,0,0,0.3);
+                border-radius: 3px;
+                background-color:#e2e2e2 !important                    "></input>
+
+
+            <input type='text'  name="note" placeholder="Notes" style="width: 100%;
+                margin-top: 10px;
+                font-size: 1rem;
+                padding: 10px;
+                box-sizing: border-box;
+                border: 1px solid rgba(0,0,0,0.3);
+                border-radius: 3px;"></input>
+
+                <div style="display: flex; margin-top: 10px; align-items: center;">
+
+                <input id="checkid" type="checkbox"  class="check" value="test" style=" width: 20px; height: 20px"/>
+                <label for="checkid" style="font-size: 1rem; margin-left: 10px">Include note in receipt</label>
+                </div>
+
+
+                                </div>
+        </xpath>
+    </t>
+</templates>
