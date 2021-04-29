@@ -77,7 +77,7 @@ var MainMenu = AbstractAction.extend({
         }
 
         blockBarcodeScan = true;
-        framework.blockUI();
+//         framework.blockUI();
 
         Session.rpc('/scan_to_print/scan_from_main_menu_mod', {
             barcode: barcode,
