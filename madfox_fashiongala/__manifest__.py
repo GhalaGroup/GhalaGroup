@@ -38,7 +38,8 @@
         'views/vic_template.xml',
         'views/vic_template2.xml',
         'views/external_layout_clean.xml',
-        'views/picking_zpl_report.xml'
+        'views/picking_zpl_report.xml',
+        'views/barcode_zpl_productTemplateModel.xml'
     ],
     'images': ['static/description/banner.png'],
     'license': 'AGPL-3',
