@@ -77,11 +77,14 @@ var MainMenu = AbstractAction.extend({
         }
 
         blockBarcodeScan = true;
-//         framework.blockUI();
+        framework.blockUI();
+
+        console.log("BARCODE", barcode);
 
         Session.rpc('/scan_to_print/scan_from_main_menu_mod', {
             barcode: barcode,
         }).then(function(result) {
+            console.log('PRODUCT ID',result);
             if (result===false) {
                 self.do_warn("product wasn't found");
                 return;
@@ -117,6 +120,7 @@ var MainMenu = AbstractAction.extend({
      * @returns A promise which resolves once the document has been printer, or rejects with an error message suitable to display for the user.
      */
     _sendToPrinter: function (zpl_data) {
+        console.log('this is the downloaded zpl:',zpl_data);
         return new Promise(function (resolve, reject) {
             // Step one: Get the default printer.
             console.debug('Getting default device... ⚙');
