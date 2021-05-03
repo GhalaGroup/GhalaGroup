@@ -101,7 +101,7 @@ var MainMenu = AbstractAction.extend({
     },
 
     _downloadZplReport: function (id) {
-        const url = 'report/text/stock.label_product_template_view/'+id;
+        const url = '/report/text/stock.label_product_template_view/'+id;
         const form_data = new FormData();
         form_data.append('csrf_token', core.csrf_token);
         form_data.append('data', JSON.stringify([url, 'qweb-text']));
