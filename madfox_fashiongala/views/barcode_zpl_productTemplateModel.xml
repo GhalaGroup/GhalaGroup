@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<odoo>
+<data>
+    <template id="report_product_view"
+        inherit_id="stock.label_barcode_product_template_view">
+
+        <xpath expr="." position="replace">
+            <t>
+            <t t-foreach="docs" t-as="product">
+                <t t-translation="off">
+^XA
+^FO90,50
+^A0N,44,33^FD<t t-esc="product.display_name"/>^FS
+<t t-if="product.barcode ">
+^FO90,100^BY3
+^BCN,100,Y,N,N
+^FD<t t-esc="product.barcode"/>^FS
+</t>
+^XZ
+                </t>
+            </t>
+
+
+
+</t>
+        </xpath>
+    </template>
+</data>
+</odoo>
