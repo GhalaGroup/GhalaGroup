@@ -10,14 +10,14 @@
                 <t t-translation="off">
 <t t-foreach="mainProduct.product_variant_ids" t-as="product"> 
 ^XA
-^FO20,20
+^FO90,20
 ^A0N,18,17^FD<t t-esc="product.default_code"/>^FS
-^FO20,44
+^FO90,44
 ^A0N,18,17^FD<t t-esc="product.name"/> [<t t-esc="product.x_studio_product_brands.x_name"/>]^FS
-^FO20,69
+^FO90,69
 ^A0N,18,17^FD<t t-if="product.product_variant_count==1" t-foreach="product.attribute_line_ids" t-as="line"> <t t-esc="line.value_ids.name" /> </t><t t-if="product.product_variant_count>1" t-esc="', '.join(map(lambda x: x.name, product.product_template_attribute_value_ids))"/>^FS
 <t t-if="product.barcode">
-^FO20,92^BY1
+^FO90,92^BY1
 ^BCN,70,Y,N,N
 ^FD<t t-esc="product.barcode"/>^FS
 </t>
