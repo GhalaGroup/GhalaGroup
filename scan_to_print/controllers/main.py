@@ -10,8 +10,10 @@ class StockBarcodeController(http.Controller):
         """ Receive a barcode scanned from the main menu and return the appropriate
             action (open an existing / new picking) or warning.
         """
-
-
-
         product = request.env['product.template'].search([('barcode', '=', barcode),])
-        return product.id
+        if product.id:
+            return product.id
+        else:
+            vendor = request.env['product.template'].search([('x_studio_vendor_barcode', '=', barcode),])
+            return vendor.id
+
