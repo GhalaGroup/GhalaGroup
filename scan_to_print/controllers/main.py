@@ -16,4 +16,5 @@ class StockBarcodeController(http.Controller):
         else:
             vendor = request.env['product.template'].search([('x_studio_vendor_barcode', '=', barcode),])
             return vendor.id
+        
 
