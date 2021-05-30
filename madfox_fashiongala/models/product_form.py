@@ -14,14 +14,12 @@ class Madfox_Product(models.Model):
         vals['barcode'] = barcode
         res = super(Madfox_Product, self).create(vals)
         # res.barcode = barcode
-        if not res.default_code:
+        if not res.default_code and res.type !='service':
             res.default_code= self.getInternalNumber(res.categ_id.id)
         return res
 
     def getInternalNumber(self, categ_id):
         mad_seq = ""
-        if self.type =='service':
-			return mad_seq
         category = self.env['product.category'].search([('id', '=', categ_id)])
         if category:
             if not category.parent_id:
@@ -68,9 +66,6 @@ class Madfox_ProductTemplate(models.Model):
 
     def getInternalNumber(self, categ_id):
         mad_seq = ""
-        if self.type =='service':
-			return mad_seq
-			
         category = self.env['product.category'].search([('id', '=', categ_id)])
         if category:
             if not category.parent_id:
