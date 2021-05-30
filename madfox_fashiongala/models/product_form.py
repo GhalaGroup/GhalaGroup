@@ -21,7 +21,7 @@ class Madfox_Product(models.Model):
     def getInternalNumber(self, categ_id):
         mad_seq = ""
         if self.type =='service':
-			return mad_seq
+		return mad_seq
         category = self.env['product.category'].search([('id', '=', categ_id)])
         if category:
             if not category.parent_id:
@@ -69,7 +69,7 @@ class Madfox_ProductTemplate(models.Model):
     def getInternalNumber(self, categ_id):
         mad_seq = ""
         if self.type =='service':
-			return mad_seq
+		return mad_seq
         category = self.env['product.category'].search([('id', '=', categ_id)])
         if category:
             if not category.parent_id:
