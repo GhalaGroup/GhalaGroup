@@ -21,7 +21,7 @@
 #############################################################################
 
 {
-    'name': 'fashion to group',
+    'name': 'GG to FG',
     'version': '14.0.1.0.0',
     'summary': 'creates sale order from galagroup to fashion gala',
     'category': 'Inventory',
