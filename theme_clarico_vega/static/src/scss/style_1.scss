@@ -753,8 +753,7 @@ td.text-center.text-xl-right.border-0
 		color: white !important;
 		> .progress-wizard-steplabel
 		{
-// 		tag
-			color:black !important;
+
 		}
 		> .progress-wizard-bar
 		{
@@ -762,7 +761,8 @@ td.text-center.text-xl-right.border-0
 		    color: black !important;
 			&:before
 			{
-				border-left: 10px solid nth($f_color,5);
+// 			tag
+				border-left: 10px solid #f0f4f3 !important;
 			}
 		}
 	}
