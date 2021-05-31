@@ -753,11 +753,12 @@ td.text-center.text-xl-right.border-0
 		color: white !important;
 		> .progress-wizard-steplabel
 		{
-		    background: #f0f4f3 !important;
-			color: black !important;
+			color:white !important;
 		}
 		> .progress-wizard-bar
 		{
+		    background: #f0f4f3 !important;
+		    color: black !important;
 			&:before
 			{
 				border-left: 10px solid nth($f_color,5);
