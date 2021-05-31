@@ -37,7 +37,7 @@ class SaleOrder(models.Model):
             # print('lst variant price', x.product_id.lst_price)
             # print('lisst template price', x.product_id.list_price)
             # the product id it takes is the product.product
-            lines.append([0, False, {'product_id':10872, 'name': 'Ecommerce Sales Service' +' - ' + self.name +' - ' + x.name, 'price_unit': x.price_unit - x.product_id.standard_price,
+            lines.append([0, False, {'product_id':10827, 'name': 'Ecommerce Sales Service' +' - ' + self.name +' - ' + x.name, 'price_unit': x.price_unit - x.product_id.standard_price,
                              'product_uom_qty': x.product_uom_qty, 'product_qty': x.product_uom_qty}])
         x = self.order_line
         # print(self.company_id.id)
