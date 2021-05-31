@@ -702,7 +702,7 @@ td.text-center.text-xl-right.border-0
 
 	.progress-wizard .progress-wizard-step
 	{
-// 	the stage we're at tag
+// 	the stages we haven't reached
 			background: #f0f4f3 !important;
 			color: black !important;
 
@@ -753,7 +753,8 @@ td.text-center.text-xl-right.border-0
 		color: white !important;
 		> .progress-wizard-steplabel
 		{
-			color:white !important;
+// 		tag
+			color:black !important;
 		}
 		> .progress-wizard-bar
 		{
