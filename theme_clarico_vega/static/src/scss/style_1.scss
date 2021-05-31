@@ -749,7 +749,8 @@ td.text-center.text-xl-right.border-0
 	}
 	.progress-wizard .progress-wizard-step.active
 	{
-		background:nth($f_color,5);
+		background: #b3054d !important;
+		color: white !important;
 		> .progress-wizard-steplabel
 		{
 			color:white !important;
