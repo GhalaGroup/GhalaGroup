@@ -43,7 +43,7 @@ class SaleOrder(models.Model):
         # print(self.company_id.id)
         print(lines)
         if self.website_id and x and self.company_id.id == 1 :
-            purchaseOrder = self.env['purchase.order'].create({'partner_id': 4,'order_line': lines, 'partner_ref' : partnerRef })
+            purchaseOrder = self.env['purchase.order'].create({'partner_id': 42,'order_line': lines, 'partner_ref' : partnerRef })
             print('this is res model id',purchaseOrder.id)
             activity = self.env['mail.activity'].create({'res_model_id': self.env['ir.model']._get(self.env['purchase.order']._name).id, 'res_id': purchaseOrder.id, 'recommended_activity_type_id': False, 'activity_type_id': 4, 'summary': purchaseOrder.name, 'date_deadline': datetime.today().strftime('%Y-%m-%d'), 'user_id': 2, 'note': purchaseOrder.name}
 )
