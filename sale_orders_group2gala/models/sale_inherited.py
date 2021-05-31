@@ -23,9 +23,19 @@ class SaleOrder(models.Model):
     # #     print(saleOrder)
     #     return v
 
+    def create(self, vals_list):
+        print(vals_list)
+        v = super(SaleOrder, self).create(vals_list)
+        if vals_list['partner_id'] == 1:
+            activity = self.env['mail.activity'].create(
+                {'res_model_id': self.env['ir.model']._get(self.env['sale.order']._name).id, 'res_id': v.id,
+                 'recommended_activity_type_id': False, 'activity_type_id': 4, 'summary': v.name,
+                 'date_deadline': datetime.today().strftime('%Y-%m-%d'), 'user_id': 2, 'note': v.name}
+                )
+        return v
+
     def _action_confirm(self):
         res = super(SaleOrder, self)._action_confirm()
-        partnerRef = ''
         lines = []
         # print(self.name)
         partnerRef = self.name
