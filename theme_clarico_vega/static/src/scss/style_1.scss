@@ -702,7 +702,8 @@ td.text-center.text-xl-right.border-0
 
 	.progress-wizard .progress-wizard-step
 	{
-			background: #141414 !important;
+			background: #b3054d !important;
+			color: white;
 
 		border:$input-border-width solid $input-border-color;
 		@include position(relative)
@@ -762,7 +763,8 @@ td.text-center.text-xl-right.border-0
 	}
 	.progress-wizard .progress-wizard-step.complete
 	{
-		background: #141414 !important;
+		background: #9e9e9e !important;
+		color: white;
 
 		> .progress-wizard-bar
 		{
