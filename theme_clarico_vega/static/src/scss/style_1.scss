@@ -703,8 +703,8 @@ td.text-center.text-xl-right.border-0
 	.progress-wizard .progress-wizard-step
 	{
 // 	the stage we're at tag
-			background: green !important;
-			color: white !important;
+			background: #f0f4f3 !important;
+			color: black !important;
 
 		border:$input-border-width solid $input-border-color;
 		@include position(relative)
