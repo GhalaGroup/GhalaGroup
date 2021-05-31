@@ -741,6 +741,8 @@ td.text-center.text-xl-right.border-0
 		> .progress-wizard-steplabel
 		{
 			margin: 10px 0 10px 5px;
+// 			tag
+            color: black !important;
 			@include style(2,5);
 			font-weight: bold;
 		}
