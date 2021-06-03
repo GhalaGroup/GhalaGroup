@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+
+    <t t-name="main_menu_mod">
+        <div class="o_stock_barcode_main_menu_container o_home_menu_background">
+            <div class="o_stock_barcode_main_menu position-relative">
+                <a href="#" class="o_stock_barcode_menu d-block float-left"><i class="fa fa-chevron-left"></i></a>
+                <h1 class="mb-4">Barcode Scanning</h1>
+
+
+                <div class="o_stock_barcode_container position-relative d-inline-block mt-4 mb-5">
+                    <img src="/barcodes/static/img/barcode.png" alt="Barcode" class="img-fluid mb-1 mt-1"/>
+                    <span class="o_stock_barcode_laser"/>
+                </div>
+
+                <hr class="mb-4 d-none d-sm-block"/>
+
+            </div>
+        </div>
+    </t>
+
+</templates>
