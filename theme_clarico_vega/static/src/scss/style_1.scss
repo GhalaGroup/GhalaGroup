@@ -702,8 +702,8 @@ td.text-center.text-xl-right.border-0
 
 	.progress-wizard .progress-wizard-step
 	{
-// 	the stages we haven't reached
-			background: #f0f4f3 !important;
+
+
 			color: black !important;
 
 		border:$input-border-width solid $input-border-color;
@@ -715,8 +715,7 @@ td.text-center.text-xl-right.border-0
 
 		> .progress-wizard-bar
 		{
-// 		tag
-		color: black !important;
+
 			height: auto;
 			background-color: nth($f_color,27);
 			@include position(absolute,-1px,-10px,auto,auto)
@@ -732,8 +731,9 @@ td.text-center.text-xl-right.border-0
 				display: block;
 				@include border(20px,27,solid)
 				border-right: 0;
-// tag
-				border-left: 10px solid #f0f4f3 !important;
+
+				border-left: 10px solid #9e9e9e !important;
+
 				content: "";
 
 			}
@@ -742,7 +742,7 @@ td.text-center.text-xl-right.border-0
 		{
 			margin: 10px 0 10px 5px;
 // 			tag
-            color: black !important;
+
 			@include style(2,5);
 			font-weight: bold;
 		}
@@ -761,7 +761,9 @@ td.text-center.text-xl-right.border-0
 		}
 		> .progress-wizard-bar
 		{
-		    background: #f0f4f3 !important;
+
+		    background: #9e9e9e !important;
+
 		    color: black !important;
 			&:before
 			{
