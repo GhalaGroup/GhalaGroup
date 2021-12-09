@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+	<report id="inventory_age_pdf_report"
+		            model="inventory.age.wizard"
+		            string="Inventory Age Report"
+		            report_type="qweb-pdf"
+		            name="dev_inventory_ageing_report.inventory_ageing_template_id"  
+		            file="dev_inventory_ageing_report.inventory_ageing_template_id"
+		            />
+
+
+	 <record id="paperformat_inventory_report" model="report.paperformat">
+            <field name="name">Inventory Ageing A4</field>
+            <field name="default" eval="True" />
+            <field name="format">custom</field>
+            <field name="page_height">297</field>
+            <field name="page_width">210</field>
+            <field name="orientation">Landscape</field>
+            <field name="margin_top">20</field>
+            <field name="margin_bottom">05</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">5</field>
+            <field name="dpi">90</field>
+        </record>
+        
+
+        
+        <record id="inventory_age_pdf_report" model="ir.actions.report">
+            <field name="paperformat_id" ref="dev_inventory_ageing_report.paperformat_inventory_report" />
+        </record>
+
+	<template id="inventory_header_layout">
+		    <!-- Multicompany -->
+		    <t t-if="o and 'company_id' in o">
+		        <t t-set="company" t-value="o.company_id"/>
+		    </t>
+		    <t t-if="not o or not 'company_id' in o">
+		        <t t-set="company" t-value="res_company"/>
+		    </t>
+
+		    <div class="footer o_background_footer">
+		        <div class="text-center">
+		            <div class="text-muted" style="color:#000">
+		                Page:
+		                <span class="page"/>
+		                of
+		                <span class="topage"/>
+		            </div>
+		        </div>
+		    </div>
+		    <div class="article">
+		      <t t-raw="0" />
+		    </div>
+		</template>
+
+</odoo>

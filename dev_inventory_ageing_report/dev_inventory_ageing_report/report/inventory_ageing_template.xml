@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+	<template id="inventory_ageing_template_body">
+		<t t-call="dev_inventory_ageing_report.inventory_header_layout">
+			<t t-foreach="docs" t-as="o">
+				<div class="page" style="font-size:15px;">
+						<style>
+				            .header_table{
+				                width:100%;
+				            }
+				            .header_table th{
+				                padding:5px;
+				                text-align:center;
+				                border:1px solid black;
+				                background:#c8cace;
+				            }
+				            .header_table td{
+				                padding:5px;
+				                text-align:center;
+				                border:1px solid black;
+				            }
+				            .my_table{
+				                width:100%;
+				            }
+				            .my_table th{
+				                padding:5px;
+				                border-bottom:1px solid #000;
+				            }
+				            .my_table td{
+				                padding:5px;
+				                border-bottom:1px solid #efefef;
+				            }
+						</style>
+						<h3><center>Stock Inventory Aging</center></h3>
+						<br/><br/>
+						<div class="row">
+								<div class="col-6" align="left">
+						           <table class="table-bordered"  width="100%">
+										<tr>
+											<td width="30%">Date</td>
+											<td><span t-esc="o.date_from"/></td>
+										</tr>
+										<tr width="30%">
+											<td>Company</td>
+											<td><span t-esc="o.company_id.name"/></td>
+										</tr>
+										<tr width="30%">
+											<td>Warehouse</td>
+											 <td><span t-esc="', '.join(map(lambda x: (x.name), o.warehouse_ids))"/></td>
+										</tr>
+										<tr width="30%">
+											<td>Location</td>
+											 <td><span t-esc="o.location_ids.name"/></td>
+										</tr>
+								</table>
+								</div>
+								<div class="col-6" align="right">
+						            <table class="table-bordered"  width="100%">
+										<tr>
+											<td width="40%">Period Length</td>
+											<td><span t-esc="o.period_length"/></td>
+										</tr>
+										<tr>
+											<td width="40%">Filter</td>
+											<td>
+												<t t-if="o.filter_by == 'by_product'">
+													Product
+												</t>
+												<t t-if="o.filter_by == 'by_category'">
+													Product Category
+												</t>
+											</td>
+										</tr>
+									</table>	
+								</div>
+                		</div>
+						<br/><br/>
+						<div class="row">
+							<div class="col-12" >
+								<t t-set="res" t-value="get_aging_detail(o)"/>
+								<t t-set="table_header_values" t-value="create_table_header(o,res)"/>
+								<t t-set="product_values" t-value="get_products(o)"/>
+								<t t-set="table_values" t-value="create_table_values(o,res,product_values)"/>
+<!--								<span t-esc="table_header_values"/>	-->
+<!--								<span t-esc="get_aging_detail(o)"/>	-->
+<!--								<span t-esc="create_table_header(o,res)"/>-->
+								<table class="my_table" width="100%">
+										<tr>
+											<th width="9%" rowspan="2" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_0')"/> </th>
+											<th width="9%" rowspan="2" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_1')"/> </th>
+											<th rowspan="2"  width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_2')"/> </th>
+											<th rowspan="2"  width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_3')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_4_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_6_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_8_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_10_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_12_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_14_header')"/> </th>
+											<th width="9%" colspan="2" style="background:#d6d6d6;border:1px solid black;text-align:center;"> <span t-esc="table_header_values.get('col_16_header')"/> </th>
+		                        	    </tr>
+		                        	    <tr>
+		                        	    	
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_4')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_5')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_6')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_7')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_8')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_9')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_10')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_11')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_12')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_13')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_14')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_15')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black"> <span t-esc="table_header_values.get('col_16')"/> </th>
+											<th width="9%" style="background:#d6d6d6;border:1px solid black;"> <span t-esc="table_header_values.get('col_17')"/> </th>
+		                        	    </tr>
+										<tr  t-foreach="table_values" t-as="data" >
+											<td style="border:1px solid black;" width="9%" > <span t-esc="data.get('col_0')"/> </td>
+											<td width="9%"  style="border:1px solid black;" > <span t-esc="data.get('col_1')"/> </td>	
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('col_2')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('col_3')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_5')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_6')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_7')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_8')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_9')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_10')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_11')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_12')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_13')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_14')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_15')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_16')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_17')"/> </td>
+											<td width="9%" style="border:1px solid black"> <span t-esc="data.get('quantity_values').get('col_18')"/> </td>
+											
+										</tr>
+								</table>
+							</div>
+						</div>
+<!--					<br/>-->
+<!--						<t t-if="o.top_by == 'customer'">-->
+<!--						<center><strong><span style="font-size:24px;">Top <span t-field="o.top" /> Customers</span></strong></center>-->
+<!--							<span style="font-size: 14px;" class="pull-right"><b>Start Date : </b><span t-field="o.start_date"/></span><br/>-->
+<!--							<span style="font-size: 14px;" class="pull-right"><b>End Date : </b><span t-field="o.end_date"/></span>-->
+<!--							<table class="table table-bordered">-->
+<!--									<tr>-->
+<!--										<th>Sr.</th>-->
+<!--										<th class="text-center">Customer</th>-->
+<!--										<th class="text-center">Total Sale Amount</th>-->
+<!--									</tr>-->
+<!--									<tr t-foreach="get_top_customer_data(o)" t-as="customer">-->
+<!--										<td><span t-esc="customer_index+1"/></td>-->
+<!--										<td><span t-esc="customer['name']"/></td>-->
+<!--										<td class="text-right"><span t-esc="customer['amount']"/></td>-->
+<!--									</tr>-->
+<!--							</table>-->
+<!--						</t>-->
+
+<!--						<t t-if="not o.top_by == 'customer'">-->
+<!--						<center><strong><span style="font-size:24px;">Top <span t-field="o.top" /> Products</span></strong></center>-->
+<!--							<span style="font-size: 14px;" class="pull-right"><b>Start Date : </b><span t-field="o.start_date"/></span><br/>-->
+<!--							<span style="font-size: 14px;" class="pull-right"><b>End Date : </b><span t-field="o.end_date"/></span>-->
+<!--							<table class="table table-bordered">-->
+<!--									<tr>-->
+<!--										<th>Sr.</th>-->
+<!--										<th>Code</th>-->
+<!--										<th class="text-center">Product Name</th>-->
+<!--										<th class="text-center">Total Qty</th>-->
+<!--										<th class="text-center">Unit Of Measure</th>-->
+<!--									</tr>-->
+<!--									<tr t-foreach="get_top_product_data(o)" t-as="product">-->
+<!--										<td><span t-esc="product_index+1"/></td>-->
+<!--										<td><span t-esc="product['code']"/></td>-->
+<!--										<td><span t-esc="product['name']"/></td>-->
+<!--										<td class="text-center"><span t-esc="product['sold_qty']"/></td>-->
+<!--										<td class="text-center"><span t-esc="product['uom']"/></td>-->
+<!--									</tr>-->
+<!--							</table>-->
+<!--						</t>-->
+					</div>
+			</t>
+		</t>
+	</template>
+
+    <template id="inventory_ageing_template_id">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="dev_inventory_ageing_report.inventory_ageing_template_body"/>
+            </t>
+        </t>
+    </template>
+</odoo>
+
