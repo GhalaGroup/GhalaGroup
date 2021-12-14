@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 {
     'name': 'Inventory Aging Report PDF/Excel',
     'version': '14.0.1.2',
