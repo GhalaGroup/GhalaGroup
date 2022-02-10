@@ -22,7 +22,7 @@
 
 {
     'name': 'Scan to Print',
-    'version': '14.0.1.0.0',
+    'version': '15.0.1.0.0',
     'sequence': 1,
     'summary': 'enables you to print product zpl by scanning them',
     'category': 'Inventory',
@@ -33,7 +33,21 @@
     'depends': ['barcodes', 'stock', 'web_tour'],
     'data': ['security/ir.model.access.csv',
              'views/scan_print_views.xml',
-             'views/assets.xml'],
+            ],
+
+     'assets': { 
+         'web.assets_backend': [ 
+             
+             'scan_to_print/static/src/js/BrowserPrint-3.0.216.min.js',
+             'scan_to_print/static/src/js/BrowserPrint-Zebra-1.0.216.min.js',
+             'scan_to_print/static/src/js/stock_barcode.js',
+             'scan_to_print/static/src/js/zpl_print.js',
+         ], 
+         'web.assets_qweb': [
+            'scan_to_print/static/src/xml/stock_barcode.xml',
+        ],
+    
+     } ,
     'qweb': ['static/src/xml/stock_barcode.xml'],
     'license': 'AGPL-3',
     'installable': True,
