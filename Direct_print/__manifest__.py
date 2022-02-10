@@ -22,7 +22,7 @@
 
 {
     'name': 'Direct Print',
-    'version': '14.0.1.0.0',
+    'version': '15.0.1.0.0',
     'summary': 'Prints zpls directly to the printer',
     'category': 'Inventory',
     'author': 'Madfox',
@@ -30,9 +30,19 @@
     'company': 'Madfox solutions',
    'website': 'https://www.madfox.solutions',
     'depends': ['stock', 'product','web','sale'],
-    'data': [
-        'views/assets.xml'
-    ],
+
+    
+    # 'data': [
+    #     'views/assets.xml'
+    # ],
+     'assets': { 
+         'web.assets_backend': [ 
+             
+             'Direct_print/static/src/js/BrowserPrint-3.0.216.min.js',
+             'Direct_print/static/src/js/BrowserPrint-Zebra-1.0.216.min.js',
+             'Direct_print/static/src/js/zpl_print.js',
+         ] 
+     } ,
     'images': ['static/description/banner.png'],
     'license': 'AGPL-3',
     'installable': True,
