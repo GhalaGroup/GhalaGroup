@@ -2,7 +2,7 @@
 <odoo>
 <data>
     <template id="report_product_view"
-        inherit_id="stock.label_barcode_product_template_view">
+        inherit_id="stock.label_product_product_view">
 
         <xpath expr="." position="replace">
             <t>

@@ -22,7 +22,7 @@
 
 {
     'name': 'Fashion Gala Customization',
-    'version': '14.0.1.0.0',
+    'version': '15.0.1.0.0',
     'summary': 'Generates internal refrernce number and Barcode for Product.',
     'category': 'Inventory',
     'author': 'Madfox',
@@ -37,12 +37,20 @@
         'views/vic.xml',
         'views/vic_template.xml',
         'views/vic_template2.xml',
-        'views/external_layout_clean.xml',
+        #'views/external_layout_clean.xml',
         'views/picking_zpl_report.xml',
         'views/barcode_zpl_productTemplateModel.xml'
 
        
     ],
+    
+    'assets': { 
+         'web.assets_backend': [ 
+             
+             'madfox_fashiongala/static/css/layout.css',
+             
+         ] 
+     } ,
     'images': ['static/description/banner.png'],
     'license': 'AGPL-3',
     'installable': True,
