@@ -16,6 +16,7 @@ class PurchaseOrder(models.Model):
             record.total_purchase_product = len(set(list_of_product))
 
     def _total_purchase_product_qty(self):
+        #commit
         for record in self:
             total_qty = 0
             for line in record.order_line:
