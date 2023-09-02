@@ -1,0 +1,27 @@
+/* ================= Main Colors =========================*/
+$o-color-palettes: (
+    (
+        'o-color-1': $theme_color,
+        'o-color-2': #868e96,
+        'o-color-3': #F8F9FA,
+        'o-color-4': #FFFFFF,
+        'o-color-5': #343a40,
+    ),
+    (
+        'o-color-1': #337ab7,
+        'o-color-2': #e9ecef,
+        'o-color-3': #F8F9FA,
+        'o-color-4': #FFFFFF,
+        'o-color-5': #343a40,
+        'menu': 2,
+        'footer': 2,
+        'copyright': 5,
+    ),
+);
+
+
+/* ===================== State Colors ========================*/
+$success:       #25BC91 !default;
+$info:          #ffaa50 !default;
+$warning:       #ff5050 !default;
+$danger:        #900000 !default;

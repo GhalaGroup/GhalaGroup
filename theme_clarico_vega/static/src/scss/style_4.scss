@@ -1,0 +1,206 @@
+/***********************************************
+				Snippet
+			----------------
+			01. Category_carousel Slider
+
+			Product
+			----------------
+			02. Product page offer timer
+
+************************************************/
+/*============================= 01. Category Slider ====================*/
+.category_carousel
+{
+	margin: 20px 0;
+	.te_category_item
+	{
+		max-width: 130px;
+		margin: 0px auto;
+		cursor: pointer;
+		img
+		{
+			max-width: 120px;
+			margin:auto;
+			@include position(absolute,0,0,0,0);
+			vertical-align: middle;
+			@include media-breakpoint-down(md)
+			{
+				max-width: 100px;
+			}
+		}
+		.te_category_img
+		{
+			@include position(relative);
+			height: 130px;
+			width: 130px;
+			vertical-align: top;
+			border-radius: 50%;
+			transition: 0.4s all;
+			@include border(1px,27,solid);
+			&:hover {
+			    @include border(1px,19,solid);
+			}
+            img {
+                border-radius: 50%;
+            }
+			/* &:before, &:after
+			{
+				content: " ";
+				width: 10px;
+				height: 10px;
+				position: absolute;
+				@include border(0px,19,solid);
+				transition: all 0.5s ease-in-out;
+			}
+			&:before {
+				bottom: 0px;
+				right: 0px;
+				border-bottom-width: 1px;
+				border-right-width: 1px;
+			}
+			&:after {
+				top: 0px;
+				left: 0px;
+				border-top-width: 1px;
+				border-left-width: 1px;
+			} */
+		}
+		&:hover
+		{
+			.te_category_img
+			{
+				&:before, &:after
+				{
+					width: 100%;
+					height: 100%;
+				}
+			}
+		}
+		.te_category_name
+		{
+			text-align: center;
+			display: block;
+			padding-top: 10px;
+			margin-top: 10px;
+			@include position(relative);
+		}
+	}
+	.owl-nav button.owl-prev {
+	  	@include position(absolute,50%,null,null,0);
+		transform: translateY(-50%);
+		i
+		{
+			font-size:nth($f_sizes,12);
+		}
+	}
+	.owl-nav button.owl-next {
+	    @extend button.owl-prev;
+	    right:0;
+	    left:unset;
+	}
+}
+/*================= 02. Product page offer timer ===============*/
+.rounded_digit_product
+{
+	/*@include border(1px,19,solid);*/
+	margin-right: 0px;
+	width: 60px;
+	vertical-align: middle;
+	display: inline-block;
+	.te_days_hr_min_sec
+	{
+		font-size: 18px;
+		padding: 5px 5px 0px;
+		line-height: normal;
+        font-weight: 300;
+	}
+	#time_lbl
+	{
+		font-size: nth($f_sizes,3);
+		color: nth($f_color, 19);
+		/*background-color:nth($f_color,19);*/
+		padding: 0px 5px 4px;
+	}
+}
+.te_offer_timer_prod
+{
+	display: none;
+	margin-bottom: 0;
+	/* @include style(4,19);
+	line-height: unset; */
+	font-size: 1rem;
+    padding: 0.3rem;
+    line-height: normal;
+    margin: 0 auto;
+}
+.digit_separator {
+    display: inline-block;
+    vertical-align: top;
+    font-size: 20px;
+    font-family: inherit;
+    font-weight: 300;
+}
+.product_offer_timer {
+	padding: 20px 20px 12px;
+	display: inline-block;
+	margin-bottom: 0.5rem;
+	margin-top: 1.1rem;
+	@include box-shadow(0px 0px 10px 0 rgba(50, 50, 93, 0.2))
+	border: 1px solid #dbdbdb;
+	>span:last-child
+	{
+		.rounded_digit_product
+		{
+			margin-right:0px;
+		}
+	}
+}
+.timer_data {
+	display: inline-block;
+	@include position(absolute,0px,null,null,22px);
+	background: #b7b6b6; /* Static color */
+	color: nth($f_color, 5);
+	max-width: 275px;
+	width: 100%;
+    text-align: center;
+    .timer_input{
+        .te_offer_timer_msg_div{
+            border: 1px solid #d2d2d2;
+            padding: 0 5px;
+        }
+    }
+}
+.te_time_main_div {
+	@include position(relative);
+}
+#product_details .js_product .te_product_quantity {
+    width: auto;
+    margin-right: 8px;
+    margin-top: 12px;
+    @include media-breakpoint-up(md)
+    {
+       display: inline-flex;
+    }
+}
+.quick_view_content, .ajax_cart_content{
+    #product_details .js_product .te_product_quantity{
+        width: initial;
+        @include media-breakpoint-up(md){
+            display: flex;
+            margin-top: 16px !important;
+            margin-bottom: 2px !important;
+        }
+    }
+}
+div.quick_view_content #product_detail #add_to_cart{
+    margin: 12px 4px 15px 0px !important;
+}
+.ajax_cart_content #product_details .js_product .te_product_quantity{
+    @include media-breakpoint-up(md){
+        margin-top: 15px !important;
+        margin-bottom: 15px !important;
+    }
+}
+.oe_share_icon span {
+	line-height: 38px;
+}
