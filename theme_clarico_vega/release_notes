@@ -1,0 +1,102 @@
+Version 14.0.2.2.3 - 4 Mar 21
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved UI/UX of Product Page.
+
+ Feature
+	- Introduce Attribute Swatches with Tool-tip.
+
+Version 14.0.2.2.2 - 26 Feb 21
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved UI/UX In Mega Menu, Logged In Popup and Product Page minor changes.
+
+ Feature
+  - Added Tooltip In Product variants level In Product Page.
+
+Version 14.0.2.2.1 - 22 Feb 21
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved UI/UX for the Product Page and Header.
+
+ Feature
+  - Image Magnifier for Product.
+
+Version 14.0.2.2.0 - 12 Feb 21
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved UI/UX for the Shop Page and Header.
+ - Added New Home Style 9 Snippet.
+
+Version 14.0.2.1.0 - 03 Feb 21
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved Search Bar code.
+ - Improved UI/UX for the Shop Page and Product Page.
+ - Improved functionality of Contact Us.
+
+ Feature
+
+- Added New Header Style.
+
+Version 14.0.2.0.0 - 14 Nov 20
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved the log in popup layout code.
+ - Scroll for counting number snippet.
+ - CSS improvement in snippets and header.
+
+ Feature
+
+- Introduced Product Display Builder Snippet.
+
+Version 14.0.1.0.3 - 24 Nov 20
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Improved Login popup auth signup link.
+ - Changed XPath for ajax cart hidden input for the product page.
+ - Removed pointer event from aos.css file.
+ - Display message if there is no video in Video banner snippet.
+
+Version 14.0.1.0.2 - 11 Nov 20
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Safari browser improvement in snippet.
+
+Version 14.0.1.0.1 - 3 Nov 20
+===================================
+Note:First upgrade emipro_theme_base and update theme.
+
+Improvement
+
+ - Design multi color attribute for the product page, quick view and ajax cart.
+ - Editor related improvement in full slider & some design improvement in Product Page,Shop Page.
+
+Version 14.0.1.0.0 - 24 Oct 20
+===================================
+
+1. Initial release
