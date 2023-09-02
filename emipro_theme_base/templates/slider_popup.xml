@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="product_configure_template">
+        <div class="modal fade w-100" id="product_configure_model">
+            <div class="modal-dialog modal-lg modal-dialog-centered" contenteditable="false">
+                <div class="modal-content product_configure_model" contenteditable="false">
+                    <button type="button" class="product_configure_model_close" data-dismiss="modal" aria-label="Close"
+                            tabindex="-1">
+                    </button>
+                    <div class="modal-body p-0 pb-3" contenteditable="false">
+                        <div class="slider-configure h-100 pb-3">
+                            <h4 class="p-3 text-center mb-0">Product Display Builder</h4>
+                            <div class="container-fluid product_slider_configure_template">
+                                <div class="row product-configure">
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3 active"
+                                             data-heading="New Arrival"
+                                             data-description="Will display the newly arrived product in the last 30 days. Please check the documentation for more information."
+                                             data-value="new-arrival">
+                                            <div class="exclusive-slider">Exclusive</div>
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset1.svg"/>
+                                            <div class="product-carousel-text">New Arrival</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3"
+                                             data-heading="Best Seller"
+                                             data-description="Will display top-selling products based on the sales report (Display Based on the previous week's selling of the product). Please check the documentation for more information."
+                                             data-value="best-seller">
+                                            <div class="exclusive-slider">Exclusive</div>
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset2.svg"/>
+                                            <div class="product-carousel-text">Best Seller</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3"
+                                             data-heading="Product Discount"
+                                             data-description="Will display products which contain discount as per current price list. For more details please check the documentation."
+                                             data-value="product-discount">
+                                            <div class="exclusive-slider">Exclusive</div>
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset3.svg"/>
+                                            <div class="product-carousel-text">Product Discount</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3"
+                                             data-heading="Product Categories Discount"
+                                             data-description="Will display products from the Product categories containing discount as per current price list. For more details please check the documentation."
+                                             data-value="product-category-discount">
+                                            <div class="exclusive-slider">Exclusive</div>
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset4.svg"/>
+                                            <div class="product-carousel-text">Product Categories Discount</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3"
+                                             data-heading="Custom Product Filter"
+                                             data-description="Will display products based on configured domain (Like eCommerce categories, brands,label) with limit and sorting options. For more details please check the documentation."
+                                             data-value="custom-domain">
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset5.svg"/>
+                                            <div class="product-carousel-text">Custom Product Filter</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="product-config-content text-center px-2 py-3"
+                                             data-heading="Custom Product Selection"
+                                             data-description="Display the manually selected product from the list of all products available.For more details please check the documentation."
+                                             data-value="manual-configuration">
+                                            <img class="product-carousel-image"
+                                                 src="/emipro_theme_base/static/src/img/product_slider/Asset6.svg"/>
+                                            <div class="product-carousel-text">Custom Product Selection</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="product-box js_item_box d-none" name="product_ids">
+                                    <li class="new-product js_new_item">
+                                        <input class="input-product js_input_item" type="text" placeholder="Search product with name... "/>
+                                        <div id="js_item"/>
+                                    </li>
+                                </ul>
+                                <div class="custom-domain py-3 d-none">
+                                    <div class="custom-domain-line" t-if="filters">
+                                        <h6>Select Slider Filter</h6>
+                                        <div class="dropdown">
+                                            <button type="button" class="dropdown-toggle slider-filter-ui"
+                                                    data-toggle="dropdown">
+                                                <t t-esc="filters[0].display_name"/>
+                                            </button>
+                                            <div class="dropdown-menu slider_filter_option">
+                                                <t t-foreach="filters" t-as="fil">
+                                                    <a class="dropdown-item" t-att-data-filter="fil.id"
+                                                       href="#">
+                                                        <t t-esc="fil.display_name"/>
+                                                    </a>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div t-if="not filters">
+                                        <h6 class="alert alert-danger p-2 mb-0">
+                                            Not Any Filters available.
+                                        </h6>
+                                    </div>
+                                </div>
+
+                                <div class="category-discount py-3 d-none">
+                                    <t t-set="categories" t-value="request.env['product.public.category'].sudo().search([('website_id','in',[False,website.id]),('parent_id','=',False)])"/>
+                                    <div t-if="categories">
+                                        <label>Select E-commerce Categories:</label>
+                                        <select multiple="multiple" class="form-control slider_category_list">
+                                           <t t-foreach="categories" t-as="categ">
+                                                  <t t-call="emipro_theme_base.product_configure_categories_template" />
+                                            </t>
+                                        </select>
+                                        <div class="pt-3">
+                                            <input type='checkbox' class="discount_categ" name="discount_policy"/>
+                                            <label for="discount_policy" class="ml-1 form-check-label">Allow Only Discounted Products</label>
+                                        </div>
+                                    </div>
+                                    <div t-else="">
+                                        <h6 class="alert alert-danger p-2 mb-0">
+                                            Not Any Categories available.
+                                        </h6>
+                                    </div>
+                                </div>
+
+                                <div class="config-note alert alert-info">
+                                    <h3>New Arrival</h3>
+                                    <div>Will display the newly arrived product in the last 30 days. Please check the documentation for more information.
+                                    </div>
+                                </div>
+                                <div class="btn-bottom-fixed">
+                                    <a class="btn btn-primary btn-ui-config js-manual-conf-btn d-none mr-2">
+                                        <i class="fa fa-long-arrow-left ml-2"/>
+                                        Back to Configuration
+                                    </a>
+                                    <a class="btn btn-primary btn-ui-config js-ui-config">
+                                        Continue to UI Configuration
+                                        <i class="fa fa-long-arrow-right ml-2"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="product-slider-configure">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template >
+
+    <template id ="product_configure_categories_template">
+        <t t-set="categ_count" t-value="len(website.get_product_categs_path(categ.id).get('categ_name_set'))"/>
+        <option t-att-class="'categ_lavel_%s' % categ_count" t-att-value="categ.id">
+            <t t-esc="categ.name"/>
+        </option>
+        <t t-foreach="categ.child_id" t-as="categ">
+            <t t-call="emipro_theme_base.product_configure_categories_template" />
+        </t>
+    </template>
+
+    <template id="product_configure" inherit_id="website.layout">
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <div role="dialog" id="product_configure_model_main" class="o_not_editable" contenteditable="false"/>
+        </xpath>
+    </template>
+
+    <template id="product_ui_configure_template">
+        <div class="container-fluid product_ui_configure_template">
+            <div class="row">
+                <t t-if="styles">
+                    <div class="col-6 ui-settings pt-3">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6>Select Slider Style</h6>
+                                    <div class="dropdown">
+                                        <button type="button" class="dropdown-toggle slider-style-ui"
+                                                data-toggle="dropdown">
+                                            <t t-esc="styles[0].display_name"/>
+                                        </button>
+                                        <div class="dropdown-menu slider_style_option">
+                                            <t t-foreach="styles" t-as="style">
+                                                <a t-if="style.style_template_key" class="dropdown-item"
+                                                   t-att-data-style="style.id"
+                                                   t-att-data-value="'%s.%s_preview'%(website.theme_id.name,style.style_template_key)"
+                                                   href="#">
+                                                    <t t-esc="style.display_name"/>
+                                                </a>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="slider-ui-icon">
+                                    <div class="product-config-icon text-center" data-icon="ui-cart-icon"
+                                         title="Shopping Cart" data-value="shopping_cart">
+                                        <div class="fa fa-shopping-cart"/>
+                                    </div>
+                                </div>
+                                <div class="slider-ui-icon">
+                                    <div class="product-config-icon text-center" data-icon="ui-wishlist-icon"
+                                         title="Wishlist" data-value="wishlist">
+                                        <div class="fa fa-heart"/>
+                                    </div>
+                                </div>
+                                <div class="slider-ui-icon">
+                                    <div class="product-config-icon text-center" data-icon="ui-quickview-icon"
+                                         title="Quick View" data-value="quick_view">
+                                        <div class="fa fa-eye"/>
+                                    </div>
+                                </div>
+                                <div class="slider-ui-icon">
+                                    <div class="product-config-icon text-center" data-icon="ui-product-label"
+                                         title="Sale Label" data-value="sale_label">
+                                        <div class="fa fa-tag"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 d-inline-block js_product_limit">
+                                    <h6 class="my-2">Product Limit</h6>
+                                    <div class="dropdown">
+                                        <button type="button" class="dropdown-toggle slider-product-limit"
+                                                data-toggle="dropdown">
+                                            Product Limit
+                                        </button>
+                                        <div class="dropdown-menu slider_limit_option">
+                                            <a class="dropdown-item" data-value="12" href="#">12</a>
+                                            <a class="dropdown-item" data-value="14" href="#">14</a>
+                                            <a class="dropdown-item" data-value="16" href="#">16</a>
+                                            <a class="dropdown-item" data-value="18" href="#">18</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 d-inline-block div_sort_by">
+                                    <h6 class="my-2">Sort By</h6>
+                                    <div class="dropdown">
+                                        <button type="button" class="dropdown-toggle slider-sort-by"
+                                                data-toggle="dropdown">
+                                            Sort By
+                                        </button>
+                                        <div class="dropdown-menu slider_sort_option">
+                                            <a class="dropdown-item" data-value="list_price desc" href="#">High to Low
+                                            </a>
+                                            <a class="dropdown-item" data-value="list_price asc" href="#">Low to High
+                                            </a>
+                                            <a class="dropdown-item" data-value="name asc" href="#">A to Z</a>
+                                            <a class="dropdown-item" data-value="name desc" href="#">Z to A</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="config-note-link alert alert-info">
+                            <p>Preview displayed based on selected UI options , you can enable/disable Add To Cart, Quick View, Wish List and Sale label from UI Option.
+                            </p>
+                            <p>To learn more please check the
+                                <a href="#" target="_blank">documentation</a>
+                                <span>or</span>
+                                <a href="#" target="_blank">video tutorial</a>.
+                            </p>
+                        </div>
+                        <div class="btn-bottom-fixed">
+                            <a class="btn btn-primary btn-ui-config js-product-config">
+                                <i class="fa fa-long-arrow-left mr-2"/>
+                                Back to Configuration
+                            </a>
+                            <a class="btn btn-primary btn-ui-config js-save-config mx-2">
+                                Save
+                            </a>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <section contenteditable="false">
+                        <h6 class="alert alert-danger p-2 mb-0">
+                            No Any style available for slider
+                        </h6>
+                    </section>
+                </t>
+                <div class="col-6 ui-preview">
+
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

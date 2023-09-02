@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Public Categories -->
+    <record id="product_public_category_form_view_icon" model="ir.ui.view">
+        <field name="name">product.public.category.form.category.icon</field>
+        <field name="model">product.public.category</field>
+        <field name="inherit_id" ref="website_sale.product_public_category_form_view"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='sequence']" position="after">
+                 <field name="icon" widget="image" class="oe_avatar w-100" options="{'size': [30, 30]}"/>
+             </xpath>
+        </field>
+    </record>
+</odoo>

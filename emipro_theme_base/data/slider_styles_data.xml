@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data noupdate="1">
+		<record id="slider_styles_one" model="slider.styles">
+			<field name="display_name">Style 1</field>
+			<field name="style_template_key">clarico_slider_styles_one_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+
+		<record id="slider_styles_two" model="slider.styles">
+			<field name="display_name">Style 2</field>
+			<field name="style_template_key">clarico_slider_styles_two_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+
+		<record id="slider_styles_three" model="slider.styles">
+			<field name="display_name">Style 3</field>
+			<field name="style_template_key">clarico_slider_styles_three_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+
+		<record id="slider_styles_four" model="slider.styles">
+			<field name="display_name">Style 4</field>
+			<field name="style_template_key">clarico_slider_styles_four_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+
+		<record id="slider_styles_five" model="slider.styles">
+			<field name="display_name">Style 5</field>
+			<field name="style_template_key">clarico_slider_styles_five_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+
+		<record id="slider_styles_six" model="slider.styles">
+			<field name="display_name">Style 6</field>
+			<field name="style_template_key">clarico_slider_styles_six_template</field>
+			<field name="slider_type">product</field>
+			<field name="slider_style">slider</field>
+		</record>
+	</data>
+</odoo>
