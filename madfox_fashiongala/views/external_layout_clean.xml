@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <template id="modified_external_layout_view"        inherit_id="web.report_assets_common">
+            <xpath expr="link[last()]" position="after">
+                 <link rel="stylesheet" href="/madfox_fashiongala/static/scss/layout.scss"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

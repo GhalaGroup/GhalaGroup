@@ -1,0 +1,22 @@
+<odoo>
+    <record id="gg" model="ir.actions.report">
+            <field name="name">GG (ZPL)</field>
+            <field name="model">stock.picking</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">madfox_fashiongala.vic_template</field>
+            <field name="report_file">madfox_fashiongala.vic_template</field>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_type">report</field>
+        </record>
+		<record id="gg_price" model="ir.actions.report">
+            <field name="name">GG-price (ZPL)</field>
+            <field name="model">stock.picking</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">madfox_fashiongala.vic_template2</field>
+            <field name="report_file">madfox_fashiongala.vic_template2</field>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_type">report</field>
+        </record>
+
+
+</odoo>
