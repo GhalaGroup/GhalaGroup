@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="brand_listing_template" name="Brand Listing">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Brands</t>
+            <div id="wrap">
+                <div class="container featured-all-brands">
+                    <t t-set="brands"
+                       t-value="request.env['product.brand.ept'].sudo().search([('website_published','=', True),('website_id', 'in', (False,website.id))]).filtered(lambda r:r.products_count > 0)"/>
+                    <t t-if="brands"><!--Featured Brand-->
+                        <h3 class="brand-title-main my-3">Our Brands</h3>
+                        <div class="clearfix my-3">
+                            <t t-foreach="range(97, 123)" t-as="i">
+                                <a t-att-data-href="'#brand_%s'%(chr(i))"
+                                   t-att-class="'has-brands active' if  brands.filtered(lambda r:r.name.startswith((chr(i) , chr(i).upper()))) else 'has-brands disabled'">
+                                    <div class="brand-alpha">
+                                        <t t-esc="chr(i)"/>
+                                    </div>
+                                </a>
+                            </t>
+                        </div>
+                        <t t-set="featured_brands" t-value="brands.filtered(lambda r:r.is_featured_brand)"/>
+                        <div class="brand-alpha-main my-3" t-if="featured_brands">
+                            <div class="box-title">
+                                <h5 class="all-brand-title mb-0">Featured Brands</h5>
+                            </div>
+                            <div class="box-content">
+                                <t t-foreach="featured_brands" t-as="brand">
+                                    <div class="item brand-item">
+                                        <a t-att-href="'/shop?attrib=0-%s' %(brand.id)">
+                                            <div class="brand-logo">
+                                                <img t-attf-src="/web/image/product.brand.ept/#{brand.id}/logo/90x90"
+                                                     alt="Brand Logo"/>
+                                            </div>
+                                            <div class="py-2">
+                                                <span class="mr-1" t-esc="brand.name"/>
+                                                (<span class="" t-esc="brand.products_count"/>)
+                                            </div>
+                                        </a>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="my-3">
+                            <div class="box-title">
+                                <h5 class="all-brand-title mb-0">All Brands</h5>
+                            </div>
+                            <t t-foreach="range(97, 123)" t-as="i">
+                                <t t-set="alpha_brands"
+                                   t-value="brands.filtered(lambda r:r.name.startswith((chr(i) , chr(i).upper())))"/>
+                                <div class="brand-alpha-main" t-if="alpha_brands" t-att-id="'brand_%s'%(chr(i))">
+                                    <h6 class="mb-0 ml-3" t-esc="chr(i).upper()"/>
+                                    <div class="box-content">
+                                        <t t-foreach="alpha_brands" t-as="brand">
+                                            <div class="item brand-item">
+                                                <a t-att-href="'/shop?attrib=0-%s' %(brand.id)">
+                                                    <div class="brand-logo">
+                                                        <img t-attf-src="/web/image/product.brand.ept/#{brand.id}/logo/90x90"
+                                                             alt="Brand Logo"/>
+                                                    </div>
+                                                    <div class="py-2">
+                                                        <span class="mr-1" t-esc="brand.name"/>
+                                                        (<span class="" t-esc="brand.products_count"/>)
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <h1>No Brand Found</h1>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

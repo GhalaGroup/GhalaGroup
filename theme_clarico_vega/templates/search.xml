@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--  Header search bar  -->
+   <template id="header_search_ept" inherit_id="website_sale.website_sale_products_search_box">
+       <xpath expr="//form" position="attributes">
+           <attribute name="t-att-action">'/shop'</attribute>
+       </xpath>
+       <xpath expr="//div[@role='search']//input[hasclass('search-query')]" position="before">
+            <!-- add get_parent_category() and  ept-parent-category selection for cateogry wise search. @Author : Angel Patel (24/09/2020) -->
+            <t t-set="ept_cat" t-value="request.env['website'].sudo().get_parent_category()"/>
+                <div class="te_advanced_search_div dropdown">
+                    <a role="button" href="#" class="btn btn-primary dropdown-toggle ept-parent-category" id="ept-parent-category" name="category" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        <span class="category_img_span"></span><span class="span_category">All</span><span class="caret"></span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="ept-parent-category">
+                        <t t-foreach="ept_cat" t-as="cat">
+                            <a  t-att-value="cat.get('id')" t-esc="cat.get('name')" class="dropdown-item ept-category-a"></a>
+                        </t>
+                    </div>
+                </div>
+        </xpath>
+    </template>
+</odoo>
