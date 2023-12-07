@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<odoo>
+<data>
+    <template id="report_product_view"
+        inherit_id="stock.label_product_product_view">
+        <xpath expr="." position="replace">
+        
+
+            <t t-foreach="docs" t-as="product">
+                <t t-translation="off">
+            
+^XA
+^FO90,20
+^A0N,18,17^FD<t t-esc="product.default_code"/>^FS
+^FO90,44
+^A0N,18,17^FD<t t-esc="product.name"/> ^FS
+^FO90,69
+^A0N,18,17^FD<t t-esc="product.x_studio_product_brands.x_name"/> <t t-if="product.product_variant_count==1" t-foreach="product.attribute_line_ids" t-as="line"> <t t-esc="line.value_ids.name" />, </t> <t t-if="product.product_variant_count>1" t-esc="', '.join(map(lambda x: x.name, product.product_template_attribute_value_ids))"/>^FS
+^FO90,92
+<t t-if="product.currency_id.position == 'after'">
+^CI28
+^A0N,18,17^FH^FDPrice: <t t-esc="product.list_price" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/><t t-esc="product.currency_id.symbol"/>^FS
+</t>
+<t t-if="product.currency_id.position == 'before'">
+^CI28
+^A0N,18,17^FH^FDPrice: <t t-esc="product.currency_id.symbol"/><t t-esc="product.list_price" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;precision&quot;: 2}"/>^FS
+</t>
+<t t-if="product.barcode">
+^FO90,120^BY1
+^BCN,50,Y,N,N
+^FD<t t-esc="product.barcode"/>^FS
+</t>
+^XZ
+                </t>
+            </t>
+            
+       </xpath>
+</template>
+</data>
+</odoo>
+        
