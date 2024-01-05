@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_product_sequence_product_sequence,product_sequence.product_sequence,model_product_sequence_product_sequence,base.group_user,1,1,1,1
