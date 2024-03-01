@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="res.groups" id ="effective_date_change_group">
+        <field name="name">Change Effective Date Privilege</field>
+    </record>
+</odoo>
