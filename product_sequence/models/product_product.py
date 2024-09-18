@@ -4,6 +4,8 @@ from odoo import models, fields, api
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
+
+    
     def _compute_internal_ref(self):
         for record in self:
             if not record.default_code and record.product_tmpl_id.categ_id and record.product_tmpl_id.categ_id.short_name and record.product_tmpl_id.categ_id.parent_id.short_name:
