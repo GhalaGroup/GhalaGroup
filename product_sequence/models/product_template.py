@@ -6,7 +6,7 @@ import logging
 class ProductTemplate(models.Model):
    _inherit = "product.template"
 
-   default_code = fields.Char()
+   default_code = fields.Char(copy=False)
 
    def get_or_create_ir_sequence(self):
       sequence_code = f"product_category_{self.categ_id.short_name}"
@@ -32,7 +32,6 @@ class ProductTemplate(models.Model):
    def write(self, vals):
       result = super(ProductTemplate, self).write(vals)
       if "categ_id" in vals:
-         # categ_id = self.env['product.category'].browse(int(vals['categ_id']))
          for record in self:
             default_code = False
             if record.categ_id and record.categ_id.short_name and record.categ_id.parent_id.short_name:
@@ -67,4 +66,17 @@ class ProductTemplate(models.Model):
          if default_code:
                res.write({'default_code': default_code})
       return res
+   
+
+   @api.returns('self', lambda value: value.id)
+   def copy(self, default=None):
+      default = default or {}
+      template = super(ProductTemplate, self).copy(default)
+      if template.default_code and template.categ_id.short_name:
+         sequence_code = f"product_category_{template.categ_id.short_name}"
+         IrSequence = self.env["ir.sequence"].search([("code","=", sequence_code)])
+         if IrSequence.exists():
+            IrSequence.number_next_actual -= 1
+         template.default_code = ""
+      return template
 
