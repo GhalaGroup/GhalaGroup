@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="product_barcode_generator" model="ir.actions.server">
+            <field name="name">Generate Barcode</field>
+            <field name="state">code</field>
+            <field name="model_id" ref="product.model_product_template" />
+            <field name="binding_model_id" ref="product.model_product_template" />
+            <field name="binding_view_types">list</field>
+            <field name="code">
+                action = records.generate_barcode()
+            </field>
+        </record>
+    </data>
+</odoo>
