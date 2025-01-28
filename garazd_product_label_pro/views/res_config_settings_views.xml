@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.garazd_product_label_pro</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="garazd_product_label.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='product_label_printing_wizard']" position="after">
+                <div class="col-12 col-lg-6 o_setting_box" id="product_label_preview_product_setting">
+                    <div class="o_setting_right_pane">
+                        <label for="print_label_preview_product_id" string="Label Template Preview"/>
+                        <div class="text-muted">
+                            Define default values to preview label templates
+                        </div>
+                        <div class="content-group">
+                            <div class="mt16">
+                                <label for="print_label_preview_product_id" string="Product" class="col-3 col-lg-3 o_light_label"/>
+                                <field name="print_label_preview_product_id" class="o_light_label" required="True" options="{'no_create': True}"/>
+                            </div>
+                            <div class="mt16">
+                                <label for="print_label_preview_pricelist_id" string="Pricelist" class="col-3 col-lg-3 o_light_label"/>
+                                <field name="print_label_preview_pricelist_id" class="o_light_label" required="True" options="{'no_create': True}"/>
+                            </div>
+                            <div class="mt16">
+                                <label for="print_label_preview_sale_pricelist_id" string="Promo Pricelist" class="col-3 col-lg-3 o_light_label"/>
+                                <field name="print_label_preview_sale_pricelist_id" class="o_light_label" required="True" options="{'no_create': True}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

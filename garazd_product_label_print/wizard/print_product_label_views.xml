@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="print_product_label_view_form" model="ir.ui.view">
+        <field name="name">print.product.label.view.form.inherit.garazd_product_label_print</field>
+        <field name="model">print.product.label</field>
+        <field name="inherit_id" ref="garazd_product_label.print_product_label_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_print']" position="before">
+                <button name="action_print_direct"
+                        string="Print"
+                        help="Print product labels"
+                        type="object"
+                        icon="fa-print"
+                        class="btn-primary mr8"/>
+            </xpath>
+            <xpath expr="//button[@name='action_print']" position="attributes">
+                <attribute name="string">Download</attribute>
+                <attribute name="help">Download product labels</attribute>
+                <attribute name="icon">fa-download</attribute>
+                <attribute name="class" separator=" " remove="btn-primary" add="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

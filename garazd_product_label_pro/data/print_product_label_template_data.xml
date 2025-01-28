@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="label_template_custom_50x25" model="print.product.label.template">
+        <field name="name">Label 50x25 mm</field>
+        <field name="paperformat_id" ref="paperformat_label_custom_50x25"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">1</field>
+        <field name="rows">1</field>
+        <field name="width">50</field>
+        <field name="height">25</field>
+    </record>
+
+    <record id="label_template_custom_100x100" model="print.product.label.template">
+        <field name="name">Label 100x100 mm</field>
+        <field name="paperformat_id" ref="paperformat_label_custom_100x100"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">1</field>
+        <field name="rows">1</field>
+        <field name="width">100</field>
+        <field name="height">99.5</field>
+        <field name="padding_top">3</field>
+        <field name="padding_left">3</field>
+        <field name="padding_right">3</field>
+        <field name="padding_bottom">3</field>
+    </record>
+
+    <record id="label_template_a4_63x38" model="print.product.label.template">
+        <field name="name">Label 63x38 mm (A4: 21 pcs, 3x7)</field>
+        <field name="paperformat_id" ref="paperformat_label_a4_63x38"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">3</field>
+        <field name="rows">7</field>
+        <field name="col_gap">2</field>
+        <field name="row_gap">2</field>
+        <field name="width">63.5</field>
+        <field name="height">38.1</field>
+    </record>
+
+    <record id="label_template_a4_99x38" model="print.product.label.template">
+        <field name="name">Label 99x38 mm (A4: 14 pcs, 2x7)</field>
+        <field name="paperformat_id" ref="paperformat_label_a4_99x38"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">2</field>
+        <field name="rows">7</field>
+        <field name="col_gap">1</field>
+        <field name="row_gap">1</field>
+        <field name="width">99.1</field>
+        <field name="height">38.1</field>
+        <field name="padding_top">2</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="padding_bottom">2</field>
+    </record>
+
+    <record id="label_template_letter_66x25" model="print.product.label.template">
+        <field name="name">Label 66x25 mm / 2⅝" x 1" (Letter: 30 pcs, 3x10)</field>
+        <field name="paperformat_id" ref="paperformat_label_letter_66x25"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">3</field>
+        <field name="rows">10</field>
+        <field name="col_gap">3</field>
+        <field name="row_gap">0</field>
+        <field name="width">66.54</field>
+        <field name="height">25.4</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="description">1" x 2⅝", Avery 6460. Avery Template Presta 94200. Compatibility: 15660, 15700, 15960, 16460, 16790, 18160, 18260, 18660, 22837, 28660, 32660, 38260, 45160, 48160, 48260, 48360, 48460, 48860, 48960, 5136, 5160, 5260, 55160, 5520, 55360, 5620, 5630, 5660, 58160, 58660, 5960, 6240, 6521, 6525, 6526, 6585, 80509, 8160, 8215, 8250, 8460, 85560, 8620, 8660, 88560, 8860, 8920, 95520, 95915.</field>
+    </record>
+
+    <record id="label_template_letter_101x50" model="print.product.label.template">
+        <field name="name">Label 101x50 mm / 4" x 2" (Letter: 10 pcs, 2x5)</field>
+        <field name="paperformat_id" ref="paperformat_label_letter_101x50"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">2</field>
+        <field name="rows">5</field>
+        <field name="col_gap">2</field>
+        <field name="width">101.6</field>
+        <field name="height">50.8</field>
+        <field name="padding_top">3</field>
+        <field name="padding_left">3</field>
+        <field name="padding_right">3</field>
+        <field name="description">4" x 2", Avery 5163. Compatibility: 15513, 15702, 16791, 18163, 18863, 38863, 48163, 48263, 48363, 48463, 48863, 5137, 5263, 55163, 5523, 55463, 58163, 5963, 6427, 6527, 6528, 8163, 8253, 8363, 8463, 85563, 8923, 95523, 95910, 95945.</field>
+    </record>
+
+
+</odoo>

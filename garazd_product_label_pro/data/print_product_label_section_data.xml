@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Sections for the Label 50x25 mm -->
+    <record id="label_section_50x25_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_50x25"/>
+        <field name="sequence">1</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">11</field>
+        <field name="align">left</field>
+        <field name="font_size">11</field>
+        <field name="line_height">1.2</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="label_section_50x25_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_50x25"/>
+        <field name="sequence">2</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="field_print_product_label_line__price"/>
+        <field name="value_format">%.2f</field>
+        <field name="height">7</field>
+        <field name="align">right</field>
+        <field name="font_size">22</field>
+        <field name="font_weight">900</field>
+        <field name="line_height">1.0</field>
+        <field name="padding_right">3</field>
+        <field name="widget">price</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="label_section_50x25_product_barcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_50x25"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">5</field>
+        <field name="align">center</field>
+        <field name="widget">barcode</field>
+    </record>
+    <record id="label_section_50x25_product_barcode_text" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_50x25"/>
+        <field name="sequence">4</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">3</field>
+        <field name="align">center</field>
+        <field name="font_size">8</field>
+        <field name="letter_spacing">1.8</field>
+    </record>
+
+    <!-- Sections for the Label 100x100 mm -->
+    <record id="label_section_100x100_product_image" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">1</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__image_1024"/>
+        <field name="height">23</field>
+        <field name="width">50</field>
+        <field name="position">left</field>
+        <field name="padding_bottom">3</field>
+        <field name="widget">image</field>
+    </record>
+    <record id="label_section_100x100_blank" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">2</field>
+        <field name="type">text</field>
+        <field name="height">23</field>
+        <field name="width">25</field>
+        <field name="position">left</field>
+    </record>
+    <record id="label_section_100x100_company_website_qrcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__company_id"/>
+        <field name="relation_field_id" ref="base.field_res_company__website"/>
+        <field name="height">23</field>
+        <field name="width">25</field>
+        <field name="position">right</field>
+        <field name="padding_bottom">3</field>
+        <field name="widget">qr_code</field>
+    </record>
+    <record id="label_section_100x100_product_code_label" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">4</field>
+        <field name="type">text</field>
+        <field name="value">Code:</field>
+        <field name="height">5</field>
+        <field name="position">left</field>
+        <field name="width">55</field>
+        <field name="align">left</field>
+        <field name="font_size">13</field>
+        <field name="padding_top">1</field>
+        <field name="with_border_top" eval="True"/>
+        <field name="with_border_right" eval="True"/>
+    </record>
+    <record id="label_section_100x100_product_price_label" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">5</field>
+        <field name="type">text</field>
+        <field name="value">Price:</field>
+        <field name="height">5</field>
+        <field name="position">right</field>
+        <field name="width">45</field>
+        <field name="align">left</field>
+        <field name="font_size">13</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">3</field>
+        <field name="with_border_top" eval="True"/>
+    </record>
+    <record id="label_section_100x100_product_code" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">6</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__default_code"/>
+        <field name="height">12</field>
+        <field name="position">left</field>
+        <field name="width">55</field>
+        <field name="align">left</field>
+        <field name="font_size">26</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">3</field>
+        <field name="padding_right">2</field>
+        <field name="with_border_right" eval="True"/>
+    </record>
+    <record id="label_section_100x100_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">7</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="field_print_product_label_line__price"/>
+        <field name="value_format">%.2f</field>
+        <field name="height">12</field>
+        <field name="position">right</field>
+        <field name="width">44</field>
+        <field name="align">left</field>
+        <field name="font_size">26</field>
+        <field name="font_weight">900</field>
+        <field name="padding_top">2</field>
+        <field name="padding_left">2</field>
+        <field name="padding_bottom">2</field>
+        <field name="widget">price</field>
+    </record>
+    <record id="label_section_100x100_product_name_label" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">8</field>
+        <field name="type">text</field>
+        <field name="value">Description:</field>
+        <field name="height">7</field>
+        <field name="align">left</field>
+        <field name="font_size">13</field>
+        <field name="padding_top">3</field>
+        <field name="padding_left">2</field>
+        <field name="with_border_top" eval="True"/>
+    </record>
+    <record id="label_section_100x100_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">9</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">30</field>
+        <field name="position">left</field>
+        <field name="width">55</field>
+        <field name="align">left</field>
+        <field name="font_size">18</field>
+        <field name="line_height">1.5</field>
+        <field name="padding_left">2</field>
+        <field name="margin_bottom">3</field>
+        <field name="with_border_right" eval="True"/>
+    </record>
+    <record id="label_section_100x100_product_multi_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">10</field>
+        <field name="type">multi_price</field>
+        <field name="multi_price_order">desc</field>
+        <field name="value_format">%.2f</field>
+        <field name="height">30</field>
+        <field name="position">right</field>
+        <field name="width">44</field>
+        <field name="align">left</field>
+        <field name="font_size">12</field>
+        <field name="line_height">1.1</field>
+        <field name="padding_left">3</field>
+        <field name="with_border_left" eval="False"/>
+    </record>
+    <record id="label_section_100x100_product_attributes" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">11</field>
+        <field name="type">product_attributes</field>
+        <field name="height">7</field>
+        <field name="font_size">18</field>
+        <field name="line_height">1.2</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">1</field>
+        <field name="with_background" eval="True"/>
+        <field name="background_color">#EBEBEB</field>
+    </record>
+    <record id="label_section_100x100_company_footer" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">12</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__create_date"/>
+        <field name="value_format">%d-%m-%Y</field>
+        <field name="height">8</field>
+        <field name="position">left</field>
+        <field name="width">25</field>
+        <field name="align">left</field>
+        <field name="font_size">10</field>
+        <field name="padding_top">4</field>
+    </record>
+    <record id="label_section_100x100_company_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">13</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__company_id"/>
+        <field name="relation_field_id" ref="base.field_res_company__name"/>
+        <field name="height">8</field>
+        <field name="position">left</field>
+        <field name="width">50</field>
+        <field name="align">center</field>
+        <field name="font_size">10</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">4</field>
+    </record>
+    <record id="label_section_100x100_company_phone" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_100x100"/>
+        <field name="sequence">14</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__company_id"/>
+        <field name="relation_field_id" ref="base.field_res_company__phone"/>
+        <field name="height">8</field>
+        <field name="position">right</field>
+        <field name="width">25</field>
+        <field name="align">right</field>
+        <field name="font_size">10</field>
+        <field name="padding_top">4</field>
+    </record>
+
+    <!-- Sections for the Label A4 63x38 mm -->
+    <record id="label_section_a4_63x38_product_barcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">1</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">11</field>
+        <field name="align">center</field>
+        <field name="padding_top">2</field>
+        <field name="widget">barcode</field>
+    </record>
+    <record id="label_section_a4_63x38_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">2</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="field_print_product_label_line__price"/>
+        <field name="value_format">%.2f</field>
+        <field name="height">8</field>
+        <field name="position">left</field>
+        <field name="width">50</field>
+        <field name="align">left</field>
+        <field name="font_size">24</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">900</field>
+        <field name="line_height">1.0</field>
+        <field name="widget">price</field>
+        <field name="padding_top">0</field>
+        <field name="padding_left">5</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="label_section_a4_63x38_product_code" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__default_code"/>
+        <field name="height">8</field>
+        <field name="position">right</field>
+        <field name="width">50</field>
+        <field name="align">center</field>
+        <field name="font_size">15</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">bold</field>
+        <field name="letter_spacing">-0.2</field>
+        <field name="padding_top">4</field>
+        <field name="padding_right">2</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="label_section_a4_63x38_product_type_text" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">4</field>
+        <field name="type">text</field>
+        <field name="value">Product Type:</field>
+        <field name="height">5</field>
+        <field name="position">left</field>
+        <field name="width">50</field>
+        <field name="align">right</field>
+        <field name="font_size">10</field>
+        <field name="font_size_measure">px</field>
+        <field name="padding_top">2</field>
+        <field name="padding_right">2</field>
+    </record>
+    <record id="label_section_a4_63x38_product_type" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">5</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__type"/>
+        <field name="height">5</field>
+        <field name="position">right</field>
+        <field name="width">50</field>
+        <field name="align">left</field>
+        <field name="font_size">10</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">2</field>
+    </record>
+    <record id="label_section_a4_63x38_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_63x38"/>
+        <field name="sequence">6</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">14</field>
+        <field name="align">center</field>
+        <field name="font_size">14</field>
+        <field name="font_size_measure">px</field>
+        <field name="line_height">1.1</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+    </record>
+
+    <!-- Sections for the Label A4 99x38 mm -->
+    <record id="label_section_a4_99x38_image" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">1</field>
+        <field name="type">image</field>
+        <field name="image" type="base64" file="base/static/img/res_partner_3-image.png"/>
+        <field name="height">27</field>
+        <field name="width">30</field>
+        <field name="position">left</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="with_border_right" eval="True"/>
+    </record>
+    <record id="label_section_a4_99x38_product_price_label" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">2</field>
+        <field name="type">text</field>
+        <field name="value">PRICE:</field>
+        <field name="height">8</field>
+        <field name="position">left</field>
+        <field name="width">30</field>
+        <field name="align">left</field>
+        <field name="font_size">15</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">100</field>
+        <field name="padding_top">2</field>
+        <field name="padding_left">2</field>
+    </record>
+    <record id="label_section_a4_93x38_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="field_print_product_label_line__price"/>
+        <field name="value_format">%.2f</field>
+        <field name="height">8</field>
+        <field name="position">right</field>
+        <field name="width">40</field>
+        <field name="align">right</field>
+        <field name="font_size">23</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">900</field>
+        <field name="padding_right">2</field>
+        <field name="widget">price</field>
+    </record>
+    <record id="label_section_a4_99x38_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">4</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">19</field>
+        <field name="width">70</field>
+        <field name="position">right</field>
+        <field name="align">left</field>
+        <field name="font_size">18</field>
+        <field name="font_size_measure">px</field>
+        <field name="line_height">1.2</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="with_border_top" eval="True"/>
+    </record>
+    <record id="label_section_a4_99x38_product_barcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">5</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">8</field>
+        <field name="width">70</field>
+        <field name="position">right</field>
+        <field name="align">center</field>
+        <field name="padding_top">1</field>
+        <field name="with_border_top" eval="True"/>
+        <field name="widget">barcode</field>
+    </record>
+    <record id="label_section_a4_99x38_company_website" model="print.product.label.section">
+        <field name="template_id" ref="label_template_a4_99x38"/>
+        <field name="sequence">6</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__company_id"/>
+        <field name="relation_field_id" ref="base.field_res_company__website"/>
+        <field name="height">8</field>
+        <field name="width">30</field>
+        <field name="position">left</field>
+        <field name="align">center</field>
+        <field name="font_size">9</field>
+        <field name="padding_top">3</field>
+        <field name="with_border_right" eval="True"/>
+    </record>
+
+    <!-- Sections for the Label Letter 2⅝" x 1" -->
+    <record id="label_section_letter_66x25_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_66x25"/>
+        <field name="sequence">1</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">13</field>
+        <field name="position">left</field>
+        <field name="width">60</field>
+        <field name="align">center</field>
+        <field name="font_size">14</field>
+        <field name="line_height">1.2</field>
+        <field name="padding_right">2</field>
+        <field name="with_border_right" eval="True"/>
+    </record>
+    <record id="label_section_letter_66x25_product_code" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_66x25"/>
+        <field name="sequence">2</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__default_code"/>
+        <field name="height">13</field>
+        <field name="position">right</field>
+        <field name="width">40</field>
+        <field name="align">center</field>
+        <field name="font_size">13</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">5</field>
+        <field name="padding_left">1</field>
+        <field name="with_border_bottom" eval="True"/>
+    </record>
+    <record id="label_section_letter_66x25_product_barcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_66x25"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">11</field>
+        <field name="position">left</field>
+        <field name="width">60</field>
+        <field name="align">center</field>
+        <field name="padding_top">1</field>
+        <field name="padding_bottom">1</field>
+        <field name="with_border_right" eval="True"/>
+        <field name="widget">barcode</field>
+    </record>
+    <record id="label_section_letter_66x25_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_66x25"/>
+        <field name="sequence">4</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="field_print_product_label_line__price"/>
+        <field name="value_format">%.2f</field>
+        <field name="height">11</field>
+        <field name="position">right</field>
+        <field name="width">40</field>
+        <field name="align">center</field>
+        <field name="font_size">23</field>
+        <field name="font_size_measure">px</field>
+        <field name="font_weight">900</field>
+        <field name="padding_top">3</field>
+        <field name="widget">price</field>
+    </record>
+
+    <!-- Sections for the Label Letter 4" x 2" -->
+    <record id="label_section_letter_101x50_promo" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_101x50"/>
+        <field name="sequence">1</field>
+        <field name="type">text</field>
+        <field name="value">SPECIAL OFFER!</field>
+        <field name="text_color">#FFFFFF</field>
+        <field name="height">12</field>
+        <field name="align">center</field>
+        <field name="font_size">30</field>
+        <field name="font_weight">bold</field>
+        <field name="line_height">1.2</field>
+        <field name="letter_spacing">2</field>
+        <field name="padding_top">1</field>
+        <field name="padding_bottom">1</field>
+        <field name="with_background" eval="True"/>
+    </record>
+    <record id="label_section_letter_101x50_product_name" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_101x50"/>
+        <field name="sequence">2</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">18</field>
+        <field name="align">left</field>
+        <field name="font_size">22</field>
+        <field name="font_size_measure">px</field>
+        <field name="line_height">1.2</field>
+        <field name="padding_left">1</field>
+        <field name="padding_top">3</field>
+        <field name="with_border_bottom" eval="True"/>
+    </record>
+    <record id="label_section_letter_101x50_product_barcode" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_101x50"/>
+        <field name="sequence">3</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__barcode"/>
+        <field name="height">15</field>
+        <field name="position">left</field>
+        <field name="width">50</field>
+        <field name="align">center</field>
+        <field name="padding_top">2</field>
+        <field name="widget">barcode</field>
+    </record>
+    <record id="label_section_letter_101x50_product_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_101x50"/>
+        <field name="sequence">4</field>
+        <field name="type">price</field>
+        <field name="value_format">%.2f</field>
+        <field name="height">6</field>
+        <field name="position">right</field>
+        <field name="width">50</field>
+        <field name="align">left</field>
+        <field name="font_size">20</field>
+        <field name="font_weight">normal</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">1</field>
+        <field name="widget" eval="False"/>
+        <field name="text_decoration">line-through</field>
+    </record>
+    <record id="label_section_letter_101x50_product_promo_price" model="print.product.label.section">
+        <field name="template_id" ref="label_template_letter_101x50"/>
+        <field name="sequence">5</field>
+        <field name="type">promo_price</field>
+        <field name="value_format">%.2f</field>
+        <field name="height">9</field>
+        <field name="position">right</field>
+        <field name="width">50</field>
+        <field name="align">left</field>
+        <field name="font_size">32</field>
+        <field name="font_weight">bold</field>
+        <field name="padding_top">1</field>
+    </record>
+
+</odoo>
