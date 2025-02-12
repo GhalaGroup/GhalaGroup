@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Update Dymo Label Sheet Dimensions -->
+        <record id="product.paperformat_label_sheet_dymo" model="report.paperformat">
+            <field name="page_height">80</field>
+            <field name="page_width">80</field>
+        </record>
+    </data>
+</odoo>
