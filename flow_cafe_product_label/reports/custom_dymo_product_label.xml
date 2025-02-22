@@ -1,77 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_simple_label_dymo" inherit_id="product.report_simple_label_dymo">
+        
         <xpath expr="//div[@class='o_label_sheet o_label_dymo']" position="replace">
-            <div class="o_label_sheet o_label_dymo"
-                 style="width:80mm; height: 80mm; padding: 5mm; border: 5px solid black; font-size: 8px;">
-
-
+          
+            <div class="o_label_sheet o_label_dymo" style="width:75mm; height: 50mm; padding: 3mm; border: 5px solid black; font-size: 8px;">
                 <!-- Top Section: Default Code (Left) & Category (Right) -->
                 <div style="position: relative; width: 100%;">
                     <!-- Default Code - Top Left -->
                     <div style="position: absolute; left: 0; top: 0;">
-                        <small class="text-nowrap" style="font-weight: bold; font-size: 14px;">
+                        <small class="text-nowrap" style="font-weight: bold; font-size: 11px;">
                             [<t t-esc="product.default_code"/>]
                         </small>
                     </div>
-
                     <!-- Category Name - Top Right -->
                     <div style="position: absolute; right: 0; top: 0;">
-                        <small class="text-nowrap" style="font-size: 14px;">
+                        <small class="text-nowrap" style="font-size: 12px;">
                             <t t-esc="product.categ_id.name"/>
                         </small>
                     </div>
                 </div>
-
-
+                
                 <!-- Product Name - Full Width -->
-                <div style="width: 100%; text-align: center; margin-top: 32px;">
-                    <strong style="font-size: 23px;">
+                <div style="width: 100%; text-align: center; margin-top: 15px;">
+                    <strong style="font-size: 12px;">
                         <t t-esc="product.name"/>
                     </strong>
                 </div>
-
+                
                 <!-- Thin Separator Line -->
-                <div style="border-top: 5px solid black; margin: 11px 0;"></div>
-
-                <!-- Barcode Section (Centered) -->
-                <div style="text-align: center; margin-top: 14px;">
-                    <div t-out="barcode" style="width: 100%; max-height: 23mm;"
-                         t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': 'width: 100%;'}"/>
-                    <small style="display: block; margin-top: 5px; font-size: 14px;">
-                        <t t-esc="product.barcode"/>
-                    </small>
-                </div>
+                <div style="border-top: 3px solid black;"/>
+                
+               
+                        <t t-if="barcode">
+                            <div t-out="barcode" style="margin-top: 4px;text-align: center;padding:0" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
+                            <div class="o_label_name" style="font-size: 10px;text-align: center;height:1.7em;background-color: transparent;">
+                                <span t-out="barcode"/>
+                            </div>
+                        </t>
+                
+              
 
                 <!-- Table Section (Quantity, Lot, SO/DLV) -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 23px; font-size: 14px;">
+                <table style="width: 100%;  margin-top: 5px; font-size: 14px;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 14px;">
-                                Quantity
+                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 12px;">
+                                QTY
                             </th>
-                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 14px;">
+                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 12px;">
                                 Lot Number
                             </th>
-                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 14px;">
+                            <th style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 12px;">
                                 SO/DLV
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 14px;">
+                            <td style="border: 1px solid black; padding: 2px; text-align: center; background-color: black; color: white; font-size: 11px;">
                                 <t t-out="quantity_by_product.get(str(product.id))"/>
                             </td>
-                            <td style="border: 1px solid black; padding: 2px; text-align: center; font-size: 14px;">
+                            <td style="border: 1px solid black; padding: 2px; text-align: center; font-size: 12px;">
                                 <t t-esc="product.default_code"/>
                             </td>
-                            <td style="border: 1px solid black; padding: 2px; text-align: center; font-size: 14px;"></td>
+                            <td style="border: 1px solid black; padding: 2px; text-align: center; font-size: 12px;"/>
                         </tr>
                     </tbody>
                 </table>
-
+                
             </div>
         </xpath>
+
     </template>
 </odoo>

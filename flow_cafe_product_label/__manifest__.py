@@ -28,6 +28,9 @@
     'data': [
         'data/custom_dymo_label_size.xml',
         'reports/custom_dymo_product_label.xml',
+        # "views/product_label_templates.xml",
+        # "views/product_label_report_action.xml",
+        # 'views/product_label_layout_view.xml'
 
     ],
 
