@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="product_label_from_template">
+        <div name="label_div">
+            <div name="transform_div">
+                <t t-foreach="label.wizard_id.template_id.section_ids" t-as="section">
+                    <div t-attf-style="{{section.get_html_style()}}">
+                        <t t-set="value" t-value="section.get_value(label)"/>
+                        <t t-if="section.widget == 'barcode'">
+                            <t t-set="barcode_size" t-value="'width: 85%; height: 100%;'"/>
+                            <div t-out="str(value)" style="padding: 0; height: 100%;" t-options="{'widget': 'barcode', 'quiet': 0, 'symbology': 'auto', 'img_style': barcode_size}"/>
+                        </t>
+                        <t t-elif="section.widget == 'price'">
+                            <div t-field="label.price" t-options="{'widget': 'monetary', 'label_price': True, 'display_currency': label.currency_id}"/>
+                        </t>
+                        <t t-elif="section.widget == 'qr_code'">
+                            <t t-set="qr_code_size_px" t-value="section.height * 40"/>
+                            <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=%d&amp;height=%d'%(value, qr_code_size_px, qr_code_size_px)" t-attf-style="display: block; height: 100%; width: {{ section.height - section.padding_top - section.padding_bottom }}mm;"/>
+                        </t>
+                        <t t-elif="section.widget == 'image'">
+                            <div t-attf-style="width:100%;height:100%;background-image:url({{ section.get_image_url(label) }});background-size:contain;background-repeat:no-repeat;background-position:center;"/>
+                        </t>
+                        <t t-elif="section.type == 'image'">
+                            <div t-attf-style="width:100%;height:100%;background-image:url(/web/image/print.product.label.section/{{ section.id }}/image);background-size:contain;background-repeat:no-repeat;background-position:center;"/>
+                        </t>
+                        <t t-elif="section.type == 'product_attributes'">
+                            <div t-out="', '.join(map(lambda x: (x.attribute_line_id.attribute_id.name + ': ' + x.name) if section.with_product_attribute_name else x.name, label.product_id.product_template_attribute_value_ids))"/>
+                        </t>
+                        <t t-elif="section.type == 'multi_price'">
+                            <t t-foreach="section.get_value(label)" t-as="price">
+                                <t t-out="price['amount']"/>
+                                <small>(from <t t-out="price['qty']"/> <t t-out="label.product_id.uom_id.name"/>)</small>
+                                <br/>
+                            </t>
+                        </t>
+                        <div t-else="" t-out="value"/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_product_label_from_template" inherit_id="garazd_product_label.report_product_label_from_template">
+        <xpath expr="//t[@t-call='web.basic_layout']" position="inside">
+            <style>body {margin: 0 !important; padding: 0 !important;}</style>
+            <t t-set="index" t-value="0"/>
+            <t t-set="cols" t-value="data.get('cols', 1)"/>
+            <t t-set="rows" t-value="data.get('rows', 1)"/>
+            <t t-set="labels_per_sheet" t-value="cols * rows"/>
+            <t t-set="skip" t-value="data.get('skip_places', 0)"/>
+            <t t-foreach="docs" t-as="label">
+                <t t-set="qty" t-value="1"/>
+                <t t-if="label.qty" t-set="qty" t-value="label.qty"/>
+                <t t-if="labels_per_sheet" t-foreach="range(not index and (qty + skip) or qty)" t-as="label_index">
+                    <div t-if="index % labels_per_sheet == 0" style="page-break-before: always;"/>
+                    <!-- Horizontal gap between labels -->
+                    <t t-if="index and index % cols == 0" t-set="horizontal_gap" t-value="'height: 1px; margin-bottom: %.2fmm;' % data.get('row_gap', 0)"/>
+                    <t t-else="" t-set="horizontal_gap" t-value="''"/>
+                    <!-- New line -->
+                    <div t-if="index % cols == 0" t-att-style="'clear:both;' + horizontal_gap"/>
+                    <!-- Vertical gap between labels -->
+                    <t t-if="index % cols != 0" t-set="vertical_gap" t-value="'margin-left: %.2fmm;' % data.get('col_gap', 0)"/>
+                    <t t-else="" t-set="vertical_gap" t-value="''"/>
+                    <!-- Label <div> block -->
+                    <div t-att-style="data.get('label_style', '') + vertical_gap">
+                        <t t-if="index &gt;= skip" t-call="garazd_product_label_pro.product_label_from_template"/>
+                    </div>
+                    <t t-set="index" t-value="index + 1"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

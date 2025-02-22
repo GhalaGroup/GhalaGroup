@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="paperformat_label_custom_50x25" model="report.paperformat">
+        <field name="name">Label: 50x25 mm</field>
+        <field name="format">custom</field>
+        <field name="page_height">25</field>
+        <field name="page_width">50</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="header_spacing">0</field>
+        <field name="header_line" eval="False"/>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+    <record id="paperformat_label_custom_100x100" model="report.paperformat">
+        <field name="name">Label: 100x100mm</field>
+        <field name="format">custom</field>
+        <field name="page_height">100</field>
+        <field name="page_width">100</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">0</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">0</field>
+        <field name="margin_right">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+    <record id="paperformat_label_a4_63x38" model="report.paperformat">
+        <field name="name">Label: A4 63x38mm</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">9</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+    <record id="paperformat_label_a4_99x38" model="report.paperformat">
+        <field name="name">Label: A4 99x38mm</field>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">0</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+    <record id="paperformat_label_letter_66x25" model="report.paperformat">
+        <field name="name">Label: Letter 1"x2⅝"</field>
+        <field name="format">Letter</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">4.76</field>
+        <field name="margin_right">4.76</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+    <record id="paperformat_label_letter_101x50" model="report.paperformat">
+        <field name="name">Label: Letter 4"x2"</field>
+        <field name="format">Letter</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12.7</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">4.76</field>
+        <field name="margin_right">4.76</field>
+        <field name="disable_shrinking" eval="True"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="default" eval="False"/>
+    </record>
+
+</odoo>

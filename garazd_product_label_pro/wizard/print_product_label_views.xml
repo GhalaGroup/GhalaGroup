@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_product_label_template_list" model="ir.actions.act_window">
+        <field name="type">ir.actions.act_window</field>
+        <field name="name">Label Templates</field>
+        <field name="res_model">print.product.label.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="binding_model_id" ref="garazd_product_label_pro.model_print_product_label"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+
+    <menuitem
+        id="label_templates_menu"
+        name="Label Templates"
+        parent="base.reporting_menuitem"
+        action="action_product_label_template_list"
+        sequence="10"
+        groups="base.group_no_one"/>
+
+    <record id="print_product_label_view_form" model="ir.ui.view">
+        <field name="name">print.product.label.view.form.inherit.garazd_product_label_pro</field>
+        <field name="model">print.product.label</field>
+        <field name="inherit_id" ref="garazd_product_label.print_product_label_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='output']" position="after">
+                <field name="label_template_preview" string="Show Label" widget="boolean_toggle" attrs="{'invisible': [('is_template_report', '=', False)]}"/>
+            </xpath>
+            <xpath expr="//a[@name='label_builder_link']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@name='label_template']" position="inside">
+                <div class="o_row" colspan="2">
+                    <field name="template_id" attrs="{'required': [('is_template_report', '=', True)]}" options="{'no_open': True, 'no_create': True}"/>
+                    <button name="action_edit_template"
+                            title="Edit Template"
+                            type="object"
+                            icon="fa-external-link"
+                            attrs="{'invisible': [('template_id', '=', False)]}"/>
+                    <button name="action_add_template"
+                            string="Add"
+                            type="object"
+                            icon="fa-plus"
+                            class="btn-primary"
+                            title="Create a new label template"/>
+                </div>
+                <div class="o_row" colspan="2">
+                    <field name="template_preview_html" attrs="{'invisible': [('label_template_preview', '=', False)]}"/>
+                </div>
+            </xpath>
+            <xpath expr="//button[@name='action_restore_initial_qty']" position="after">
+                <span class="text-muted px-3">|</span>
+                <span class="oe_form_field pr-2">Skip:</span>
+                <field name="skip_place_count" class="mr-2" style="width: 40px !important; text-align: right;"/>
+                <button name="action_reset_skip"
+                        title="Reset the value of skipping empty places."
+                        type="object"
+                        class="btn-xs btn-light"
+                        icon="fa-remove"/>
+                <span class="text-muted px-3">|</span>
+                <field name="pricelist_id" class="mr8" options="{'no_open': True, 'no_create': True}" placeholder="Select a pricelist..."/>
+            </xpath>
+            <xpath expr="//tree/field[@name='barcode']" position="after">
+                <field name="price" optional="show"/>
+                <field name="currency_id" optional="show"/>
+            </xpath>
+            <xpath expr="//page[@name='options']//field[@name='company_id']" position="after">
+                <field name="sale_pricelist_id" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

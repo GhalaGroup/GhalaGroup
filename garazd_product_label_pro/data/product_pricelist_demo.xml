@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="pricelist_item_min_qty_3" model="product.pricelist.item">
+        <field name="pricelist_id" ref="product.list0"/>
+        <field name="applied_on">0_product_variant</field>
+        <field name="product_id" ref="product.product_product_4c"/>
+        <field name="compute_price">percentage</field>
+        <field name="percent_price">10</field>
+        <field name="min_quantity">3</field>
+    </record>
+    <record id="pricelist_item_min_qty_5" model="product.pricelist.item">
+        <field name="pricelist_id" ref="product.list0"/>
+        <field name="applied_on">0_product_variant</field>
+        <field name="product_id" ref="product.product_product_4c"/>
+        <field name="compute_price">percentage</field>
+        <field name="percent_price">25</field>
+        <field name="min_quantity">5</field>
+    </record>
+    <record id="pricelist_item_min_qty_10" model="product.pricelist.item">
+        <field name="pricelist_id" ref="product.list0"/>
+        <field name="applied_on">0_product_variant</field>
+        <field name="product_id" ref="product.product_product_4c"/>
+        <field name="compute_price">percentage</field>
+        <field name="percent_price">40</field>
+        <field name="min_quantity">10</field>
+    </record>
+
+    <record id="promo_pricelist" model="product.pricelist" forcecreate="True">
+        <field name="name">Promo Pricelist</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+    <record id="pricelist_item_promo_product" model="product.pricelist.item">
+        <field name="pricelist_id" ref="promo_pricelist"/>
+        <field name="applied_on">0_product_variant</field>
+        <field name="product_id" ref="product.product_product_4c"/>
+        <field name="compute_price">percentage</field>
+        <field name="percent_price">33</field>
+    </record>
+    <record id="pricelist_item_promo_global" model="product.pricelist.item">
+        <field name="pricelist_id" ref="promo_pricelist"/>
+        <field name="applied_on">3_global</field>
+        <field name="compute_price">percentage</field>
+        <field name="percent_price">5</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="print_product_label_section_view_form" model="ir.ui.view">
+        <field name="name">print.product.label.section.view.form</field>
+        <field name="model">print.product.label.section</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" text="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <field name="template_preview_html" class="oe_avatar" attrs="{'invisible': [('preview', '=', False)]}"/>
+                    <div class="oe_title">
+                        <h1><div class="d-flex">
+                                <field name="display_name" class="text-break"/>
+                        </div></h1>
+                    </div>
+                    <div name="options">
+                        <div class="d-inline-block">
+                            <label for="preview" class="mr8"/>
+                            <field name="preview" widget="boolean_toggle"/>
+                        </div>
+                    </div>
+                    <field name="active" invisible="1"/>
+                    <field name="field_ttype" invisible="1"/>
+                    <field name="field_ids" invisible="1"/>
+                    <field name="relation_model_id" invisible="1"/>
+                    <field name="relation_field_ttype" invisible="1"/>
+                    <field name="nested_relation_model_id" invisible="1"/>
+                    <group>
+                        <group string="Data">
+                            <field name="type" />
+                            <field name="value" attrs="{'invisible': [('type', '!=', 'text')]}"/>
+                            <field name="image" attrs="{'invisible': [('type', '!=', 'image')], 'required': [('type', '=', 'image')]}"/>
+                            <field name="field_id"
+                                   attrs="{'invisible': [('type', '!=', 'field')]}"
+                                   options="{'no_open': True, 'no_create': True}"/>
+
+                            <label for="relation_field_id" attrs="{'invisible': ['|', ('type', '!=', 'field'), '&amp;', ('type', '=', 'field'), ('field_ttype', 'not in', ['many2one', 'many2many', 'one2many'])], 'required': [('type', '=', 'field'), ('field_ttype', 'in', ['many2one', 'many2many', 'one2many'])]}"/>
+                            <div class="o_row" attrs="{'invisible': ['|', ('type', '!=', 'field'), '&amp;', ('type', '=', 'field'), ('field_ttype', 'not in', ['many2one', 'many2many', 'one2many'])], 'required': [('type', '=', 'field'), ('field_ttype', 'in', ['many2one', 'many2many', 'one2many'])]}">
+                                <field name="relation_field_id"
+                                       domain="[('model_id', '=', relation_model_id), ('ttype', 'in', ['binary', 'char', 'text', 'html', 'selection', 'float', 'monetary', 'integer', 'date', 'datetime', 'many2one'])]"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                                <field name="nested_relation_field_id"
+                                       attrs="{'invisible': ['|', ('type', '!=', 'field'), '&amp;', ('type', '=', 'field'), ('relation_field_ttype', 'not in', ['many2one'])], 'required': [('type', '=', 'field'), ('relation_field_ttype', 'in', ['many2one'])]}"
+                                       domain="[('model_id', '=', nested_relation_model_id), ('ttype', 'in', ['binary', 'char', 'text', 'html', 'selection', 'float', 'monetary', 'integer', 'date', 'datetime'])]"
+                                       options="{'no_open': True, 'no_create': True}"/>
+                            </div>
+                            <!-- Options for section types -->
+                            <field name="currency_position" attrs="{'invisible': [('type', 'not in', ['price', 'promo_price', 'multi_price'])]}"/>
+                            <field name="multi_price_order" string="Order" attrs="{'invisible': [('type', '!=', 'multi_price')]}"/>
+                            <field name="multi_price_limit" string="Limit" attrs="{'invisible': [('type', '!=', 'multi_price')]}"/>
+                            <field name="with_product_attribute_name" widget="boolean_toggle" attrs="{'invisible': [('type', '!=', 'product_attributes')]}"/>
+                        </group>
+                        <group string="Design">
+                            <field name="height"/>
+                            <field name="position"/>
+                            <label for="width" attrs="{'invisible': [('position', '=', 'none')]}"/>
+                            <div class="o_row" attrs="{'invisible': [('position', '=', 'none')]}">
+                                <field name="width" attrs="{'required': [('position', '!=', 'none')]}"/>
+                                <field name="width_measure" />
+                            </div>
+                            <field name="widget" attrs="{'invisible': [('type', 'not in', ['text', 'field'])]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Text" name="text_setting">
+                            <group>
+                                <group>
+                                    <field name="align" widget="selection"/>
+                                    <field name="font_weight" widget="radio" options="{'horizontal': true}"/>
+                                    <label for="font_size"/>
+                                    <div class="o_row">
+                                        <field name="font_size" />
+                                        <field name="font_size_measure" />
+                                    </div>
+                                    <field name="line_height"/>
+                                    <field name="letter_spacing"/>
+                                    <field name="text_color" string="Color" widget="color"/>
+                                </group>
+                                <group>
+                                    <field name="value_format" attrs="{'invisible': ['|', ('type', 'not in', ['field', 'price', 'promo_price', 'multi_price']), ('widget', '!=', False)]}"/>
+                                    <field name="text_decoration"/>
+                                    <separator string="URL options" colspan="2"/>
+                                    <field name="make_url_absolute" widget="boolean_toggle" attrs="{'invisible': [('type', 'not in', ['text', 'field'])]}"/>
+                                    <field name="shorten_url" widget="boolean_toggle" attrs="{'invisible': [('type', 'not in', ['text', 'field'])]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Paddings" name="padding">
+                            <group col="4" colspan="2">
+                                <group col="2" colspan="2">
+                                    <label for="padding_top" string="Top"/>
+                                    <div>
+                                        <field name="padding_top" class="oe_inline"/> mm
+                                    </div>
+                                    <label for="padding_bottom" string="Bottom"/>
+                                    <div>
+                                        <field name="padding_bottom" class="oe_inline"/> mm
+                                    </div>
+                                </group>
+                                <group col="2" colspan="2">
+                                    <label for="padding_left" string="Left"/>
+                                    <div>
+                                        <field name="padding_left" class="oe_inline"/> mm
+                                    </div>
+                                    <label for="padding_right" string="Right"/>
+                                    <div>
+                                        <field name="padding_right" class="oe_inline"/> mm
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Margins" name="margin">
+                            <group col="4" colspan="2">
+                                <group col="2" colspan="2">
+                                    <label for="margin_top" string="Top"/>
+                                    <div>
+                                        <field name="margin_top" class="oe_inline"/> mm
+                                    </div>
+                                    <label for="margin_bottom" string="Bottom"/>
+                                    <div>
+                                        <field name="margin_bottom" class="oe_inline"/> mm
+                                    </div>
+                                </group>
+                                <group col="2" colspan="2">
+                                    <label for="margin_left" string="Left"/>
+                                    <div>
+                                        <field name="margin_left" class="oe_inline"/> mm
+                                    </div>
+                                    <label for="margin_right" string="Right"/>
+                                    <div>
+                                        <field name="margin_right" class="oe_inline"/> mm
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Borders" name="border">
+                            <group col="4" colspan="2">
+                                <group col="2" colspan="2">
+                                    <field name="with_border_top" string="Top" widget="boolean_toggle"/>
+                                    <field name="with_border_bottom" string="Bottom" widget="boolean_toggle"/>
+                                </group>
+                                <group col="2" colspan="2">
+                                    <field name="with_border_left" string="Left" widget="boolean_toggle"/>
+                                    <field name="with_border_right" string="Right" widget="boolean_toggle"/>
+                                </group>
+                                <group col="2" colspan="2" attrs="{'invisible': [('with_border_top', '=', False), ('with_border_left', '=', False), ('with_border_right', '=', False), ('with_border_bottom', '=', False)]}">
+                                    <field name="border_width" string="Width, px"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Background" name="background">
+                            <group>
+                                <group>
+                                    <field name="with_background" widget="boolean_toggle"/>
+                                    <field name="background_color" widget="color" attrs="{'invisible': [('with_background', '=', False)]}"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="print_product_label_section_view_tree" model="ir.ui.view">
+        <field name="name">print.product.label.section.view.tree</field>
+        <field name="model">print.product.label.section</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="type=='text' and not widget"
+                  decoration-danger="widget=='price' or type=='promo_price'"
+                  decoration-success="widget in ['barcode', 'qr_code']"
+                  decoration-warning="type=='image' or widget=='image'"
+                  decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="display_name"/>
+                <field name="position" optional="show"/>
+                <field name="type" optional="hide"/>
+                <field name="field_id" optional="hide"/>
+                <field name="relation_field_id" optional="hide"/>
+                <field name="widget" optional="hide"/>
+                <field name="value_format" optional="hide"/>
+                <field name="align" optional="show"/>
+                <field name="font_size" optional="show"/>
+                <field name="font_size_measure" optional="hide"/>
+                <field name="line_height" optional="show"/>
+                <field name="font_weight" optional="show"/>
+                <field name="height" sum="Total Label Height" optional="show"/>
+                <field name="active" widget="boolean_toggle" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>

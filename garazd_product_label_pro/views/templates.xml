@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="label_preview" name="Product label Preview">
+        <div t-att-style="back_style">
+            <div t-att-style="label_style">
+                <div name="transform_div">
+                <t t-foreach="sections" t-as="section">
+                    <div t-att-style="'%s%s' % (section.get_html_style(), 'opacity: 0.3;' if editable_section_id and section.id != editable_section_id else '')">
+                        <div t-if="section.type == 'product_attributes'" t-out="', '.join(map(lambda x: (x.attribute_line_id.attribute_id.name + ': ' + x.name) if section.with_product_attribute_name else x.name, label.product_id.product_template_attribute_value_ids))"/>
+                        <div t-if="section.type == 'multi_price'">
+                            <t t-foreach="section.get_value(label)" t-as="price">
+                                <t t-out="price['amount']"/>
+                                <small>(from <t t-out="price['qty']"/> <t t-out="label.product_id.uom_id.name"/>)</small>
+                                <br/>
+                            </t>
+                        </div>
+                        <t t-elif="section.widget == 'barcode'">
+                            <img t-att-src="'/report/barcode/auto/%s?quiet=0' % section.get_value(label)" style="width:85%;height:100%;"/>
+                        </t>
+                        <t t-elif="section.widget == 'price'">
+                          <div>
+                              <t t-esc="label.currency_id.symbol"/>&amp;nbsp;
+                              <span class="oe_currency_value" t-esc="'%.0f.' % label.price"/><span class="oe_currency_value" style="font-size:0.5em">00</span>
+                          </div>
+                        </t>
+                        <t t-elif="section.widget == 'qr_code'">
+                            <t t-set="qr_code_size_px" t-value="section.height * section.template_id.ratio_px_in_mm"/>
+                            <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=%d&amp;height=%d'%(section.get_value(label), qr_code_size_px, qr_code_size_px)" t-attf-style="display: block; height: 100%; width: {{ section.height - section.padding_top - section.padding_bottom }}mm;"/>
+                        </t>
+                        <t t-elif="section.widget == 'image'">
+                            <div t-attf-style="width:100%;height:100%;background-image:url({{ section.get_image_url(label) }});background-size:contain;background-repeat:no-repeat;background-position:center;"/>
+                        </t>
+                        <t t-elif="section.type == 'image'">
+                            <div t-attf-style="width:100%;height:100%;background-image:url(/web/image/print.product.label.section/{{ section.id }}/image);background-size:contain;background-repeat:no-repeat;background-position:center;"/>
+                        </t>
+                        <t t-else="">
+                            <div t-esc="section.get_value(label)" style="white-space:normal"/>
+                        </t>
+                    </div>
+                </t>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</odoo>
