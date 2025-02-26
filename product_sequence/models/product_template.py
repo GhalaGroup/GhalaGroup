@@ -55,10 +55,6 @@ class ProductTemplate(models.Model):
    @api.model
    def create(self, vals):
       # Generate Internal Reference
-      barcode = self.env["ir.sequence"].next_by_code("barcode.product.template")
-      if not vals.get("barcode"):
-         # Generate barcode number
-         vals.update({"barcode":barcode})
       res = super(ProductTemplate, self).create(vals)
       #Check if the category-related fields are in vals before generating default_code
       if "categ_id" in vals:
