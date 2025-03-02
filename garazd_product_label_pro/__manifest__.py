@@ -7,7 +7,7 @@
 
 {
     'name': 'Odoo Product Label Builder',
-    'version': '16.0.1.12.2',
+    'version': '16.0.1.12.3',
     'category': 'Extra Tools',
     'author': 'Garazd Creation',
     'website': 'https://garazd.biz/en/shop/category/odoo-product-labels-15',

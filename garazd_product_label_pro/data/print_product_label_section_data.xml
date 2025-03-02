@@ -17,6 +17,25 @@
         <field name="padding_right">2</field>
         <field name="active" eval="True"/>
     </record>
+
+
+     <record id="label_section_50x25_custom" model="print.product.label.section">
+        <field name="template_id" ref="label_template_custom_victore"/>
+        <field name="sequence">1</field>
+        <field name="type">field</field>
+        <field name="field_id" ref="garazd_product_label.field_print_product_label_line__product_id"/>
+        <field name="relation_field_id" ref="product.field_product_product__name"/>
+        <field name="height">11</field>
+        <field name="align">left</field>
+        <field name="font_size">11</field>
+        <field name="line_height">1.2</field>
+        <field name="padding_top">1</field>
+        <field name="padding_left">2</field>
+        <field name="padding_right">2</field>
+        <field name="active" eval="True"/>
+    </record>
+
+
     <record id="label_section_50x25_product_price" model="print.product.label.section">
         <field name="template_id" ref="label_template_custom_50x25"/>
         <field name="sequence">2</field>
