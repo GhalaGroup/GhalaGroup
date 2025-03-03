@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
 
+    <record id="label_template_custom_victore" model="print.product.label.template">
+        <field name="name">Label udtz</field>
+        <field name="paperformat_id" ref="paperformat_label_custom_50x25"/>
+        <field name="orientation">Portrait</field>
+        <field name="cols">1</field>
+        <field name="rows">1</field>
+        <field name="width">50</field>
+        <field name="height">25</field>
+    </record>
+
     <record id="label_template_custom_50x25" model="print.product.label.template">
         <field name="name">Label 50x25 mm</field>
         <field name="paperformat_id" ref="paperformat_label_custom_50x25"/>
