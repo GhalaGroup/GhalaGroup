@@ -28,7 +28,7 @@ class ProductTemplate(models.Model):
             sequence = record.get_or_create_ir_sequence()
             parent_categories = self.env['product.category'].search([
                ('id', 'parent_of', record.categ_id.id)
-            ], order="id desc")
+            ], order="id asc")
             short_names = "/".join(parent_categories.mapped("short_name"))
             return f"{short_names}/{sequence}"
          return False
@@ -54,7 +54,7 @@ class ProductTemplate(models.Model):
                   }).next_by_code(sequence_code)
                parent_categories = self.env['product.category'].search([
                   ('id', 'parent_of', record.categ_id.id)
-               ], order="id desc")
+               ], order="id asc")
                short_names = "/".join(parent_categories.mapped("short_name"))
                default_code =  f"{short_names}/{sequence}"
             if default_code:
