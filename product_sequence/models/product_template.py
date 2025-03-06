@@ -26,9 +26,14 @@ class ProductTemplate(models.Model):
       for record in self:
          if record.categ_id and record.categ_id.short_name and record.categ_id.parent_id.short_name:
             sequence = record.get_or_create_ir_sequence()
-            return f"{record.categ_id.parent_id.short_name}/{record.categ_id.short_name}/{sequence}"
+            parent_categories = self.env['product.category'].search([
+               ('id', 'parent_of', record.categ_id.id)
+            ], order="id desc")
+            short_names = "/".join(parent_categories.mapped("short_name"))
+            return f"{short_names}/{sequence}"
          return False
 
+   
    def write(self, vals):
       result = super(ProductTemplate, self).write(vals)
       if "categ_id" in vals:
@@ -47,16 +52,18 @@ class ProductTemplate(models.Model):
                      "number_next": 1,
                      "number_increment": 1
                   }).next_by_code(sequence_code)
-               default_code =  f"{record.categ_id.parent_id.short_name}/{record.categ_id.short_name}/{sequence}"
+               parent_categories = self.env['product.category'].search([
+                  ('id', 'parent_of', record.categ_id.id)
+               ], order="id desc")
+               short_names = "/".join(parent_categories.mapped("short_name"))
+               default_code =  f"{short_names}/{sequence}"
             if default_code:
                super(ProductTemplate, record).write({'default_code': default_code})  # Avoid recursion by calling super
       return result
         
    @api.model
    def create(self, vals):
-      # Generate Internal Reference
       res = super(ProductTemplate, self).create(vals)
-      #Check if the category-related fields are in vals before generating default_code
       if "categ_id" in vals:
          default_code = res._generate_default_code()
          if default_code:
