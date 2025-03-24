@@ -14,7 +14,7 @@ class MrpProduction(models.Model):
     def _compute_sol_name(self):
         for record in self:
             if record.origin:
-                sale_order = record.env['sale.order'].search([('name', '=', record.origin)])
+                sale_order = record.env['sale.order'].search([('name', '=', record.origin)],limit=1)
                 if sale_order and sale_order.order_line.name:
                     record['product_description_variants'] = sale_order.order_line.name
 
@@ -22,7 +22,7 @@ class MrpProduction(models.Model):
     def _inverse_compute_sol_name(self):
         for record in self:
             if record.origin:
-                sale_order = record.env['sale.order'].search([('name', '=', record.origin)])
+                sale_order = record.env['sale.order'].search([('name', '=', record.origin)],limit=1)
                 if sale_order and sale_order.order_line.name:
                     record['product_description_variants'] = sale_order.order_line.name
                 else:
