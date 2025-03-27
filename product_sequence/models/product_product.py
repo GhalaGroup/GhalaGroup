@@ -54,8 +54,9 @@ class ProductProduct(models.Model):
     @api.model
     def create(self, vals):
         res = super(ProductProduct, self).create(vals)
-        default_code = res._generate_default_code()
-        if default_code:
-            res.write({'default_code': default_code})
+        if not res.default_code:
+            default_code = res._generate_default_code()
+            if default_code :
+                res.write({'default_code': default_code})
         return res
 

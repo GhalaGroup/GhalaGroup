@@ -64,7 +64,7 @@ class ProductTemplate(models.Model):
    @api.model
    def create(self, vals):
       res = super(ProductTemplate, self).create(vals)
-      if "categ_id" in vals:
+      if "categ_id" in vals and not 'default_code' in vals:
          default_code = res._generate_default_code()
          if default_code:
                res.write({'default_code': default_code})
