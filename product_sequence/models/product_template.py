@@ -79,7 +79,7 @@ class ProductTemplate(models.Model):
          sequence_code = f"product_category_{template.categ_id.short_name}"
          IrSequence = self.env["ir.sequence"].search([("code","=", sequence_code)])
          if IrSequence.exists():
-            IrSequence.number_next_actual -= 1
+            IrSequence.number_next_actual -= 2
       default_code = template._generate_default_code()
       if default_code:
          template.default_code = default_code
