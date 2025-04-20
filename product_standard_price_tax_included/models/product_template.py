@@ -12,6 +12,7 @@ class ProductTemplate(models.Model):
         compute="_compute_standard_price_tax_included",
         string="Cost Price Tax Included",
         digits="Product Price",
+        store=True,
         help="Cost Price of the product, All Tax Included:\n"
         "This field will be computed with the 'Cost Price', taking into"
         " account Sale Taxes setting.",
@@ -21,6 +22,7 @@ class ProductTemplate(models.Model):
         compute="_compute_standard_price_tax_included",
         string="Sale Price Tax Included",
         digits="Product Price",
+        store=True,
         help="Sale Price of the product, All Tax Included:\n"
         "This field will be computed with the 'Sale Price', taking into"
         " account Sale Taxes setting.",
