@@ -18,7 +18,8 @@ class ProductProduct(models.Model):
             "code": sequence_code,
             "padding": 5,
             "number_next": 1,
-            "number_increment": 1
+            "number_increment": 1,
+            "company_id": self.company_id.id,
         }).next_by_code(sequence_code)
    
     def _generate_default_code(self):
