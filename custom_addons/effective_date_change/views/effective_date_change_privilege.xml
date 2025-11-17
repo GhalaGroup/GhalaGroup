@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="effective_date_change_privilege">
+            <field name="name">effective.date.change.privilege</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="effective_date_change"/>
+            <field name="arch" type="xml">
+
+                <button name="action_cancel" position="after">
+                    <button name="wiz_open" groups="effective_date_change.effective_date_change_group" type="object" string="Change Effective Date" invisible="state != 'done'"/>
+                </button>
+
+            </field>
+        </record>
+    </data>
+</odoo>

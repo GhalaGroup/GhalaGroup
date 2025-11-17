@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Product Sequence Configuration. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<odoo>
+
+    <!-- Regenerate SKU Wizard Form -->
+    <record id="regenerate_sku_wizard_view_form" model="ir.ui.view">
+        <field name="name">regenerate.sku.wizard.view.form</field>
+        <field name="model">regenerate.sku.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Regenerate Product SKUs" class="o_regenerate_sku_wizard">
+                <style>
+                    .o_regenerate_sku_wizard .modal-dialog {
+                        max-width: 1200px !important;
+                        width: 90% !important;
+                    }
+                    .o_regenerate_sku_wizard .o_list_table {
+                        font-size: 10px !important;
+                    }
+                    .o_regenerate_sku_wizard .o_list_table td,
+                    .o_regenerate_sku_wizard .o_list_table th {
+                        padding: 4px 8px !important;
+                    }
+                </style>
+                <sheet>
+                    <!-- Draft State -->
+                    <group invisible="state != 'draft'">
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="scope" widget="radio"/>
+                            <field name="category_id" invisible="scope != 'category'" required="scope == 'category'"/>
+                            <field name="product_ids" widget="many2many_tags" invisible="scope != 'selection'"/>
+                        </group>
+                        <group>
+                            <field name="respect_locks"/>
+                            <field name="use_recycle_pool"/>
+                            <field name="reset_sequence" invisible="scope != 'category'"/>
+                        </group>
+                    </group>
+
+                    <!-- Preview State -->
+                    <group invisible="state != 'preview'">
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <field name="total_products" readonly="1"/>
+                            <field name="locked_products" readonly="1"/>
+                            <field name="products_to_update" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook invisible="state != 'preview'">
+                        <page string="Preview Changes" name="preview">
+                            <field name="preview_line_ids" nolabel="1">
+                                <list decoration-muted="is_locked" decoration-success="will_update" decoration-warning="not will_update and not is_locked">
+                                    <field name="product_name" string="Product"/>
+                                    <field name="category_name" string="Category"/>
+                                    <field name="current_sku" string="Current"/>
+                                    <field name="new_sku" string="New SKU"/>
+                                    <field name="is_locked" invisible="1"/>
+                                    <field name="will_update" invisible="1"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+
+                    <!-- Done State -->
+                    <group invisible="state != 'done'">
+                        <group>
+                            <field name="state" invisible="1"/>
+                            <div class="alert alert-success" role="alert">
+                                <p><strong>Success!</strong> SKUs have been regenerated.</p>
+                                <p>Total products updated: <field name="products_to_update" readonly="1" nolabel="1"/></p>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <!-- Draft State Buttons -->
+                    <button string="Generate Preview"
+                            name="action_generate_preview"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button string="Cancel"
+                            special="cancel"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"/>
+
+                    <!-- Preview State Buttons -->
+                    <button string="Regenerate SKUs"
+                            name="action_regenerate"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'preview'"/>
+                    <button string="Regenerate SKUs &amp; Lock"
+                            name="action_regenerate_and_lock"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'preview'"/>
+                    <button string="Back"
+                            name="action_back_to_draft"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'preview'"/>
+                    <button string="Cancel"
+                            special="cancel"
+                            class="btn-secondary"
+                            invisible="state != 'preview'"/>
+
+                    <!-- Done State Buttons -->
+                    <button string="Close"
+                            special="cancel"
+                            class="btn-primary"
+                            invisible="state != 'done'"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Regenerate SKU Wizard Action -->
+    <record id="action_regenerate_sku_wizard" model="ir.actions.act_window">
+        <field name="name">Regenerate Product SKUs</field>
+        <field name="res_model">regenerate.sku.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

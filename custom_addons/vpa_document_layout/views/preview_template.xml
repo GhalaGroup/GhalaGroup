@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wrapper template that uses Odoo's proper preview container with asset loading -->
+    <template id="vpa_preview_with_container">
+        <t t-call="web.html_preview_container">
+            <t t-call="vpa_document_layout.vpa_layout_preview"/>
+        </t>
+    </template>
+
+    <!-- VPA Layout Preview Template -->
+    <template id="vpa_layout_preview">
+        <t t-set="o" t-value="config.company_id"/>
+        <t t-set="company" t-value="config.company_id"/>
+        <t t-set="display_name_in_footer" t-value="True"/>
+        <t t-set="report_type" t-value="'html'"/>
+        <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
+        <t t-set="address">
+            <strong>Deco Addict</strong><br/>
+            77 Santa Barbara Rd<br/>
+            Pleasant Hill CA 94523<br/>
+            United States
+        </t>
+        <t t-set="information_block">
+            <div><strong>Quotation Date:</strong> 11/17/2025</div>
+            <div><strong>Expiration:</strong> 12/17/2025</div>
+            <div><strong>Salesperson:</strong> Demo User</div>
+        </t>
+
+        <!-- Call the actual VPA layout template -->
+        <t t-call="vpa_document_layout.external_layout_vpa">
+            <!-- Sample quotation body content with proper Bubble table styling -->
+            <div class="page" style="font-size: 10pt;">
+
+                <!-- Product Table with Bubble boxed-rounded styling -->
+                <table class="table table-sm" style="margin-top: 1rem;">
+                    <thead style="text-transform: uppercase;">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Quantity</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Taxes</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>[FURN_8999] Three-Seat Sofa</strong><br/>
+                                <small class="text-muted">Three Seater Sofa with Lounger in Steel Grey Color</small>
+                            </td>
+                            <td class="text-end">5.00</td>
+                            <td class="text-end">$1,500.00</td>
+                            <td class="text-end">15%</td>
+                            <td class="text-end">$7,500.00</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>[FURN_8220] Four Person Desk</strong><br/>
+                                <small class="text-muted">Four person modern office workstation</small>
+                            </td>
+                            <td class="text-end">5.00</td>
+                            <td class="text-end">$2,350.00</td>
+                            <td class="text-end">15%</td>
+                            <td class="text-end">$11,750.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Totals Table -->
+                <div id="total" class="row justify-content-end mt-4">
+                    <div class="col-4">
+                        <table class="table o_total_table table-sm" style="page-break-inside: avoid;">
+                            <tr>
+                                <td><strong>Untaxed Amount</strong></td>
+                                <td class="text-end">$19,250.00</td>
+                            </tr>
+                            <tr class="o_taxes">
+                                <td>Tax 15%</td>
+                                <td class="text-end">$2,887.50</td>
+                            </tr>
+                            <tr style="border-top: 2px solid #000;">
+                                <td><strong>Total</strong></td>
+                                <td class="text-end o_price_total"><strong>$22,137.50</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <p><strong>Payment terms:</strong> 30 Days</p>
+                    <p style="margin-top: 1rem;">
+                        <strong>Terms and conditions:</strong><br/>
+                        <small class="text-muted">
+                            Please send payment within 30 days of receiving this invoice.<br/>
+                            There will be a 10% interest charge per month on late invoices.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Styles for VPA config (similar to web.styles_company_report) -->
+    <template id="styles_vpa_report">
+        <t t-foreach="company_ids" t-as="config" t-translation="off">
+            <t t-set="company" t-value="config.company_id"/>
+            <t t-set="primary" t-value="config.primary_accent_color or company.primary_color or '#212529'"/>
+            <t t-set="secondary" t-value="config.secondary_accent_color or company.secondary_color or '#212529'"/>
+
+            .o_company_<t t-esc='company.id'/>_layout {
+                // Custom VPA styling per company
+                h2 {
+                    color: <t t-esc='primary'/>;
+                }
+
+                .o_company_logo {
+                    max-width: <t t-esc='config.header_logo_width'/>px;
+                    max-height: <t t-esc='config.header_logo_height'/>px;
+                }
+            }
+        </t>
+    </template>
+</odoo>

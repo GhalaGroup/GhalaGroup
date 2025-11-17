@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Product Sequence Configuration. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<odoo>
+
+    <!-- Recycle Pool List View -->
+    <record id="product_sku_recycle_pool_view_list" model="ir.ui.view">
+        <field name="name">product.sku.recycle.pool.view.list</field>
+        <field name="model">product.sku.recycle.pool</field>
+        <field name="arch" type="xml">
+            <list string="SKU Recycle Pool" delete="1">
+                <field name="name"/>
+                <field name="sku_number"/>
+                <field name="category_path"/>
+                <field name="category_id"/>
+                <field name="original_product_name"/>
+                <field name="deleted_date"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Recycle Pool Form View -->
+    <record id="product_sku_recycle_pool_view_form" model="ir.ui.view">
+        <field name="name">product.sku.recycle.pool.view.form</field>
+        <field name="model">product.sku.recycle.pool</field>
+        <field name="arch" type="xml">
+            <form string="Recycled SKU">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sku_number"/>
+                            <field name="category_id"/>
+                        </group>
+                        <group>
+                            <field name="category_path"/>
+                            <field name="original_product_name"/>
+                            <field name="deleted_date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Remove from Pool"
+                                name="action_remove_from_pool"
+                                type="object"
+                                class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Recycle Pool Search View -->
+    <record id="product_sku_recycle_pool_view_search" model="ir.ui.view">
+        <field name="name">product.sku.recycle.pool.view.search</field>
+        <field name="model">product.sku.recycle.pool</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="category_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Recycle Pool Action -->
+    <record id="action_product_sku_recycle_pool" model="ir.actions.act_window">
+        <field name="name">SKU Recycle Pool</field>
+        <field name="res_model">product.sku.recycle.pool</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No recycled SKUs available
+            </p>
+            <p>
+                When products are deleted, their SKUs are added here for reuse.
+                This helps maintain sequential numbering without gaps.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_product_sku_recycle_pool"
+              name="SKU Recycle Pool"
+              parent="stock.menu_stock_config_settings"
+              action="action_product_sku_recycle_pool"
+              sequence="101"
+              groups="base.group_system"/>
+
+</odoo>

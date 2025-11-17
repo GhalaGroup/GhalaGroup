@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA Document Configuration Form View -->
+    <record id="view_vpa_document_config_form" model="ir.ui.view">
+        <field name="name">vpa.document.config.form</field>
+        <field name="model">vpa.document.config</field>
+        <field name="arch" type="xml">
+            <form string="VPA Layout Configuration" class="o_document_layout">
+                <sheet>
+                    <div class="alert alert-info mb-3" role="alert">
+                        <strong>Note:</strong> This header and footer will be used universally across all Odoo apps (Sales, Purchase, Invoices, Manufacturing, etc.) when you select "VPA Document Layout" in Settings → Companies → Document Layout.
+                    </div>
+
+                    <group>
+                        <field name="name"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                    </group>
+
+                    <!-- Side-by-side layout: Settings on left, Preview on right -->
+                    <group>
+                        <group class="o_document_layout_settings" style="max-width: 50%;">
+                            <notebook>
+                        <!-- HEADER SECTION -->
+                        <page string="Header">
+                            <group string="Logo Settings">
+                                <group>
+                                    <field name="header_logo_position"/>
+                                    <field name="header_logo_width"/>
+                                    <field name="header_logo_height"/>
+                                </group>
+                                <group>
+                                    <field name="header_show_tagline"/>
+                                    <field name="header_tagline_position" invisible="not header_show_tagline"/>
+                                </group>
+                            </group>
+
+                            <group string="Company Details">
+                                <group>
+                                    <field name="header_company_details_position"/>
+                                    <field name="header_show_vat"/>
+                                </group>
+                            </group>
+
+                            <group string="Company Details Custom HTML" class="oe_edit_only">
+                                <div colspan="2" class="mb-2">
+                                    <button name="action_load_company_details" type="object" string="Load Company Details"
+                                            class="btn btn-primary" icon="fa-download"
+                                            help="Click to load your company details from Settings → Companies. You can then edit and style the HTML."/>
+                                </div>
+                                <field name="header_company_details_html" widget="html" nolabel="1" colspan="2"
+                                       placeholder="Click 'Load Company Details' button above to populate this field with your company address, phone, email, etc. Then you can edit and style it."/>
+                            </group>
+
+                            <group string="Header Shape &amp; Colors">
+                                <group>
+                                    <field name="header_show_circle"/>
+                                    <field name="header_circle_size" invisible="not header_show_circle"/>
+                                    <field name="header_circle_opacity" invisible="not header_show_circle"/>
+                                    <field name="header_circle_color" invisible="not header_show_circle" widget="color"/>
+                                </group>
+                                <group>
+                                    <field name="text_color_header" widget="color"/>
+                                    <field name="primary_accent_color" widget="color"/>
+                                </group>
+                            </group>
+
+                            <group string="Header Spacing">
+                                <group>
+                                    <field name="header_padding_top"/>
+                                    <field name="header_padding_bottom"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- FOOTER SECTION -->
+                        <page string="Footer">
+                            <group string="Footer Layout Mode">
+                                <field name="footer_layout"/>
+                                <field name="footer_enable_custom_sections" invisible="footer_layout != 'custom'"/>
+                            </group>
+
+                            <!-- Custom Multi-Row Footer -->
+                            <group string="Footer Row 1" invisible="not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <group>
+                                    <field name="footer_row1_enable"/>
+                                    <field name="footer_row1_align" invisible="not footer_row1_enable"/>
+                                </group>
+                            </group>
+                            <group invisible="not footer_row1_enable or not footer_enable_custom_sections or footer_layout != 'custom' or footer_row1_align == 'split'">
+                                <field name="footer_row1_content" widget="html" nolabel="1" colspan="2" placeholder="e.g., &lt;strong&gt;Bank Account Details:&lt;/strong&gt;"/>
+                            </group>
+                            <group invisible="not footer_row1_enable or footer_row1_align != 'split' or not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <label for="footer_row1_left_content" string="Left Column"/>
+                                <field name="footer_row1_left_content" widget="html" nolabel="1"/>
+                                <label for="footer_row1_right_content" string="Right Column"/>
+                                <field name="footer_row1_right_content" widget="html" nolabel="1"/>
+                            </group>
+
+                            <group string="Footer Row 2" invisible="not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <group>
+                                    <field name="footer_row2_enable"/>
+                                    <field name="footer_row2_align" invisible="not footer_row2_enable"/>
+                                </group>
+                            </group>
+                            <group invisible="not footer_row2_enable or not footer_enable_custom_sections or footer_layout != 'custom' or footer_row2_align == 'split'">
+                                <field name="footer_row2_content" widget="html" nolabel="1" colspan="2" placeholder="e.g., Account Name: UDESIGN LIMITED | Bank: CRDB Bank"/>
+                            </group>
+                            <group invisible="not footer_row2_enable or footer_row2_align != 'split' or not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <label for="footer_row2_left_content" string="Left Column"/>
+                                <field name="footer_row2_left_content" widget="html" nolabel="1"/>
+                                <label for="footer_row2_right_content" string="Right Column"/>
+                                <field name="footer_row2_right_content" widget="html" nolabel="1"/>
+                            </group>
+
+                            <group string="Footer Row 3" invisible="not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <group>
+                                    <field name="footer_row3_enable"/>
+                                    <field name="footer_row3_align" invisible="not footer_row3_enable"/>
+                                </group>
+                            </group>
+                            <group invisible="not footer_row3_enable or not footer_enable_custom_sections or footer_layout != 'custom' or footer_row3_align == 'split'">
+                                <field name="footer_row3_content" widget="html" nolabel="1" colspan="2" placeholder="e.g., Account Number (TZS): 0150548871900"/>
+                            </group>
+                            <group invisible="not footer_row3_enable or footer_row3_align != 'split' or not footer_enable_custom_sections or footer_layout != 'custom'">
+                                <label for="footer_row3_left_content" string="Left Column"/>
+                                <field name="footer_row3_left_content" widget="html" nolabel="1"/>
+                                <label for="footer_row3_right_content" string="Right Column"/>
+                                <field name="footer_row3_right_content" widget="html" nolabel="1"/>
+                            </group>
+
+                            <!-- Standard Footer (non-custom) -->
+                            <group string="Standard Footer Options" invisible="footer_layout == 'custom'">
+                                <group>
+                                    <field name="footer_show_bank_details"/>
+                                    <field name="footer_bank_details_align" invisible="not footer_show_bank_details"/>
+                                </group>
+                            </group>
+
+                            <group string="Footer Page Numbers &amp; Document Name">
+                                <group>
+                                    <field name="footer_show_page_numbers"/>
+                                    <field name="footer_show_document_name"/>
+                                </group>
+                            </group>
+
+                            <group string="Footer Shape &amp; Colors">
+                                <group>
+                                    <field name="footer_show_shape"/>
+                                    <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
+                                    <field name="footer_shape_color" invisible="not footer_show_shape" widget="color"/>
+                                </group>
+                                <group>
+                                    <field name="text_color_footer" widget="color"/>
+                                    <field name="secondary_accent_color" widget="color"/>
+                                </group>
+                            </group>
+
+                            <group string="Footer Spacing">
+                                <group>
+                                    <field name="footer_padding_top"/>
+                                    <field name="footer_padding_bottom"/>
+                                    <field name="footer_row_spacing" invisible="not footer_enable_custom_sections or footer_layout != 'custom'"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- DOCUMENT LAYOUT SECTION -->
+                        <page string="Document Layout">
+                            <group string="Document Title">
+                                <group>
+                                    <field name="body_title_position"/>
+                                    <field name="body_title_size"/>
+                                </group>
+                            </group>
+
+                            <group string="Table Styling">
+                                <group>
+                                    <field name="body_table_style"/>
+                                    <field name="body_table_header_bg" widget="color"/>
+                                    <field name="body_table_border_color" widget="color"/>
+                                </group>
+                            </group>
+
+                            <group string="Customer Address Block">
+                                <group>
+                                    <field name="body_show_customer_address"/>
+                                    <field name="body_customer_address_position" invisible="not body_show_customer_address"/>
+                                </group>
+                            </group>
+
+                            <group string="Body Colors &amp; Spacing">
+                                <group>
+                                    <field name="text_color_body" widget="color"/>
+                                    <field name="body_margin_top"/>
+                                    <field name="body_margin_bottom"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                        </group>
+
+                        <!-- Preview Pane (Right Side) -->
+                        <div class="o_preview" style="max-width: 50%; padding-left: 20px;">
+                            <field name="preview" widget="iframe_wrapper" class="preview_document_layout d-flex justify-content-center mb-0"/>
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- VPA Document Configuration List View -->
+    <record id="view_vpa_document_config_tree" model="ir.ui.view">
+        <field name="name">vpa.document.config.list</field>
+        <field name="model">vpa.document.config</field>
+        <field name="arch" type="xml">
+            <list string="VPA Layout Configurations">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="footer_layout"/>
+                <field name="body_table_style"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- VPA Document Configuration Action -->
+    <record id="action_vpa_document_config" model="ir.actions.act_window">
+        <field name="name">VPA Layout Settings</field>
+        <field name="res_model">vpa.document.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_company_id': allowed_company_ids[0]}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure VPA Document Layout
+            </p>
+            <p>
+                Customize header, footer, and document body styling.<br/>
+                A default configuration has been created for your company.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items - DISABLED due to cache issue, use Settings menu instead -->
+    <!--
+    <menuitem id="menu_vpa_document_layout_root"
+              name="VPA Layout"
+              sequence="100"
+              web_icon="vpa_document_layout,static/description/icon.png"/>
+
+    <menuitem id="menu_vpa_document_config"
+              name="Layout Settings"
+              parent="menu_vpa_document_layout_root"
+              action="action_vpa_document_config"
+              sequence="10"/>
+    -->
+</odoo>

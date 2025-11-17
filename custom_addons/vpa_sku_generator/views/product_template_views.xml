@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Product Sequence Configuration. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<odoo>
+
+    <!-- Product Template Form View - Add SKU Lock -->
+    <record id="product_template_form_view_sku_lock" model="ir.ui.view">
+        <field name="name">product.template.form.sku.lock</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add lock checkbox next to default_code -->
+            <field name="default_code" position="after">
+                <field name="sku_locked" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Product Template Tree View - Add SKU Lock Column -->
+    <record id="product_template_tree_view_sku_lock" model="ir.ui.view">
+        <field name="name">product.template.tree.sku.lock</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="default_code" position="after">
+                <field name="sku_locked" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Product Variant List View - Add SKU Actions -->
+    <record id="product_product_tree_view_sku_actions" model="ir.ui.view">
+        <field name="name">product.product.tree.sku.actions</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Add SKU locked field and action buttons -->
+            <field name="default_code" position="after">
+                <field name="sku_locked" column_invisible="1"/>
+                <button name="action_regenerate_sku"
+                        type="object"
+                        icon="fa-refresh"
+                        title="Regenerate SKU"
+                        invisible="sku_locked"
+                        groups="vpa_sku_generator.group_vpa_sku_generator_user"/>
+                <!-- Show green unlock icon when NOT locked (can be locked) -->
+                <button name="action_toggle_sku_lock"
+                        type="object"
+                        icon="fa-unlock text-success"
+                        title="SKU is unlocked - Click to lock"
+                        invisible="sku_locked"
+                        groups="vpa_sku_generator.group_vpa_sku_generator_user"/>
+                <!-- Show red lock icon when locked (can be unlocked) -->
+                <button name="action_toggle_sku_lock"
+                        type="object"
+                        icon="fa-lock text-danger"
+                        title="SKU is locked - Click to unlock"
+                        invisible="not sku_locked"
+                        groups="vpa_sku_generator.group_vpa_sku_generator_user"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Custom tree view for grouped products with proper aggregations -->
+    <record id="product_product_tree_view_no_aggregation" model="ir.ui.view">
+        <field name="name">product.product.tree.no.aggregation</field>
+        <field name="model">product.product</field>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <list string="Products" create="false" multi_edit="1">
+                <field name="product_tmpl_id" column_invisible="1"/>
+                <field name="default_code" optional="show" readonly="1"/>
+                <field name="name" readonly="1"/>
+                <field name="categ_id" options="{'no_create': True}" groups="product.group_product_variant" optional="hide"/>
+                <field name="product_template_variant_value_ids" widget="many2many_tags" groups="product.group_product_variant" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>
+                <field name="lst_price" optional="show" readonly="1" string="Sales Price"/>
+                <field name="standard_price" optional="show" readonly="1" groups="base.group_user" string="Cost"/>
+                <field name="qty_available" optional="show" readonly="1" sum="Total On Hand" string="On Hand"/>
+                <field name="virtual_available" optional="hide" readonly="1" string="Forecasted"/>
+                <field name="uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" optional="show"/>
+                <field name="product_tag_ids" widget="many2many_tags" optional="hide"/>
+                <field name="activity_exception_decoration" widget="activity_exception"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search view with default grouping -->
+    <record id="product_search_view_default_group" model="ir.ui.view">
+        <field name="name">product.product.search.default.group</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <filter name="group_by_product_template" string="Group by Product"
+                        context="{'group_by': 'product_tmpl_id'}"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

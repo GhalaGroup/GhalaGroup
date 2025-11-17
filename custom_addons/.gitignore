@@ -1,0 +1,32 @@
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+*.py[cod]
+
+# Backup files
+backup_files/
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Database files
+*.sql
+*.dump
+
+# Filestore
+filestore/
+data/

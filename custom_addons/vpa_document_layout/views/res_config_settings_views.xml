@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit settings view to add VPA edit button -->
+    <record id="res_config_settings_view_form_inherit_vpa" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.vpa</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add button in document_layout_setting content-group -->
+            <xpath expr="//setting[@id='document_layout_setting']//div[@class='content-group']" position="inside">
+                <br invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"/>
+                <button string="Edit VPA Document Layout"
+                        type="object"
+                        name="action_open_vpa_config"
+                        class="oe_link"
+                        icon="oi-arrow-right"
+                        invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"
+                        help="Customize VPA layout: header, footer, colors, and more"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

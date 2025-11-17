@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Product Sequence Generator</title>
+</head>
+<body>
+
+<!-- Banner Section -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="oe_slogan" style="color:#875A7B;">Product Sequence Generator</h2>
+            <h3 class="oe_slogan">Professional SKU Management for Odoo 19</h3>
+        </div>
+    </div>
+</section>
+
+<!-- Overview Section -->
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <h2 class="oe_slogan" style="color:#875A7B;">Automate Your Product SKU Generation</h2>
+            <p class="oe_mt32 text-center" style="font-size: 18px;">
+                Generate professional SKUs automatically based on category hierarchy.
+                Perfect for businesses that need consistent product identification.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Key Features</h2>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-refresh fa-3x" style="color:#875A7B;"></span>
+            </div>
+            <h3 class="oe_mb16">Auto-Generate SKUs</h3>
+            <p class="oe_mb32">
+                Automatically generate SKUs based on category hierarchy when creating or updating products.
+                Example: FUR/TBL/00001
+            </p>
+        </div>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-lock fa-3x" style="color:#875A7B;"></span>
+            </div>
+            <h3 class="oe_mb16">SKU Locking</h3>
+            <p class="oe_mb32">
+                Lock individual products to prevent accidental SKU changes during regeneration.
+                Protect your critical products.
+            </p>
+        </div>
+    </div>
+    <div class="oe_row oe_spaced">
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-recycle fa-3x" style="color:#875A7B;"></span>
+            </div>
+            <h3 class="oe_mb16">Gap Filling</h3>
+            <p class="oe_mb32">
+                Recycle SKUs from deleted products to eliminate gaps in your numbering sequence.
+                Maintain clean, sequential SKUs.
+            </p>
+        </div>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-sitemap fa-3x" style="color:#875A7B;"></span>
+            </div>
+            <h3 class="oe_mb16">Variant Support</h3>
+            <p class="oe_mb32">
+                Automatically handle product variants with sequential suffixes.
+                Format: FUR/TBL/00003-001, 00003-002
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- SKU Format Examples -->
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">SKU Format Examples</h2>
+        <div class="oe_span12">
+            <div style="background:#fff; padding:20px; border-radius:8px; margin:10px 0;">
+                <h4 style="color:#875A7B;">Simple Product</h4>
+                <p style="font-family:monospace; font-size:16px;">
+                    Category: Furniture → Tables<br/>
+                    Short Codes: FUR → TBL<br/>
+                    Generated SKU: <strong style="color:#28a745;">FUR/TBL/00001</strong>
+                </p>
+            </div>
+            <div style="background:#fff; padding:20px; border-radius:8px; margin:10px 0;">
+                <h4 style="color:#875A7B;">Product with Variants</h4>
+                <p style="font-family:monospace; font-size:16px;">
+                    Template: <strong style="color:#28a745;">FUR/TBL/00003</strong><br/>
+                    Variant 1 (Small): <strong style="color:#28a745;">FUR/TBL/00003-001</strong><br/>
+                    Variant 2 (Medium): <strong style="color:#28a745;">FUR/TBL/00003-002</strong><br/>
+                    Variant 3 (Large): <strong style="color:#28a745;">FUR/TBL/00003-003</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Complete Features List -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Complete Feature List</h2>
+        <div class="oe_span6">
+            <ul class="oe_mt32">
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Category-based SKU generation</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Product variant sequential suffixes</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> SKU locking per product</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> SKU recycle pool for gap filling</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Bulk regeneration wizard</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Preview before regenerating</li>
+            </ul>
+        </div>
+        <div class="oe_span6">
+            <ul class="oe_mt32">
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Validation rules (require category/SKU)</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Block manual SKU entry option</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> 4-tab settings page</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Category management interface</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Multi-company support</li>
+                <li style="margin-bottom:10px;"><span class="fa fa-check-circle" style="color:#28a745;"></span> Comprehensive statistics</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">How It Works</h2>
+        <div class="oe_span12">
+            <div style="background:#fff; padding:30px; border-radius:8px;">
+                <ol style="font-size:16px; line-height:1.8;">
+                    <li><strong>Set Up Categories:</strong> Assign short codes to your product categories (FUR, TBL, CHR)</li>
+                    <li><strong>Configure Settings:</strong> Choose validation rules and auto-generation preferences</li>
+                    <li><strong>Create Products:</strong> SKUs automatically generate when you select a category</li>
+                    <li><strong>Lock Important Products:</strong> Prevent accidental changes to critical SKUs</li>
+                    <li><strong>Regenerate When Needed:</strong> Preview and regenerate SKUs in bulk</li>
+                    <li><strong>Recycle Deleted SKUs:</strong> System automatically fills gaps</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Settings & Configuration -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Settings & Configuration</h2>
+        <div class="oe_span12">
+            <p class="oe_mt32 text-center" style="font-size:18px;">
+                Comprehensive 4-tab settings page for complete control
+            </p>
+        </div>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-cog fa-2x" style="color:#875A7B;"></span>
+            </div>
+            <h4>General Settings</h4>
+            <p>Auto-generation toggles, validation rules, statistics dashboard, and quick actions</p>
+        </div>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-sitemap fa-2x" style="color:#875A7B;"></span>
+            </div>
+            <h4>Categories</h4>
+            <p>Manage category short codes, view examples, and see statistics</p>
+        </div>
+    </div>
+    <div class="oe_row oe_spaced">
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-list-ol fa-2x" style="color:#875A7B;"></span>
+            </div>
+            <h4>Sequences</h4>
+            <p>View and manage sequences for each category with multi-company support</p>
+        </div>
+        <div class="oe_span6">
+            <div class="oe_picture">
+                <span class="fa fa-recycle fa-2x" style="color:#875A7B;"></span>
+            </div>
+            <h4>Recycle Pool</h4>
+            <p>Monitor and manage recycled SKUs available for reuse</p>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits -->
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Benefits</h2>
+        <div class="oe_span6">
+            <ul class="oe_mt32" style="font-size:16px;">
+                <li style="margin-bottom:10px;">✓ Consistent SKU formatting</li>
+                <li style="margin-bottom:10px;">✓ Eliminate manual entry errors</li>
+                <li style="margin-bottom:10px;">✓ Sequential numbering without gaps</li>
+                <li style="margin-bottom:10px;">✓ Professional identification system</li>
+            </ul>
+        </div>
+        <div class="oe_span6">
+            <ul class="oe_mt32" style="font-size:16px;">
+                <li style="margin-bottom:10px;">✓ Category-based organization</li>
+                <li style="margin-bottom:10px;">✓ Prevent accidental changes</li>
+                <li style="margin-bottom:10px;">✓ Save time with bulk operations</li>
+                <li style="margin-bottom:10px;">✓ Perfect for large catalogs</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Installation -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Installation</h2>
+        <div class="oe_span12">
+            <div style="background:#f8f9fa; padding:30px; border-radius:8px;">
+                <ol style="font-size:16px; line-height:1.8;">
+                    <li>Install the module from Apps menu</li>
+                    <li>Navigate to Inventory → Configuration → Product Sequence Generator</li>
+                    <li>Set up your category short codes</li>
+                    <li>Configure validation rules and options</li>
+                    <li>Start creating products with automatic SKU generation!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Requirements -->
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Requirements</h2>
+        <div class="oe_span12 text-center">
+            <p style="font-size:16px; line-height:1.8;">
+                <strong>Odoo Version:</strong> 19.0 Community or Enterprise<br/>
+                <strong>Dependencies:</strong> Product and Stock modules (included in base Odoo)
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- License & Copyright -->
+<section class="oe_container">
+    <div class="oe_row">
+        <div class="oe_span12">
+            <hr style="margin:30px 0;"/>
+            <div class="text-center" style="color:#666;">
+                <p><strong>License:</strong> OPL-1 (Odoo Proprietary License)</p>
+                <p><strong>Copyright:</strong> © 2025 VPA Software Limited</p>
+                <p><strong>Version:</strong> 19.0.1.0.0 (v1.0)</p>
+                <p><strong>Price:</strong> $79.99 USD</p>
+                <p style="margin-top:20px;">
+                    This is commercial software. Purchase required for use.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

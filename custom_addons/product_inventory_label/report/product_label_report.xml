@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="product_inventory_label" model="ir.actions.report">
+            <field name="name">Product label(Inventory)</field>
+            <field name="model">product.product</field>
+             <field name="report_type">qweb-text</field>
+              <field name="report_name">product_inventory_label.label_product_inventory_view</field>
+               <field name="report_file">product_inventory_label.label_product_inventory_view</field>
+                <field name="binding_model_id" eval="False"/>
+                 <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo>
