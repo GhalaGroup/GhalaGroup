@@ -22,7 +22,7 @@
 
 {
     'name': 'Direct Print',
-    'version': '16.0.1.0.0',
+    'version': '19.0.1.0.0',
     'summary': 'Prints zpls directly to the printer',
     'category': 'Inventory',
     'author': 'Madfox',
