@@ -21,7 +21,7 @@
             <field name="name">SKU Manager</field>
             <field name="sequence">10</field>
             <field name="privilege_id" ref="res_groups_privilege_vpa_sku_generator"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_system'))]"/>
             <field name="comment">User can manage SKU generation, lock/unlock products, and regenerate sequences.</field>
         </record>
 
@@ -31,7 +31,6 @@
             <field name="sequence">20</field>
             <field name="privilege_id" ref="res_groups_privilege_vpa_sku_generator"/>
             <field name="implied_ids" eval="[(4, ref('group_vpa_sku_generator_user'))]"/>
-            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
             <field name="comment">Full access to all SKU management features including settings and recycle pool.</field>
         </record>
 
