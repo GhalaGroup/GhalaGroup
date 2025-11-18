@@ -17,7 +17,7 @@ postgres_data/
 dump.sql
 
 # Filestore (images, attachments - too large for Git)
-data/
+/data/
 filestore/
 
 # Backups

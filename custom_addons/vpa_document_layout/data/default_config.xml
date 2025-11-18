@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default VPA Document Configuration -->
+        <record id="default_vpa_config" model="vpa.document.config">
+            <field name="name">Default VPA Layout Configuration</field>
+            <field name="company_id" ref="base.main_company"/>
+
+            <!-- Header Settings -->
+            <field name="header_logo_position">right</field>
+            <field name="header_logo_width">150</field>
+            <field name="header_logo_height">50</field>
+            <field name="header_show_tagline">True</field>
+            <field name="header_tagline_position">left</field>
+            <field name="header_show_circle">True</field>
+            <field name="header_circle_size">1100</field>
+            <field name="header_circle_opacity">0.1</field>
+            <field name="header_company_details_position">right</field>
+            <field name="header_show_vat">True</field>
+            <field name="header_padding_top">20</field>
+            <field name="header_padding_bottom">10</field>
+
+            <!-- Body Settings -->
+            <field name="body_title_position">right</field>
+            <field name="body_title_size">medium</field>
+            <field name="body_table_style">boxed-rounded</field>
+            <field name="body_table_header_bg">#f8f9fa</field>
+            <field name="body_table_border_color">#dee2e6</field>
+            <field name="body_show_customer_address">True</field>
+            <field name="body_customer_address_position">left</field>
+
+            <!-- Footer Settings -->
+            <field name="footer_layout">custom</field>
+            <field name="footer_enable_custom_sections">True</field>
+            <field name="footer_show_shape">True</field>
+            <field name="footer_shape_opacity">0.1</field>
+            <field name="footer_padding_top">16</field>
+            <field name="footer_padding_bottom">10</field>
+            <field name="footer_row_spacing">8</field>
+
+            <!-- Footer Row 1: Bank Account Details -->
+            <field name="footer_row1_enable">True</field>
+            <field name="footer_row1_align">center</field>
+            <field name="footer_row1_content"><![CDATA[<p style="margin:0; font-size:0.9em;"><strong>Bank Account Details:</strong></p>]]></field>
+
+            <!-- Footer Row 2: Bank Information -->
+            <field name="footer_row2_enable">True</field>
+            <field name="footer_row2_align">split</field>
+            <field name="footer_row2_left_content"><![CDATA[<p style="margin:0; font-size:0.85em;">Account Name: UDESIGN LIMITED.<br/>Bank: CRDB Bank</p>]]></field>
+            <field name="footer_row2_right_content"><![CDATA[<p style="margin:0; font-size:0.85em;">SWIFT : CORUTZTZ<br/>Branch Code: 3385</p>]]></field>
+
+            <!-- Footer Row 3: Account Number -->
+            <field name="footer_row3_enable">True</field>
+            <field name="footer_row3_align">center</field>
+            <field name="footer_row3_content"><![CDATA[<p style="margin:0; font-size:0.85em;">Account Number (TZS) : 0150548871900</p>]]></field>
+
+            <field name="footer_show_page_numbers">True</field>
+            <field name="footer_show_document_name">True</field>
+
+            <!-- Colors -->
+            <field name="text_color_header">#000000</field>
+            <field name="text_color_body">#000000</field>
+            <field name="text_color_footer">#6c757d</field>
+        </record>
+    </data>
+</odoo>

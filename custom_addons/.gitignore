@@ -27,6 +27,6 @@ Thumbs.db
 *.sql
 *.dump
 
-# Filestore
+# Filestore (NOT module data folders!)
 filestore/
-data/
+# Note: Module data/ folders ARE allowed (they contain XML/CSV, not DB files)

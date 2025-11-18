@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Product Sequence Configuration. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<odoo>
+    <data>
+        <!-- Visual separator -->
+        <record id="action_separator_sku" model="ir.actions.server">
+            <field name="name">─────────────────</field>
+            <field name="model_id" ref="product.model_product_product"/>
+            <field name="binding_model_id" ref="product.model_product_product"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">99</field>
+            <field name="state">code</field>
+            <field name="code">pass</field>
+        </record>
+
+        <!-- Server Action: Bulk Regenerate SKUs -->
+        <record id="action_server_bulk_regenerate_sku" model="ir.actions.server">
+            <field name="name">SKU: Regenerate</field>
+            <field name="model_id" ref="product.model_product_product"/>
+            <field name="binding_model_id" ref="product.model_product_product"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">100</field>
+            <field name="state">code</field>
+            <field name="code">
+if records:
+    action = records.action_bulk_regenerate_sku()
+            </field>
+        </record>
+
+        <!-- Server Action: Lock SKU -->
+        <record id="action_server_lock_sku" model="ir.actions.server">
+            <field name="name">SKU: Lock</field>
+            <field name="model_id" ref="product.model_product_product"/>
+            <field name="binding_model_id" ref="product.model_product_product"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">101</field>
+            <field name="state">code</field>
+            <field name="code">
+templates = records.mapped('product_tmpl_id')
+templates.with_context(skip_sku_validation=True).write({'sku_locked': True})
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'SKU Locked',
+        'message': '%d product(s) locked successfully' % len(templates),
+        'type': 'success',
+        'sticky': False,
+        'next': {'type': 'ir.actions.act_window_close'},
+    }
+}
+            </field>
+        </record>
+
+        <!-- Server Action: Unlock SKU -->
+        <record id="action_server_unlock_sku" model="ir.actions.server">
+            <field name="name">SKU: Unlock</field>
+            <field name="model_id" ref="product.model_product_product"/>
+            <field name="binding_model_id" ref="product.model_product_product"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">102</field>
+            <field name="state">code</field>
+            <field name="code">
+templates = records.mapped('product_tmpl_id')
+templates.with_context(skip_sku_validation=True).write({'sku_locked': False})
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'SKU Unlocked',
+        'message': '%d product(s) unlocked successfully' % len(templates),
+        'type': 'success',
+        'sticky': False,
+        'next': {'type': 'ir.actions.act_window_close'},
+    }
+}
+            </field>
+        </record>
+
+        <!-- Window Action: Products Grouped by Template -->
+        <record id="action_product_product_grouped" model="ir.actions.act_window">
+            <field name="name">Products (Grouped)</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="vpa_sku_generator.product_product_tree_view_no_aggregation"/>
+            <field name="context">{'search_default_group_by_product_template': 1, 'group_expand': True}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new product
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Item for Grouped Products -->
+        <!-- Commented out - menu structure changed in Odoo 19 -->
+        <!--
+        <menuitem
+            id="menu_product_product_grouped"
+            name="Products (Grouped)"
+            parent="stock.menu_stock_product"
+            action="action_product_product_grouped"
+            sequence="5"/>
+        -->
+
+    </data>
+</odoo>
