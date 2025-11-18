@@ -5,14 +5,14 @@
     <data noupdate="0">
         <!-- Security Category -->
         <record id="module_category_vpa_sku_generator" model="ir.module.category">
-            <field name="name">Product Sequence Generator</field>
+            <field name="name">VPA SKU Generator</field>
             <field name="description">Manage SKU generation and product sequences</field>
             <field name="sequence">20</field>
         </record>
 
         <!-- Privilege for Product Sequence -->
         <record model="res.groups.privilege" id="res_groups_privilege_vpa_sku_generator">
-            <field name="name">Product Sequence Generator</field>
+            <field name="name">VPA SKU Generator</field>
             <field name="category_id" ref="module_category_vpa_sku_generator"/>
         </record>
 
