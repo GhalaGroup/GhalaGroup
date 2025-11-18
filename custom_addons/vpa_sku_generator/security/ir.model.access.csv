@@ -1,5 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_product_sku_recycle_pool_user,product.sku.recycle.pool.user,model_product_sku_recycle_pool,group_vpa_sku_generator_user,1,0,0,0
-access_product_sku_recycle_pool_manager,product.sku.recycle.pool.manager,model_product_sku_recycle_pool,group_vpa_sku_generator_manager,1,1,1,1
-access_regenerate_sku_wizard_user,regenerate.sku.wizard.user,model_regenerate_sku_wizard,group_vpa_sku_generator_user,1,1,1,1
-access_regenerate_sku_wizard_line_user,regenerate.sku.wizard.line.user,model_regenerate_sku_wizard_line,group_vpa_sku_generator_user,1,1,1,1
+access_product_sku_recycle_pool_all,product.sku.recycle.pool.all,model_product_sku_recycle_pool,base.group_system,1,1,1,1
+access_regenerate_sku_wizard_all,regenerate.sku.wizard.all,model_regenerate_sku_wizard,base.group_system,1,1,1,1
+access_regenerate_sku_wizard_line_all,regenerate.sku.wizard.line.all,model_regenerate_sku_wizard_line,base.group_system,1,1,1,1
