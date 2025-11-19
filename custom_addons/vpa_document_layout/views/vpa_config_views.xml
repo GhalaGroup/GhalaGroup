@@ -7,6 +7,21 @@
         <field name="arch" type="xml">
             <form string="VPA Layout Configuration" class="o_document_layout">
                 <sheet>
+                    <div class="alert alert-warning mb-3" role="alert" style="padding: 20px; border-left: 5px solid #ff9800;">
+                        <h4 style="margin-top: 0; color: #ff9800;">
+                            <i class="fa fa-magic"/> NEW: Advanced Template System Available!
+                        </h4>
+                        <p style="margin-bottom: 15px;">
+                            <strong>Create custom templates for each document type!</strong><br/>
+                            The new template system lets you design different layouts for Quotations, Invoices, Purchase Orders, etc.<br/>
+                            Each template appears as a separate option in the Print menu.
+                        </p>
+                        <button name="%(action_vpa_document_template)d" type="action"
+                                string="→ Open Template Manager"
+                                class="btn btn-warning btn-lg"
+                                style="font-weight: bold; padding: 10px 20px;"/>
+                    </div>
+
                     <div class="alert alert-info mb-3" role="alert">
                         <strong>Note:</strong> This header and footer will be used universally across all Odoo apps (Sales, Purchase, Invoices, Manufacturing, etc.) when you select "VPA Document Layout" in Settings → Companies → Document Layout.
                     </div>
@@ -240,17 +255,10 @@
         </field>
     </record>
 
-    <!-- Menu Items - DISABLED due to cache issue, use Settings menu instead -->
-    <!--
-    <menuitem id="menu_vpa_document_layout_root"
-              name="VPA Layout"
-              sequence="100"
-              web_icon="vpa_document_layout,static/description/icon.png"/>
-
+    <!-- Legacy Config Menu (root menu defined in vpa_menu_root.xml) -->
     <menuitem id="menu_vpa_document_config"
-              name="Layout Settings"
+              name="Old Layout Settings (Legacy)"
               parent="menu_vpa_document_layout_root"
               action="action_vpa_document_config"
-              sequence="10"/>
-    -->
+              sequence="20"/>
 </odoo>

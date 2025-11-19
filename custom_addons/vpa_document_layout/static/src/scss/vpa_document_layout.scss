@@ -1,0 +1,14 @@
+/* VPA Document Layout - Based on Odoo's base.document.layout pattern */
+
+.o_document_layout {
+    .o_group {
+        .o_document_layout_company {
+            flex: 4;
+        }
+
+        .o_preview {
+            flex: 6;
+            display: flex;
+        }
+    }
+}

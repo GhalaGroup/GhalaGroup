@@ -81,6 +81,37 @@
         </div>
     </template>
 
+    <!-- Footer (separate from body to prevent page breaks) -->
+    <template id="footer_vpa">
+        <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+        <t t-set="secondary_color" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+        <div t-attf-class="footer o_company_#{company.id}_layout">
+            <!-- Decorative wave in footer (matching Bubble template) -->
+            <svg t-if="vpa_config.footer_show_shape"
+                 style="position: fixed; left: 0; bottom: 0;"
+                 width="500" height="228" viewBox="0 0 500 228" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                      t-attf-fill="{{secondary_color}}"
+                      t-att-fill-opacity="vpa_config.footer_shape_opacity or 0.1"/>
+            </svg>
+
+            <div style="position: relative; z-index: 1; padding: 15px 0; text-align: center; font-size: 8pt; color: #666;">
+                <div style="border-top: 1px solid #ddd; padding-top: 10px;">
+                    <div t-if="company.report_footer" t-field="company.report_footer" style="margin-bottom: 8px;"/>
+                    <!-- Bank details -->
+                    <div t-if="company.partner_id.bank_ids" style="margin-top: 8px;">
+                        <strong>Bank Details:</strong>
+                        <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                            <t t-esc="bank.bank_name"/> - Account: <t t-esc="bank.acc_number"/>
+                            <span t-if="bank.bank_bic"> - BIC: <t t-esc="bank.bank_bic"/></span>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- VPA-specific company styles -->
     <template id="styles_vpa_report">
         <t t-foreach="company_ids" t-as="vpa_config" t-translation="off">

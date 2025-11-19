@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu - Must load first -->
+    <menuitem id="menu_vpa_document_layout_root"
+              name="VPA Layout"
+              sequence="100"
+              web_icon="vpa_document_layout,static/description/icon.png"/>
+</odoo>

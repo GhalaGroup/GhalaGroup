@@ -9,13 +9,20 @@
             <!-- Add button in document_layout_setting content-group -->
             <xpath expr="//setting[@id='document_layout_setting']//div[@class='content-group']" position="inside">
                 <br invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"/>
-                <button string="Edit VPA Document Layout"
+                <button string="Edit VPA Document Layout (Old)"
                         type="object"
                         name="action_open_vpa_config"
                         class="oe_link"
                         icon="oi-arrow-right"
                         invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"
                         help="Customize VPA layout: header, footer, colors, and more"/>
+                <br invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"/>
+                <button string="→ Manage Document Templates (NEW!)"
+                        type="action"
+                        name="%(vpa_document_layout.action_vpa_document_template)d"
+                        class="btn-primary"
+                        invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"
+                        help="Create custom templates for quotations, invoices, etc."/>
             </xpath>
         </field>
     </record>
