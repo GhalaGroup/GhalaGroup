@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class VPADocumentTemplate(models.Model):
@@ -88,6 +91,16 @@ class VPADocumentTemplate(models.Model):
     table_border_color = fields.Char(string='Table Border Color', default='#e0e0e0')
     table_row_alt_bg = fields.Char(string='Alternate Row Background', default='#fafafa')
 
+    # Paper Settings
+    paper_size = fields.Selection([
+        ('a4', 'A4 (210mm x 297mm)'),
+        ('letter', 'Letter (8.5in x 11in)'),
+    ], string='Paper Size', default='a4', required=True)
+    paper_orientation = fields.Selection([
+        ('portrait', 'Portrait'),
+        ('landscape', 'Landscape'),
+    ], string='Orientation', default='portrait', required=True)
+
     # Footer Settings
     footer_show_shape = fields.Boolean(string='Show Footer Wave Shape', default=True)
     footer_shape_opacity = fields.Float(string='Footer Shape Opacity', default=0.1)
@@ -119,7 +132,8 @@ class VPADocumentTemplate(models.Model):
                  'footer_show_shape', 'footer_shape_opacity', 'footer_layout', 'footer_bank_details_show',
                  'footer_column_1_title', 'footer_column_1_content',
                  'footer_column_2_title', 'footer_column_2_content',
-                 'footer_column_3_title', 'footer_column_3_content')
+                 'footer_column_3_title', 'footer_column_3_content',
+                 'paper_size', 'paper_orientation')
     def _compute_preview(self):
         """Generate live preview - following Odoo's base.document.layout pattern"""
         for template in self:
@@ -427,6 +441,30 @@ class VPADocumentTemplate(models.Model):
             # Maintain aspect ratio with max constraints
             return f'max-width: {self.header_logo_width}px; max-height: {self.header_logo_height}px;'
 
+    def _get_paper_dimensions(self):
+        """Get paper dimensions based on size and orientation"""
+        self.ensure_one()
+
+        # Define dimensions in mm (portrait)
+        dimensions = {
+            'a4': {'width': 210, 'height': 297},
+            'letter': {'width': 215.9, 'height': 279.4},  # 8.5in x 11in in mm
+        }
+
+        dims = dimensions.get(self.paper_size, dimensions['a4'])
+
+        # Swap if landscape
+        if self.paper_orientation == 'landscape':
+            dims = {'width': dims['height'], 'height': dims['width']}
+
+        return dims
+
+    def _get_page_size_css(self):
+        """Get CSS @page size declaration"""
+        self.ensure_one()
+        size_name = 'A4' if self.paper_size == 'a4' else 'Letter'
+        return f'size: {size_name} {self.paper_orientation};'
+
     def _create_qweb_template(self):
         """Create QWeb template for this document template"""
         self.ensure_one()
@@ -446,16 +484,20 @@ class VPADocumentTemplate(models.Model):
         doc_template_view = self.env.ref(doc_template.replace('.', '_').replace('_', '.', 1), raise_if_not_found=False)
 
         if doc_template_view:
-            inherit_view = self.env['ir.ui.view'].create({
-                'name': f'VPA {doc_template} Inherit {self.id}',
-                'type': 'qweb',
-                'mode': 'extension',
-                'inherit_id': doc_template_view.id,
-                'key': f'vpa_document_layout.{doc_template.replace(".", "_")}_inherit_{self.id}',
-                'arch': f'''<xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            try:
+                inherit_view = self.env['ir.ui.view'].create({
+                    'name': f'VPA {doc_template} Inherit {self.id}',
+                    'type': 'qweb',
+                    'mode': 'extension',
+                    'inherit_id': doc_template_view.id,
+                    'key': f'vpa_document_layout.{doc_template.replace(".", "_")}_inherit_{self.id}',
+                    'arch': f'''<xpath expr="//t[@t-call='web.external_layout']" position="attributes">
     <attribute name="t-call">vpa_document_layout.external_layout_vpa_template_{self.id}</attribute>
 </xpath>''',
-            })
+                })
+            except Exception as e:
+                # If xpath not found (already replaced by another template), skip inheritance view
+                _logger.info(f"Skipping inheritance view for template {self.id}: {str(e)}")
 
         # Create the main report template
         main_template = self.env['ir.ui.view'].create({
@@ -472,6 +514,12 @@ class VPADocumentTemplate(models.Model):
         })
 
         # Create the external layout template with custom styling
+        # Get paper dimensions
+        dims = self._get_paper_dimensions()
+        page_width = dims['width']
+        page_height = dims['height']
+        page_size_css = self._get_page_size_css()
+
         # Build arch content without f-string to avoid {{{{ escaping issues
         arch_content = '''<t t-name="vpa_document_layout.external_layout_vpa_template_%s">
     <t t-set="vpa_template" t-value="env['vpa.document.template'].browse(%s)"/>
@@ -479,13 +527,13 @@ class VPADocumentTemplate(models.Model):
     <t t-set="primary_color" t-value="'%s'"/>
     <t t-set="secondary_color" t-value="'%s'"/>
 
-    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Lato', 'Helvetica', 'Arial', sans-serif; padding: 20px; position: relative;">
+    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;">
 
         <style type="text/css">
             @page {
                 margin: 0mm;
                 padding: 0mm;
-                size: A4 portrait;
+                %s
             }
             body {
                 margin: 0;
@@ -493,27 +541,20 @@ class VPADocumentTemplate(models.Model):
             }
             .o_report_layout_vpa {
                 position: relative;
-                padding: 20px;
-                min-height: 297mm;
+                width: %smm;
+                height: %smm;
+                padding: 0;
+                box-sizing: border-box;
+                overflow: hidden;
             }
             .o_report_layout_vpa .page {
                 position: relative;
                 z-index: 2;
-                min-height: 220mm;
-            }
-            .o_report_layout_vpa .vpa_footer {
-                position: relative;
-                margin-top: 20px;
-                padding-top: 15px;
-                clear: both;
-            }
-            @media print {
-                .o_report_layout_vpa {
-                    min-height: 297mm;
-                }
-                .o_report_layout_vpa .page {
-                    min-height: 220mm;
-                }
+                width: 100%%;
+                height: 100%%;
+                padding: 20px;
+                padding-bottom: 120px;
+                box-sizing: border-box;
             }
             /* Main product table - ensure visibility in PDF */
             table.o_main_table, .o_report_layout_vpa table.o_main_table {
@@ -621,28 +662,27 @@ class VPADocumentTemplate(models.Model):
 
             <!-- Document content -->
             <t t-out="0"/>
-        </div>
 
-        <!-- Footer -->
-        <div class="vpa_footer" style="padding-top: 15px;">
+            <!-- Footer - absolute position at bottom -->
+            <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 100; padding-top: 15px; border-top: 1px solid #e0e0e0; background: white;">
             <!-- Footer Wave Shape -->
-            <svg t-if="%s" style="position: absolute; bottom: 0; left: 0; width: 100%%; height: 80px; z-index: 0;" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <svg t-if="%s" style="position: absolute; top: -25px; left: 0; width: 100%%; height: 50px; z-index: 0;" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0,0 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,120 L0,120 Z" t-attf-fill="%s" t-att-fill-opacity="%s"/>
             </svg>
 
             <!-- Footer Content with Columns -->
-            <div style="position: relative; z-index: 1; padding: 20px; font-size: 8pt;">
+            <div style="position: relative; z-index: 1; padding: 10px 0; font-size: 7pt;">
                 <!-- Single Column Layout -->
                 <div t-if="vpa_template.footer_layout == 'single'" style="text-align: center;">
                     <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                        <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
+                        <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
                         <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6;">
                             <t t-out="vpa_template.footer_column_1_content"/>
                         </div>
                     </div>
                     <!-- Bank Details for single column -->
-                    <div t-if="%s and company.partner_id.bank_ids" style="margin-top: 12px; color: #666;">
-                        <strong style="display: block; margin-bottom: 6px;">Bank Details:</strong>
+                    <div t-if="%s and company.partner_id.bank_ids" style="margin-top: 8px; color: #666;">
+                        <strong style="display: block; margin-bottom: 3px; font-size: 8pt;">Bank Details:</strong>
                         <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
                             <span t-field="bank.bank_id.name"/> - <span t-field="bank.acc_number"/>
                         </t>
@@ -654,7 +694,7 @@ class VPADocumentTemplate(models.Model):
                     <tr>
                         <td style="width: 50%%; vertical-align: top; padding-right: 15px;">
                             <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
+                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
                                 <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6;">
                                     <t t-out="vpa_template.footer_column_1_content"/>
                                 </div>
@@ -662,7 +702,7 @@ class VPADocumentTemplate(models.Model):
                         </td>
                         <td style="width: 50%%; vertical-align: top; padding-left: 15px;">
                             <div t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
-                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
+                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
                                 <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.6;">
                                     <t t-out="vpa_template.footer_column_2_content"/>
                                 </div>
@@ -683,16 +723,16 @@ class VPADocumentTemplate(models.Model):
                     <tr>
                         <td style="width: 33.33%%; vertical-align: top; padding-right: 10px;">
                             <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
-                                <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;">
+                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
+                                <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
                                     <t t-out="vpa_template.footer_column_1_content"/>
                                 </div>
                             </div>
                         </td>
                         <td style="width: 33.33%%; vertical-align: top; padding: 0 10px;">
                             <div t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
-                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
-                                <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;">
+                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
+                                <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
                                     <t t-out="vpa_template.footer_column_2_content"/>
                                 </div>
                                 <!-- Bank Details for three columns (middle) -->
@@ -706,14 +746,15 @@ class VPADocumentTemplate(models.Model):
                         </td>
                         <td style="width: 33.33%%; vertical-align: top; padding-left: 10px;">
                             <div t-if="vpa_template.footer_column_3_title or vpa_template.footer_column_3_content">
-                                <strong t-if="vpa_template.footer_column_3_title" style="display: block; margin-bottom: 8px; font-size: 9pt; color: %s;" t-out="vpa_template.footer_column_3_title"/>
-                                <div t-if="vpa_template.footer_column_3_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;">
+                                <strong t-if="vpa_template.footer_column_3_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_3_title"/>
+                                <div t-if="vpa_template.footer_column_3_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
                                     <t t-out="vpa_template.footer_column_3_content"/>
                                 </div>
                             </div>
                         </td>
                     </tr>
                 </table>
+            </div>
             </div>
         </div>
     </div>
@@ -728,6 +769,9 @@ class VPADocumentTemplate(models.Model):
             self.id,
             self.primary_accent_color,
             self.secondary_accent_color,
+            page_size_css,  # @page size
+            page_width,  # Container width
+            page_height,  # Container height
             table_styles['border'],  # Table border color
             table_styles['header_bg'],  # Table header background (thead)
             table_styles['header_text'],  # Table header text color (thead)

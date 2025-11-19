@@ -2,8 +2,18 @@
 <odoo>
     <!-- Template Preview Container -->
     <template id="vpa_template_preview_container">
-        <div style="max-width: 210mm; min-height: 297mm; margin: 20px auto; padding: 0; background: white; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <t t-set="dims" t-value="template._get_paper_dimensions()"/>
+
+        <!-- Full size preview - NO SCALING - exact paper dimensions -->
+        <div t-attf-style="position: relative; width: {{dims['width']}}mm; height: {{dims['height']}}mm; margin: 20px auto; padding: 0; background: white; border: 2px solid #875a7b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
             <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
+        </div>
+
+        <!-- Show paper info below preview -->
+        <div style="text-align: center; margin: 10px auto; color: #666; font-size: 11px;">
+            <strong>Paper:</strong> <t t-esc="'A4' if template.paper_size == 'a4' else 'Letter'"/>
+            (<t t-esc="dims['width']"/>mm × <t t-esc="dims['height']"/>mm) -
+            <strong>Orientation:</strong> <t t-esc="template.paper_orientation.capitalize()"/>
         </div>
     </template>
 
@@ -28,7 +38,7 @@
         <!-- Call the dynamically generated VPA layout template -->
         <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
             <!-- Sample quotation body content -->
-            <div class="page" style="font-size: 10pt;">
+            <div style="font-size: 10pt;">
                 <!-- Product Table -->
                 <table class="table table-sm o_main_table" style="margin-top: 1rem;">
                     <thead>

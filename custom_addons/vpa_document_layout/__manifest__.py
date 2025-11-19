@@ -27,6 +27,7 @@
         'views/report_templates.xml',
         'views/preview_template.xml',
         'views/template_preview.xml',     # Template preview
+        'views/template_preview_fullpage.xml',  # Full page preview
         'data/report_layout.xml',
         'data/default_templates.xml',     # Default templates
         'views/sale_order_report_inherit.xml',
