@@ -211,7 +211,8 @@ class VPADocumentTemplate(models.Model):
             'header_logo_alignment', 'header_logo_width', 'header_logo_height',
             'header_logo_aspect_ratio', 'header_company_info_alignment', 'header_company_details_html',
             'header_show_circle', 'header_circle_size', 'header_circle_opacity',
-            'primary_accent_color', 'secondary_accent_color', 'footer_bank_details_show'
+            'primary_accent_color', 'secondary_accent_color',
+            'footer_show_shape', 'footer_shape_opacity', 'footer_bank_details_show'
         ]
 
         # Check if any template field was updated
@@ -624,6 +625,11 @@ class VPADocumentTemplate(models.Model):
                 <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
             </svg>
 
+            <!-- Footer Wave Shape - positioned at bottom, extends beyond boundaries like circle -->
+            <svg t-if="%s" style="position: absolute; bottom: -100px; left: -50px; width: 120%%; height: 300px; z-index: 0;" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,120 L0,30 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,120 Z" t-attf-fill="%s" t-att-fill-opacity="%s"/>
+            </svg>
+
             <!-- Header -->
         <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 4px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
@@ -664,14 +670,9 @@ class VPADocumentTemplate(models.Model):
             <t t-out="0"/>
 
             <!-- Footer - absolute position at bottom -->
-            <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 100; padding-top: 15px; border-top: 1px solid #e0e0e0; background: white;">
-            <!-- Footer Wave Shape -->
-            <svg t-if="%s" style="position: absolute; top: -25px; left: 0; width: 100%%; height: 50px; z-index: 0;" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0,0 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,120 L0,120 Z" t-attf-fill="%s" t-att-fill-opacity="%s"/>
-            </svg>
-
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; min-height: 100px;">
             <!-- Footer Content with Columns -->
-            <div style="position: relative; z-index: 1; padding: 10px 0; font-size: 7pt;">
+            <div style="position: relative; z-index: 1; padding: 40px 20px 15px 20px; font-size: 7pt;">
                 <!-- Single Column Layout -->
                 <div t-if="vpa_template.footer_layout == 'single'" style="text-align: center;">
                     <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
@@ -788,6 +789,9 @@ class VPADocumentTemplate(models.Model):
             self.header_circle_size / 2,
             self.primary_accent_color,
             self.header_circle_opacity,
+            str(self.footer_show_shape).lower(),  # Footer wave shape
+            self.secondary_accent_color,  # Footer wave color
+            self.footer_shape_opacity,  # Footer wave opacity
             self.primary_accent_color,  # Header border bottom
             self.header_logo_alignment,
             self._get_logo_style(),
@@ -797,9 +801,6 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
-            str(self.footer_show_shape).lower(),  # Footer wave shape
-            self.secondary_accent_color,  # Footer wave color
-            self.footer_shape_opacity,  # Footer wave opacity
             self.primary_accent_color,  # Footer column 1 title color (single)
             str(self.footer_bank_details_show).lower(),  # Bank details (single)
             self.primary_accent_color,  # Footer column 1 title color (two_col)
