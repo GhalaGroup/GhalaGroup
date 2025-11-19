@@ -1,6 +1,10 @@
 /* VPA Document Layout - Following Odoo's base.document.layout pattern exactly */
 
 .o_document_layout {
+    .o_form_sheet_bg {
+        max-width: 1500px !important;
+    }
+
     .o_group {
         display: flex;
         width: auto !important;
