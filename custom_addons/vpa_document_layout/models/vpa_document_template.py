@@ -212,7 +212,8 @@ class VPADocumentTemplate(models.Model):
             'header_logo_aspect_ratio', 'header_company_info_alignment', 'header_company_details_html',
             'header_show_circle', 'header_circle_size', 'header_circle_opacity',
             'primary_accent_color', 'secondary_accent_color',
-            'footer_show_shape', 'footer_shape_opacity', 'footer_bank_details_show'
+            'footer_show_shape', 'footer_shape_opacity', 'footer_bank_details_show',
+            'paper_size', 'paper_orientation'  # Paper settings also trigger regeneration
         ]
 
         # Check if any template field was updated
@@ -227,8 +228,38 @@ class VPADocumentTemplate(models.Model):
                 ])
                 existing_views.unlink()
 
-                # Regenerate
+                # Regenerate QWeb templates
                 template._create_qweb_template()
+
+        # If paper size/orientation changed, update paperformat
+        if 'paper_size' in vals or 'paper_orientation' in vals:
+            for template in self:
+                if template.report_action_id:
+                    # Update paperformat
+                    paper_format_name = 'A4' if template.paper_size == 'a4' else 'Letter'
+                    orientation = 'Portrait' if template.paper_orientation == 'portrait' else 'Landscape'
+                    paperformat_name = f'VPA {paper_format_name} {orientation}'
+
+                    # Find or create the new paperformat
+                    paperformat = self.env['report.paperformat'].search([
+                        ('name', '=', paperformat_name),
+                    ], limit=1)
+
+                    if not paperformat:
+                        paperformat = self.env['report.paperformat'].create({
+                            'name': paperformat_name,
+                            'format': paper_format_name,
+                            'orientation': orientation,
+                            'margin_top': 0,
+                            'margin_bottom': 0,
+                            'margin_left': 0,
+                            'margin_right': 0,
+                            'header_spacing': 0,
+                            'dpi': 96,
+                        })
+
+                    # Update report action to use new paperformat
+                    template.report_action_id.write({'paperformat_id': paperformat.id})
 
         # Update report action name if name changed
         for template in self:
@@ -262,24 +293,33 @@ class VPADocumentTemplate(models.Model):
 
         model = model_map.get(self.document_type, 'sale.order')
 
-        # Get or create A4 paperformat
+        # Get or create paperformat with zero margins based on template settings
+        paper_format_name = 'A4' if self.paper_size == 'a4' else 'Letter'
+        orientation = 'Portrait' if self.paper_orientation == 'portrait' else 'Landscape'
+
+        paperformat_name = f'VPA {paper_format_name} {orientation}'
+
         paperformat = self.env['report.paperformat'].search([
-            ('name', '=', 'VPA A4'),
-            ('format', '=', 'A4'),
+            ('name', '=', paperformat_name),
         ], limit=1)
 
+        paperformat_values = {
+            'name': paperformat_name,
+            'format': paper_format_name,
+            'orientation': orientation,
+            'margin_top': 0,
+            'margin_bottom': 0,
+            'margin_left': 0,
+            'margin_right': 0,
+            'header_spacing': 0,
+            'dpi': 96,
+        }
+
         if not paperformat:
-            paperformat = self.env['report.paperformat'].create({
-                'name': 'VPA A4',
-                'format': 'A4',
-                'orientation': 'Portrait',
-                'margin_top': 0,
-                'margin_bottom': 0,
-                'margin_left': 0,
-                'margin_right': 0,
-                'header_spacing': 0,
-                'dpi': 96,
-            })
+            paperformat = self.env['report.paperformat'].create(paperformat_values)
+        else:
+            # Update existing paperformat to ensure zero margins
+            paperformat.write(paperformat_values)
 
         # Build print report name expression
         # Format: Quote Number - Client Name (Customer Reference)
@@ -423,12 +463,12 @@ class VPADocumentTemplate(models.Model):
 
         preset = style_presets.get(self.table_style, style_presets['modern_light'])
 
-        # Use custom colors if provided, otherwise use preset
+        # Always use custom colors from template settings
         return {
-            'header_bg': self.table_header_bg_color if self.table_header_bg_color != '#f5f5f5' else preset['header_bg'],
-            'header_text': self.table_header_text_color if self.table_header_text_color != '#333333' else preset['header_text'],
-            'border': self.table_border_color if self.table_border_color != '#e0e0e0' else preset['border'],
-            'alt_row': self.table_row_alt_bg if self.table_row_alt_bg != '#fafafa' else preset['alt_row'],
+            'header_bg': self.table_header_bg_color or preset['header_bg'],
+            'header_text': self.table_header_text_color or preset['header_text'],
+            'border': self.table_border_color or preset['border'],
+            'alt_row': self.table_row_alt_bg or preset['alt_row'],
             'header_border_bottom': preset['header_border_bottom'],
         }
 
@@ -470,6 +510,10 @@ class VPADocumentTemplate(models.Model):
         """Create QWeb template for this document template"""
         self.ensure_one()
 
+        import logging
+        _logger = logging.getLogger(__name__)
+        _logger.info(f"Starting _create_qweb_template for template {self.id}: {self.name}")
+
         # Determine which document template to call based on document type
         document_template_map = {
             'quotation': 'sale.report_saleorder_document',
@@ -479,40 +523,157 @@ class VPADocumentTemplate(models.Model):
         }
 
         doc_template = document_template_map.get(self.document_type, 'sale.report_saleorder_document')
+        _logger.info(f"Document type: {self.document_type}, Using template: {doc_template}")
 
-        # Create inheritance view to replace web.external_layout call in document template
-        # Get the inherit_id for the document template
-        doc_template_view = self.env.ref(doc_template.replace('.', '_').replace('_', '.', 1), raise_if_not_found=False)
+        # Create standalone VPA report template without hijacking global web.external_layout
+        # This allows other document layouts to work normally while VPA templates appear as separate print actions
 
-        if doc_template_view:
-            try:
-                inherit_view = self.env['ir.ui.view'].create({
-                    'name': f'VPA {doc_template} Inherit {self.id}',
-                    'type': 'qweb',
-                    'mode': 'extension',
-                    'inherit_id': doc_template_view.id,
-                    'key': f'vpa_document_layout.{doc_template.replace(".", "_")}_inherit_{self.id}',
-                    'arch': f'''<xpath expr="//t[@t-call='web.external_layout']" position="attributes">
-    <attribute name="t-call">vpa_document_layout.external_layout_vpa_template_{self.id}</attribute>
-</xpath>''',
-                })
-            except Exception as e:
-                # If xpath not found (already replaced by another template), skip inheritance view
-                _logger.info(f"Skipping inheritance view for template {self.id}: {str(e)}")
+        # For sale orders, set up address/info blocks and render document
+        if self.document_type in ['quotation', 'sale_order']:
+            if self.hide_odoo_header:
+                # Custom header: Set address and information_block for VPA external layout
+                main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+            <t t-set="address">
+                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address", "name"], "no_marker": True}}'/>
+            </t>
+            <t t-set="information_block">
+                <strong>Customer:</strong>
+                <div t-field="doc.partner_invoice_id" t-options='{{"widget": "contact", "fields": ["name"], "no_marker": True}}'/>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-if="doc.state in ['draft','sent']">Quotation # </t>
+                <t t-elif="doc.state in ['sale','done']">Order # </t>
+                <t t-elif="doc.state == 'cancel'">Cancelled Order # </t>
+                <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <div id="informations" class="row mt-4 mb-4">
+                    <div t-if="doc.client_order_ref" class="col-auto col-3 mw-100 mb-2">
+                        <strong>Your Reference:</strong>
+                        <p class="m-0" t-field="doc.client_order_ref"/>
+                    </div>
+                    <div t-if="doc.date_order" class="col-auto col-3 mw-100 mb-2">
+                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
+                        <strong t-else="">Order Date:</strong>
+                        <p class="m-0" t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" class="col-auto col-3 mw-100 mb-2">
+                        <strong>Expiration:</strong>
+                        <p class="m-0" t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id.name" class="col-auto col-3 mw-100 mb-2">
+                        <strong>Salesperson:</strong>
+                        <p class="m-0" t-field="doc.user_id"/>
+                    </div>
+                </div>
+
+                <!-- Order Lines Table -->
+                <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                <t t-set="display_taxes" t-value="True"/>
+                <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th name="th_description" class="text-start">Description</th>
+                            <th name="th_quantity" class="text-end">Quantity</th>
+                            <th name="th_priceunit" class="text-end">Unit Price</th>
+                            <th name="th_discount" t-if="display_discount" class="text-end">Disc.%</th>
+                            <th name="th_taxes" t-if="display_taxes" class="text-end">Taxes</th>
+                            <th name="th_subtotal" class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="lines_to_report" t-as="line">
+                            <tr t-if="line.display_type == \'line_section\'" class="fw-bold o_line_section">
+                                <td colspan="99"><span t-field="line.name"/></td>
+                            </tr>
+                            <tr t-elif="line.display_type == \'line_note\'" class="fst-italic o_line_note">
+                                <td colspan="99"><span t-field="line.name"/></td>
+                            </tr>
+                            <tr t-else="">
+                                <td><span t-field="line.name"/></td>
+                                <td class="text-end"><span t-field="line.product_uom_qty"/></td>
+                                <td class="text-end"><span t-field="line.price_unit"/></td>
+                                <td t-if="display_discount" class="text-end"><span t-field="line.discount"/></td>
+                                <td t-if="display_taxes" class="text-end">
+                                    <span t-out="\', \'.join(map(lambda x: x.description or x.name, line.tax_ids))"/>
+                                </td>
+                                <td class="text-end"><span t-field="line.price_subtotal"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <div class="clearfix">
+                    <div id="total" class="row">
+                        <div class="col-6 ms-auto">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td>Untaxed Amount</td>
+                                    <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Taxes</td>
+                                    <td class="text-end"><span t-field="doc.amount_tax"/></td>
+                                </tr>
+                                <tr class="border-black">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-end"><strong><span t-field="doc.amount_total"/></strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and conditions -->
+                <div t-if="doc.note" class="mt-4">
+                    <p><strong>Terms and Conditions:</strong></p>
+                    <p t-field="doc.note"/>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id, hide_footer=str(self.hide_odoo_footer).lower())
+            else:
+                # Use Odoo's standard header: Just call the full document
+                main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
+        else:
+            # For other document types, create a simpler template
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <div class="page">
+                    <p>VPA Template for {doc_type} (Document structure pending)</p>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id, doc_type=self.document_type)  # Format with template ID
 
         # Create the main report template
+        _logger.info(f"Creating main template view for template {self.id}")
         main_template = self.env['ir.ui.view'].create({
             'name': f'VPA Report Template {self.id}',
             'type': 'qweb',
             'key': f'vpa_document_layout.report_template_{self.id}',
-            'arch': f'''<t t-name="vpa_document_layout.report_template_{self.id}">
-    <t t-call="web.html_container">
-        <t t-foreach="docs" t-as="doc">
-            <t t-call="{doc_template}" t-lang="doc.partner_id.lang"/>
-        </t>
-    </t>
-</t>''',
+            'arch': main_template_arch,
         })
+        _logger.info(f"Main template created: {main_template.id}")
 
         # Create the external layout template with custom styling
         # Get paper dimensions
@@ -531,31 +692,83 @@ class VPADocumentTemplate(models.Model):
     <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;">
 
         <style type="text/css">
+            /* Force zero margins on all PDF page elements */
             @page {
-                margin: 0mm;
-                padding: 0mm;
+                margin: 0mm !important;
+                padding: 0mm !important;
                 %s
             }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%% !important;
+                height: 100%% !important;
+            }
             body {
-                margin: 0;
-                padding: 0;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%% !important;
+                height: 100%% !important;
+            }
+            /* Critical: Remove Odoo's default container padding that adds margins */
+            .container, .container-fluid {
+                padding-right: 0 !important;
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+                width: 100%% !important;
+            }
+            div.o_background, .o_background {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%% !important;
+                background: transparent !important;
+            }
+            article, .article {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100%% !important;
+                background: transparent !important;
             }
             .o_report_layout_vpa {
                 position: relative;
-                width: %smm;
-                height: %smm;
-                padding: 0;
+                width: 100%% !important;
+                height: 100%% !important;
+                padding: 0 !important;
+                margin: 0 !important;
                 box-sizing: border-box;
-                overflow: hidden;
+                background: white !important;
             }
             .o_report_layout_vpa .page {
                 position: relative;
                 z-index: 2;
+                width: 100%% !important;
+                height: %smm !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-sizing: border-box;
+                background: white !important;
+            }
+            .o_report_layout_vpa .page-layout-table {
                 width: 100%%;
                 height: 100%%;
-                padding: 20px;
-                padding-bottom: 120px;
-                box-sizing: border-box;
+                border-collapse: collapse;
+                border-spacing: 0;
+                border: none !important;
+            }
+            .o_report_layout_vpa .page-layout-table td.content-cell {
+                height: 100%%;
+                vertical-align: top;
+                padding: 15px;
+                border: none !important;
+            }
+            .o_report_layout_vpa .page-layout-table tr {
+                border: none !important;
             }
             /* Main product table - ensure visibility in PDF */
             table.o_main_table, .o_report_layout_vpa table.o_main_table {
@@ -565,12 +778,6 @@ class VPADocumentTemplate(models.Model):
                 border: 2px solid %s !important;
                 margin-bottom: 20px !important;
             }
-            table.o_main_table thead, .o_report_layout_vpa table.o_main_table thead {
-                background: %s !important;
-                color: %s !important;
-                font-weight: bold !important;
-                %s
-            }
             table.o_main_table thead th, .o_report_layout_vpa table.o_main_table thead th {
                 background: %s !important;
                 color: %s !important;
@@ -578,10 +785,11 @@ class VPADocumentTemplate(models.Model):
                 font-weight: bold !important;
                 border: 1px solid %s !important;
                 text-align: left !important;
+                %s
             }
             table.o_main_table tbody td, .o_report_layout_vpa table.o_main_table tbody td {
                 padding: 10px 8px !important;
-                border: 1px solid #e0e0e0 !important;
+                border: 1px solid %s !important;
                 vertical-align: top !important;
             }
             table.o_main_table tbody tr:nth-child(even), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even) {
@@ -620,16 +828,15 @@ class VPADocumentTemplate(models.Model):
 
         <!-- Page Content Wrapper -->
         <div class="page">
-            <!-- Decorative circle -->
-            <svg t-if="%s" style="position: absolute; top: -100px; right: -100px; z-index: 0;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
+            <!-- Decorative circle - positioned outside page with higher z-index to appear above content -->
+            <svg t-if="%s" style="position: absolute; top: -115px; right: -115px; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
             </svg>
 
-            <!-- Footer Wave Shape - positioned at bottom, extends beyond boundaries like circle -->
-            <svg t-if="%s" style="position: absolute; bottom: -100px; left: -50px; width: 120%%; height: 300px; z-index: 0;" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0,120 L0,30 C150,60 350,0 600,30 C850,60 1050,0 1200,30 L1200,120 Z" t-attf-fill="%s" t-att-fill-opacity="%s"/>
-            </svg>
-
+            <!-- Real HTML table for reliable footer positioning in PDF -->
+            <table class="page-layout-table">
+                <tr>
+                    <td class="content-cell">
             <!-- Header -->
         <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 4px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
@@ -668,156 +875,62 @@ class VPADocumentTemplate(models.Model):
 
             <!-- Document content -->
             <t t-out="0"/>
-
-            <!-- Footer - absolute position at bottom -->
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; min-height: 100px;">
-            <!-- Footer Content with Columns -->
-            <div style="position: relative; z-index: 1; padding: 40px 20px 15px 20px; font-size: 7pt;">
-                <!-- Single Column Layout -->
-                <div t-if="vpa_template.footer_layout == 'single'" style="text-align: center;">
-                    <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                        <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
-                        <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6;">
-                            <t t-out="vpa_template.footer_column_1_content"/>
-                        </div>
-                    </div>
-                    <!-- Bank Details for single column -->
-                    <div t-if="%s and company.partner_id.bank_ids" style="margin-top: 8px; color: #666;">
-                        <strong style="display: block; margin-bottom: 3px; font-size: 8pt;">Bank Details:</strong>
-                        <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                            <span t-field="bank.bank_id.name"/> - <span t-field="bank.acc_number"/>
-                        </t>
-                    </div>
-                </div>
-
-                <!-- Two Column Layout -->
-                <table t-if="vpa_template.footer_layout == 'two_col'" style="width: 100%%; border-collapse: collapse;">
-                    <tr>
-                        <td style="width: 50%%; vertical-align: top; padding-right: 15px;">
-                            <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
-                                <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6;">
-                                    <t t-out="vpa_template.footer_column_1_content"/>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="width: 50%%; vertical-align: top; padding-left: 15px;">
-                            <div t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
-                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
-                                <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.6;">
-                                    <t t-out="vpa_template.footer_column_2_content"/>
-                                </div>
-                                <!-- Bank Details for two columns (right side) -->
-                                <div t-if="%s and company.partner_id.bank_ids and not vpa_template.footer_column_2_content" style="color: #666;">
-                                    <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                                        <span t-field="bank.bank_id.name"/><br/>
-                                        <span t-field="bank.acc_number"/>
-                                    </t>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Three Column Layout -->
-                <table t-if="vpa_template.footer_layout == 'three_col'" style="width: 100%%; border-collapse: collapse;">
-                    <tr>
-                        <td style="width: 33.33%%; vertical-align: top; padding-right: 10px;">
-                            <div t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
-                                <strong t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_1_title"/>
-                                <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
-                                    <t t-out="vpa_template.footer_column_1_content"/>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="width: 33.33%%; vertical-align: top; padding: 0 10px;">
-                            <div t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
-                                <strong t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_2_title"/>
-                                <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
-                                    <t t-out="vpa_template.footer_column_2_content"/>
-                                </div>
-                                <!-- Bank Details for three columns (middle) -->
-                                <div t-if="%s and company.partner_id.bank_ids and not vpa_template.footer_column_2_content" style="color: #666; font-size: 7.5pt;">
-                                    <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                                        <span t-field="bank.bank_id.name"/><br/>
-                                        <span t-field="bank.acc_number"/>
-                                    </t>
-                                </div>
-                            </div>
-                        </td>
-                        <td style="width: 33.33%%; vertical-align: top; padding-left: 10px;">
-                            <div t-if="vpa_template.footer_column_3_title or vpa_template.footer_column_3_content">
-                                <strong t-if="vpa_template.footer_column_3_title" style="display: block; margin-bottom: 4px; font-size: 8pt; color: %s;" t-out="vpa_template.footer_column_3_title"/>
-                                <div t-if="vpa_template.footer_column_3_content" style="color: #666; line-height: 1.4; font-size: 7pt;">
-                                    <t t-out="vpa_template.footer_column_3_content"/>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            </div>
-        </div>
-    </div>
+                    </td><!-- Close content-cell -->
+                </tr>
+            </table><!-- Close page-layout-table -->
+        </div><!-- Close page -->
+    </div><!-- Close article -->
 </t>'''
+
+        # NOTE: Footer is now rendered separately via wkhtmltopdf --footer-html
+        # See /vpa/template/footer/<template_id> route
 
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters
+        # Finalize arch_content with all parameters (30 total - footer removed)
         arch_content = arch_content % (
             self.id,
             self.id,
             self.primary_accent_color,
             self.secondary_accent_color,
             page_size_css,  # @page size
-            page_width,  # Container width
-            page_height,  # Container height
-            table_styles['border'],  # Table border color
-            table_styles['header_bg'],  # Table header background (thead)
-            table_styles['header_text'],  # Table header text color (thead)
-            table_styles['header_border_bottom'] if table_styles['header_border_bottom'] != 'none' else '',  # Header border bottom
-            table_styles['header_bg'],  # Table header background (th)
-            table_styles['header_text'],  # Table header text color (th)
+            page_height,  # Page height for layout
+            table_styles['border'],  # Table border (2px solid)
+            table_styles['header_bg'],  # Table header background (thead th)
+            table_styles['header_text'],  # Table header text color (thead th)
             table_styles['border'],  # Table header th border color
+            table_styles['header_border_bottom'] if table_styles['header_border_bottom'] != 'none' else '',  # Header border bottom
+            table_styles['border'],  # Table body td border color
             table_styles['alt_row'],  # Alternate row background
-            str(self.header_show_circle).lower(),  # Decorative circle
-            self.header_circle_size,
-            self.header_circle_size,
-            self.header_circle_size / 2,
-            self.header_circle_size / 2,
-            self.header_circle_size / 2,
-            self.primary_accent_color,
-            self.header_circle_opacity,
-            str(self.footer_show_shape).lower(),  # Footer wave shape
-            self.secondary_accent_color,  # Footer wave color
-            self.footer_shape_opacity,  # Footer wave opacity
-            self.primary_accent_color,  # Header border bottom
-            self.header_logo_alignment,
-            self._get_logo_style(),
-            self.header_company_info_alignment,
+            str(self.header_show_circle).lower(),  # Decorative circle show
+            self.header_circle_size,  # Circle width
+            self.header_circle_size,  # Circle height
+            self.header_circle_size / 2,  # Circle cx
+            self.header_circle_size / 2,  # Circle cy
+            self.header_circle_size / 2,  # Circle radius
+            self.primary_accent_color,  # Circle fill color
+            self.header_circle_opacity,  # Circle opacity
+            self.primary_accent_color,  # Header border bottom color
+            self.header_logo_alignment,  # Logo alignment
+            self._get_logo_style(),  # Logo style
+            self.header_company_info_alignment,  # Company info alignment
             self.header_company_info_color,  # Company info div color
             self.header_company_info_color,  # Company info span color (custom HTML)
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
-            self.primary_accent_color,  # Footer column 1 title color (single)
-            str(self.footer_bank_details_show).lower(),  # Bank details (single)
-            self.primary_accent_color,  # Footer column 1 title color (two_col)
-            self.primary_accent_color,  # Footer column 2 title color (two_col)
-            str(self.footer_bank_details_show).lower(),  # Bank details (two_col)
-            self.primary_accent_color,  # Footer column 1 title color (three_col)
-            self.primary_accent_color,  # Footer column 2 title color (three_col)
-            str(self.footer_bank_details_show).lower(),  # Bank details (three_col)
-            self.primary_accent_color,  # Footer column 3 title color (three_col)
         )
 
+        _logger.info(f"Creating external layout view for template {self.id}")
         layout_template = self.env['ir.ui.view'].create({
             'name': f'VPA External Layout {self.id}',
             'type': 'qweb',
             'key': f'vpa_document_layout.external_layout_vpa_template_{self.id}',
             'arch': arch_content,
         })
+        _logger.info(f"External layout created: {layout_template.id}")
+        _logger.info(f"Successfully created all templates for {self.id}")
 
     def _get_sample_document(self):
         """Get a sample document for preview based on document type"""
@@ -868,11 +981,20 @@ class VPADocumentTemplate(models.Model):
             }
         }
 
-    def action_preview_template(self):
-        """Open preview of this template"""
+    def action_preview_footer(self):
+        """Open footer preview in new tab"""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_url',
-            'url': f'/vpa/template/preview/{self.id}',
+            'url': f'/vpa/template/preview_footer/{self.id}',
             'target': 'new',
+        }
+
+    def action_preview_template(self):
+        """Download PDF preview of this template"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/vpa/template/preview/pdf/{self.id}',
+            'target': 'self',
         }

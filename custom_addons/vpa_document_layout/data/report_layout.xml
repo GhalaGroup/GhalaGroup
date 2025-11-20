@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- VPA layout registration REMOVED - VPA templates now work as separate print actions
+             instead of being a global document layout option.
+             This allows users to select other document layouts (Boxed, Bold, Striped, etc.)
+             in Settings → Companies → Configure Document Layout, while VPA templates
+             appear as individual print options in the Print menu.
+        -->
+        <!--
         <record id="report_layout_vpa" model="report.layout">
             <field name="name">VPA Document Layout</field>
             <field name="sequence">10</field>
             <field name="view_id" ref="vpa_document_layout.external_layout_vpa"/>
         </record>
+        -->
     </data>
 </odoo>

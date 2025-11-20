@@ -3,17 +3,25 @@
     <!-- Template Preview Container -->
     <template id="vpa_template_preview_container">
         <t t-set="dims" t-value="template._get_paper_dimensions()"/>
+        <t t-set="paper_name" t-value="'A4' if template.paper_size == 'a4' else 'Letter'"/>
+        <t t-set="orientation" t-value="template.paper_orientation.capitalize()"/>
 
-        <!-- Full size preview - NO SCALING - exact paper dimensions -->
-        <div t-attf-style="position: relative; width: {{dims['width']}}mm; height: {{dims['height']}}mm; margin: 20px auto; padding: 0; background: white; border: 2px solid #875a7b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
+        <!-- Preview info bar -->
+        <div style="text-align: center; padding: 15px; background: #f8f9fa; border-bottom: 2px solid #875a7b; margin-bottom: 20px;">
+            <strong>Live Preview:</strong>
+            <span style="color: #875a7b; font-weight: bold;"><t t-esc="paper_name"/> (<t t-esc="dims['width']"/>mm × <t t-esc="dims['height']"/>mm)</span> -
+            <strong>Orientation:</strong> <t t-esc="orientation"/> -
+            <strong>Margins:</strong> <span style="color: #28a745;">0mm (Full Bleed)</span>
+        </div>
+
+        <!-- Exact paper size preview - matches PDF exactly -->
+        <div t-attf-style="position: relative; width: {{dims['width']}}mm; height: {{dims['height']}}mm; margin: 0 auto 20px; padding: 0; background: white; border: 2px solid #875a7b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
             <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
         </div>
 
-        <!-- Show paper info below preview -->
-        <div style="text-align: center; margin: 10px auto; color: #666; font-size: 11px;">
-            <strong>Paper:</strong> <t t-esc="'A4' if template.paper_size == 'a4' else 'Letter'"/>
-            (<t t-esc="dims['width']"/>mm × <t t-esc="dims['height']"/>mm) -
-            <strong>Orientation:</strong> <t t-esc="template.paper_orientation.capitalize()"/>
+        <!-- Footer info -->
+        <div style="text-align: center; padding: 10px; color: #666; font-size: 12px;">
+            ℹ️ This preview shows the <strong>exact size</strong> of the PDF that will be generated
         </div>
     </template>
 

@@ -28,6 +28,8 @@
         'views/preview_template.xml',
         'views/template_preview.xml',     # Template preview
         'views/template_preview_fullpage.xml',  # Full page preview
+        'views/vpa_footer_only.xml',      # Footer-only template for wkhtmltopdf --footer-html
+        'views/vpa_footer_preview.xml',   # Footer preview page
         'data/report_layout.xml',
         'data/default_templates.xml',     # Default templates
         'views/sale_order_report_inherit.xml',

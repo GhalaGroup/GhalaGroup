@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Footer-Only Template for wkhtmltopdf footer-html -->
+    <template id="vpa_footer_only">
+        <html>
+            <head>
+                <meta charset="utf-8"/>
+                <style type="text/css">
+                    * {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 15px 20px 20px 20px;
+                        font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
+                        position: relative;
+                        height: 55mm;
+                    }
+                    .footer-wave {
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 120px;
+                        z-index: 0;
+                    }
+                    .footer-content {
+                        position: relative;
+                        z-index: 101;
+                        font-size: 8pt;
+                        line-height: 1.5;
+                        padding-top: 5px;
+                    }
+                    .footer-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: none;
+                    }
+                    .footer-table td {
+                        vertical-align: top;
+                        border: none;
+                        padding: 0 10px;
+                    }
+                    .footer-table td:first-child {
+                        padding-left: 0;
+                    }
+                    .footer-table td:last-child {
+                        padding-right: 0;
+                    }
+                    .footer-column-title {
+                        display: block;
+                        margin-bottom: 4px;
+                        font-size: 8pt;
+                        font-weight: bold;
+                    }
+                    .footer-column-content {
+                        color: #666;
+                        line-height: 1.6;
+                        font-size: 7.5pt;
+                    }
+                </style>
+            </head>
+            <body>
+                <!-- Footer Wave Shape -->
+                <t t-if="template.footer_show_shape">
+                    <svg class="footer-wave" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                              t-attf-fill="{{template.secondary_accent_color}}"
+                              t-attf-fill-opacity="{{template.footer_shape_opacity}}"/>
+                    </svg>
+                </t>
+
+                <!-- Footer Content -->
+                <div class="footer-content">
+                    <!-- Single Column Layout -->
+                    <t t-if="template.footer_layout == 'single'">
+                        <div style="text-align: center;">
+                            <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                <span t-if="template.footer_column_1_title"
+                                      class="footer-column-title"
+                                      t-attf-style="color: {{template.primary_accent_color}};"
+                                      t-esc="template.footer_column_1_title"/>
+                                <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
+                            </t>
+                            <!-- Bank Details -->
+                            <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids">
+                                <div style="margin-top: 8px; color: #666;">
+                                    <span style="display: block; margin-bottom: 3px; font-size: 8pt; font-weight: bold;">Bank Details:</span>
+                                    <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                        <span t-field="bank.bank_id.name"/> - <span t-field="bank.acc_number"/>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Two Column Layout -->
+                    <t t-if="template.footer_layout == 'two_col'">
+                        <table class="footer-table">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                        <span t-if="template.footer_column_1_title"
+                                              class="footer-column-title"
+                                              t-attf-style="color: {{template.primary_accent_color}};"
+                                              t-esc="template.footer_column_1_title"/>
+                                        <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
+                                    </t>
+                                </td>
+                                <td style="width: 50%;">
+                                    <t t-if="template.footer_column_2_title or template.footer_column_2_content">
+                                        <span t-if="template.footer_column_2_title"
+                                              class="footer-column-title"
+                                              t-attf-style="color: {{template.primary_accent_color}};"
+                                              t-esc="template.footer_column_2_title"/>
+                                        <div t-if="template.footer_column_2_content" class="footer-column-content" t-raw="template.footer_column_2_content"/>
+                                    </t>
+                                    <!-- Bank Details (if no column 2 content) -->
+                                    <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
+                                        <div style="color: #666;">
+                                            <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                                <span t-field="bank.bank_id.name"/><br/>
+                                                <span t-field="bank.acc_number"/>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+
+                    <!-- Three Column Layout -->
+                    <t t-if="template.footer_layout == 'three_col'">
+                        <table class="footer-table">
+                            <tr>
+                                <td style="width: 33.33%;">
+                                    <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                        <span t-if="template.footer_column_1_title"
+                                              class="footer-column-title"
+                                              t-attf-style="color: {{template.primary_accent_color}};"
+                                              t-esc="template.footer_column_1_title"/>
+                                        <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
+                                    </t>
+                                </td>
+                                <td style="width: 33.33%;">
+                                    <t t-if="template.footer_column_2_title or template.footer_column_2_content">
+                                        <span t-if="template.footer_column_2_title"
+                                              class="footer-column-title"
+                                              t-attf-style="color: {{template.primary_accent_color}};"
+                                              t-esc="template.footer_column_2_title"/>
+                                        <div t-if="template.footer_column_2_content" class="footer-column-content" t-raw="template.footer_column_2_content"/>
+                                    </t>
+                                    <!-- Bank Details (if no column 2 content) -->
+                                    <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
+                                        <div style="color: #666; font-size: 7.5pt;">
+                                            <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                                <span t-field="bank.bank_id.name"/><br/>
+                                                <span t-field="bank.acc_number"/>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </td>
+                                <td style="width: 33.33%;">
+                                    <t t-if="template.footer_column_3_title or template.footer_column_3_content">
+                                        <span t-if="template.footer_column_3_title"
+                                              class="footer-column-title"
+                                              t-attf-style="color: {{template.primary_accent_color}};"
+                                              t-esc="template.footer_column_3_title"/>
+                                        <div t-if="template.footer_column_3_content" class="footer-column-content" t-raw="template.footer_column_3_content"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+                </div>
+            </body>
+        </html>
+    </template>
+</odoo>

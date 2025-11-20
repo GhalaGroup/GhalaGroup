@@ -15,12 +15,35 @@
                 }
                 .page-container {
                     width: <t t-esc="dims['width']"/>mm;
-                    height: <t t-esc="dims['height']"/>mm;
-                    margin: 0 auto;
+                    min-height: <t t-esc="dims['height']"/>mm;
+                    margin: 0 auto 40px;
                     background: white;
                     box-shadow: 0 0 20px rgba(0,0,0,0.5);
                     position: relative;
-                    overflow: hidden;
+                    overflow: visible;
+                }
+
+                /* Print styles - ensure proper A4 printing */
+                @media print {
+                    @page {
+                        size: <t t-esc="'A4' if template.paper_size == 'a4' else 'Letter'"/> <t t-esc="template.paper_orientation"/>;
+                        margin: 0;
+                    }
+
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                    }
+
+                    .page-container {
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                        box-shadow: none;
+                        page-break-after: always;
+                    }
                 }
             </style>
             </t>
