@@ -114,7 +114,7 @@ class IrActionsReport(models.Model):
         if self.env.context.get('vpa_force_zero_margins'):
             _logger.info("✅ Forcing zero margins for VPA template (context flag detected)")
 
-            # Remove margin/spacing arguments, --disable-local-file-access, AND --quiet
+            # Remove margin/spacing arguments, DPI, zoom, --disable-local-file-access, AND --quiet
             new_args = []
             skip_next = False
             for i, arg in enumerate(command_args):
@@ -122,8 +122,13 @@ class IrActionsReport(models.Model):
                     skip_next = False
                     continue
 
-                # Check if this arg is a margin/spacing parameter or disable-local-file-access
+                # Check if this arg is a margin/spacing parameter
                 if arg.startswith('--margin-') or arg in ['--header-spacing', '--footer-spacing']:
+                    skip_next = True  # Skip the value too
+                    continue
+
+                # Remove DPI and zoom to ensure consistent rendering between Preview and Real Print
+                if arg in ['--dpi', '--zoom']:
                     skip_next = True  # Skip the value too
                     continue
 
@@ -142,18 +147,28 @@ class IrActionsReport(models.Model):
             # Get template ID from context for footer URL
             template_id = self.env.context.get('vpa_template_id')
 
+            # Add consistent DPI and zoom for all VPA templates
+            # This ensures Preview and Real Print render identically
+            command_args.extend([
+                '--dpi', '96',   # Match paper format DPI
+                '--zoom', '1.0',  # No zoom scaling
+            ])
+
+            # Get template ID for footer
+            template_id = self.env.context.get('vpa_template_id')
+
             if template_id:
-                # Use footer-html for VPA templates
+                # Use footer-html approach
                 base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
                 footer_url = f"{base_url}/vpa/template/footer/{template_id}"
 
                 _logger.info(f"✅ Using footer-html: {footer_url}")
 
-                # Add margins with footer space and enable local file access
+                # Add footer with margin
                 command_args.extend([
-                    '--enable-local-file-access',  # Allow wkhtmltopdf to fetch footer from localhost
+                    '--enable-local-file-access',
                     '--margin-top', '0',
-                    '--margin-bottom', '50mm',  # Reserve space for footer
+                    '--margin-bottom', '30mm',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
                     '--header-spacing', '0',
@@ -161,7 +176,7 @@ class IrActionsReport(models.Model):
                     '--footer-html', footer_url,
                 ])
             else:
-                # No template ID - use zero margins everywhere
+                # No footer
                 command_args.extend([
                     '--margin-top', '0',
                     '--margin-bottom', '0',

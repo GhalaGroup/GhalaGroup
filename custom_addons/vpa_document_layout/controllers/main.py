@@ -48,15 +48,31 @@ class VPATemplatePreview(http.Controller):
             _logger.error(f"❌ External layout view NOT FOUND: {external_layout_key}")
 
         try:
-            # Render the template HTML directly - NO wrapper, NO modifications
-            html_content = request.env['ir.ui.view']._render_template(
-                'vpa_document_layout.vpa_template_preview_layout',
-                {
-                    'template': template,
-                    'company': template.company_id,
-                    'image_data_uri': image_data_uri,
-                }
-            )
+            # Get a sample document to render with REAL data
+            sample_doc = template._get_sample_document()
+
+            if not sample_doc:
+                # Fallback to hardcoded preview if no sample document
+                html_content = request.env['ir.ui.view']._render_template(
+                    'vpa_document_layout.vpa_template_preview_layout',
+                    {
+                        'template': template,
+                        'company': template.company_id,
+                        'image_data_uri': image_data_uri,
+                    }
+                )
+            else:
+                # Render with REAL document data (same as Real Print!)
+                report_template = f'vpa_document_layout.report_template_{template.id}'
+                html_content = request.env['ir.ui.view']._render_template(
+                    report_template,
+                    {
+                        'docs': sample_doc,
+                        'doc_ids': sample_doc.ids,
+                        'doc_model': sample_doc._name,
+                        'company': template.company_id,
+                    }
+                )
 
             # Decode if bytes
             if isinstance(html_content, bytes):
@@ -88,13 +104,8 @@ class VPATemplatePreview(http.Controller):
                 landscape=template.paper_orientation == 'landscape',
                 specific_paperformat_args={
                     '--page-size': size_name,
-                    '--margin-top': '0',
-                    '--margin-bottom': '50mm',
-                    '--margin-left': '0',
-                    '--margin-right': '0',
-                    '--header-spacing': '0',
-                    '--footer-spacing': '0',
-                    '--footer-html': footer_url,
+                    # DPI and zoom are now handled centrally in ir_actions_report.py
+                    # to ensure consistency between Preview and Real Print
                 },
                 set_viewport_size=False
             )

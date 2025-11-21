@@ -13,25 +13,29 @@
                     }
                     body {
                         margin: 0;
-                        padding: 15px 20px 20px 20px;
+                        padding: 0;
                         font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
                         position: relative;
-                        height: 55mm;
+                        height: 30mm;
                     }
                     .footer-wave {
                         position: absolute;
-                        bottom: 0;
+                        top: 0;
                         left: 0;
                         width: 100%;
-                        height: 120px;
+                        height: 100%;
                         z-index: 0;
                     }
                     .footer-content {
-                        position: relative;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
                         z-index: 101;
                         font-size: 8pt;
                         line-height: 1.5;
-                        padding-top: 5px;
+                        padding: 20px 25px 25px 25px;
+                        width: 100%;
                     }
                     .footer-table {
                         width: 100%;

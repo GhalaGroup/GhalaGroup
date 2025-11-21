@@ -764,7 +764,7 @@ class VPADocumentTemplate(models.Model):
             .o_report_layout_vpa .page-layout-table td.content-cell {
                 height: 100%%;
                 vertical-align: top;
-                padding: 15px;
+                padding: 18px;
                 border: none !important;
             }
             .o_report_layout_vpa .page-layout-table tr {

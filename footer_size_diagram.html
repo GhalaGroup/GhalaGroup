@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>VPA Footer Size Diagram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #875a7b;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .diagram {
+            border: 2px solid #333;
+            position: relative;
+            background: white;
+            margin: 20px 0;
+        }
+        .section {
+            border: 2px dashed #666;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .label {
+            position: absolute;
+            background: #fff;
+            padding: 4px 8px;
+            border: 1px solid #333;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        .label.right {
+            right: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .label.bottom {
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .label.top {
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .label.left {
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .dimension {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #d9534f;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .wave-area {
+            background: linear-gradient(135deg, rgba(33,183,153,0.1) 0%, rgba(33,183,153,0.3) 100%);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        .content-area {
+            background: rgba(135,90,123,0.05);
+            position: relative;
+            z-index: 10;
+        }
+        .padding-indicator {
+            background: repeating-linear-gradient(
+                45deg,
+                #ffc107,
+                #ffc107 10px,
+                #fff3cd 10px,
+                #fff3cd 20px
+            );
+            opacity: 0.3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #875a7b;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .code {
+            font-family: 'Courier New', monospace;
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d9534f;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .columns-demo {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .column {
+            flex: 1;
+            border: 2px dashed #21b799;
+            padding: 10px;
+            background: rgba(33,183,153,0.05);
+        }
+        .column-title {
+            font-weight: bold;
+            color: #875a7b;
+            font-size: 8pt;
+            margin-bottom: 4px;
+        }
+        .column-content {
+            color: #666;
+            font-size: 7.5pt;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 VPA Footer Size Diagram - Technical Specifications</h1>
+
+        <div class="info-box">
+            <strong>Scale:</strong> This diagram uses 1px = 1mm for accurate visualization. All measurements are shown in millimeters (mm) and pixels (px).
+        </div>
+
+        <!-- Main Footer Container -->
+        <h2>1. Footer Container (body element)</h2>
+        <div class="diagram" style="height: 207px; width: 100%; background: #fafafa;">
+            <!-- Total height: 55mm = 207px at 96dpi -->
+            <div class="dimension" style="top: -25px; left: 10px;">height: 55mm (207px)</div>
+            <div class="dimension" style="right: -120px; top: 50%;">body element</div>
+
+            <!-- Top Padding -->
+            <div class="padding-indicator" style="height: 56px; width: 100%;">
+                <div class="dimension" style="left: 10px; top: 20px;">padding-top: 15px</div>
+            </div>
+
+            <!-- Left/Right Padding -->
+            <div class="padding-indicator" style="position: absolute; left: 0; top: 56px; width: 75px; height: 95px;">
+                <div class="dimension" style="left: 5px; top: 40px; writing-mode: vertical-lr; transform: rotate(180deg);">20px</div>
+            </div>
+            <div class="padding-indicator" style="position: absolute; right: 0; top: 56px; width: 75px; height: 95px;">
+                <div class="dimension" style="right: 5px; top: 40px; writing-mode: vertical-lr; transform: rotate(180deg);">20px</div>
+            </div>
+
+            <!-- Wave Shape Area -->
+            <div class="wave-area" style="height: 120px;">
+                <div class="dimension" style="bottom: 50px; left: 50%; transform: translateX(-50%);">
+                    Wave SVG: height: 120px (~32mm)
+                </div>
+                <div class="dimension" style="bottom: 10px; left: 50%; transform: translateX(-50%);">
+                    position: absolute, bottom: 0, z-index: 0
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area" style="position: absolute; top: 56px; left: 75px; right: 75px; bottom: 56px;">
+                <div class="dimension" style="top: -20px; left: 50%; transform: translateX(-50%);">
+                    Footer Content Area (z-index: 101)
+                </div>
+                <div style="padding-top: 5px; font-size: 8pt;">
+                    <div style="font-weight: bold; color: #875a7b; margin-bottom: 4px;">Column Title (8pt, bold)</div>
+                    <div style="font-size: 7.5pt; color: #666; line-height: 1.6;">Column content (7.5pt, color: #666, line-height: 1.6)</div>
+                </div>
+            </div>
+
+            <!-- Bottom Padding -->
+            <div class="padding-indicator" style="position: absolute; bottom: 0; height: 56px; width: 100%;">
+                <div class="dimension" style="left: 10px; bottom: 20px;">padding-bottom: 20px</div>
+            </div>
+        </div>
+
+        <!-- Technical Specifications Table -->
+        <h2>2. CSS Properties & Sizes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Element</th>
+                    <th>CSS Class/ID</th>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3"><strong>Footer Container</strong></td>
+                    <td rowspan="3"><span class="code">body</span></td>
+                    <td><span class="code">height</span></td>
+                    <td><strong>55mm</strong> (207px @ 96dpi)</td>
+                </tr>
+                <tr>
+                    <td><span class="code">padding</span></td>
+                    <td>15px 20px 20px 20px (top, right, bottom, left)</td>
+                </tr>
+                <tr>
+                    <td><span class="code">position</span></td>
+                    <td>relative</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td rowspan="5"><strong>Wave Shape</strong></td>
+                    <td rowspan="5"><span class="code">.footer-wave</span></td>
+                    <td><span class="code">height</span></td>
+                    <td><strong>120px</strong> (~31.75mm)</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><span class="code">width</span></td>
+                    <td>100%</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><span class="code">position</span></td>
+                    <td>absolute</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><span class="code">bottom</span></td>
+                    <td>0</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><span class="code">z-index</span></td>
+                    <td>0 (behind content)</td>
+                </tr>
+                <tr style="background: #e7f3ff;">
+                    <td rowspan="4"><strong>Footer Content</strong></td>
+                    <td rowspan="4"><span class="code">.footer-content</span></td>
+                    <td><span class="code">font-size</span></td>
+                    <td>8pt (titles)</td>
+                </tr>
+                <tr style="background: #e7f3ff;">
+                    <td><span class="code">line-height</span></td>
+                    <td>1.5</td>
+                </tr>
+                <tr style="background: #e7f3ff;">
+                    <td><span class="code">padding-top</span></td>
+                    <td>5px</td>
+                </tr>
+                <tr style="background: #e7f3ff;">
+                    <td><span class="code">z-index</span></td>
+                    <td>101 (above wave)</td>
+                </tr>
+                <tr>
+                    <td rowspan="2"><strong>Column Title</strong></td>
+                    <td rowspan="2"><span class="code">.footer-column-title</span></td>
+                    <td><span class="code">font-size</span></td>
+                    <td>8pt</td>
+                </tr>
+                <tr>
+                    <td><span class="code">font-weight</span></td>
+                    <td>bold</td>
+                </tr>
+                <tr>
+                    <td rowspan="3"><strong>Column Content</strong></td>
+                    <td rowspan="3"><span class="code">.footer-column-content</span></td>
+                    <td><span class="code">font-size</span></td>
+                    <td>7.5pt</td>
+                </tr>
+                <tr>
+                    <td><span class="code">color</span></td>
+                    <td>#666</td>
+                </tr>
+                <tr>
+                    <td><span class="code">line-height</span></td>
+                    <td>1.6</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Page Margin Settings -->
+        <h2>3. Page Margin Settings (wkhtmltopdf)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Margin</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background: #ffe7e7;">
+                    <td><span class="code">--margin-bottom</span></td>
+                    <td><strong>50mm</strong></td>
+                    <td>Space reserved at bottom of page for footer (5mm less than footer height)</td>
+                </tr>
+                <tr>
+                    <td><span class="code">--margin-top</span></td>
+                    <td>0</td>
+                    <td>No top margin (header in main template)</td>
+                </tr>
+                <tr>
+                    <td><span class="code">--margin-left</span></td>
+                    <td>0</td>
+                    <td>No left margin</td>
+                </tr>
+                <tr>
+                    <td><span class="code">--margin-right</span></td>
+                    <td>0</td>
+                    <td>No right margin</td>
+                </tr>
+                <tr>
+                    <td><span class="code">--footer-spacing</span></td>
+                    <td>0</td>
+                    <td>No spacing between content and footer margin</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Column Layouts -->
+        <h2>4. Footer Column Layouts</h2>
+
+        <h3>Single Column Layout (<span class="code">footer_layout = 'single'</span>)</h3>
+        <div class="columns-demo">
+            <div class="column" style="flex: 1;">
+                <div class="column-title">Column 1 Title</div>
+                <div class="column-content">Width: 100% (centered)<br/>All content in one column</div>
+            </div>
+        </div>
+
+        <h3>Two Column Layout (<span class="code">footer_layout = 'two_col'</span>)</h3>
+        <div class="columns-demo">
+            <div class="column">
+                <div class="column-title">Column 1 Title</div>
+                <div class="column-content">Width: 50%<br/>Padding: 0 10px</div>
+            </div>
+            <div class="column">
+                <div class="column-title">Column 2 Title</div>
+                <div class="column-content">Width: 50%<br/>Padding: 0 10px</div>
+            </div>
+        </div>
+
+        <h3>Three Column Layout (<span class="code">footer_layout = 'three_col'</span>)</h3>
+        <div class="columns-demo">
+            <div class="column">
+                <div class="column-title">Column 1 Title</div>
+                <div class="column-content">Width: 33.33%<br/>Padding: 0 10px</div>
+            </div>
+            <div class="column">
+                <div class="column-title">Column 2 Title</div>
+                <div class="column-content">Width: 33.33%<br/>Padding: 0 10px</div>
+            </div>
+            <div class="column">
+                <div class="column-title">Column 3 Title</div>
+                <div class="column-content">Width: 33.33%<br/>Padding: 0 10px</div>
+            </div>
+        </div>
+
+        <!-- Template File Paths -->
+        <h2>5. File Locations</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Path</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Footer Template (XML)</td>
+                    <td><span class="code">custom_addons/vpa_document_layout/views/vpa_footer_only.xml</span></td>
+                </tr>
+                <tr>
+                    <td>Footer Controller (Python)</td>
+                    <td><span class="code">custom_addons/vpa_document_layout/controllers/main.py</span><br/>
+                        Route: <span class="code">/vpa/template/footer/&lt;template_id&gt;</span></td>
+                </tr>
+                <tr>
+                    <td>PDF Args Configuration</td>
+                    <td><span class="code">custom_addons/vpa_document_layout/models/ir_actions_report.py</span><br/>
+                        Line 156: <span class="code">--margin-bottom</span> setting</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Technical Notes -->
+        <h2>6. Important Technical Notes</h2>
+        <div class="info-box">
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Footer Height vs Margin:</strong> Footer is 55mm tall, but margin is 50mm. This 5mm overlap allows the wave shape to extend to the page edge for a seamless look.</li>
+                <li><strong>Z-Index Layering:</strong> Wave (z-index: 0) sits behind content (z-index: 101), creating depth.</li>
+                <li><strong>Font Sizes:</strong> Titles use 8pt, content uses 7.5pt for hierarchy.</li>
+                <li><strong>Responsive Padding:</strong> 15px top, 20px sides, 20px bottom provides breathing room.</li>
+                <li><strong>DOCTYPE Required:</strong> Footer HTML must start with <span class="code">&lt;!DOCTYPE html&gt;</span> (added in controller).</li>
+                <li><strong>Authentication:</strong> Footer route uses <span class="code">auth='public'</span> with <span class="code">.sudo()</span> so wkhtmltopdf can fetch it.</li>
+            </ul>
+        </div>
+
+        <!-- Summary Box -->
+        <div style="background: #f0f0f0; border: 3px solid #875a7b; padding: 20px; margin: 30px 0; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #875a7b;">📊 Quick Reference Summary</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 14px;">
+                <div>
+                    <strong>Footer Dimensions:</strong><br/>
+                    • Height: 55mm (207px)<br/>
+                    • Width: 100% of page<br/>
+                    • Wave: 120px (~32mm)<br/>
+                </div>
+                <div>
+                    <strong>Page Margin:</strong><br/>
+                    • Bottom: 50mm<br/>
+                    • Top/Left/Right: 0<br/>
+                    • Footer Spacing: 0<br/>
+                </div>
+                <div>
+                    <strong>Typography:</strong><br/>
+                    • Title: 8pt, bold<br/>
+                    • Content: 7.5pt, #666<br/>
+                    • Line Height: 1.5-1.6<br/>
+                </div>
+                <div>
+                    <strong>Padding:</strong><br/>
+                    • Top: 15px<br/>
+                    • Left/Right: 20px<br/>
+                    • Bottom: 20px<br/>
+                </div>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: #999; margin-top: 40px; font-size: 12px;">
+            Generated for VPA Document Layout Module - Odoo 19 Enterprise
+        </p>
+    </div>
+</body>
+</html>
