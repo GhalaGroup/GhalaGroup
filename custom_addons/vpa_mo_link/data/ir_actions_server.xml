@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- MO - Link: Link existing Manufacturing Orders to Sales Order -->
+    <record id="action_mo_link" model="ir.actions.server">
+        <field name="name">MO - Link</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+# MO - Link: Find and link existing Manufacturing Orders to this Sales Order
+# This action searches for MOs where the Source/Origin field matches the SO name
+# The compute method will automatically include them in the smart button
+
+# Check if MRP module is installed
+try:
+    mrp_production = env['mrp.production']
+except KeyError:
+    raise UserError("Manufacturing (MRP) module is not installed. Please install it first.")
+
+# Find MOs where origin (Source field) matches this SO's name
+matching_mos = mrp_production.search([
+    ('origin', '=', record.name),
+    ('state', '!=', 'cancel')
+])
+
+if not matching_mos:
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'No MOs Found',
+            'message': f"No Manufacturing Orders found with Source = '{record.name}'.\n\nTo link MOs, first set the Source field in the MO (Miscellaneous tab) to match this SO number.",
+            'type': 'warning',
+            'sticky': True,
+        }
+    }
+else:
+    # Trigger recomputation of mrp_production_ids
+    # The overridden _compute_mrp_production_ids will pick up MOs with matching origin
+    record._compute_mrp_production_ids()
+
+    # Add chatter messages for audit trail
+    mo_names = []
+    for mo in matching_mos:
+        mo_names.append(mo.name)
+
+        # Add chatter link in MO
+        so_link = f"<a href='#id={record.id}&model=sale.order'>{record.name}</a>"
+        mo.message_post(body=f"Linked to Sales Order {so_link}")
+
+    # Add chatter in Sales Order
+    mo_links = ', '.join([f"<a href='#id={mo.id}&model=mrp.production'>{mo.name}</a>" for mo in matching_mos])
+    record.message_post(body=f"Linked Manufacturing Orders: {mo_links}")
+
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'MOs Linked Successfully',
+            'message': f"Successfully linked {len(matching_mos)} Manufacturing Order(s):\n" + "\n".join(mo_names),
+            'type': 'success',
+            'sticky': False,
+        }
+    }
+]]></field>
+    </record>
+
+    <!-- MO - Unlink: Remove link between Sales Order and Manufacturing Orders -->
+    <record id="action_mo_unlink" model="ir.actions.server">
+        <field name="name">MO - Unlink</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+# MO - Unlink: Remove link between SO and MOs by clearing the origin field
+# This removes MOs from the smart button without deleting them
+
+# Check if MRP module is installed
+try:
+    mrp_production = env['mrp.production']
+except KeyError:
+    raise UserError("Manufacturing (MRP) module is not installed.")
+
+# Get MOs linked via origin field
+linked_mos = mrp_production.search([
+    ('origin', '=', record.name),
+    ('state', '!=', 'cancel')
+])
+
+if not linked_mos:
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'No Linked MOs',
+            'message': f"No Manufacturing Orders are linked to this Sales Order via the Source field.",
+            'type': 'info',
+            'sticky': False,
+        }
+    }
+else:
+    # Clear origin field to remove the link
+    mo_names = []
+    for mo in linked_mos:
+        mo_names.append(mo.name)
+        mo.write({'origin': False})
+
+        # Add chatter message in MO
+        so_link = f"<a href='#id={record.id}&model=sale.order'>{record.name}</a>"
+        mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+
+    # Trigger recomputation to update smart button
+    record._compute_mrp_production_ids()
+
+    # Log in Sales Order
+    mo_links = ', '.join([f"<a href='#id={mo.id}&model=mrp.production'>{mo.name}</a>" for mo in linked_mos])
+    record.message_post(body=f"Unlinked {len(linked_mos)} Manufacturing Order(s): {mo_links}")
+
+    # Show notification
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'MOs Unlinked',
+            'message': f"Successfully unlinked {len(linked_mos)} Manufacturing Order(s):\n" + "\n".join(mo_names),
+            'type': 'success',
+            'sticky': False,
+        }
+    }
+]]></field>
+    </record>
+
+</odoo>

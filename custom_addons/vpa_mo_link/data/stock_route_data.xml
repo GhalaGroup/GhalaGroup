@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Production Route
+            This route is product-selectable and works similarly to the standard "Manufacture" route.
+            When selected on a product, it triggers MO creation when SO is confirmed.
+        -->
+        <record id="route_production" model="stock.route">
+            <field name="name">Production</field>
+            <field name="company_id" eval="False"/>
+            <field name="sequence">6</field>
+            <field name="product_selectable" eval="True"/>
+            <field name="warehouse_selectable" eval="False"/>
+            <field name="sale_selectable" eval="False"/>
+        </record>
+
+        <!--
+            Note: Stock rules for this route are created automatically per warehouse
+            when the warehouse's "Manufacturing" option is enabled.
+
+            If you need to manually create rules for specific warehouses, you can add them here.
+            Example structure:
+
+            <record id="production_rule_warehouse1" model="stock.rule">
+                <field name="name">WH1: Production</field>
+                <field name="action">manufacture</field>
+                <field name="route_id" ref="route_production"/>
+                <field name="picking_type_id" ref="stock.picking_type_id"/>
+                <field name="location_dest_id" ref="stock.stock_location_stock"/>
+                <field name="procure_method">make_to_stock</field>
+                <field name="company_id" ref="base.main_company"/>
+            </record>
+        -->
+
+        <!-- Create manufacturing rules for all warehouses on the Production route -->
+        <function model="stock.warehouse" name="_create_production_route_rules"/>
+    </data>
+</odoo>

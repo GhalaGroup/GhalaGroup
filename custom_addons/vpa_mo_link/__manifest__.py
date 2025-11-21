@@ -1,31 +1,62 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '1.0',
+    'version': '1.0.0',
     'category': 'Manufacturing',
-    'summary': 'Compatibility module for Manufacturing Order automation',
+    'summary': 'Advanced Manufacturing Order management with flexible workflows and manual linking',
+    'price': 199.00,
+    'currency': 'USD',
     'description': """
 VPA - Manufacturing Order Link
 ===============================
 
-This module provides compatibility for automations that create Manufacturing Orders
-from Sales Orders. It adds the procurement_group_id field to sale.order when the
-stock/mrp modules are not installed, preventing AttributeError.
+Extends Odoo's standard manufacturing integration to support custom workflows.
 
-Features:
----------
-* Adds dummy procurement_group_id field to prevent automation errors
-* Allows automations to check procurement_group_id without crashing
-* Compatible with Preview button and portal access
+Key Features:
+-------------
+1. **Draft MO Creation**: All auto-created MOs stay in DRAFT (never auto-confirmed)
+2. **No-BOM Support**: MOs created even when BOM is missing (user sets later)
+3. **Manual MO Linking**: Link MOs created before Sales Orders
+4. **Unified Smart Button**: Shows both automatic and manually linked MOs
+5. **Production Route**: Dedicated route created automatically on installation
 
-This is a separate module from VPA Document Layout to keep concerns separated.
+Workflows Supported:
+--------------------
+* Standard: Product with route → Confirm SO → MO in DRAFT → Review → Confirm
+* No BOM: Product without BOM → Confirm SO → MO in DRAFT → Set BOM → Confirm
+* Manual: Create MO → Set Source field → Create SO → MO appears in smart button
+* Link Action: Create MO → Create SO → Click "MO - Link" → Link established
+
+Technical Details:
+------------------
+* Overrides stock_rule._should_auto_confirm_procurement_mo() to return False
+* Overrides stock_rule._prepare_mo_vals() to handle missing BOMs
+* Extends sale_mrp._compute_mrp_production_ids() to include origin-based MOs
+* MO - Link/Unlink actions manage origin field for manual linking
+* Compatible with procurement_group_id automations
+* Creates Production route automatically on installation
+
+License:
+--------
+Odoo Proprietary License v1.0 (OPL-1)
+This module is proprietary software. Use requires a valid Odoo Enterprise subscription.
+Redistribution and resale are prohibited.
+
+This module is separate from VPA Document Layout.
     """,
     'author': 'Your Company',
     'website': 'https://www.yourcompany.com',
-    'depends': ['sale'],
-    'data': [],
+    'maintainer': 'Your Company',
+    'support': 'support@yourcompany.com',
+    'images': ['static/description/icon.png'],
+    'depends': ['sale_mrp', 'mrp', 'stock'],
+    'data': [
+        'data/stock_route_data.xml',
+        'data/ir_actions_server.xml',
+    ],
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'application': False,
     'auto_install': False,
-    'license': 'LGPL-3',
+    'license': 'OPL-1',
 }
