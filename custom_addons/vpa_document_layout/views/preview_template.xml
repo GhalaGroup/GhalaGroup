@@ -9,8 +9,8 @@
 
     <!-- VPA Layout Preview Template -->
     <template id="vpa_layout_preview">
-        <t t-set="o" t-value="config.company_id"/>
-        <t t-set="company" t-value="config.company_id"/>
+        <t t-set="o" t-value="template.company_id"/>
+        <t t-set="company" t-value="template.company_id"/>
         <t t-set="display_name_in_footer" t-value="True"/>
         <t t-set="report_type" t-value="'html'"/>
         <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
@@ -27,7 +27,7 @@
         </t>
 
         <!-- Call the actual VPA layout template -->
-        <t t-call="vpa_document_layout.external_layout_vpa">
+        <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
             <!-- Sample quotation body content with proper Bubble table styling -->
             <div class="page" style="font-size: 10pt;">
 
@@ -67,20 +67,20 @@
                 </table>
 
                 <!-- Totals Table -->
-                <div id="total" class="row justify-content-end mt-4">
-                    <div class="col-4">
-                        <table class="table o_total_table table-sm" style="page-break-inside: avoid;">
+                <div class="clearfix" style="clear: both; overflow: auto;">
+                    <div id="total" style="float: right; width: 50%; max-width: 500px; min-width: 300px;">
+                        <table class="table table-sm o_total_table">
                             <tr>
-                                <td><strong>Untaxed Amount</strong></td>
+                                <td>Untaxed Amount</td>
                                 <td class="text-end">$19,250.00</td>
                             </tr>
-                            <tr class="o_taxes">
-                                <td>Tax 15%</td>
+                            <tr>
+                                <td>Taxes</td>
                                 <td class="text-end">$2,887.50</td>
                             </tr>
-                            <tr style="border-top: 2px solid #000;">
+                            <tr class="border-black">
                                 <td><strong>Total</strong></td>
-                                <td class="text-end o_price_total"><strong>$22,137.50</strong></td>
+                                <td class="text-end o_price_total">$22,137.50</td>
                             </tr>
                         </table>
                     </div>

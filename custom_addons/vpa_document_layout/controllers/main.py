@@ -50,14 +50,16 @@ class VPATemplatePreview(http.Controller):
         try:
             # Get a sample document to render with REAL data
             sample_doc = template._get_sample_document()
+            _logger.info(f"🔍 Sample doc result: {sample_doc}")
 
             if not sample_doc:
                 # Fallback to hardcoded preview if no sample document
                 html_content = request.env['ir.ui.view']._render_template(
-                    'vpa_document_layout.vpa_template_preview_layout',
+                    'vpa_document_layout.vpa_layout_preview',
                     {
                         'template': template,
                         'company': template.company_id,
+                        'config': template,
                         'image_data_uri': image_data_uri,
                     }
                 )

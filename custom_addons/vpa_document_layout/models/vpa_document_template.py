@@ -537,11 +537,23 @@ class VPADocumentTemplate(models.Model):
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
             <t t-set="address">
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address", "name"], "no_marker": True}}'/>
+                <strong><span t-field="doc.partner_id.name"/></strong><br/>
+                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
             </t>
             <t t-set="information_block">
-                <strong>Customer:</strong>
-                <div t-field="doc.partner_invoice_id" t-options='{{"widget": "contact", "fields": ["name"], "no_marker": True}}'/>
+                <div t-if="doc.date_order">
+                    <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
+                    <strong t-else="">Order Date:</strong>
+                    <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                </div>
+                <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" class="mt-2">
+                    <strong>Expiration:</strong>
+                    <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                </div>
+                <div t-if="doc.user_id.name" class="mt-2">
+                    <strong>Salesperson:</strong>
+                    <span t-field="doc.user_id"/>
+                </div>
             </t>
             <t t-set="layout_document_title">
                 <t t-if="doc.state in ['draft','sent']">Quotation # </t>
@@ -550,26 +562,6 @@ class VPADocumentTemplate(models.Model):
                 <span t-field="doc.name"/>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
-                <div id="informations" class="row mt-4 mb-4">
-                    <div t-if="doc.client_order_ref" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Your Reference:</strong>
-                        <p class="m-0" t-field="doc.client_order_ref"/>
-                    </div>
-                    <div t-if="doc.date_order" class="col-auto col-3 mw-100 mb-2">
-                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
-                        <strong t-else="">Order Date:</strong>
-                        <p class="m-0" t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
-                    </div>
-                    <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Expiration:</strong>
-                        <p class="m-0" t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
-                    </div>
-                    <div t-if="doc.user_id.name" class="col-auto col-3 mw-100 mb-2">
-                        <strong>Salesperson:</strong>
-                        <p class="m-0" t-field="doc.user_id"/>
-                    </div>
-                </div>
-
                 <!-- Order Lines Table -->
                 <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
                 <t t-set="display_taxes" t-value="True"/>
@@ -609,24 +601,22 @@ class VPADocumentTemplate(models.Model):
                 </table>
 
                 <!-- Totals -->
-                <div class="clearfix">
-                    <div id="total" class="row">
-                        <div class="col-6 ms-auto">
-                            <table class="table table-sm">
-                                <tr>
-                                    <td>Untaxed Amount</td>
-                                    <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Taxes</td>
-                                    <td class="text-end"><span t-field="doc.amount_tax"/></td>
-                                </tr>
-                                <tr class="border-black">
-                                    <td><strong>Total</strong></td>
-                                    <td class="text-end"><strong><span t-field="doc.amount_total"/></strong></td>
-                                </tr>
-                            </table>
-                        </div>
+                <div class="clearfix" style="clear: both; overflow: auto;">
+                    <div id="total" style="float: right; width: 50%%; max-width: 500px; min-width: 300px;">
+                        <table class="table table-sm o_total_table">
+                            <tr>
+                                <td>Untaxed Amount</td>
+                                <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
+                            </tr>
+                            <tr>
+                                <td>Taxes</td>
+                                <td class="text-end"><span t-field="doc.amount_tax"/></td>
+                            </tr>
+                            <tr class="border-black">
+                                <td><strong>Total</strong></td>
+                                <td class="text-end o_price_total"><span t-field="doc.amount_total"/></td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
 
@@ -806,19 +796,24 @@ class VPADocumentTemplate(models.Model):
                 border-collapse: collapse !important;
                 width: 100%% !important;
                 margin-top: 20px !important;
+                border: 1px solid #dee2e6 !important;
             }
             .o_report_layout_vpa table.o_total_table td {
-                padding: 8px 12px !important;
-                border: none !important;
+                padding: 10px 12px !important;
+                border: 1px solid #dee2e6 !important;
                 font-size: 10pt !important;
             }
             .o_report_layout_vpa table.o_total_table tr {
-                border-bottom: 1px solid #e0e0e0 !important;
+                border-bottom: 1px solid #dee2e6 !important;
             }
             .o_report_layout_vpa table.o_total_table tr:last-child {
                 border-top: 2px solid #000 !important;
+                background-color: #f8f9fa !important;
                 font-weight: bold !important;
                 font-size: 11pt !important;
+            }
+            .o_report_layout_vpa table.o_total_table tr:last-child td {
+                font-weight: bold !important;
             }
             .o_report_layout_vpa .o_price_total {
                 font-weight: bold !important;
@@ -951,9 +946,23 @@ class VPADocumentTemplate(models.Model):
         if not model:
             return False
 
-        # Get the first available document of this type
-        sample = self.env[model].search([('company_id', '=', self.company_id.id)], limit=1)
-        return sample
+        # Get the first available document of this type WITH lines/items
+        domain = [('company_id', '=', self.company_id.id)]
+
+        # Add line check based on model
+        if model == 'sale.order':
+            domain.append(('order_line', '!=', False))
+        elif model == 'account.move':
+            domain.append(('invoice_line_ids', '!=', False))
+        elif model == 'purchase.order':
+            domain.append(('order_line', '!=', False))
+        elif model == 'stock.picking':
+            domain.append(('move_ids', '!=', False))
+        elif model == 'mrp.production':
+            domain.append(('move_raw_ids', '!=', False))
+
+        sample = self.env[model].search(domain, limit=1)
+        return sample if sample else False
 
     def action_regenerate_templates(self):
         """Button action to regenerate QWeb templates"""
