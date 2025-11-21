@@ -39,7 +39,7 @@
                             <!-- Basic Info -->
                             <group>
                                 <group>
-                                    <field name="name" placeholder="e.g., Modern Sales Quote"/>
+                                    <field name="name" placeholder="e.g., Modern Sales Quote" colspan="2"/>
                                     <field name="target_app"/>
                                     <field name="document_type"/>
                                 </group>
@@ -48,6 +48,12 @@
                                     <field name="sequence"/>
                                 </group>
                             </group>
+
+                            <!-- PDF File Naming -->
+                            <separator string="PDF File Naming"/>
+                            <field name="print_name_pattern" string="Filename Format"/>
+                            <field name="print_name_preview" readonly="1" string="Example" class="text-muted fst-italic"/>
+                            <field name="print_name_expression" invisible="print_name_pattern != 'custom'" placeholder="e.g., object.name + ' - ' + object.partner_id.name" string="Custom Expression"/>
 
                             <!-- Settings Notebook -->
                             <notebook>

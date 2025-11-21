@@ -159,7 +159,8 @@ class IrActionsReport(models.Model):
 
             if template_id:
                 # Use footer-html approach
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                # HARDCODED: wkhtmltopdf runs inside Docker container, must use internal port 8069
+                base_url = "http://localhost:8069"
                 footer_url = f"{base_url}/vpa/template/footer/{template_id}"
 
                 _logger.info(f"✅ Using footer-html: {footer_url}")

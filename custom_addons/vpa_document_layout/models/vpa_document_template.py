@@ -17,6 +17,71 @@ class VPADocumentTemplate(models.Model):
     sequence = fields.Integer(string='Sequence', default=10, help='Order in print menu')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
+    # PDF Filename Configuration
+    print_name_pattern = fields.Selection([
+        ('doc_name', 'Document Number Only (e.g., S00001)'),
+        ('doc_customer', 'Document Number - Customer Name (e.g., S00001 - Deco Addict)'),
+        ('doc_customer_ref', 'Document Number - Customer Name (Ref) (e.g., S00001 - Deco Addict (REF123))'),
+        ('doc_customer_ref_date', 'Document Number - Customer Name (Ref) - Date (e.g., S00001 - Deco Addict (REF123) - 2025-01-15)'),
+        ('customer_doc', 'Customer Name - Document Number (e.g., Deco Addict - S00001)'),
+        ('doc_date', 'Document Number - Date (e.g., S00001 - 2025-01-15)'),
+        ('custom', 'Custom Expression'),
+    ], string='PDF Filename Pattern', default='doc_customer_ref', required=True,
+       help='Choose how the PDF filename will appear when downloaded')
+
+    print_name_expression = fields.Char(
+        string='Custom Filename Expression',
+        help='Python expression for PDF filename. Available: object (document record). Example: object.name + " - " + object.partner_id.name'
+    )
+
+    @api.depends('print_name_pattern', 'print_name_expression')
+    def _compute_print_name_preview(self):
+        """Show preview of what the filename will look like"""
+        for record in self:
+            if record.print_name_pattern == 'doc_name':
+                record.print_name_preview = 'S00001.pdf'
+            elif record.print_name_pattern == 'doc_customer':
+                record.print_name_preview = 'S00001 - Deco Addict.pdf'
+            elif record.print_name_pattern == 'doc_customer_ref':
+                record.print_name_preview = 'S00001 - Deco Addict (REF123).pdf'
+            elif record.print_name_pattern == 'doc_customer_ref_date':
+                record.print_name_preview = 'S00001 - Deco Addict (REF123) - 2025-01-15.pdf'
+            elif record.print_name_pattern == 'customer_doc':
+                record.print_name_preview = 'Deco Addict - S00001.pdf'
+            elif record.print_name_pattern == 'doc_date':
+                record.print_name_preview = 'S00001 - 2025-01-15.pdf'
+            elif record.print_name_pattern == 'custom':
+                record.print_name_preview = 'Custom expression...'
+            else:
+                record.print_name_preview = ''
+
+    print_name_preview = fields.Char(string='Preview', compute='_compute_print_name_preview', store=False)
+
+    def _get_print_name_expression(self):
+        """Get the actual Python expression based on pattern selection
+        Note: Expressions must be compatible with safe_eval which doesn't support hasattr, time module, etc.
+        """
+        self.ensure_one()
+
+        if self.print_name_pattern == 'doc_name':
+            return "object.name or 'Document'"
+        elif self.print_name_pattern == 'doc_customer':
+            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer')"
+        elif self.print_name_pattern == 'doc_customer_ref':
+            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
+        elif self.print_name_pattern == 'doc_customer_ref_date':
+            # Simplified version without hasattr - safe_eval doesn't support it
+            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else '')) + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
+        elif self.print_name_pattern == 'customer_doc':
+            return "(object.partner_id.name or 'Customer') + ' - ' + (object.name or 'Document')"
+        elif self.print_name_pattern == 'doc_date':
+            # Simplified version without hasattr
+            return "(object.name or 'Document') + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
+        elif self.print_name_pattern == 'custom':
+            return self.print_name_expression or "(object.name or 'Document')"
+        else:
+            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer')"
+
     # Logo - related field like base.document.layout
     logo = fields.Binary(related='company_id.logo', readonly=True, string="Company Logo")
     partner_id = fields.Many2one(related='company_id.partner_id', readonly=True, string="Company Partner")
@@ -261,10 +326,11 @@ class VPADocumentTemplate(models.Model):
                     # Update report action to use new paperformat
                     template.report_action_id.write({'paperformat_id': paperformat.id})
 
-        # Update report action name if name changed
-        for template in self:
-            if template.report_action_id:
-                template._update_report_action()
+        # Update report action name or print_report_name if changed
+        if 'name' in vals or 'print_name_pattern' in vals or 'print_name_expression' in vals:
+            for template in self:
+                if template.report_action_id:
+                    template._update_report_action()
 
         return result
 
@@ -321,10 +387,8 @@ class VPADocumentTemplate(models.Model):
             # Update existing paperformat to ensure zero margins
             paperformat.write(paperformat_values)
 
-        # Build print report name expression
-        # Format: Quote Number - Client Name (Customer Reference)
-        # Example: S00001 - Deco Addict (EA123) or S00001 - Deco Addict (if no ref)
-        print_name_expr = "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
+        # Get print name expression based on pattern selection
+        print_name_expr = self._get_print_name_expression()
 
         # Create report action
         report_action = self.env['ir.actions.report'].create({
@@ -348,8 +412,12 @@ class VPADocumentTemplate(models.Model):
         """Update existing report action"""
         self.ensure_one()
         if self.report_action_id:
+            # Get print name expression based on pattern selection
+            print_name_expr = self._get_print_name_expression()
+
             self.report_action_id.write({
                 'name': self.name,
+                'print_report_name': print_name_expr,
             })
 
     def action_load_company_details(self):
@@ -535,7 +603,7 @@ class VPADocumentTemplate(models.Model):
                 main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
-            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
             <t t-set="address">
                 <strong><span t-field="doc.partner_id.name"/></strong><br/>
                 <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
