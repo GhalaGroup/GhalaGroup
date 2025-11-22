@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- UPDATE existing wards to point to correct district regions -->
+        <!-- This file has noupdate="0" to force updates -->
+
+        <!-- Update Kinondoni District Wards -->
+        <record id="ward_masaki" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_oyster_bay" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mikocheni" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_msasani" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_kawe" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mbezi" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_sinza" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mwenge" model="res.country.ward">
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <!-- Update Ilala District Wards -->
+        <record id="ward_kariakoo" model="res.country.ward">
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_kisutu" model="res.country.ward">
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_upanga" model="res.country.ward">
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_pugu" model="res.country.ward">
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_buguruni" model="res.country.ward">
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <!-- Update Temeke District Wards -->
+        <record id="ward_mbagala" model="res.country.ward">
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_chang_ombe" model="res.country.ward">
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_miburani" model="res.country.ward">
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_mtoni" model="res.country.ward">
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <!-- Update Ubungo District Wards -->
+        <record id="ward_manzese" model="res.country.ward">
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_makumbusho" model="res.country.ward">
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_kimara" model="res.country.ward">
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_saranga" model="res.country.ward">
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <!-- Update Kigamboni District Wards -->
+        <record id="ward_kigamboni_town" model="res.country.ward">
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+        <record id="ward_mbagala_kuu" model="res.country.ward">
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+        <record id="ward_vijibweni" model="res.country.ward">
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+    </data>
+</odoo>

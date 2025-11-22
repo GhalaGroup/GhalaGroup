@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Partner Form View for Tanzania Localization -->
+        <record id="view_partner_form_vpa_tanzania" model="ir.ui.view">
+            <field name="name">res.partner.form.vpa.tanzania</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">17</field>
+            <field name="arch" type="xml">
+
+                <!-- Update TIN (VAT) field placeholder -->
+                <xpath expr="//field[@name='vat']" position="attributes">
+                    <attribute name="placeholder">123-456-789</attribute>
+                </xpath>
+
+                <!-- Add VRN field right after TIN (preserving existing VRN data from partner_vat_number module) -->
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="vrn" placeholder="40-1234567-X"/>
+                </xpath>
+
+                <!-- Add invisible country_code field for visibility conditions -->
+                <xpath expr="//field[@name='country_id']" position="before">
+                    <field name="country_code" invisible="1"/>
+                </xpath>
+
+                <!-- Update P.O. Box (Zip) field placeholder -->
+                <xpath expr="//field[@name='zip']" position="attributes">
+                    <attribute name="placeholder">P.O. Box 12345</attribute>
+                </xpath>
+
+                <!-- NEW ORDER: Ward comes FIRST (before City) -->
+                <xpath expr="//field[@name='city']" position="before">
+                    <field name="ward_id"
+                           placeholder="Select Ward"
+                           options="{'no_create': True, 'no_open': True}"/>
+                </xpath>
+
+                <!-- Region comes AFTER Ward (auto-filled, but can be manually changed) -->
+                <xpath expr="//field[@name='ward_id']" position="after">
+                    <field name="region_id"
+                           placeholder="Region"
+                           options="{'no_create': True, 'no_open': True}"/>
+                </xpath>
+
+                <!-- City comes LAST (auto-filled from Region, but can be manually changed) -->
+                <xpath expr="//field[@name='city']" position="attributes">
+                    <attribute name="placeholder">City</attribute>
+                </xpath>
+
+                <!-- Hide State field for Tanzania (replaced by Ward) -->
+                <xpath expr="//field[@name='state_id']" position="attributes">
+                    <attribute name="invisible">country_code == 'TZ'</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+        <!-- Inherit Partner Tree/List View -->
+        <record id="view_partner_tree_vpa_tanzania" model="ir.ui.view">
+            <field name="name">res.partner.tree.vpa.tanzania</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+
+                <!-- Add VRN column after TIN in list view -->
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="vrn" optional="hide"/>
+                </xpath>
+
+                <!-- Add Region column -->
+                <xpath expr="//field[@name='country_id']" position="after">
+                    <field name="region_id" optional="hide"/>
+                </xpath>
+
+                <!-- Add Ward column -->
+                <xpath expr="//field[@name='region_id']" position="after">
+                    <field name="ward_id" optional="hide"/>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>
