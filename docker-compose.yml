@@ -9,7 +9,6 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-      - ./backup_files:/backup
     ports:
       - "5436:5432"
     restart: unless-stopped
@@ -31,7 +30,6 @@ services:
       - ./custom_addons:/mnt/custom-addons
       - ./config:/etc/odoo
       - ./data:/var/lib/odoo
-      - ./backup_files/filestore:/mnt/filestore
     ports:
       - "8071:8069"
       - "8072:8072"

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <record model="res.groups" id="vpa_effective_date_change_group">
+        <field name="name">VPA: Change Effective Date</field>
+        <field name="comment">Users in this group can change effective dates of validated stock transfers.</field>
+    </record>
+</odoo>
