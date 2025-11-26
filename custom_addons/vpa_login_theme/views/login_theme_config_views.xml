@@ -210,7 +210,7 @@
         <field name="name">VPA Applications</field>
         <field name="parent_id" ref="base.menu_administration"/>
         <field name="sequence">4</field>
-        <field name="group_ids" eval="[(5, 0, 0)]"/>
+        <field name="group_ids" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>
 
     <!-- Login Theme Submenu - Direct access to login theme config -->
@@ -219,7 +219,7 @@
         <field name="parent_id" ref="menu_vpa_applications"/>
         <field name="sequence">1</field>
         <field name="action" ref="action_login_theme_config"/>
-        <field name="group_ids" eval="[(5, 0, 0)]"/>
+        <field name="group_ids" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>
 
 </odoo>
