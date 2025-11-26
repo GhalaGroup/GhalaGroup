@@ -87,6 +87,7 @@ Make your Odoo login page truly yours with VPA Login Theme!
         'views/login_theme_config_views.xml',
         'views/web_templates.xml',
         'data/default_theme_data.xml',
+        'data/fix_menu_groups.xml',  # MUST be last to force menu groups
     ],
     'assets': {
         'web.assets_frontend': [

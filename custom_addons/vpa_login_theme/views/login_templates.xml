@@ -6,4 +6,18 @@
             <link rel="stylesheet" type="text/css" href="/vpa_login_theme/get_theme_css"/>
         </xpath>
     </template>
+
+    <!-- Override company logo on login page -->
+    <template id="login_company_logo_override" name="VPA Login Theme - Company Logo Override" inherit_id="web.login" priority="99">
+        <xpath expr="//img[@alt='Logo']" position="replace">
+            <img src="/vpa_login_theme/company_logo" alt="Logo" style="max-height: 120px; width: auto;"/>
+        </xpath>
+    </template>
+
+    <!-- Override company logo on database selector -->
+    <template id="database_selector_logo_override" name="VPA Login Theme - Database Selector Logo" inherit_id="web.database_selector" priority="99">
+        <xpath expr="//img[@alt='Logo']" position="replace">
+            <img src="/vpa_login_theme/company_logo" alt="Logo" style="max-height: 120px; width: auto;"/>
+        </xpath>
+    </template>
 </odoo>
