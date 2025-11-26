@@ -206,20 +206,20 @@
     </record>
 
     <!-- VPA Applications Parent Menu (appears as top menu in Settings) -->
-    <record id="menu_vpa_applications" model="ir.ui.menu" forcecreate="True">
-        <field name="name">VPA Applications</field>
-        <field name="parent_id" ref="base.menu_administration"/>
-        <field name="sequence">4</field>
-        <field name="group_ids" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
+    <menuitem
+        id="menu_vpa_applications"
+        name="VPA Applications"
+        parent="base.menu_administration"
+        sequence="4"
+        groups="base.group_system"/>
 
     <!-- Login Theme Submenu - Direct access to login theme config -->
-    <record id="menu_vpa_login_theme" model="ir.ui.menu" forcecreate="True">
-        <field name="name">Login Theme</field>
-        <field name="parent_id" ref="menu_vpa_applications"/>
-        <field name="sequence">1</field>
-        <field name="action" ref="action_login_theme_config"/>
-        <field name="group_ids" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
+    <menuitem
+        id="menu_vpa_login_theme"
+        name="Login Theme"
+        parent="menu_vpa_applications"
+        sequence="1"
+        action="action_login_theme_config"
+        groups="base.group_system"/>
 
 </odoo>

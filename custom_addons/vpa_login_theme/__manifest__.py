@@ -93,6 +93,7 @@ Make your Odoo login page truly yours with VPA Login Theme!
             'vpa_login_theme/static/src/css/login_theme.css',
         ],
     },
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'application': False,
     'auto_install': False,
