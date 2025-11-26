@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Module 17: VPA Product Catalogue | VPA Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+        .sidemenu { width: 280px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; position: fixed; height: 100vh; }
+        .sidemenu nav ul { list-style: none; }
+        .sidemenu nav ul li a { display: block; padding: 12px 20px; color: rgba(255,255,255,0.9); text-decoration: none; }
+        .sidemenu nav ul li a.active { background: #3498db; border-left: 4px solid #fff; font-weight: bold; }
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .content-header { background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; }
+        .content-header h1 { font-size: 2.5em; }
+        .content-header .badge { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; margin-right: 10px; }
+        .content-section { background: white; padding: 30px; margin-bottom: 20px; border-radius: 10px; }
+        .content-section h2 { color: #3498db; font-size: 1.8em; margin-bottom: 20px; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .price-tag { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px 30px; border-radius: 10px; font-size: 2em; font-weight: bold; margin: 20px 0; display: inline-block; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .feature-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; }
+        .success-box { background: #d4edda; border-left: 5px solid #28a745; padding: 20px; margin: 20px 0; }
+        .code-block { background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: monospace; font-size: 0.9em; line-height: 1.5; }
+        .nav-buttons { display: flex; justify-content: space-between; margin: 40px 0; }
+        .nav-buttons a { background: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; }
+        ul { margin-left: 20px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <nav>
+            <ul>
+                <li><a href="module_01_base.html">1. BASE</a></li>
+                <li><a href="module_02_configurator.html">2. Configurator</a></li>
+                <li><a href="module_16_delivery_scheduling.html">16. Delivery Scheduling</a></li>
+                <li><a href="module_17_product_catalogue.html" class="active">17. Product Catalogue</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Module 17: vpa_product_catalogue</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">Series/Collection Management with 235 Products & Technical Files</p>
+            <div style="margin-top: 15px;">
+                <span class="badge">Phase 1</span>
+                <span class="badge">Universal Module</span>
+                <span class="badge">$6,000</span>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p><strong>vpa_product_catalogue</strong> manages product collections (Quadroto, Arabica, ModernCraft, Ottomania, Doppio, W-Series, SW-Series) with 235 products. Links catalog items to Odoo inventory, tracks technical files (SolidWorks, Sketchup, 3D Renders, eDrawing, DXF), and manages dimension variants.</p>
+            <div class="success-box">
+                <strong>Based on Real Data:</strong> This module is designed around your actual Product Catalogue.csv with 8 series, 235+ products, and dimension-based variants (W1200×D750, W1400×D750, etc.).
+            </div>
+            <div class="price-tag">$6,000</div>
+        </div>
+
+        <div class="content-section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item"><strong>Series Management</strong><br>8 collections (Quadroto, Arabica, etc.)</div>
+                <div class="feature-item"><strong>Product Families</strong><br>Group dimension variants</div>
+                <div class="feature-item"><strong>Multi-Image Galleries</strong><br>Multiple photos per product</div>
+                <div class="feature-item"><strong>Technical File Tracking</strong><br>SolidWorks, Sketchup, DXF, 3D renders</div>
+                <div class="feature-item"><strong>Inventory Linking</strong><br>Bidirectional catalog ↔ product link</div>
+                <div class="feature-item"><strong>Customer Showcase</strong><br>Customer-facing product browser</div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Real Example from Your Data</h2>
+            <div class="code-block">
+Series: Quadroto
+  ├─ Office Desks (45 variants)
+  │  ├─ Office Desk - 2 Side Legs
+  │  │  ├─ W1200×D750 → $235 (C1M/OFC0401)
+  │  │  ├─ W1400×D750 → $260 (C1M/OFC0400)
+  │  │  ├─ W1500×D750 → $270 (C1M/OFC0402)
+  │  │  ├─ W1600×D750 → $280 (C1M/OFC0251)
+  │  │  ├─ W1800×D750 → $315 (C1M/OFC0252)
+  │  │  └─ W2000×D750 → $345 (C1M/OFC0253)
+  │
+  ├─ Workstations (62 variants)
+  │  └─ 4 Person Workstation - Front Separator
+  │     ├─ W2000×D1200 → $680 (C1M/OFC0448)
+  │     ├─ W2400×D1200 → $725 (C1M/OFC0279)
+  │     └─ W2800×D1200 → $765 (C1M/OFC0449)
+  │
+  └─ Meeting Tables (38 variants)
+
+Total: 235+ products across 8 series
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Business Value</h2>
+            <ul>
+                <li><strong>Centralized Product Data:</strong> One source of truth for 235 products</li>
+                <li><strong>Technical File Management:</strong> Track all CAD/design files</li>
+                <li><strong>Customer Self-Service:</strong> Browse products 24/7</li>
+                <li><strong>Sales Enablement:</strong> Quick product lookup with images</li>
+                <li><strong>Variant Management:</strong> Easily manage dimension families</li>
+            </ul>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="module_16_delivery_scheduling.html">← Previous Module</a>
+            <a href="../MODULAR_ARCHITECTURE.html">View Full System →</a>
+        </div>
+
+        <footer style="text-align: center; padding: 40px 0; color: #7f8c8d;">
+            <p><strong>VPA Furniture Studio</strong> | Module 17 of 17 - COMPLETE</p>
+            <p>© 2025 VPA Furniture Studio. All rights reserved.</p>
+        </footer>
+    </main>
+</body>
+</html>

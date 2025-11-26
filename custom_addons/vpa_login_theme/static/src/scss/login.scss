@@ -1,0 +1,29 @@
+// VPA Login Theme - Red Branding
+// Override Odoo's default purple login button with red
+
+.oe_login_form {
+    .btn-primary {
+        background-color: #DC143C !important; // Crimson red
+        border-color: #DC143C !important;
+
+        &:hover {
+            background-color: #B22222 !important; // Darker red on hover
+            border-color: #B22222 !important;
+        }
+
+        &:focus, &:active {
+            background-color: #B22222 !important;
+            border-color: #B22222 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 20, 60, 0.5) !important;
+        }
+    }
+}
+
+// Optional: Style links on login page to match
+.oe_login_form a {
+    color: #DC143C;
+
+    &:hover {
+        color: #B22222;
+    }
+}

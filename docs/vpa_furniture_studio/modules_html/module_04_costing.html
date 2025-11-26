@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4: vpa_furniture_costing | VPA Furniture Studio</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; display: flex; min-height: 100vh; }
+        .sidemenu { width: 280px; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: #ecf0f1; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidemenu::-webkit-scrollbar { width: 8px; }
+        .sidemenu::-webkit-scrollbar-track { background: #2c3e50; }
+        .sidemenu::-webkit-scrollbar-thumb { background: #f39c12; border-radius: 4px; }
+        .sidemenu-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 2px solid #f39c12; }
+        .sidemenu-header h2 { font-size: 18px; margin-bottom: 5px; color: #f39c12; }
+        .version { font-size: 12px; color: #95a5a6; }
+        .sidemenu nav { padding: 20px 0; }
+        .category { padding: 15px 20px 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #95a5a6; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+        .category:first-child { border-top: none; margin-top: 0; }
+        .sidemenu ul { list-style: none; }
+        .sidemenu li { margin: 0; }
+        .sidemenu a { display: block; padding: 10px 20px; color: #ecf0f1; text-decoration: none; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidemenu a:hover { background: rgba(243, 156, 18, 0.2); border-left-color: #f39c12; padding-left: 25px; }
+        .sidemenu a.active { background: rgba(243, 156, 18, 0.3); border-left-color: #f39c12; font-weight: 600; color: #fff; }
+        .doc-links { padding: 20px; border-top: 2px solid rgba(255,255,255,0.1); margin-top: 20px; }
+        .doc-links a { display: block; padding: 8px 0; color: #3498db; text-decoration: none; font-size: 13px; }
+        .doc-links a:hover { color: #5dade2; }
+        .content { margin-left: 280px; flex: 1; padding: 40px 60px; background: #f8f9fa; }
+        .module-header { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 40px; box-shadow: 0 5px 20px rgba(243, 156, 18, 0.3); }
+        .module-header h1 { font-size: 36px; margin-bottom: 10px; }
+        .module-meta { display: flex; gap: 30px; margin-top: 20px; font-size: 14px; }
+        .module-meta span { display: flex; align-items: center; gap: 8px; }
+        .price-tag { background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 24px; font-weight: bold; }
+        .section { background: white; padding: 30px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .section h2 { color: #2c3e50; font-size: 28px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #f39c12; }
+        .section h3 { color: #34495e; font-size: 20px; margin-top: 25px; margin-bottom: 15px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+        .feature-card { background: #f8f9fa; padding: 20px; border-radius: 6px; border-left: 4px solid #f39c12; }
+        .feature-card h4 { color: #f39c12; margin-bottom: 10px; font-size: 16px; }
+        .info-box { background: #e8f4f8; border-left: 4px solid #3498db; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        .warning-box { background: #fef5e7; border-left: 4px solid #f39c12; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        .success-box { background: #e8f8f5; border-left: 4px solid #27ae60; padding: 15px 20px; margin: 20px 0; border-radius: 4px; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 14px; color: #f39c12; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 20px; border-radius: 6px; overflow-x: auto; margin: 20px 0; }
+        pre code { background: none; color: #ecf0f1; padding: 0; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #34495e; color: white; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        ul, ol { margin: 15px 0; padding-left: 30px; }
+        li { margin: 8px 0; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 30px; border-top: 2px solid #ecf0f1; }
+        .nav-button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3); }
+        .nav-button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4); }
+        .nav-button.prev::before { content: "← "; }
+        .nav-button.next::after { content: " →"; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>🏗️ VPA Furniture Studio</h2>
+            <div class="version">Version 1.0 | Odoo 19</div>
+        </div>
+        <nav>
+            <div class="category">Core Foundation</div>
+            <ul><li><a href="module_01_base.html">1. BASE (Foundation)</a></li></ul>
+            <div class="category">Sales & Configuration</div>
+            <ul>
+                <li><a href="module_02_configurator.html">2. Configurator</a></li>
+                <li><a href="module_03_catalog.html">3. Catalog</a></li>
+                <li><a href="module_17_product_catalogue.html">17. Product Catalogue</a></li>
+            </ul>
+            <div class="category">Costing & Reporting</div>
+            <ul>
+                <li><a href="module_04_costing.html" class="active">4. Costing</a></li>
+                <li><a href="module_05_reports.html">5. Reports</a></li>
+            </ul>
+            <div class="category">Manufacturing</div>
+            <ul>
+                <li><a href="module_06_manufacturing.html">6. Manufacturing</a></li>
+                <li><a href="module_07_bom_smart.html">7. BOM Smart</a></li>
+                <li><a href="module_08_nesting.html">8. Nesting/CNC</a></li>
+                <li><a href="module_12_shopfloor.html">12. Shop Floor</a></li>
+            </ul>
+            <div class="category">Inventory & Warehouse</div>
+            <ul>
+                <li><a href="module_09_inventory_advanced.html">9. Inventory Advanced</a></li>
+                <li><a href="module_10_inventory_barcode.html">10. Inventory Barcode</a></li>
+                <li><a href="module_11_label_designer.html">11. Label Designer</a></li>
+            </ul>
+            <div class="category">Quality & Analytics</div>
+            <ul>
+                <li><a href="module_13_quality_control.html">13. Quality Control</a></li>
+                <li><a href="module_14_analytics.html">14. Analytics</a></li>
+            </ul>
+            <div class="category">Customer Experience</div>
+            <ul>
+                <li><a href="module_15_portal.html">15. Portal</a></li>
+                <li><a href="module_16_delivery_scheduling.html">16. Delivery Scheduling</a></li>
+            </ul>
+        </nav>
+        <div class="doc-links">
+            <strong style="color: #95a5a6; font-size: 12px;">📚 DOCUMENTATION</strong>
+            <a href="../README.md">📖 Main Overview</a>
+            <a href="../PACKAGES.md">💰 Packages & Pricing</a>
+            <a href="../MODULE_DEPENDENCIES.md">🔗 Dependencies</a>
+            <a href="../MODULAR_ARCHITECTURE.html">🏗️ Full Architecture</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="module-header">
+            <h1>💰 Module 4: vpa_furniture_costing</h1>
+            <p style="font-size: 18px; margin-top: 10px;">Advanced Historical Cost Tracking & Profitability Analysis</p>
+            <div class="module-meta">
+                <span><strong>📦 Phase:</strong> Phase 1 (Months 1-6)</span>
+                <span><strong>🏷️ Type:</strong> Costing & Reporting</span>
+                <span><strong>⚡ Priority:</strong> High</span>
+                <span class="price-tag">$7,000</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Overview</h2>
+            <p>The <strong>vpa_furniture_costing</strong> module provides <strong>historical cost tracking</strong> using weighted averages from actual production data. Unlike traditional systems that rely on fixed estimates, this module tracks real costs and automatically updates profitability metrics.</p>
+
+            <div class="warning-box">
+                <strong>🔥 Critical Innovation:</strong> This system uses <strong>actual production costs</strong> (not estimates) to calculate weighted averages, giving you the most accurate profitability data possible.
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📊 Historical Cost Tracking</h4>
+                    <p>Weighted average costs from actual production runs</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💹 Real-Time Profitability</h4>
+                    <p>Instant profit margin calculation on every order</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔍 Cost Breakdown</h4>
+                    <p>Detailed analysis: materials, labor, overhead</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📈 Trend Analysis</h4>
+                    <p>Cost trends over time with variance reports</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Key Features</h2>
+
+            <h3>1. Historical Cost Calculation</h3>
+            <pre><code># How Weighted Average Works:
+Production Run 1: Door - Materials: $45, Labor: $15, Total: $60
+Production Run 2: Door - Materials: $48, Labor: $14, Total: $62
+Production Run 3: Door - Materials: $46, Labor: $16, Total: $62
+
+Weighted Average Cost = (60 + 62 + 62) / 3 = $61.33
+
+When Production Run 4 completes, system automatically recalculates:
+Weighted Average Cost = (60 + 62 + 62 + 64) / 4 = $62.00</code></pre>
+
+            <div class="info-box">
+                <strong>💡 Why This Matters:</strong> Fixed estimates become outdated. Weighted averages from actual production give you real-time insight into true costs and profitability.
+            </div>
+
+            <h3>2. Cost Components</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cost Component</th>
+                        <th>How Calculated</th>
+                        <th>Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Material Cost</strong></td>
+                        <td>Sum of all materials consumed</td>
+                        <td>Stock moves from MO</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Labor Cost</strong></td>
+                        <td>Actual time × hourly rate per operation</td>
+                        <td>Work order time tracking</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Overhead</strong></td>
+                        <td>% of material + labor (configurable)</td>
+                        <td>Company overhead rate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Waste/Scrap</strong></td>
+                        <td>Materials marked as scrap</td>
+                        <td>Scrap orders</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rework</strong></td>
+                        <td>Additional time/materials from quality failures</td>
+                        <td>Quality control module</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3. Profitability Analysis</h3>
+            <ul>
+                <li><strong>Order-Level Profit:</strong> Actual profit/margin per sales order</li>
+                <li><strong>Product-Level Profit:</strong> Average profitability per product type</li>
+                <li><strong>Customer-Level Profit:</strong> Total profitability per customer</li>
+                <li><strong>Material-Level Cost:</strong> Trends in material costs over time</li>
+                <li><strong>Labor Efficiency:</strong> Actual vs. standard labor costs</li>
+            </ul>
+
+            <h3>4. Cost Variance Reports</h3>
+            <pre><code>Product: Office Desk (W1200×D750)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Last 30 Days Cost Analysis:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Standard Estimated Cost: $185.00
+Actual Weighted Avg Cost: $192.35
+Variance: +$7.35 (3.97% over)
+
+Cost Breakdown:
+  Materials:  $125.00 (estimate) → $128.50 (actual) [+2.8%]
+  Labor:       $45.00 (estimate) →  $48.85 (actual) [+8.6%]
+  Overhead:    $15.00 (estimate) →  $15.00 (actual) [0.0%]
+
+Top Cost Drivers:
+  1. Oak Veneer: +$2.50 (price increase)
+  2. Finishing Labor: +$3.85 (inefficiency)
+
+Action Recommended: Review finishing process efficiency</code></pre>
+
+            <div class="warning-box">
+                <strong>⚠️ Cost Alerts:</strong> System automatically flags products with cost variance &gt; 10% for management review.
+            </div>
+
+            <h3>5. Multi-Currency Support</h3>
+            <ul>
+                <li><strong>Cost Tracking Currency:</strong> Track costs in base currency (TZS)</li>
+                <li><strong>Pricing Currency:</strong> Quote in USD/EUR with live exchange rates</li>
+                <li><strong>Smart Rounding:</strong> TZS rounds to 1,000; USD/EUR to whole units</li>
+                <li><strong>Exchange Rate History:</strong> Historical rate tracking for accurate profitability</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Technical Architecture</h2>
+
+            <h3>Historical Cost Model</h3>
+            <pre><code>class FurnitureProductionCost(models.Model):
+    _name = 'furniture.production.cost'
+    _description = 'Historical Production Cost Record'
+
+    production_id = fields.Many2one('mrp.production', 'Manufacturing Order')
+    product_id = fields.Many2one('product.product', 'Product', required=True)
+
+    # Cost Breakdown
+    material_cost = fields.Monetary('Material Cost', currency_field='currency_id')
+    labor_cost = fields.Monetary('Labor Cost', currency_field='currency_id')
+    overhead_cost = fields.Monetary('Overhead Cost', currency_field='currency_id')
+    waste_cost = fields.Monetary('Waste/Scrap Cost', currency_field='currency_id')
+    rework_cost = fields.Monetary('Rework Cost', currency_field='currency_id')
+    total_cost = fields.Monetary('Total Cost', compute='_compute_total_cost', store=True)
+
+    # Quantity
+    qty_produced = fields.Float('Quantity Produced', default=1.0)
+    unit_cost = fields.Monetary('Unit Cost', compute='_compute_unit_cost', store=True)
+
+    # Metadata
+    date_produced = fields.Datetime('Production Date', default=fields.Datetime.now)
+    currency_id = fields.Many2one('res.currency', related='company_id.currency_id')
+
+    @api.depends('material_cost', 'labor_cost', 'overhead_cost', 'waste_cost', 'rework_cost')
+    def _compute_total_cost(self):
+        for rec in self:
+            rec.total_cost = (rec.material_cost + rec.labor_cost +
+                             rec.overhead_cost + rec.waste_cost + rec.rework_cost)
+
+    @api.depends('total_cost', 'qty_produced')
+    def _compute_unit_cost(self):
+        for rec in self:
+            rec.unit_cost = rec.total_cost / rec.qty_produced if rec.qty_produced else 0.0</code></pre>
+
+            <h3>Weighted Average Calculation</h3>
+            <pre><code>class ProductTemplate(models.Model):
+    _inherit = 'product.template'
+
+    # Historical Cost Fields
+    weighted_avg_cost = fields.Monetary('Weighted Avg Cost',
+        compute='_compute_weighted_avg_cost', store=True,
+        currency_field='currency_id')
+
+    historical_cost_count = fields.Integer('Cost Records Count',
+        compute='_compute_historical_costs')
+
+    last_production_cost = fields.Monetary('Last Production Cost',
+        compute='_compute_historical_costs',
+        currency_field='currency_id')
+
+    @api.depends('furniture_production_cost_ids.unit_cost')
+    def _compute_weighted_avg_cost(self):
+        for product in self:
+            cost_records = product.furniture_production_cost_ids.filtered(
+                lambda r: r.date_produced >= (fields.Datetime.now() - timedelta(days=90))
+            )
+            if cost_records:
+                total_cost = sum(cost_records.mapped('total_cost'))
+                total_qty = sum(cost_records.mapped('qty_produced'))
+                product.weighted_avg_cost = total_cost / total_qty if total_qty else 0.0
+            else:
+                product.weighted_avg_cost = product.standard_price</code></pre>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Dependencies</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Module</th>
+                        <th>Why Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>vpa_furniture_studio (BASE)</strong></td>
+                        <td>Product models</td>
+                    </tr>
+                    <tr>
+                        <td><strong>vpa_furniture_manufacturing</strong></td>
+                        <td>Production orders for cost tracking</td>
+                    </tr>
+                    <tr>
+                        <td><strong>mrp</strong> (Odoo)</td>
+                        <td>Manufacturing operations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>account</strong> (Odoo)</td>
+                        <td>Cost accounting integration</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Optional Integrations</h3>
+            <ul>
+                <li><strong>vpa_furniture_analytics:</strong> Advanced cost analytics and predictive modeling</li>
+                <li><strong>vpa_quality_control:</strong> Include rework costs in historical tracking</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>💼 Business Value</h2>
+            <ul>
+                <li><strong>Accurate Profitability:</strong> Know real profit margins, not estimates</li>
+                <li><strong>Pricing Intelligence:</strong> Set prices based on actual costs</li>
+                <li><strong>Cost Control:</strong> Identify cost overruns before they impact bottom line</li>
+                <li><strong>Trend Analysis:</strong> Spot material price increases early</li>
+                <li><strong>Process Efficiency:</strong> Identify labor inefficiencies by comparing standard vs. actual</li>
+                <li><strong>Decision Support:</strong> Data-driven decisions on product profitability</li>
+            </ul>
+
+            <div class="success-box">
+                <strong>📊 ROI:</strong> Companies typically discover 15-20% of products are unprofitable after implementing historical cost tracking. Adjusting pricing on these products alone typically covers module cost within 2-3 months.
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="module_03_catalog.html" class="nav-button prev">Module 3: Catalog</a>
+            <a href="module_05_reports.html" class="nav-button next">Module 5: Reports</a>
+        </div>
+    </main>
+</body>
+</html>

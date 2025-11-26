@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 6: VPA Furniture Manufacturing | VPA Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+
+        /* Side Menu */
+        .sidemenu {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .sidemenu-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .sidemenu-header h2 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .sidemenu-header .version {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .sidemenu nav ul {
+            list-style: none;
+        }
+
+        .sidemenu nav ul li {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidemenu nav ul li a {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .sidemenu nav ul li a:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 30px;
+        }
+
+        .sidemenu nav ul li a.active {
+            background: #3498db;
+            border-left: 4px solid #fff;
+            font-weight: bold;
+        }
+
+        .sidemenu .category {
+            padding: 15px 20px 8px 20px;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.5);
+            font-weight: bold;
+        }
+
+        .sidemenu-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .sidemenu-footer a {
+            display: block;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .sidemenu-footer a:hover {
+            background: #2980b9;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .content-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content-header .module-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .content-header .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #3498db;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .content-section h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .price-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .feature-item strong {
+            color: #3498db;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .code-block .keyword {
+            color: #66d9ef;
+        }
+
+        .code-block .string {
+            color: #a6e22e;
+        }
+
+        .code-block .comment {
+            color: #75715e;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+        }
+
+        .nav-buttons a {
+            background: #3498db;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-buttons a:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .nav-buttons a.disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        ul li, ol li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Side Menu -->
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>VPA Furniture Studio</h2>
+            <div class="version">Version 1.0 | Odoo 19</div>
+        </div>
+
+        <nav>
+            <div class="category">Main Documentation</div>
+            <ul>
+                <li><a href="../README.md">Main Hub</a></li>
+                <li><a href="../MODULAR_ARCHITECTURE.html">Full Specification</a></li>
+                <li><a href="../PACKAGES.md">Packages & Pricing</a></li>
+                <li><a href="../MODULE_DEPENDENCIES.md">Dependencies</a></li>
+                <li><a href="../MODULES_LIST.md">Icon Specs</a></li>
+            </ul>
+
+            <div class="category">Core Foundation</div>
+            <ul>
+                <li><a href="module_01_base.html">1. BASE (Foundation)</a></li>
+            </ul>
+
+            <div class="category">Sales & Configuration</div>
+            <ul>
+                <li><a href="module_02_configurator.html">2. Configurator</a></li>
+                <li><a href="module_03_catalog.html">3. Catalog (PDF)</a></li>
+                <li><a href="module_17_product_catalogue.html">17. Product Catalogue</a></li>
+            </ul>
+
+            <div class="category">Pricing & Finance</div>
+            <ul>
+                <li><a href="module_04_costing.html">4. Costing</a></li>
+                <li><a href="module_05_reports.html">5. Reports</a></li>
+            </ul>
+
+            <div class="category">Manufacturing</div>
+            <ul>
+                <li><a href="module_06_manufacturing.html" class="active">6. Manufacturing</a></li>
+                <li><a href="module_07_bom_smart.html">7. Smart BOMs</a></li>
+                <li><a href="module_08_nesting.html">8. Nesting (CNC)</a></li>
+            </ul>
+
+            <div class="category">Warehouse & Logistics</div>
+            <ul>
+                <li><a href="module_09_inventory_advanced.html">9. Inventory Advanced</a></li>
+                <li><a href="module_10_inventory_barcode.html">10. Barcode/RFID</a></li>
+                <li><a href="module_11_label_designer.html">11. Label Designer</a></li>
+            </ul>
+
+            <div class="category">Production Floor</div>
+            <ul>
+                <li><a href="module_12_shopfloor.html">12. Shop Floor</a></li>
+                <li><a href="module_13_quality_control.html">13. Quality Control</a></li>
+            </ul>
+
+            <div class="category">Analytics & Insights</div>
+            <ul>
+                <li><a href="module_14_analytics.html">14. Analytics</a></li>
+            </ul>
+
+            <div class="category">Customer-Facing</div>
+            <ul>
+                <li><a href="module_15_portal.html">15. Customer Portal</a></li>
+                <li><a href="module_16_delivery_scheduling.html">16. Delivery Scheduling</a></li>
+            </ul>
+        </nav>
+
+        <div class="sidemenu-footer">
+            <a href="../MODULAR_ARCHITECTURE.html">Full Specification</a>
+            <a href="../PACKAGES.md">View Pricing</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Module 6: vpa_furniture_manufacturing</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">Furniture-Specific Manufacturing & Production Orders</p>
+            <div class="module-meta">
+                <span class="badge">Phase: Phase 1</span>
+                <span class="badge">Type: Manufacturing</span>
+                <span class="badge">Status: Furniture-Specific</span>
+                <span class="badge">Price: $8,000</span>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p>
+                <strong>vpa_furniture_manufacturing</strong> extends Odoo's manufacturing module with furniture-specific production workflows. This module enables make-to-order manufacturing, automatically creates manufacturing orders from sales orders, manages work centers for furniture assembly, and handles furniture-specific routing.
+            </p>
+
+            <div class="success-box">
+                <strong>Why This Matters:</strong> Custom furniture is predominantly make-to-order (MTO). This module automates the transition from sales to production, ensuring every configured order triggers the right manufacturing processes without manual intervention.
+            </div>
+
+            <div class="price-tag">$8,000</div>
+        </div>
+
+        <div class="content-section">
+            <h2>Key Features</h2>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <strong>Make-to-Order (MTO)</strong><br>
+                    Automatically create MOs when sales orders are confirmed
+                </div>
+                <div class="feature-item">
+                    <strong>Furniture Work Centers</strong><br>
+                    Pre-configured for cutting, assembly, finishing, upholstery
+                </div>
+                <div class="feature-item">
+                    <strong>Smart Routing</strong><br>
+                    Furniture-specific production routes (door vs cabinet vs desk)
+                </div>
+                <div class="feature-item">
+                    <strong>BOM Integration</strong><br>
+                    Consumes materials from configurator BOMs
+                </div>
+                <div class="feature-item">
+                    <strong>Work Order Tracking</strong><br>
+                    Track progress at each production stage
+                </div>
+                <div class="feature-item">
+                    <strong>Component Production</strong><br>
+                    Create sub-assemblies (frames, panels, drawers)
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Technical Architecture</h2>
+
+            <h3>Manufacturing Order Extensions</h3>
+
+            <div class="code-block">
+<span class="keyword">class</span> FurnitureManufacturingOrder(models.Model):
+    <span class="string">"""Extends mrp.production with furniture-specific fields"""</span>
+    _inherit = <span class="string">'mrp.production'</span>
+
+    <span class="comment"># Furniture-specific fields</span>
+    furniture_type = fields.Selection(
+        related=<span class="string">'product_id.furniture_type'</span>,
+        string=<span class="string">'Furniture Type'</span>,
+        store=True
+    )
+
+    furniture_dimensions = fields.Char(
+        compute=<span class="string">'_compute_furniture_dimensions'</span>,
+        string=<span class="string">'Dimensions (H×W×D)'</span>
+    )
+
+    sale_order_id = fields.Many2one(
+        <span class="string">'sale.order'</span>,
+        string=<span class="string">'Sales Order'</span>,
+        compute=<span class="string">'_compute_sale_order'</span>,
+        store=True
+    )
+
+    customer_id = fields.Many2one(
+        related=<span class="string">'sale_order_id.partner_id'</span>,
+        string=<span class="string">'Customer'</span>,
+        store=True
+    )
+
+    custom_finish = fields.Char(<span class="string">'Custom Finish'</span>)
+    custom_notes = fields.Text(<span class="string">'Production Notes'</span>)
+
+    <span class="keyword">@api.depends</span>(<span class="string">'product_id'</span>)
+    <span class="keyword">def</span> _compute_furniture_dimensions(self):
+        <span class="keyword">for</span> mo <span class="keyword">in</span> self:
+            <span class="keyword">if</span> mo.product_id.is_furniture:
+                h = mo.product_id.furniture_height
+                w = mo.product_id.furniture_width
+                d = mo.product_id.furniture_depth
+                mo.furniture_dimensions = <span class="string">f"H{h}×W{w}×D{d}mm"</span>
+            <span class="keyword">else</span>:
+                mo.furniture_dimensions = False
+
+    <span class="keyword">def</span> action_confirm(self):
+        <span class="string">"""Override to add furniture-specific logic"""</span>
+        res = <span class="keyword">super</span>().action_confirm()
+
+        <span class="comment"># Auto-assign to furniture work center based on type</span>
+        <span class="keyword">for</span> mo <span class="keyword">in</span> self:
+            <span class="keyword">if</span> mo.furniture_type:
+                mo._assign_furniture_workcenter()
+
+        <span class="keyword">return</span> res
+            </div>
+
+            <h3>Work Center Configuration</h3>
+
+            <div class="code-block">
+<span class="keyword">class</span> FurnitureWorkCenter(models.Model):
+    <span class="string">"""Pre-configured work centers for furniture production"""</span>
+    _inherit = <span class="string">'mrp.workcenter'</span>
+
+    furniture_operation_type = fields.Selection([
+        (<span class="string">'cutting'</span>, <span class="string">'Cutting & Sizing'</span>),
+        (<span class="string">'cnc'</span>, <span class="string">'CNC Machining'</span>),
+        (<span class="string">'edging'</span>, <span class="string">'Edge Banding'</span>),
+        (<span class="string">'assembly'</span>, <span class="string">'Assembly'</span>),
+        (<span class="string">'finishing'</span>, <span class="string">'Finishing & Painting'</span>),
+        (<span class="string">'upholstery'</span>, <span class="string">'Upholstery'</span>),
+        (<span class="string">'hardware'</span>, <span class="string">'Hardware Installation'</span>),
+        (<span class="string">'qa'</span>, <span class="string">'Quality Check'</span>),
+        (<span class="string">'packaging'</span>, <span class="string">'Packaging'</span>),
+    ], string=<span class="string">'Operation Type'</span>)
+
+<span class="comment"># Default work centers created on module install:</span>
+work_centers = [
+    {<span class="string">'name'</span>: <span class="string">'Cutting Station'</span>, <span class="string">'type'</span>: <span class="string">'cutting'</span>, <span class="string">'capacity'</span>: 100},
+    {<span class="string">'name'</span>: <span class="string">'CNC Router'</span>, <span class="string">'type'</span>: <span class="string">'cnc'</span>, <span class="string">'capacity'</span>: 1},
+    {<span class="string">'name'</span>: <span class="string">'Edge Banding'</span>, <span class="string">'type'</span>: <span class="string">'edging'</span>, <span class="string">'capacity'</span>: 50},
+    {<span class="string">'name'</span>: <span class="string">'Assembly Floor'</span>, <span class="string">'type'</span>: <span class="string">'assembly'</span>, <span class="string">'capacity'</span>: 200},
+    {<span class="string">'name'</span>: <span class="string">'Finishing Room'</span>, <span class="string">'type'</span>: <span class="string">'finishing'</span>, <span class="string">'capacity'</span>: 75},
+]
+            </div>
+
+            <h3>Routing Templates</h3>
+
+            <div class="code-block">
+<span class="keyword">class</span> FurnitureRouting(models.Model):
+    <span class="string">"""Furniture-specific routing templates"""</span>
+    _inherit = <span class="string">'mrp.routing'</span>
+
+    furniture_type = fields.Selection([
+        (<span class="string">'door'</span>, <span class="string">'Door Production'</span>),
+        (<span class="string">'cabinet'</span>, <span class="string">'Cabinet Production'</span>),
+        (<span class="string">'desk'</span>, <span class="string">'Desk Production'</span>),
+        (<span class="string">'table'</span>, <span class="string">'Table Production'</span>),
+        (<span class="string">'chair'</span>, <span class="string">'Chair Production'</span>),
+    ])
+
+<span class="comment"># Example: Door routing (5 operations)</span>
+<span class="comment"># 1. Cutting (30 min) → Cut panels to size</span>
+<span class="comment"># 2. CNC (45 min) → Route edges, drill holes</span>
+<span class="comment"># 3. Edge Banding (20 min) → Apply edge tape</span>
+<span class="comment"># 4. Finishing (120 min) → Veneer, paint, polish</span>
+<span class="comment"># 5. QA (15 min) → Final inspection</span>
+            </div>
+
+            <h3>Dependencies</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dependency Type</th>
+                        <th>Module</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>VPA Module</strong></td>
+                        <td><code>vpa_furniture_studio</code></td>
+                        <td>Base furniture product types & dimensions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Odoo Core</strong></td>
+                        <td><code>mrp</code></td>
+                        <td>Manufacturing & production orders</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Odoo Core</strong></td>
+                        <td><code>stock</code></td>
+                        <td>Inventory & picking operations</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Odoo Core</strong></td>
+                        <td><code>sale</code></td>
+                        <td>Sales order integration</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2>Production Workflow</h2>
+
+            <h3>Make-to-Order Process</h3>
+            <ol>
+                <li><strong>Sales Order Confirmed:</strong> Customer places order for "Quadroto Desk W1600×D750 - Walnut"</li>
+                <li><strong>MO Auto-Created:</strong> System creates Manufacturing Order automatically</li>
+                <li><strong>BOM Consumed:</strong> Materials reserved from configurator BOM</li>
+                <li><strong>Work Orders Generated:</strong> Operations created based on routing</li>
+                <li><strong>Production Started:</strong> Shop floor begins work</li>
+                <li><strong>Components Tracked:</strong> Each operation marked complete</li>
+                <li><strong>Final Product:</strong> Desk moves to warehouse for delivery</li>
+            </ol>
+
+            <h3>Example: Cabinet Manufacturing Flow</h3>
+            <div class="code-block">
+<span class="comment"># Sales Order: Arabica Cabinet H2200×W900×D600</span>
+
+Manufacturing Order: MO/00245
+Product: Arabica Cabinet H2200×W900×D600
+Customer: ABC Furniture Ltd.
+Quantity: 1 Unit
+
+BOM Components:
+  ├─ MDF Sheet 2440×1220×18mm (qty: 1.5 sheets)
+  ├─ Oak Veneer (qty: 2.5 m²)
+  ├─ Drawer Slides (qty: 6 pcs)
+  ├─ Hinges (qty: 8 pcs)
+  └─ Cabinet Handles (qty: 10 pcs)
+
+Routing Operations:
+  1. [Cutting Station] - Cut MDF panels (45 min)
+  2. [CNC Router] - Route grooves & drill holes (60 min)
+  3. [Edge Banding] - Apply edge tape (30 min)
+  4. [Assembly Floor] - Assemble cabinet box (90 min)
+  5. [Finishing Room] - Apply veneer & finish (180 min)
+  6. [Assembly Floor] - Install hardware (45 min)
+  7. [QA Station] - Quality inspection (20 min)
+  8. [Packaging] - Package for delivery (15 min)
+
+Total Production Time: ~8 hours
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Business Value</h2>
+
+            <h3>ROI Metrics</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Before Automation</th>
+                        <th>After Implementation</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Order-to-Production Time</td>
+                        <td>2-3 days</td>
+                        <td>Immediate</td>
+                        <td>95% faster</td>
+                    </tr>
+                    <tr>
+                        <td>Manual BOM Creation</td>
+                        <td>30 min/order</td>
+                        <td>0 min (automated)</td>
+                        <td>100% eliminated</td>
+                    </tr>
+                    <tr>
+                        <td>Material Reservation Errors</td>
+                        <td>15% orders</td>
+                        <td>&lt; 1%</td>
+                        <td>93% reduction</td>
+                    </tr>
+                    <tr>
+                        <td>Production Visibility</td>
+                        <td>Manual tracking</td>
+                        <td>Real-time status</td>
+                        <td>100% visibility</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Cost Savings (Annual - 500 orders/year)</h3>
+            <ul>
+                <li><strong>Labor Savings:</strong> 250 hours/year × $25/hr = $6,250</li>
+                <li><strong>Error Reduction:</strong> 70 fewer mistakes × $150/error = $10,500</li>
+                <li><strong>Faster Production:</strong> 2 days faster × 500 orders = ~$15,000</li>
+                <li><strong>Total Annual Savings:</strong> $31,750</li>
+                <li><strong>Payback Period:</strong> ~3 months</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Installation & Configuration</h2>
+
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>Module 1: vpa_furniture_studio (BASE) installed</li>
+                <li>Odoo Manufacturing module enabled</li>
+                <li>Work centers configured</li>
+                <li>Product BOMs created (manually or from configurator)</li>
+            </ul>
+
+            <h3>Post-Installation Setup</h3>
+            <ol>
+                <li><strong>Configure Work Centers:</strong> Navigate to Manufacturing → Configuration → Work Centers</li>
+                <li><strong>Set Product Routes:</strong> Enable "Manufacture" route on furniture products</li>
+                <li><strong>Create Routing Templates:</strong> Define standard operations for furniture types</li>
+                <li><strong>Test MTO Flow:</strong> Create test sales order and verify MO creation</li>
+                <li><strong>Train Production Team:</strong> Educate staff on work order interface</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>Recommended Combo:</strong> This module works best with:
+                <ul>
+                    <li>Module 2: Configurator (auto-generate BOMs)</li>
+                    <li>Module 7: Smart BOMs (material substitution)</li>
+                    <li>Module 12: Shop Floor (tablet interface for operators)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <a href="module_05_reports.html">← Previous Module: Reports</a>
+            <a href="module_07_bom_smart.html">Next Module: Smart BOMs →</a>
+        </div>
+
+        <footer style="text-align: center; padding: 40px 0; color: #7f8c8d; border-top: 2px solid #ecf0f1; margin-top: 40px;">
+            <p><strong>VPA Furniture Studio</strong> | Module 6 of 17</p>
+            <p>© 2025 VPA Furniture Studio. All rights reserved.</p>
+        </footer>
+    </main>
+</body>
+</html>

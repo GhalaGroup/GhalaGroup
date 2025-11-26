@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inject dynamic CSS into frontend assets -->
+    <template id="login_theme_assets" name="Login Theme Assets" inherit_id="web.assets_frontend">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" type="text/css" href="/vpa_login_theme/get_theme_css"/>
+        </xpath>
+    </template>
+</odoo>

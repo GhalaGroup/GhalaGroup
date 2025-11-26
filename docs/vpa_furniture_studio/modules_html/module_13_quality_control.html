@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Module 13: VPA Quality Control | VPA Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+        .sidemenu { width: 280px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidemenu-header { padding: 20px; background: rgba(0,0,0,0.2); }
+        .sidemenu nav ul { list-style: none; }
+        .sidemenu nav ul li a { display: block; padding: 12px 20px; color: rgba(255,255,255,0.9); text-decoration: none; }
+        .sidemenu nav ul li a.active { background: #8e44ad; border-left: 4px solid #fff; font-weight: bold; }
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .content-header { background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; }
+        .content-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .content-header .badge { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; margin-right: 10px; }
+        .content-section { background: white; padding: 30px; margin-bottom: 20px; border-radius: 10px; }
+        .content-section h2 { color: #8e44ad; font-size: 1.8em; margin-bottom: 20px; border-bottom: 3px solid #8e44ad; padding-bottom: 10px; }
+        .price-tag { display: inline-block; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px 30px; border-radius: 10px; font-size: 2em; font-weight: bold; margin: 20px 0; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .feature-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #8e44ad; }
+        .success-box { background: #d4edda; border-left: 5px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .nav-buttons { display: flex; justify-content: space-between; margin: 40px 0; }
+        .nav-buttons a { background: #8e44ad; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; }
+        ul { margin-left: 20px; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>VPA Furniture Studio</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="module_01_base.html">1. BASE</a></li>
+                <li><a href="module_12_shopfloor.html">12. Shop Floor</a></li>
+                <li><a href="module_13_quality_control.html" class="active">13. Quality Control</a></li>
+                <li><a href="module_14_analytics.html">14. Analytics</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Module 13: vpa_quality_control</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">Mobile Inspections with Photo Documentation & Pass/Fail Workflows</p>
+            <div style="margin-top: 15px;">
+                <span class="badge">Phase 3</span>
+                <span class="badge">Universal Module</span>
+                <span class="badge">$6,000</span>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p><strong>vpa_quality_control</strong> enables mobile quality inspections with photo documentation, pass/fail workflows, quality metrics tracking, and defect management. UNIVERSAL module for manufacturing, food processing, pharmaceuticals.</p>
+            <div class="success-box">
+                <strong>Why This Matters:</strong> Quality issues caught early save 10x the cost of customer returns. Photo documentation proves inspection completion and provides evidence for suppliers.
+            </div>
+            <div class="price-tag">$6,000</div>
+        </div>
+
+        <div class="content-section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item"><strong>Mobile Inspections</strong><br>Tablet/phone quality checks</div>
+                <div class="feature-item"><strong>Photo Documentation</strong><br>Capture defects with images</div>
+                <div class="feature-item"><strong>Pass/Fail Workflows</strong><br>Automatic routing based on results</div>
+                <div class="feature-item"><strong>Quality Metrics</strong><br>Track defect rates, trends</div>
+                <div class="feature-item"><strong>Checklist Templates</strong><br>Standardized inspection criteria</div>
+                <div class="feature-item"><strong>Supplier Tracking</strong><br>Material quality by vendor</div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Business Value</h2>
+            <ul>
+                <li><strong>Defect Reduction:</strong> 60% fewer customer complaints</li>
+                <li><strong>Cost Savings:</strong> $50,000/year in avoided returns</li>
+                <li><strong>Documentation:</strong> Proof of inspection for audits</li>
+                <li><strong>Supplier Quality:</strong> Data-driven vendor decisions</li>
+                <li><strong>Payback:</strong> 1.4 months</li>
+            </ul>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="module_12_shopfloor.html">← Previous</a>
+            <a href="module_14_analytics.html">Next →</a>
+        </div>
+
+        <footer style="text-align: center; padding: 40px 0; color: #7f8c8d; margin-top: 40px;">
+            <p><strong>VPA Furniture Studio</strong> | Module 13 of 17</p>
+        </footer>
+    </main>
+</body>
+</html>

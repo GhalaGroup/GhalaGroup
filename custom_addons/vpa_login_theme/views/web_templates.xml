@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Override web.layout template to use custom favicon -->
+    <template id="web_layout_inherit_favicon" inherit_id="web.layout" name="VPA Custom Favicon">
+        <xpath expr="//link[@rel='shortcut icon']" position="replace">
+            <link type="image/x-icon" rel="shortcut icon" href="/vpa_login_theme/favicon"/>
+        </xpath>
+    </template>
+</odoo>

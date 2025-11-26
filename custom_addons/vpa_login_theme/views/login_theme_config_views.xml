@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Login Theme Configuration Form View -->
+    <record id="view_login_theme_config_form" model="ir.ui.view">
+        <field name="name">login.theme.config.form</field>
+        <field name="model">login.theme.config</field>
+        <field name="arch" type="xml">
+            <form string="Login Theme Configuration" class="o_login_theme_form">
+                <header>
+                    <button name="%(base_setup.action_general_configuration)d" string="← Back to Settings" type="action" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+
+                    <field name="active" invisible="1"/>
+
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 20px;">
+                        <div class="oe_title" style="flex: 1; max-width: 70%;">
+                            <label for="theme_name" string="Theme Name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="theme_name" placeholder="e.g., My Company Red Theme" required="1"/>
+                            </h1>
+                        </div>
+                        <div style="flex-shrink: 0; padding-left: 20px;">
+                            <img src="/vpa_login_theme/static/description/icon.png" alt="VPA Login Theme" style="max-height: 100px; opacity: 0.95; display: block;" title="VPA Login Theme by VPA Software"/>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="preset_theme"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="🎨 Colors &amp; Styling" name="colors">
+                            <group string="Button Colors">
+                                <group>
+                                    <field name="primary_color" widget="color"/>
+                                    <field name="secondary_color" widget="color"/>
+                                </group>
+                                <group>
+                                    <field name="link_color" widget="color"/>
+                                    <field name="background_color" widget="color"/>
+                                </group>
+                            </group>
+                            <group string="Visual Effects">
+                                <group>
+                                    <field name="border_radius"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info mt-3" role="alert">
+                                <i class="fa fa-lightbulb-o" title="Tip"/> <strong>Tip:</strong> Use the color picker to select your brand colors.
+                                Select a preset theme above to quickly apply professional color schemes.
+                            </div>
+                        </page>
+
+                        <page string="📝 Branding &amp; Content" name="branding">
+                            <group string="Page Content">
+                                <group>
+                                    <field name="page_title" placeholder="Enter browser tab title"/>
+                                    <field name="welcome_message" placeholder="Welcome to our portal..." widget="text"/>
+                                </group>
+                                <group>
+                                    <field name="footer_text" placeholder="© 2025 Your Company"/>
+                                </group>
+                            </group>
+
+                            <group string="Company Logo &amp; Favicon">
+                                <group string="Company Logo">
+                                    <label for="company_logo" string="Current Logo"/>
+                                    <div class="o_row">
+                                        <field name="company_logo" widget="image" class="oe_avatar" options="{'size': [150, 150]}"/>
+                                        <div class="ms-3">
+                                            <div class="text-muted small">
+                                                <i class="fa fa-info-circle"/> From Settings → Companies
+                                            </div>
+                                            <div class="mt-2">
+                                                <button name="%(base.action_res_company_form)d" string="Change Logo" type="action" class="btn btn-link" icon="fa-edit"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </group>
+                                <group string="Custom Favicon">
+                                    <label for="custom_favicon" string="Upload Favicon"/>
+                                    <div class="o_row">
+                                        <field name="custom_favicon" widget="image" class="oe_avatar" options="{'size': [64, 64], 'preview_image': 'custom_favicon'}"/>
+                                        <div class="ms-3">
+                                            <field name="favicon_filename" invisible="1"/>
+                                            <div class="text-muted small">
+                                                <i class="fa fa-info-circle"/> Upload .ico or .png file<br/>
+                                                Recommended: 16x16 or 32x32 px
+                                            </div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-info" invisible="not custom_favicon">Custom favicon active</span>
+                                                <span class="badge bg-secondary" invisible="custom_favicon">Using Odoo default</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </group>
+                            </group>
+
+                            <group string="Logo Display Settings">
+                                <group>
+                                    <field name="logo_max_height"/>
+                                    <field name="logo_max_width"/>
+                                </group>
+                            </group>
+
+                            <div class="alert alert-info mt-3" role="alert">
+                                <i class="fa fa-info-circle" title="Info"/> <strong>Info:</strong> Logo dimensions control how your company logo appears on the login page.
+                                Height is in pixels (px), width is in percentage (%). To change the actual logo image, click "Change Logo" above.
+                            </div>
+                        </page>
+
+                        <page string="⚙️ Advanced Settings" name="advanced">
+                            <group string="Display Options">
+                                <group>
+                                    <field name="show_database_selector"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <i class="fa fa-exclamation-triangle" title="Caution"/> <strong>Caution:</strong> These settings affect login page functionality.
+                                Only modify if you understand the implications.
+                            </div>
+                        </page>
+
+                        <page string="👁️ Preview" name="preview">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <h3 class="mb-3">
+                                        <i class="fa fa-eye" title="Preview"/> Live Theme Preview
+                                    </h3>
+                                    <div class="alert alert-info mb-3" role="alert">
+                                        <i class="fa fa-magic" title="Live"/> <strong>Interactive Preview:</strong> This shows how your login page will look. Hover over the button to see the hover effect!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <!-- Live HTML Preview -->
+                                    <field name="preview_html" widget="html" class="o_login_theme_preview"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-lg-12">
+                                    <div class="alert alert-success" role="alert">
+                                        <h5><i class="fa fa-check-circle" title="Preview"/> How to See Full Login Page</h5>
+                                        <ol class="mb-0">
+                                            <li>Click <strong>Save</strong> button above to apply your changes</li>
+                                            <li>Open a new <strong>incognito/private</strong> browser window</li>
+                                            <li>Navigate to your Odoo login page</li>
+                                            <li>See your complete theme in action!</li>
+                                        </ol>
+                                        <hr/>
+                                        <p class="mb-0">
+                                            <i class="fa fa-bolt" title="Instant"/> <strong>Instant Apply:</strong> Changes take effect immediately - no server restart needed!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Login Theme Configuration List View -->
+    <record id="view_login_theme_config_tree" model="ir.ui.view">
+        <field name="name">login.theme.config.list</field>
+        <field name="model">login.theme.config</field>
+        <field name="arch" type="xml">
+            <list string="Login Themes">
+                <field name="theme_name"/>
+                <field name="preset_theme"/>
+                <field name="primary_color" widget="color"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Login Theme Configuration Action -->
+    <record id="action_login_theme_config" model="ir.actions.act_window">
+        <field name="name">Login Theme</field>
+        <field name="res_model">login.theme.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first login theme!
+            </p>
+            <p>
+                Customize the colors and appearance of your Odoo login page to match your brand.
+            </p>
+        </field>
+    </record>
+
+    <!-- VPA Applications Parent Menu (appears as top menu in Settings) -->
+    <menuitem
+        id="menu_vpa_applications"
+        name="VPA Applications"
+        parent="base.menu_administration"
+        sequence="4"
+        groups="vpa_login_theme.group_login_theme_user"/>
+
+    <!-- Login Theme Submenu - Direct access to login theme config -->
+    <menuitem
+        id="menu_vpa_login_theme"
+        name="Login Theme"
+        parent="menu_vpa_applications"
+        sequence="1"
+        action="action_login_theme_config"
+        groups="vpa_login_theme.group_login_theme_user"/>
+
+</odoo>

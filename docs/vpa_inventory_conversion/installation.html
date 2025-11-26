@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Guide | VPA Inventory Conversion</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+
+        .sidemenu { width: 280px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidemenu::-webkit-scrollbar { width: 8px; }
+        .sidemenu::-webkit-scrollbar-track { background: #2c3e50; }
+        .sidemenu::-webkit-scrollbar-thumb { background: #16a085; border-radius: 4px; }
+
+        .sidemenu-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 2px solid #16a085; }
+        .sidemenu-header h2 { font-size: 18px; margin-bottom: 5px; color: #16a085; }
+        .version { font-size: 12px; color: #95a5a6; }
+
+        .sidemenu nav { padding: 20px 0; }
+        .category { padding: 15px 20px 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #95a5a6; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+        .category:first-child { border-top: none; margin-top: 0; }
+
+        .sidemenu ul { list-style: none; }
+        .sidemenu a { display: block; padding: 10px 20px; color: #ecf0f1; text-decoration: none; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidemenu a:hover { background: rgba(22, 160, 133, 0.2); border-left-color: #16a085; padding-left: 25px; }
+        .sidemenu a.active { background: rgba(22, 160, 133, 0.3); border-left-color: #16a085; font-weight: 600; color: #fff; }
+
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .content-header { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .content-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .content-header p { font-size: 1.2em; opacity: 0.95; }
+
+        .content-section { background: white; padding: 30px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .content-section h2 { color: #16a085; font-size: 1.8em; margin-bottom: 20px; border-bottom: 3px solid #16a085; padding-bottom: 10px; }
+        .content-section h3 { color: #2c3e50; font-size: 1.4em; margin: 25px 0 15px 0; }
+        .content-section p { margin-bottom: 15px; line-height: 1.8; font-size: 16px; }
+
+        .highlight-box { background: #d4edda; border-left: 5px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .warning-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .info-box { background: #d1ecf1; border-left: 5px solid #17a2b8; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .danger-box { background: #f8d7da; border-left: 5px solid #dc3545; padding: 20px; margin: 20px 0; border-radius: 5px; }
+
+        ul, ol { margin: 15px 0 15px 30px; line-height: 2; }
+        ul li, ol li { margin-bottom: 10px; }
+
+        code { background: #f4f4f4; padding: 3px 8px; border-radius: 4px; font-family: 'Courier New', monospace; color: #e83e8c; font-size: 14px; }
+
+        pre { background: #2c3e50; color: #ecf0f1; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; }
+        pre code { background: none; color: #ecf0f1; padding: 0; }
+
+        .step-number { display: inline-block; background: #16a085; color: white; width: 35px; height: 35px; line-height: 35px; text-align: center; border-radius: 50%; font-weight: bold; margin-right: 10px; }
+
+        .nav-buttons { display: flex; justify-content: space-between; margin: 40px 0; }
+        .nav-buttons a { background: #16a085; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; transition: all 0.3s ease; }
+        .nav-buttons a:hover { background: #138d75; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        table th { background: #16a085; color: white; font-weight: 600; }
+        table tr:hover { background: #f8f9fa; }
+
+        .checklist { list-style: none; margin-left: 0; }
+        .checklist li:before { content: "☐ "; font-size: 20px; margin-right: 10px; color: #16a085; }
+
+        .screenshot-placeholder { background: #e9ecef; border: 2px dashed #6c757d; padding: 60px; text-align: center; color: #6c757d; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>VPA Inventory Conversion</h2>
+            <p class="version">Version 19.0.1.0.0</p>
+        </div>
+
+        <nav>
+            <div class="category">Getting Started</div>
+            <ul>
+                <li><a href="index.html">Overview</a></li>
+                <li><a href="installation.html" class="active">Installation</a></li>
+                <li><a href="configuration.html">Configuration</a></li>
+            </ul>
+
+            <div class="category">User Guides</div>
+            <ul>
+                <li><a href="user_guide.html">User Guide</a></li>
+                <li><a href="workflow.html">Approval Workflow</a></li>
+                <li><a href="expense_conversion.html">Expense Conversion</a></li>
+                <li><a href="asset_conversion.html">Asset Conversion</a></li>
+            </ul>
+
+            <div class="category">Features</div>
+            <ul>
+                <li><a href="reports.html">Reports & Analytics</a></li>
+                <li><a href="security.html">Security & Privileges</a></li>
+            </ul>
+
+            <div class="category">Technical</div>
+            <ul>
+                <li><a href="api.html">API Documentation</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>📦 Installation Guide</h1>
+            <p>Step-by-step instructions to install VPA Inventory Conversion</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Prerequisites</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Before installing, ensure you meet all prerequisites to avoid installation issues.
+            </div>
+
+            <h3>System Requirements</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Specification</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Odoo Version</strong></td>
+                        <td>19.0 Enterprise Edition</td>
+                        <td>Required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Python</strong></td>
+                        <td>3.10 or higher</td>
+                        <td>Required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PostgreSQL</strong></td>
+                        <td>12 or higher</td>
+                        <td>Required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Disk Space</strong></td>
+                        <td>50 MB minimum</td>
+                        <td>Required</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Required Odoo Modules</h3>
+            <p>These modules must be installed before VPA Inventory Conversion:</p>
+            <ul class="checklist">
+                <li><code>account_accountant</code> - Accounting features</li>
+                <li><code>stock</code> - Inventory management</li>
+                <li><code>account_asset</code> - Asset management (Enterprise)</li>
+            </ul>
+
+            <h3>Optional Modules (Recommended)</h3>
+            <ul class="checklist">
+                <li><code>purchase</code> - For purchase-related conversions</li>
+                <li><code>sale_management</code> - For sales integration</li>
+                <li><code>hr</code> - For department tracking</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Installation Methods</h2>
+
+            <h3>Method 1: Install from Apps (Recommended)</h3>
+
+            <p><span class="step-number">1</span> <strong>Navigate to Apps</strong></p>
+            <p>Log in to your Odoo instance as an administrator and go to the Apps menu.</p>
+            <div class="screenshot-placeholder">
+                [Screenshot: Odoo Apps Menu]
+            </div>
+
+            <p><span class="step-number">2</span> <strong>Search for Module</strong></p>
+            <p>In the search box, type "VPA Inventory Conversion" and press Enter.</p>
+            <pre><code>Search: VPA Inventory Conversion</code></pre>
+
+            <p><span class="step-number">3</span> <strong>Click Install</strong></p>
+            <p>Locate the module card and click the "Install" button.</p>
+            <div class="screenshot-placeholder">
+                [Screenshot: Module Install Button]
+            </div>
+
+            <div class="info-box">
+                <strong>ℹ️ Installation Time:</strong> The module typically takes 30-60 seconds to install. You'll see a progress indicator during installation.
+            </div>
+
+            <p><span class="step-number">4</span> <strong>Verify Installation</strong></p>
+            <p>After installation, verify the module appears in your main menu:</p>
+            <ul>
+                <li>Go to <strong>Inventory → Operations → Inventory Conversion</strong></li>
+                <li>You should see the conversion dashboard</li>
+            </ul>
+
+            <h3>Method 2: Manual Installation</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ Advanced Users Only:</strong> Manual installation requires command-line access and technical knowledge.
+            </div>
+
+            <p><span class="step-number">1</span> <strong>Download Module</strong></p>
+            <p>Download the module ZIP file from Odoo Apps Store or your provided link.</p>
+
+            <p><span class="step-number">2</span> <strong>Extract to Addons Directory</strong></p>
+            <p>Extract the module to your Odoo custom addons directory:</p>
+            <pre><code>cd /path/to/odoo/custom_addons
+unzip vpa_inventory_conversion.zip</code></pre>
+
+            <p><span class="step-number">3</span> <strong>Set Permissions</strong></p>
+            <p>Ensure proper file permissions:</p>
+            <pre><code>sudo chown -R odoo:odoo vpa_inventory_conversion
+sudo chmod -R 755 vpa_inventory_conversion</code></pre>
+
+            <p><span class="step-number">4</span> <strong>Update Apps List</strong></p>
+            <p>Restart Odoo server and update the apps list:</p>
+            <pre><code># Restart Odoo
+sudo systemctl restart odoo
+
+# Update apps list from Odoo UI
+# Settings → Technical → Apps → Update Apps List</code></pre>
+
+            <p><span class="step-number">5</span> <strong>Install Module</strong></p>
+            <p>Search for "vpa_inventory_conversion" in Apps and click Install.</p>
+
+            <h3>Method 3: Using Odoo.sh</h3>
+
+            <p><span class="step-number">1</span> <strong>Access Odoo.sh Dashboard</strong></p>
+            <p>Log in to your Odoo.sh project dashboard.</p>
+
+            <p><span class="step-number">2</span> <strong>Upload Module</strong></p>
+            <p>Use the Odoo.sh interface to upload the module ZIP file or add it via Git.</p>
+
+            <p><span class="step-number">3</span> <strong>Deploy</strong></p>
+            <p>Deploy the changes to your production or staging branch.</p>
+
+            <p><span class="step-number">4</span> <strong>Install from Apps</strong></p>
+            <p>Navigate to Apps and install "VPA Inventory Conversion".</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Post-Installation Verification</h2>
+
+            <h3>Checklist</h3>
+            <ul class="checklist">
+                <li>Module appears in Apps list with "Installed" status</li>
+                <li>Menu item "Inventory Conversion" visible under Inventory → Operations</li>
+                <li>No error messages in Odoo server logs</li>
+                <li>Settings page accessible at Settings → Inventory Conversion</li>
+                <li>User groups created: User, Manager, Administrator</li>
+                <li>Document sequences initialized (ASC/2024/00001)</li>
+            </ul>
+
+            <h3>Test Installation</h3>
+            <ol>
+                <li>Navigate to <strong>Inventory → Operations → Inventory Conversion</strong></li>
+                <li>Click "Create" button</li>
+                <li>You should see the conversion form without errors</li>
+                <li>Cancel the form (don't save)</li>
+            </ol>
+
+            <div class="highlight-box">
+                <strong>✅ Success!</strong> If you can access the conversion form, the module is installed correctly.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Troubleshooting</h2>
+
+            <h3>Common Issues & Solutions</h3>
+
+            <h4>Issue: Module Not Found in Apps</h4>
+            <div class="danger-box">
+                <strong>Symptoms:</strong> Cannot find "VPA Inventory Conversion" in Apps search
+            </div>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Click "Update Apps List" in Apps menu (may require debug mode)</li>
+                <li>Clear browser cache and refresh</li>
+                <li>Verify module is in correct addons directory</li>
+                <li>Check Odoo server logs for loading errors</li>
+            </ul>
+
+            <h4>Issue: Installation Fails</h4>
+            <div class="danger-box">
+                <strong>Symptoms:</strong> Installation error or module in "To Install" state
+            </div>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Check that all required modules are installed first</li>
+                <li>Review Odoo logs: <code>sudo tail -f /var/log/odoo/odoo-server.log</code></li>
+                <li>Ensure database user has proper permissions</li>
+                <li>Try installing in Odoo debug mode for detailed errors</li>
+            </ul>
+
+            <h4>Issue: Menu Not Visible</h4>
+            <div class="danger-box">
+                <strong>Symptoms:</strong> Module installed but menu item missing
+            </div>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Log out and log back in</li>
+                <li>Verify user has access rights (must be in Inventory/User group minimum)</li>
+                <li>Check if menu is under Inventory → Operations</li>
+                <li>Refresh browser (Ctrl+F5 / Cmd+Shift+R)</li>
+            </ul>
+
+            <h4>Issue: Dependency Error</h4>
+            <div class="danger-box">
+                <strong>Symptoms:</strong> Error about missing module dependencies
+            </div>
+            <p><strong>Solutions:</strong></p>
+            <ol>
+                <li>Install <code>account_accountant</code> module</li>
+                <li>Ensure <code>stock</code> module is installed</li>
+                <li>Install <code>account_asset</code> (Enterprise required)</li>
+                <li>Retry VPA Inventory Conversion installation</li>
+            </ol>
+
+            <h3>Getting Help</h3>
+            <p>If you continue experiencing issues:</p>
+            <ul>
+                <li>📧 Email: support@vpasoftware.com</li>
+                <li>Include: Odoo version, error logs, screenshots</li>
+                <li>Response time: Within 24 hours (business days)</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Upgrade Instructions</h2>
+
+            <h3>Upgrading from Previous Version</h3>
+
+            <div class="warning-box">
+                <strong>⚠️ Backup First:</strong> Always backup your database before upgrading!
+            </div>
+
+            <ol>
+                <li><strong>Backup Database</strong>
+                    <pre><code>pg_dump your_database_name > backup_before_upgrade.sql</code></pre>
+                </li>
+                <li><strong>Download New Version</strong> - Get the latest module version</li>
+                <li><strong>Replace Module Files</strong> - Overwrite old files with new ones</li>
+                <li><strong>Restart Odoo</strong>
+                    <pre><code>sudo systemctl restart odoo</code></pre>
+                </li>
+                <li><strong>Upgrade Module</strong> - Go to Apps → VPA Inventory Conversion → Upgrade</li>
+                <li><strong>Test Functionality</strong> - Verify existing data and features work</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>ℹ️ Data Safety:</strong> Upgrades preserve all existing conversion records, photos, and configurations.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Uninstallation</h2>
+
+            <div class="danger-box">
+                <strong>⚠️ Warning:</strong> Uninstalling will permanently delete all conversion records, photos, and configuration data. This action cannot be undone!
+            </div>
+
+            <h3>Before Uninstalling</h3>
+            <ul class="checklist">
+                <li>Export all conversion reports you need to keep</li>
+                <li>Download all attached photos and documents</li>
+                <li>Verify no conversions are in "Posted" state (or reverse them)</li>
+                <li>Backup database</li>
+            </ul>
+
+            <h3>Uninstall Steps</h3>
+            <ol>
+                <li>Go to <strong>Apps</strong></li>
+                <li>Search for "VPA Inventory Conversion"</li>
+                <li>Click the <strong>⋮ (three dots)</strong> menu</li>
+                <li>Select <strong>Uninstall</strong></li>
+                <li>Confirm the action</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>ℹ️ Note:</strong> Uninstalling does NOT reverse journal entries or delete created assets. These remain in your accounting records for audit compliance.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Next Steps</h2>
+
+            <div class="highlight-box">
+                <strong>✅ Installation Complete!</strong> You're ready to configure the module.
+            </div>
+
+            <h3>Recommended Next Actions</h3>
+            <ol>
+                <li>📖 Read the <a href="configuration.html">Configuration Guide</a> to set up accounts and sequences</li>
+                <li>🔐 Configure <a href="security.html">User Privileges</a> and assign users to groups</li>
+                <li>📝 Review the <a href="user_guide.html">User Guide</a> to understand features</li>
+                <li>🎯 Create your <a href="expense_conversion.html">First Conversion</a></li>
+            </ol>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="index.html">← Back to Overview</a>
+            <a href="configuration.html">Next: Configuration →</a>
+        </div>
+    </main>
+</body>
+</html>

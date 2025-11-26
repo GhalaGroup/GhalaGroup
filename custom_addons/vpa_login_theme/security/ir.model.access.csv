@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_login_theme_config_user,access.login.theme.config.user,model_login_theme_config,group_login_theme_user,1,0,0,0
+access_login_theme_config_manager,access.login.theme.config.manager,model_login_theme_config,group_login_theme_manager,1,1,1,0
+access_login_theme_config_admin,access.login.theme.config.admin,model_login_theme_config,group_login_theme_admin,1,1,1,1

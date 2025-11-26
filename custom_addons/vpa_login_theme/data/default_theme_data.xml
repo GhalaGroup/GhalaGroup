@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Default Red Theme -->
+    <record id="default_red_theme" model="login.theme.config">
+        <field name="theme_name">Default Red Theme</field>
+        <field name="preset_theme">red</field>
+        <field name="primary_color">#DC143C</field>
+        <field name="secondary_color">#B22222</field>
+        <field name="link_color">#DC143C</field>
+        <field name="background_color">#F3F4F6</field>
+        <field name="logo_max_height">120</field>
+        <field name="logo_max_width">100</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

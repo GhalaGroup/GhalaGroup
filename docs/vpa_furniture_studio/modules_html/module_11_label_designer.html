@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 11: VPA Label Designer | VPA Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+        .sidemenu { width: 280px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+        .sidemenu-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 2px solid rgba(255,255,255,0.1); }
+        .sidemenu-header h2 { font-size: 1.3em; margin-bottom: 5px; }
+        .sidemenu-header .version { font-size: 0.85em; opacity: 0.8; }
+        .sidemenu nav ul { list-style: none; }
+        .sidemenu nav ul li { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidemenu nav ul li a { display: block; padding: 12px 20px; color: rgba(255,255,255,0.9); text-decoration: none; transition: all 0.3s; font-size: 0.95em; }
+        .sidemenu nav ul li a:hover { background: rgba(255,255,255,0.1); padding-left: 30px; }
+        .sidemenu nav ul li a.active { background: #27ae60; border-left: 4px solid #fff; font-weight: bold; }
+        .sidemenu .category { padding: 15px 20px 8px 20px; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.5); font-weight: bold; }
+        .sidemenu-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; }
+        .sidemenu-footer a { display: block; padding: 10px; background: #27ae60; color: white; text-align: center; text-decoration: none; border-radius: 5px; margin-bottom: 10px; transition: all 0.3s; }
+        .sidemenu-footer a:hover { background: #229954; }
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .content-header { background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .content-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .content-header .module-meta { display: flex; gap: 20px; margin-top: 15px; flex-wrap: wrap; }
+        .content-header .badge { background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; }
+        .content-section { background: white; padding: 30px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .content-section h2 { color: #27ae60; font-size: 1.8em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #27ae60; }
+        .content-section h3 { color: #2c3e50; font-size: 1.4em; margin-top: 25px; margin-bottom: 15px; }
+        .price-tag { display: inline-block; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px 30px; border-radius: 10px; font-size: 2em; font-weight: bold; margin: 20px 0; box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3); }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .feature-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60; }
+        .feature-item strong { color: #27ae60; }
+        .code-block { background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 0.9em; line-height: 1.5; }
+        .code-block .keyword { color: #66d9ef; }
+        .code-block .string { color: #a6e22e; }
+        .code-block .comment { color: #75715e; }
+        .info-box { background: #d1ecf1; border-left: 5px solid #17a2b8; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .success-box { background: #d4edda; border-left: 5px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table th { background: #27ae60; color: white; padding: 12px; text-align: left; font-weight: 600; }
+        table td { padding: 12px; border-bottom: 1px solid #ddd; }
+        table tr:hover { background: #f8f9fa; }
+        .nav-buttons { display: flex; justify-content: space-between; margin: 40px 0; }
+        .nav-buttons a { background: #27ae60; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; transition: all 0.3s; }
+        .nav-buttons a:hover { background: #229954; transform: translateY(-2px); }
+        ul, ol { margin-left: 20px; line-height: 1.8; }
+        ul li, ol li { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>VPA Furniture Studio</h2>
+            <div class="version">Version 1.0 | Odoo 19</div>
+        </div>
+        <nav>
+            <div class="category">Main Documentation</div>
+            <ul>
+                <li><a href="../README.md">Main Hub</a></li>
+                <li><a href="../MODULAR_ARCHITECTURE.html">Full Specification</a></li>
+                <li><a href="../PACKAGES.md">Packages & Pricing</a></li>
+            </ul>
+            <div class="category">Core Foundation</div>
+            <ul><li><a href="module_01_base.html">1. BASE (Foundation)</a></li></ul>
+            <div class="category">Sales & Configuration</div>
+            <ul>
+                <li><a href="module_02_configurator.html">2. Configurator</a></li>
+                <li><a href="module_03_catalog.html">3. Catalog (PDF)</a></li>
+                <li><a href="module_17_product_catalogue.html">17. Product Catalogue</a></li>
+            </ul>
+            <div class="category">Pricing & Finance</div>
+            <ul>
+                <li><a href="module_04_costing.html">4. Costing</a></li>
+                <li><a href="module_05_reports.html">5. Reports</a></li>
+            </ul>
+            <div class="category">Manufacturing</div>
+            <ul>
+                <li><a href="module_06_manufacturing.html">6. Manufacturing</a></li>
+                <li><a href="module_07_bom_smart.html">7. Smart BOMs</a></li>
+                <li><a href="module_08_nesting.html">8. Nesting (CNC)</a></li>
+            </ul>
+            <div class="category">Warehouse & Logistics</div>
+            <ul>
+                <li><a href="module_09_inventory_advanced.html">9. Inventory Advanced</a></li>
+                <li><a href="module_10_inventory_barcode.html">10. Barcode/RFID</a></li>
+                <li><a href="module_11_label_designer.html" class="active">11. Label Designer</a></li>
+            </ul>
+            <div class="category">Production Floor</div>
+            <ul>
+                <li><a href="module_12_shopfloor.html">12. Shop Floor</a></li>
+                <li><a href="module_13_quality_control.html">13. Quality Control</a></li>
+            </ul>
+            <div class="category">Analytics & Insights</div>
+            <ul><li><a href="module_14_analytics.html">14. Analytics</a></li></ul>
+            <div class="category">Customer-Facing</div>
+            <ul>
+                <li><a href="module_15_portal.html">15. Customer Portal</a></li>
+                <li><a href="module_16_delivery_scheduling.html">16. Delivery Scheduling</a></li>
+            </ul>
+        </nav>
+        <div class="sidemenu-footer">
+            <a href="../MODULAR_ARCHITECTURE.html">Full Specification</a>
+            <a href="../PACKAGES.md">View Pricing</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>Module 11: vpa_label_designer</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">ZPL Label Designer for Zebra Printers with Drag-and-Drop</p>
+            <div class="module-meta">
+                <span class="badge">Phase: Phase 1</span>
+                <span class="badge">Type: Universal Module</span>
+                <span class="badge">Price: $4,000</span>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p><strong>vpa_label_designer</strong> provides a drag-and-drop label designer for Zebra thermal printers using ZPL (Zebra Programming Language). Create custom labels with barcodes, QR codes, product info, and variable data. This is a UNIVERSAL module that can be sold to retail, warehouses, manufacturing, and any business requiring label printing.</p>
+            <div class="success-box">
+                <strong>Why This Matters:</strong> Custom labels eliminate expensive pre-printed label stock, allow variable data (order numbers, dates), and integrate directly with Odoo operations (products, shipments, inventory moves).
+            </div>
+            <div class="price-tag">$4,000</div>
+        </div>
+
+        <div class="content-section">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item"><strong>Drag-and-Drop Designer</strong><br>Visual label design interface</div>
+                <div class="feature-item"><strong>ZPL Generation</strong><br>Auto-generate Zebra printer commands</div>
+                <div class="feature-item"><strong>Barcode/QR Codes</strong><br>Add scannable codes to labels</div>
+                <div class="feature-item"><strong>Variable Data</strong><br>Product names, prices, dates, custom fields</div>
+                <div class="feature-item"><strong>Template Library</strong><br>Pre-built templates for common uses</div>
+                <div class="feature-item"><strong>Batch Printing</strong><br>Print multiple labels at once</div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Technical Architecture</h2>
+            <h3>Label Template Model</h3>
+            <div class="code-block">
+<span class="keyword">class</span> LabelTemplate(models.Model):
+    <span class="string">"""Custom label template"""</span>
+    _name = <span class="string">'label.template'</span>
+
+    name = fields.Char(<span class="string">'Template Name'</span>)
+    label_width = fields.Integer(<span class="string">'Width (mm)'</span>, default=100)
+    label_height = fields.Integer(<span class="string">'Height (mm)'</span>, default=50)
+
+    element_ids = fields.One2many(
+        <span class="string">'label.template.element'</span>,
+        <span class="string">'template_id'</span>,
+        string=<span class="string">'Label Elements'</span>
+    )
+
+    zpl_code = fields.Text(
+        <span class="string">'ZPL Code'</span>,
+        compute=<span class="string">'_compute_zpl'</span>
+    )
+
+    <span class="keyword">def</span> _compute_zpl(self):
+        <span class="string">"""Generate ZPL code from elements"""</span>
+        <span class="keyword">for</span> template <span class="keyword">in</span> self:
+            zpl = <span class="string">f"^XA\n"</span>  <span class="comment"># Start label</span>
+            zpl += <span class="string">f"^PW{template.label_width * 8}\n"</span>  <span class="comment"># Width in dots</span>
+
+            <span class="keyword">for</span> element <span class="keyword">in</span> template.element_ids:
+                zpl += element.generate_zpl()
+
+            zpl += <span class="string">"^XZ\n"</span>  <span class="comment"># End label</span>
+            template.zpl_code = zpl
+
+    <span class="keyword">def</span> print_label(self, data):
+        <span class="string">"""Print label with variable data"""</span>
+        zpl = self.zpl_code
+
+        <span class="comment"># Replace variables</span>
+        <span class="keyword">for</span> key, value <span class="keyword">in</span> data.items():
+            zpl = zpl.replace(<span class="string">f"{{{{KEY}}}}"</span>, str(value))
+
+        <span class="comment"># Send to printer</span>
+        self._send_to_printer(zpl)
+            </div>
+
+            <h3>ZPL Generation Example</h3>
+            <div class="code-block">
+<span class="comment"># Example: Product label with barcode</span>
+
+^XA                     <span class="comment">; Start label</span>
+^PW800                  <span class="comment">; Width: 800 dots (100mm @ 203dpi)</span>
+^LH0,0                  <span class="comment">; Label home position</span>
+
+<span class="comment">; Company logo</span>
+^FO50,20^GFA,size,size,data...^FS
+
+<span class="comment">; Product name</span>
+^FO50,80^A0N,40,40^FD{{PRODUCT_NAME}}^FS
+
+<span class="comment">; Product code (barcode)</span>
+^FO50,140^BY3^BCN,100,Y,N,N
+^FD{{BARCODE}}^FS
+
+<span class="comment">; Price</span>
+^FO50,260^A0N,30,30^FDPrice: ${{PRICE}}^FS
+
+<span class="comment">; Date</span>
+^FO500,260^A0N,25,25^FD{{DATE}}^FS
+
+^XZ                     <span class="comment">; End label</span>
+            </div>
+
+            <h3>Dependencies</h3>
+            <table>
+                <thead>
+                    <tr><th>Type</th><th>Module</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Odoo Core</strong></td><td><code>product</code></td><td>Product data source</td></tr>
+                    <tr><td><strong>Odoo Core</strong></td><td><code>stock</code></td><td>Inventory labels</td></tr>
+                    <tr><td><strong>Hardware</strong></td><td>Zebra printer</td><td>Label printing device</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2>Label Templates</h2>
+            <h3>Pre-Built Templates</h3>
+            <ul>
+                <li><strong>Product Label:</strong> Name, barcode, price, date</li>
+                <li><strong>Shipping Label:</strong> Destination, tracking, box count</li>
+                <li><strong>Location Label:</strong> Warehouse, aisle, bin, barcode</li>
+                <li><strong>Manufacturing Label:</strong> MO number, product, operator, date</li>
+                <li><strong>QC Label:</strong> Inspection status, inspector, date</li>
+            </ul>
+
+            <h3>Variable Fields</h3>
+            <ul>
+                <li>{{PRODUCT_NAME}}, {{PRODUCT_CODE}}, {{BARCODE}}</li>
+                <li>{{PRICE}}, {{COST}}, {{CURRENCY}}</li>
+                <li>{{DATE}}, {{TIME}}, {{USER}}</li>
+                <li>{{CUSTOMER}}, {{ORDER_NUMBER}}</li>
+                <li>{{MO_NUMBER}}, {{WORKSTATION}}</li>
+                <li>{{QTY}}, {{UOM}}, {{BATCH}}</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Business Value</h2>
+            <h3>Cost Savings</h3>
+            <ul>
+                <li><strong>Pre-Printed Labels:</strong> $0.15/label × 10,000 labels/year = $1,500 saved</li>
+                <li><strong>Labor:</strong> 5 min/batch vs 15 min manual = 100 hours/year × $20 = $2,000</li>
+                <li><strong>Flexibility:</strong> Change labels instantly (no reordering stock)</li>
+                <li><strong>Data Accuracy:</strong> 100% accurate vs 8% error rate with manual</li>
+                <li><strong>Total Annual Value:</strong> $3,500+</li>
+                <li><strong>Payback Period:</strong> 1.1 years</li>
+            </ul>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="module_10_inventory_barcode.html">← Previous Module</a>
+            <a href="module_12_shopfloor.html">Next Module →</a>
+        </div>
+
+        <footer style="text-align: center; padding: 40px 0; color: #7f8c8d; border-top: 2px solid #ecf0f1; margin-top: 40px;">
+            <p><strong>VPA Furniture Studio</strong> | Module 11 of 17</p>
+            <p>© 2025 VPA Furniture Studio. All rights reserved.</p>
+        </footer>
+    </main>
+</body>
+</html>

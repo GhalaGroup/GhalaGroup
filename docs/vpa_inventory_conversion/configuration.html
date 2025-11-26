@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Guide | VPA Inventory Conversion</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+
+        .sidemenu { width: 280px; background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%); color: white; position: fixed; height: 100vh; overflow-y: auto; }
+        .sidemenu::-webkit-scrollbar { width: 8px; }
+        .sidemenu::-webkit-scrollbar-track { background: #2c3e50; }
+        .sidemenu::-webkit-scrollbar-thumb { background: #16a085; border-radius: 4px; }
+
+        .sidemenu-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 2px solid #16a085; }
+        .sidemenu-header h2 { font-size: 18px; margin-bottom: 5px; color: #16a085; }
+        .version { font-size: 12px; color: #95a5a6; }
+
+        .sidemenu nav { padding: 20px 0; }
+        .category { padding: 15px 20px 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #95a5a6; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+        .category:first-child { border-top: none; margin-top: 0; }
+
+        .sidemenu ul { list-style: none; }
+        .sidemenu a { display: block; padding: 10px 20px; color: #ecf0f1; text-decoration: none; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidemenu a:hover { background: rgba(22, 160, 133, 0.2); border-left-color: #16a085; padding-left: 25px; }
+        .sidemenu a.active { background: rgba(22, 160, 133, 0.3); border-left-color: #16a085; font-weight: 600; color: #fff; }
+
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .content-header { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: white; padding: 40px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .content-header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .content-header p { font-size: 1.2em; opacity: 0.95; }
+
+        .content-section { background: white; padding: 30px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .content-section h2 { color: #16a085; font-size: 1.8em; margin-bottom: 20px; border-bottom: 3px solid #16a085; padding-bottom: 10px; }
+        .content-section h3 { color: #2c3e50; font-size: 1.4em; margin: 25px 0 15px 0; }
+        .content-section h4 { color: #34495e; font-size: 1.2em; margin: 20px 0 10px 0; }
+        .content-section p { margin-bottom: 15px; line-height: 1.8; font-size: 16px; }
+
+        .highlight-box { background: #d4edda; border-left: 5px solid #28a745; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .warning-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 5px; }
+        .info-box { background: #d1ecf1; border-left: 5px solid #17a2b8; padding: 20px; margin: 20px 0; border-radius: 5px; }
+
+        ul, ol { margin: 15px 0 15px 30px; line-height: 2; }
+        ul li, ol li { margin-bottom: 10px; }
+
+        code { background: #f4f4f4; padding: 3px 8px; border-radius: 4px; font-family: 'Courier New', monospace; color: #e83e8c; font-size: 14px; }
+
+        .step-number { display: inline-block; background: #16a085; color: white; width: 35px; height: 35px; line-height: 35px; text-align: center; border-radius: 50%; font-weight: bold; margin-right: 10px; }
+
+        .nav-buttons { display: flex; justify-content: space-between; margin: 40px 0; }
+        .nav-buttons a { background: #16a085; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; transition: all 0.3s ease; }
+        .nav-buttons a:hover { background: #138d75; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        table th { background: #16a085; color: white; font-weight: 600; }
+        table tr:hover { background: #f8f9fa; }
+
+        .config-box { background: #f8f9fa; border: 2px solid #16a085; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .config-box h4 { color: #16a085; margin-bottom: 15px; }
+
+        .screenshot-placeholder { background: #e9ecef; border: 2px dashed #6c757d; padding: 60px; text-align: center; color: #6c757d; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>VPA Inventory Conversion</h2>
+            <p class="version">Version 19.0.1.0.0</p>
+        </div>
+
+        <nav>
+            <div class="category">Getting Started</div>
+            <ul>
+                <li><a href="index.html">Overview</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="configuration.html" class="active">Configuration</a></li>
+            </ul>
+
+            <div class="category">User Guides</div>
+            <ul>
+                <li><a href="user_guide.html">User Guide</a></li>
+                <li><a href="workflow.html">Approval Workflow</a></li>
+                <li><a href="expense_conversion.html">Expense Conversion</a></li>
+                <li><a href="asset_conversion.html">Asset Conversion</a></li>
+            </ul>
+
+            <div class="category">Features</div>
+            <ul>
+                <li><a href="reports.html">Reports & Analytics</a></li>
+                <li><a href="security.html">Security & Privileges</a></li>
+            </ul>
+
+            <div class="category">Technical</div>
+            <ul>
+                <li><a href="api.html">API Documentation</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <h1>⚙️ Configuration Guide</h1>
+            <p>Complete setup instructions for VPA Inventory Conversion</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Quick Start Configuration</h2>
+
+            <p>Follow this 5-minute setup to get VPA Inventory Conversion ready for use:</p>
+
+            <ol>
+                <li>Configure document sequences (ASC numbers)</li>
+                <li>Set up default expense and asset accounts</li>
+                <li>Configure approval thresholds</li>
+                <li>Assign user privileges</li>
+                <li>Create reason templates (optional but recommended)</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>ℹ️ Pro Tip:</strong> Complete all configuration steps before creating your first conversion to ensure smooth operation.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 1: Access Configuration Settings</h2>
+
+            <p><span class="step-number">1</span> Navigate to Settings</p>
+            <p>Go to <strong>Settings → Inventory Conversion</strong> (you may need to scroll down in the Settings menu)</p>
+            <div class="screenshot-placeholder">
+                [Screenshot: Settings Menu - Inventory Conversion Section]
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Permissions Required:</strong> Only users with "Administrator" access rights can modify these settings. If you don't see the Inventory Conversion section, contact your system administrator.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 2: Configure Document Numbering</h2>
+
+            <h3>Sequential Numbering Configuration</h3>
+
+            <p>VPA Inventory Conversion uses a unified sequence for all conversions with the format: <code>ASC/YYYY/00001</code></p>
+
+            <div class="config-box">
+                <h4>Sequence Settings</h4>
+                <table>
+                    <tr>
+                        <td><strong>Prefix:</strong></td>
+                        <td><code>ASC/%(year)s/</code></td>
+                        <td>Automatically includes current year</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Padding:</strong></td>
+                        <td>5 digits</td>
+                        <td>Example: 00001, 00002, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Next Number:</strong></td>
+                        <td>1 (default)</td>
+                        <td>Change if needed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reset Yearly:</strong></td>
+                        <td>✅ Enabled</td>
+                        <td>Resets to 00001 each year</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h4>Configuration Steps:</h4>
+            <ol>
+                <li>In Settings → Inventory Conversion → <strong>Document Numbering</strong></li>
+                <li>Review the default prefix: <code>ASC/%(year)s/</code></li>
+                <li>Adjust padding if needed (5 is recommended)</li>
+                <li>Set "Next Number" if you want to start from a specific number</li>
+                <li>Save settings</li>
+            </ol>
+
+            <h4>Sequence Examples:</h4>
+            <ul>
+                <li><code>ASC/2024/00001</code> - First conversion in 2024</li>
+                <li><code>ASC/2024/00002</code> - Second conversion in 2024</li>
+                <li><code>ASC/2024/00156</code> - 156th conversion in 2024</li>
+                <li><code>ASC/2025/00001</code> - First conversion in 2025 (resets)</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>💡 Customization:</strong> You can change the prefix to match your company's numbering scheme. For example: <code>IC/%(year)s/</code> (Inventory Conversion) or <code>INV/%(year)s/</code>.
+            </div>
+
+            <h4>Reset Sequence (If Needed)</h4>
+            <p>If you need to reset the sequence back to 1:</p>
+            <ol>
+                <li>Go to Settings → Inventory Conversion → Document Numbering</li>
+                <li>Click "Reset to 1" button</li>
+                <li>Confirm the action</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>⚠️ Warning:</strong> Resetting the sequence may create duplicate document numbers if you have existing conversions. Only reset if absolutely necessary.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 3: Configure Default Accounts</h2>
+
+            <h3>Expense Account Configuration</h3>
+
+            <p>Set up default accounts for expense conversions to speed up the creation process.</p>
+
+            <div class="config-box">
+                <h4>Default Expense Conversion Account</h4>
+                <ol>
+                    <li>Go to Settings → Inventory Conversion → <strong>Default Accounts</strong></li>
+                    <li>Click on "Default Expense Conversion Account" field</li>
+                    <li>Select an expense account from your Chart of Accounts</li>
+                    <li>Recommended accounts:
+                        <ul>
+                            <li><code>6xxx</code> - Inventory Loss/Write-off</li>
+                            <li><code>6xxx</code> - Cost of Goods Sold (COGS)</li>
+                            <li><code>6xxx</code> - Operating Expenses</li>
+                        </ul>
+                    </li>
+                    <li>Save settings</li>
+                </ol>
+            </div>
+
+            <h4>Common Expense Accounts:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Account Type</th>
+                        <th>Typical Code</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Inventory Write-off</td>
+                        <td>6100</td>
+                        <td>Damaged, obsolete, expired goods</td>
+                    </tr>
+                    <tr>
+                        <td>Cost of Goods Sold</td>
+                        <td>5000</td>
+                        <td>Direct inventory costs</td>
+                    </tr>
+                    <tr>
+                        <td>Loss on Inventory</td>
+                        <td>6200</td>
+                        <td>Theft, shrinkage, damage</td>
+                    </tr>
+                    <tr>
+                        <td>Operating Expense</td>
+                        <td>6500</td>
+                        <td>General operational losses</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Asset Account Configuration</h3>
+
+            <div class="config-box">
+                <h4>Default Asset Conversion Account</h4>
+                <ol>
+                    <li>Go to Settings → Inventory Conversion → <strong>Default Accounts</strong></li>
+                    <li>Click on "Default Asset Conversion Account" field</li>
+                    <li>Select a fixed asset account from Chart of Accounts</li>
+                    <li>Typical accounts:
+                        <ul>
+                            <li><code>1500</code> - Fixed Assets</li>
+                            <li><code>1510</code> - Furniture & Equipment</li>
+                            <li><code>1520</code> - Machinery & Tools</li>
+                        </ul>
+                    </li>
+                    <li>Save settings</li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Note:</strong> Users can override these default accounts when creating conversions. These defaults simply speed up data entry.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 4: Configure Approval Thresholds</h2>
+
+            <h3>Approval Workflow Settings</h3>
+
+            <p>Define dollar amount thresholds that determine which approval level is required.</p>
+
+            <div class="config-box">
+                <h4>Approval Threshold Configuration</h4>
+                <ol>
+                    <li>Go to Settings → Inventory Conversion → <strong>Approval Thresholds</strong></li>
+                    <li>Set the following thresholds:
+                        <table style="margin-top: 15px;">
+                            <thead>
+                                <tr>
+                                    <th>Setting</th>
+                                    <th>Recommended Value</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Auto-approve below</td>
+                                    <td>$0 (disabled)</td>
+                                    <td>Amount below which conversions auto-approve</td>
+                                </tr>
+                                <tr>
+                                    <td>Manager approval limit</td>
+                                    <td>$50,000</td>
+                                    <td>Max amount Managers can approve</td>
+                                </tr>
+                                <tr>
+                                    <td>Dual approval above</td>
+                                    <td>$100,000</td>
+                                    <td>Requires Admin + secondary approval</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>Save settings</li>
+                </ol>
+            </div>
+
+            <h4>Example Approval Matrix:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Conversion Value</th>
+                        <th>Required Approval Level</th>
+                        <th>Workflow</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>$0 - $5,000</td>
+                        <td>Manager</td>
+                        <td>User → Manager → Post</td>
+                    </tr>
+                    <tr>
+                        <td>$5,001 - $50,000</td>
+                        <td>Manager</td>
+                        <td>User → Manager → Admin → Post</td>
+                    </tr>
+                    <tr>
+                        <td>$50,001 - $100,000</td>
+                        <td>Administrator</td>
+                        <td>User → Admin → Post</td>
+                    </tr>
+                    <tr>
+                        <td>Over $100,000</td>
+                        <td>Dual Approval</td>
+                        <td>User → Admin + Secondary → Post</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Additional Workflow Options</h3>
+
+            <div class="config-box">
+                <h4>Notification Settings</h4>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>☑️ <strong>Send notification to approvers</strong> - Email alerts when approval needed</li>
+                    <li>☑️ <strong>Lock conversions after posting</strong> - Prevent editing posted records</li>
+                    <li>☑️ <strong>Require reason for all conversions</strong> - Mandatory reason field</li>
+                    <li>☐ <strong>Allow self-approval</strong> - Let users approve their own requests (not recommended)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 5: Configure Email Notifications</h2>
+
+            <h3>Email Template Configuration</h3>
+
+            <p>VPA Inventory Conversion sends automatic email notifications at key workflow stages.</p>
+
+            <h4>Default Email Triggers:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trigger</th>
+                        <th>Recipient</th>
+                        <th>Template</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Conversion Submitted</td>
+                        <td>Manager</td>
+                        <td>Approval Request Email</td>
+                    </tr>
+                    <tr>
+                        <td>Manager Approved</td>
+                        <td>Administrator</td>
+                        <td>Admin Verification Needed</td>
+                    </tr>
+                    <tr>
+                        <td>Conversion Posted</td>
+                        <td>Original User</td>
+                        <td>Conversion Complete</td>
+                    </tr>
+                    <tr>
+                        <td>Conversion Rejected</td>
+                        <td>Original User</td>
+                        <td>Rejection Notice</td>
+                    </tr>
+                    <tr>
+                        <td>High Value (>$50k)</td>
+                        <td>Administrator</td>
+                        <td>High Value Alert</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Customize Email Templates (Optional):</h4>
+            <ol>
+                <li>Go to <strong>Settings → Technical → Email → Templates</strong></li>
+                <li>Search for "VPA Inventory Conversion"</li>
+                <li>Select the template to customize</li>
+                <li>Edit subject, body, and recipients as needed</li>
+                <li>Save changes</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Ensure your Odoo email server is properly configured (Settings → Technical → Email → Outgoing Mail Servers) for notifications to work.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 6: Create Reason Templates</h2>
+
+            <h3>Predefined Reason Templates</h3>
+
+            <p>Create templates for common conversion reasons to ensure consistency and speed up data entry.</p>
+
+            <h4>Creating Reason Templates:</h4>
+            <ol>
+                <li>Go to <strong>Inventory → Configuration → Reason Templates</strong></li>
+                <li>Click <strong>Create</strong></li>
+                <li>Fill in template details:
+                    <ul>
+                        <li><strong>Name:</strong> Short description (e.g., "Damaged During Handling")</li>
+                        <li><strong>Description:</strong> Full explanation</li>
+                        <li><strong>Conversion Type:</strong> Expense or Asset</li>
+                        <li><strong>Default Account:</strong> Associated account (optional)</li>
+                    </ul>
+                </li>
+                <li>Save the template</li>
+            </ol>
+
+            <h4>Recommended Templates:</h4>
+
+            <div class="config-box">
+                <h4>Expense Conversion Templates</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Template Name</th>
+                            <th>Description</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Damaged - Handling</td>
+                            <td>Items damaged during warehouse operations</td>
+                            <td>Forklift damage, drops, breaks</td>
+                        </tr>
+                        <tr>
+                            <td>Obsolete - No Demand</td>
+                            <td>Products no longer sellable or needed</td>
+                            <td>Old models, discontinued items</td>
+                        </tr>
+                        <tr>
+                            <td>Defective - Manufacturing</td>
+                            <td>Products with manufacturing defects</td>
+                            <td>Quality failures, production errors</td>
+                        </tr>
+                        <tr>
+                            <td>Expired - Shelf Life</td>
+                            <td>Items past expiration date</td>
+                            <td>Food, chemicals, time-sensitive goods</td>
+                        </tr>
+                        <tr>
+                            <td>Customer Return - Damaged</td>
+                            <td>Returned products not resalable</td>
+                            <td>Damaged returns, used items</td>
+                        </tr>
+                        <tr>
+                            <td>Theft/Loss</td>
+                            <td>Missing inventory or stolen goods</td>
+                            <td>Shrinkage, theft, loss</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="config-box">
+                <h4>Asset Conversion Templates</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Template Name</th>
+                            <th>Description</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Equipment - Capitalization</td>
+                            <td>Convert equipment inventory to fixed asset</td>
+                            <td>Tools, machinery put into service</td>
+                        </tr>
+                        <tr>
+                            <td>Furniture - Office Use</td>
+                            <td>Convert furniture to company asset</td>
+                            <td>Desks, chairs, cabinets</td>
+                        </tr>
+                        <tr>
+                            <td>IT Equipment - In Use</td>
+                            <td>Computers and IT hardware in service</td>
+                            <td>Servers, computers, network gear</td>
+                        </tr>
+                        <tr>
+                            <td>Vehicle - Fleet Addition</td>
+                            <td>Add vehicle to company fleet</td>
+                            <td>Trucks, forklifts, company cars</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 7: Configure Analytic Accounting (Optional)</h2>
+
+            <h3>Department & Cost Center Tracking</h3>
+
+            <p>If you want to track conversions by department or project:</p>
+
+            <ol>
+                <li>Ensure <strong>Analytic Accounting</strong> is enabled:
+                    <ul>
+                        <li>Go to <strong>Settings → Accounting → Analytics</strong></li>
+                        <li>Enable "Analytic Accounting"</li>
+                    </ul>
+                </li>
+                <li>Create Analytic Accounts:
+                    <ul>
+                        <li>Go to <strong>Accounting → Configuration → Analytic Accounts</strong></li>
+                        <li>Create accounts for each department or cost center</li>
+                    </ul>
+                </li>
+                <li>Users can select these when creating conversions</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>💡 Benefit:</strong> Track which departments are generating the most write-offs or asset conversions for better cost control.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Step 8: Multi-Company Setup (If Applicable)</h2>
+
+            <h3>Multi-Company Configuration</h3>
+
+            <p>If you operate multiple companies in Odoo:</p>
+
+            <ol>
+                <li>Configure sequences per company:
+                    <ul>
+                        <li>Each company can have different numbering schemes</li>
+                        <li>Example: Company A = <code>ASC-A/2024/00001</code>, Company B = <code>ASC-B/2024/00001</code></li>
+                    </ul>
+                </li>
+                <li>Set default accounts per company:
+                    <ul>
+                        <li>Each company can have different expense/asset accounts</li>
+                    </ul>
+                </li>
+                <li>Configure approval limits per company:
+                    <ul>
+                        <li>Different threshold amounts for different companies</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>⚠️ Access Control:</strong> Users can only see conversions for companies they have access to, as defined by their user settings.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Configuration Checklist</h2>
+
+            <p>Before starting to use the module, verify you've completed these steps:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Configuration Item</th>
+                        <th>Status</th>
+                        <th>Required?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>✓ Document sequence configured</td>
+                        <td>☐</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Default expense account set</td>
+                        <td>☐</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Default asset account set</td>
+                        <td>☐</td>
+                        <td>Yes (if using assets)</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Approval thresholds configured</td>
+                        <td>☐</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>✓ User privileges assigned (see Security page)</td>
+                        <td>☐</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Email notifications enabled</td>
+                        <td>☐</td>
+                        <td>Recommended</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Reason templates created</td>
+                        <td>☐</td>
+                        <td>Recommended</td>
+                    </tr>
+                    <tr>
+                        <td>✓ Analytic accounts configured</td>
+                        <td>☐</td>
+                        <td>Optional</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <strong>✅ Configuration Complete!</strong> You're now ready to assign user privileges and create your first conversion.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Next Steps</h2>
+
+            <ol>
+                <li>📖 Configure <a href="security.html">User Privileges & Access Rights</a></li>
+                <li>📝 Read the <a href="user_guide.html">User Guide</a> to understand features</li>
+                <li>🎯 Create your <a href="expense_conversion.html">First Expense Conversion</a></li>
+                <li>🏢 Or create an <a href="asset_conversion.html">Asset Conversion</a></li>
+            </ol>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="installation.html">← Back to Installation</a>
+            <a href="security.html">Next: Security Setup →</a>
+        </div>
+    </main>
+</body>
+</html>

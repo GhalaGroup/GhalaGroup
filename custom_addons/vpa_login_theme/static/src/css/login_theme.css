@@ -1,0 +1,28 @@
+/* VPA Login Theme - Red Default Theme */
+
+/* Login Button Styling */
+.oe_login_form .btn-primary {
+    background-color: #DC143C !important;
+    border-color: #DC143C !important;
+}
+
+.oe_login_form .btn-primary:hover {
+    background-color: #B22222 !important;
+    border-color: #B22222 !important;
+}
+
+.oe_login_form .btn-primary:focus,
+.oe_login_form .btn-primary:active {
+    background-color: #B22222 !important;
+    border-color: #B22222 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 20, 60, 0.5) !important;
+}
+
+/* Link Styling */
+.oe_login_form a {
+    color: #DC143C;
+}
+
+.oe_login_form a:hover {
+    color: #B22222;
+}

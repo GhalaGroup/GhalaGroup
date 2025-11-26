@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- VPA Softwares Security Category -->
+        <record id="module_category_vpa_softwares" model="ir.module.category">
+            <field name="name">VPA Softwares</field>
+            <field name="description">VPA Software Limited Applications</field>
+            <field name="sequence">50</field>
+        </record>
+
+        <!-- Login Theme Privilege -->
+        <record model="res.groups.privilege" id="res_groups_privilege_login_theme">
+            <field name="name">Login Theme</field>
+            <field name="category_id" ref="module_category_vpa_softwares"/>
+            <field name="placeholder">No</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Login Theme User Group (Basic Access) -->
+        <record id="group_login_theme_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_login_theme"/>
+            <field name="comment">Users can view login theme configuration</field>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- Login Theme Manager Group -->
+        <record id="group_login_theme_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_login_theme"/>
+            <field name="comment">Users can configure and manage login page themes</field>
+            <field name="implied_ids" eval="[(4, ref('group_login_theme_user'))]"/>
+        </record>
+
+        <!-- Login Theme Administrator Group (Full Access) -->
+        <record id="group_login_theme_admin" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="sequence">30</field>
+            <field name="privilege_id" ref="res_groups_privilege_login_theme"/>
+            <field name="comment">Full access to login theme configuration and settings</field>
+            <field name="implied_ids" eval="[(4, ref('group_login_theme_manager'))]"/>
+        </record>
+
+    </data>
+</odoo>

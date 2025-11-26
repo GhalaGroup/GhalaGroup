@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Furniture Studio - Complete Modular ERP System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidemenu {
+            width: 280px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidemenu::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidemenu::-webkit-scrollbar-track {
+            background: #2c3e50;
+        }
+
+        .sidemenu::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .sidemenu-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 2px solid #667eea;
+        }
+
+        .sidemenu-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .version {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .sidemenu nav {
+            padding: 20px 0;
+        }
+
+        .category {
+            padding: 15px 20px 8px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #95a5a6;
+            font-weight: 600;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 10px;
+        }
+
+        .category:first-child {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .sidemenu ul {
+            list-style: none;
+        }
+
+        .sidemenu li {
+            margin: 0;
+        }
+
+        .sidemenu a {
+            display: block;
+            padding: 10px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidemenu a:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-left-color: #667eea;
+            padding-left: 25px;
+        }
+
+        .sidemenu a.active {
+            background: rgba(102, 126, 234, 0.3);
+            border-left-color: #667eea;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .doc-links {
+            padding: 20px;
+            border-top: 2px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .doc-links a {
+            display: block;
+            padding: 8px 0;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .doc-links a:hover {
+            color: #5dade2;
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 0;
+            background: #f8f9fa;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 60px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero .subtitle {
+            font-size: 24px;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .hero .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .hero .stat {
+            text-align: center;
+        }
+
+        .hero .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .hero .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .main-content {
+            padding: 60px;
+        }
+
+        .section {
+            background: white;
+            padding: 40px;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 36px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 24px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .module-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .module-card h4 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .module-card .module-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .module-card .price {
+            font-size: 24px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .module-card .phase {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .module-card .description {
+            color: #555;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .module-card .view-details {
+            display: inline-block;
+            margin-top: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .module-card .view-details:hover {
+            color: #764ba2;
+            padding-left: 10px;
+        }
+
+        .module-card .view-details::after {
+            content: " →";
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .package-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .package-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .package-card h4 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .package-card .package-price {
+            font-size: 42px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .package-card .package-savings {
+            color: #27ae60;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .package-card .module-count {
+            color: #777;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .package-card.featured {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fff5e6 0%, #ffffff 100%);
+            transform: scale(1.05);
+        }
+
+        .package-card.featured h4 {
+            color: #f39c12;
+        }
+
+        .package-card.featured .package-price {
+            color: #f39c12;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #e8f8f5;
+            border-left: 4px solid #27ae60;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 4px;
+        }
+
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 10px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .universal-badge {
+            display: inline-block;
+            background: #16a085;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidemenu">
+        <div class="sidemenu-header">
+            <h2>🏗️ VPA Furniture Studio</h2>
+            <div class="version">Version 1.0 | Odoo 19</div>
+        </div>
+
+        <nav>
+            <div class="category">Core Foundation</div>
+            <ul>
+                <li><a href="modules_html/module_01_base.html">1. BASE (Foundation)</a></li>
+            </ul>
+
+            <div class="category">Sales & Configuration</div>
+            <ul>
+                <li><a href="modules_html/module_02_configurator.html">2. Configurator</a></li>
+                <li><a href="modules_html/module_03_catalog.html">3. Catalog</a></li>
+                <li><a href="modules_html/module_17_product_catalogue.html">17. Product Catalogue</a></li>
+            </ul>
+
+            <div class="category">Costing & Reporting</div>
+            <ul>
+                <li><a href="modules_html/module_04_costing.html">4. Costing</a></li>
+                <li><a href="modules_html/module_05_reports.html">5. Reports</a></li>
+            </ul>
+
+            <div class="category">Manufacturing</div>
+            <ul>
+                <li><a href="modules_html/module_06_manufacturing.html">6. Manufacturing</a></li>
+                <li><a href="modules_html/module_07_bom_smart.html">7. BOM Smart</a></li>
+                <li><a href="modules_html/module_08_nesting.html">8. Nesting/CNC</a></li>
+                <li><a href="modules_html/module_12_shopfloor.html">12. Shop Floor</a></li>
+            </ul>
+
+            <div class="category">Inventory & Warehouse</div>
+            <ul>
+                <li><a href="modules_html/module_09_inventory_advanced.html">9. Inventory Advanced</a></li>
+                <li><a href="modules_html/module_10_inventory_barcode.html">10. Inventory Barcode</a></li>
+                <li><a href="modules_html/module_11_label_designer.html">11. Label Designer</a></li>
+            </ul>
+
+            <div class="category">Quality & Analytics</div>
+            <ul>
+                <li><a href="modules_html/module_13_quality_control.html">13. Quality Control</a></li>
+                <li><a href="modules_html/module_14_analytics.html">14. Analytics</a></li>
+            </ul>
+
+            <div class="category">Customer Experience</div>
+            <ul>
+                <li><a href="modules_html/module_15_portal.html">15. Portal</a></li>
+                <li><a href="modules_html/module_16_delivery_scheduling.html">16. Delivery Scheduling</a></li>
+            </ul>
+        </nav>
+
+        <div class="doc-links">
+            <strong style="color: #95a5a6; font-size: 12px;">📚 DOCUMENTATION</strong>
+            <a href="README.md">📖 Main Overview</a>
+            <a href="PACKAGES.md">💰 Packages & Pricing</a>
+            <a href="SUBSCRIPTION_PRICING.md">💳 Subscription Plans</a>
+            <a href="MODULE_DEPENDENCIES.md">🔗 Dependencies</a>
+            <a href="MODULAR_ARCHITECTURE.html">🏗️ Full Architecture</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="hero">
+            <h1>🏗️ VPA Furniture Studio</h1>
+            <p class="subtitle">Complete Modular ERP System for Custom Furniture Manufacturing</p>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">17</span>
+                    <span class="stat-label">Modules</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Packages</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">$12K-$80K</span>
+                    <span class="stat-label">Pricing Range</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="section">
+                <h2>🎯 System Overview</h2>
+                <p style="font-size: 18px; line-height: 1.8; color: #555;">
+                    VPA Furniture Studio is a comprehensive modular ERP system built on <strong>Odoo 19 Enterprise</strong>, specifically designed for custom furniture manufacturing businesses. The system uses revolutionary <strong>BOM Groups architecture</strong> for dynamic material selection, <strong>historical cost tracking</strong> for accurate profitability analysis, and advanced features like <strong>CNC nesting optimization</strong> and <strong>multi-box inventory tracking</strong>.
+                </p>
+
+                <div class="info-box">
+                    <strong>💡 Modular Architecture Advantage:</strong> Buy only the modules you need. Start with the Starter Package ($12K) and upgrade as your business grows. All modules integrate seamlessly with Odoo 19 Enterprise.
+                </div>
+
+                <h3>🌟 Key Innovations</h3>
+                <ul style="font-size: 16px;">
+                    <li><strong>BOM Groups:</strong> Materials selected dynamically from inventory categories (no hardcoding)</li>
+                    <li><strong>Historical Costing:</strong> Weighted averages from actual production (not estimates)</li>
+                    <li><strong>Multi-Box Tracking:</strong> Track products that come in multiple boxes ("Box 1 of 3")</li>
+                    <li><strong>CNC Nesting:</strong> Optimize sheet cutting to reduce material waste by 15-25%</li>
+                    <li><strong>Product Catalogue:</strong> Manage 8 series (Quadroto, Arabica, ModernCraft, etc.) with 235+ products</li>
+                    <li><strong>Universal Modules:</strong> 5 modules can be sold to any industry (not just furniture)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>📦 Pricing Packages</h2>
+                <p style="font-size: 16px; margin-bottom: 20px;">Choose from 5 pre-configured packages or buy modules individually (à la carte).</p>
+
+                <div class="info-box" style="margin-bottom: 30px;">
+                    <strong>💳 Flexible Payment Options:</strong> All packages available as <strong>One-Time Purchase</strong>, <strong>Monthly Subscription</strong>, or <strong>Yearly Subscription</strong> (save 17%).
+                    <a href="SUBSCRIPTION_PRICING.md" style="color: #667eea; font-weight: 600; margin-left: 10px;">View Subscription Pricing →</a>
+                </div>
+
+                <div class="packages-grid">
+                    <div class="package-card">
+                        <h4>🥉 Starter</h4>
+                        <div class="package-price">$12,000</div>
+                        <div class="package-savings">Save $9,000 (43%)</div>
+                        <div class="module-count">5 Modules</div>
+                        <p style="color: #777; font-size: 14px;">Perfect for small furniture shops starting with custom configuration and basic reporting.</p>
+                        <p style="color: #667eea; font-size: 13px; margin-top: 10px; font-weight: 600;">Or $500/month | $5,000/year</p>
+                    </div>
+
+                    <div class="package-card">
+                        <h4>🥈 Professional</h4>
+                        <div class="package-price">$35,000</div>
+                        <div class="package-savings">Save $17,000 (33%)</div>
+                        <div class="module-count">9 Modules</div>
+                        <p style="color: #777; font-size: 14px;">Add manufacturing, inventory, and shop floor control for growing businesses.</p>
+                        <p style="color: #667eea; font-size: 13px; margin-top: 10px; font-weight: 600;">Or $1,500/month | $15,000/year</p>
+                    </div>
+
+                    <div class="package-card featured">
+                        <span class="badge">⭐ MOST POPULAR</span>
+                        <h4>🥇 Advanced</h4>
+                        <div class="package-price">$52,000</div>
+                        <div class="package-savings">Save $23,000 (31%)</div>
+                        <div class="module-count">12 Modules</div>
+                        <p style="color: #777; font-size: 14px;">Complete production suite with barcode/RFID, labels, and smart BOMs.</p>
+                        <p style="color: #667eea; font-size: 13px; margin-top: 10px; font-weight: 600;">Or $2,200/month | $22,000/year</p>
+                    </div>
+
+                    <div class="package-card">
+                        <h4>💎 Enterprise</h4>
+                        <div class="package-price">$67,000</div>
+                        <div class="package-savings">Save $25,000 (27%)</div>
+                        <div class="module-count">15 Modules</div>
+                        <p style="color: #777; font-size: 14px;">Advanced + quality control, analytics, CNC nesting, and delivery scheduling.</p>
+                        <p style="color: #667eea; font-size: 13px; margin-top: 10px; font-weight: 600;">Or $2,800/month | $28,000/year</p>
+                    </div>
+
+                    <div class="package-card">
+                        <h4>🚀 Ultimate</h4>
+                        <div class="package-price">$80,000</div>
+                        <div class="package-savings">Save $22,000 (22%)</div>
+                        <div class="module-count">17 Modules</div>
+                        <p style="color: #777; font-size: 14px;">Everything! Complete system with customer portal and product catalogue.</p>
+                        <p style="color: #667eea; font-size: 13px; margin-top: 10px; font-weight: 600;">Or $3,500/month | $35,000/year</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="PACKAGES.md" class="cta-button">View Complete Pricing Guide</a>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔷 All 17 Modules</h2>
+
+                <h3>Core Foundation</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 1: BASE</h4>
+                        <div class="module-meta">
+                            <span class="price">$2,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Foundation module with furniture product models, dimension fields, currency handling, and base configuration. Required by all other modules.</p>
+                        <a href="modules_html/module_01_base.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Sales & Configuration</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 2: Configurator</h4>
+                        <div class="module-meta">
+                            <span class="price">$6,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Revolutionary BOM Groups architecture for dynamic material selection. Configure furniture products with real-time pricing from inventory.</p>
+                        <a href="modules_html/module_02_configurator.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 3: Catalog</h4>
+                        <div class="module-meta">
+                            <span class="price">$4,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Generate professional PDF catalogs and interactive web e-catalogs with multi-language and multi-currency support.</p>
+                        <a href="modules_html/module_03_catalog.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 17: Product Catalogue <span class="universal-badge">⭐ NEW</span></h4>
+                        <div class="module-meta">
+                            <span class="price">$6,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Manage 8 series (Quadroto, Arabica, ModernCraft, etc.) with 235+ products, technical files (SolidWorks, DXF), and bidirectional inventory linking.</p>
+                        <a href="modules_html/module_17_product_catalogue.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Costing & Reporting</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 4: Costing</h4>
+                        <div class="module-meta">
+                            <span class="price">$7,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Historical cost tracking with weighted averages from actual production. Real-time profitability analysis and cost variance reports.</p>
+                        <a href="modules_html/module_04_costing.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 5: Reports</h4>
+                        <div class="module-meta">
+                            <span class="price">$3,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Comprehensive dashboards and business intelligence reports for sales, production, inventory, and financial analysis.</p>
+                        <a href="modules_html/module_05_reports.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Manufacturing</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 6: Manufacturing</h4>
+                        <div class="module-meta">
+                            <span class="price">$8,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Make-to-order manufacturing with auto-created MOs from sales orders, work center management, and furniture-specific routing.</p>
+                        <a href="modules_html/module_06_manufacturing.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 7: BOM Smart</h4>
+                        <div class="module-meta">
+                            <span class="price">$5,000</span>
+                            <span class="phase">Phase 2</span>
+                        </div>
+                        <p class="description">Smart material substitution, alternative materials, BOM versioning, and automatic updates from configurator selections.</p>
+                        <a href="modules_html/module_07_bom_smart.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 8: Nesting/CNC</h4>
+                        <div class="module-meta">
+                            <span class="price">$10,000</span>
+                            <span class="phase">Phase 3</span>
+                        </div>
+                        <p class="description">CNC sheet cutting optimization with DXF/SVG export. Reduce material waste by 15-25% through intelligent nesting algorithms.</p>
+                        <a href="modules_html/module_08_nesting.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 12: Shop Floor</h4>
+                        <div class="module-meta">
+                            <span class="price">$8,000</span>
+                            <span class="phase">Phase 2</span>
+                        </div>
+                        <p class="description">Tablet interfaces at workstations with real-time MO status, photo documentation, and operator time tracking.</p>
+                        <a href="modules_html/module_12_shopfloor.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Inventory & Warehouse</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 9: Inventory Advanced</h4>
+                        <div class="module-meta">
+                            <span class="price">$5,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">Multi-box tracking ("Box 1 of 3"), partial shipment prevention, and advanced UOM handling for furniture products.</p>
+                        <a href="modules_html/module_09_inventory_advanced.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 10: Barcode/RFID <span class="universal-badge">🌐 UNIVERSAL</span></h4>
+                        <div class="module-meta">
+                            <span class="price">$6,000</span>
+                            <span class="phase">Phase 2</span>
+                        </div>
+                        <p class="description">Native Android app with RFID support, offline mode, and barcode scanning for receiving, picking, and shipping operations.</p>
+                        <a href="modules_html/module_10_inventory_barcode.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 11: Label Designer <span class="universal-badge">🌐 UNIVERSAL</span></h4>
+                        <div class="module-meta">
+                            <span class="price">$4,000</span>
+                            <span class="phase">Phase 1</span>
+                        </div>
+                        <p class="description">ZPL label printing for Zebra printers with drag-and-drop designer, QR codes, barcodes, and variable data support.</p>
+                        <a href="modules_html/module_11_label_designer.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Quality & Analytics</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 13: Quality Control <span class="universal-badge">🌐 UNIVERSAL</span></h4>
+                        <div class="module-meta">
+                            <span class="price">$6,000</span>
+                            <span class="phase">Phase 3</span>
+                        </div>
+                        <p class="description">Mobile inspections with photo documentation, pass/fail workflows, quality metrics tracking, and non-conformance management.</p>
+                        <a href="modules_html/module_13_quality_control.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 14: Analytics</h4>
+                        <div class="module-meta">
+                            <span class="price">$9,000</span>
+                            <span class="phase">Phase 3</span>
+                        </div>
+                        <p class="description">Predictive analytics with machine learning for demand forecasting, cost predictions, and advanced business intelligence dashboards.</p>
+                        <a href="modules_html/module_14_analytics.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <h3>Customer Experience</h3>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <h4>Module 15: Portal</h4>
+                        <div class="module-meta">
+                            <span class="price">$7,000</span>
+                            <span class="phase">Phase 4</span>
+                        </div>
+                        <p class="description">Customer self-service portal for order tracking, online configurator, quotation requests, and 3D product visualization.</p>
+                        <a href="modules_html/module_15_portal.html" class="view-details">View Details</a>
+                    </div>
+
+                    <div class="module-card">
+                        <h4>Module 16: Delivery Scheduling <span class="universal-badge">🌐 UNIVERSAL</span></h4>
+                        <div class="module-meta">
+                            <span class="price">$5,000</span>
+                            <span class="phase">Phase 3</span>
+                        </div>
+                        <p class="description">Route optimization, driver assignment, delivery time slots, customer notifications, and real-time tracking.</p>
+                        <a href="modules_html/module_16_delivery_scheduling.html" class="view-details">View Details</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌐 Universal Modules</h2>
+                <p style="font-size: 16px; margin-bottom: 20px;">5 modules can be sold to <strong>any business</strong> (not just furniture manufacturing):</p>
+                <ul style="font-size: 16px;">
+                    <li><strong>Module 10: Barcode/RFID</strong> - Any warehouse/inventory operation</li>
+                    <li><strong>Module 11: Label Designer</strong> - Any business needing labels (retail, warehouse, shipping)</li>
+                    <li><strong>Module 13: Quality Control</strong> - Any manufacturing or service industry</li>
+                    <li><strong>Module 16: Delivery Scheduling</strong> - Any business with delivery operations</li>
+                    <li><strong>Module 17: Product Catalogue</strong> - Any business with product collections/series</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>📊 Market Opportunity:</strong> Universal modules expand your addressable market from furniture manufacturers to all SME businesses. Estimated TAM: 500,000+ businesses globally.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Implementation Timeline</h2>
+                <p style="font-size: 16px; margin-bottom: 20px;">Phased implementation approach over 12-18 months:</p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 15px; text-align: left;">Phase</th>
+                            <th style="padding: 15px; text-align: left;">Timeline</th>
+                            <th style="padding: 15px; text-align: left;">Modules</th>
+                            <th style="padding: 15px; text-align: left;">Investment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 12px;"><strong>Phase 1</strong></td>
+                            <td style="padding: 12px;">Months 1-6</td>
+                            <td style="padding: 12px;">BASE, Configurator, Catalog, Costing, Reports, Manufacturing, Inventory Advanced, Label Designer, Product Catalogue</td>
+                            <td style="padding: 12px;"><strong>$41,000</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 12px;"><strong>Phase 2</strong></td>
+                            <td style="padding: 12px;">Months 7-9</td>
+                            <td style="padding: 12px;">BOM Smart, Barcode/RFID, Shop Floor</td>
+                            <td style="padding: 12px;"><strong>$19,000</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 12px;"><strong>Phase 3</strong></td>
+                            <td style="padding: 12px;">Months 10-15</td>
+                            <td style="padding: 12px;">Nesting/CNC, Quality Control, Analytics, Delivery Scheduling</td>
+                            <td style="padding: 12px;"><strong>$30,000</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 12px;"><strong>Phase 4</strong></td>
+                            <td style="padding: 12px;">Months 16-18</td>
+                            <td style="padding: 12px;">Portal</td>
+                            <td style="padding: 12px;"><strong>$7,000</strong></td>
+                        </tr>
+                        <tr style="background: #f8f9fa; font-weight: bold;">
+                            <td style="padding: 12px;" colspan="3">Total Investment</td>
+                            <td style="padding: 12px;"><strong>$97,000</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>💼 Business Case</h2>
+                <h3>Revenue Projections (3 Years)</h3>
+                <ul style="font-size: 16px;">
+                    <li><strong>Year 1:</strong> 8 customers × $40K average = <strong>$320,000</strong></li>
+                    <li><strong>Year 2:</strong> 25 customers × $45K average = <strong>$1,125,000</strong></li>
+                    <li><strong>Year 3:</strong> 45 customers × $50K average = <strong>$2,250,000</strong></li>
+                    <li><strong>Total 3-Year Revenue:</strong> <strong>$3,695,000</strong></li>
+                </ul>
+
+                <h3>Key Success Metrics</h3>
+                <ul style="font-size: 16px;">
+                    <li><strong>ROI for Customers:</strong> 6-18 months depending on package</li>
+                    <li><strong>Target Market:</strong> Custom furniture manufacturers (50-500 employees)</li>
+                    <li><strong>Global TAM:</strong> 50,000+ furniture manufacturers</li>
+                    <li><strong>Competitive Advantage:</strong> Only system with BOM Groups + Historical Costing + CNC Nesting</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ Development Investment:</strong> Total development cost estimated at $400K-$500K over 18 months. Break-even at ~12 customers (achievable in Year 2).
+                </div>
+            </div>
+
+            <div style="text-align: center; padding: 60px 0;">
+                <h2 style="margin-bottom: 30px;">Ready to Get Started?</h2>
+                <a href="SUBSCRIPTION_PRICING.md" class="cta-button" style="margin-right: 20px;">View Subscription Plans</a>
+                <a href="PACKAGES.md" class="cta-button" style="margin-right: 20px;">One-Time Pricing</a>
+                <a href="MODULE_DEPENDENCIES.md" class="cta-button">Installation Guide</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
