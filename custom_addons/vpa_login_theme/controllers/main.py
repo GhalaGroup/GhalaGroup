@@ -8,6 +8,48 @@ from odoo.http import request
 
 class LoginThemeController(http.Controller):
 
+    @http.route(['/web/binary/company_logo', '/logo', '/logo.png'], type='http', auth='public')
+    def company_logo(self, dbname=None, **kw):
+        """
+        Override Odoo's default company logo route to serve the logo from the active VPA theme's company.
+        This ensures the login page shows the correct company logo based on theme configuration.
+        """
+        try:
+            # Get active theme configuration
+            LoginThemeConfig = request.env['login.theme.config'].sudo()
+            theme = LoginThemeConfig.search([('active', '=', True)], limit=1)
+
+            # If theme exists and has a company with logo, serve that logo
+            if theme and theme.company_id and theme.company_id.logo_web:
+                logo_data = base64.b64decode(theme.company_id.logo_web)
+                return request.make_response(
+                    logo_data,
+                    headers=[
+                        ('Content-Type', 'image/png'),
+                        ('Cache-Control', 'public, max-age=604800'),  # Cache for 1 week
+                    ]
+                )
+        except:
+            pass
+
+        # Fallback to default Odoo behavior - get first company's logo
+        try:
+            company = request.env['res.company'].sudo().search([], limit=1)
+            if company and company.logo_web:
+                logo_data = base64.b64decode(company.logo_web)
+                return request.make_response(
+                    logo_data,
+                    headers=[
+                        ('Content-Type', 'image/png'),
+                        ('Cache-Control', 'public, max-age=604800'),
+                    ]
+                )
+        except:
+            pass
+
+        # Final fallback - redirect to Odoo default logo
+        return request.redirect('/web/static/img/logo2.png')
+
     @http.route('/vpa_login_theme/favicon', type='http', auth='public')
     def get_custom_favicon(self, **kwargs):
         """Serve custom favicon from active theme"""
@@ -30,44 +72,6 @@ class LoginThemeController(http.Controller):
 
         # Fallback to default Odoo favicon
         return request.redirect('/web/static/img/favicon.ico')
-
-    @http.route('/vpa_login_theme/company_logo', type='http', auth='public')
-    def get_company_logo(self, **kwargs):
-        """Serve the company logo from the active theme's company"""
-        try:
-            LoginThemeConfig = request.env['login.theme.config'].sudo()
-            theme = LoginThemeConfig.search([('active', '=', True)], limit=1)
-
-            if theme and theme.company_id and theme.company_id.logo_web:
-                # Return the company's logo
-                logo_data = base64.b64decode(theme.company_id.logo_web)
-                return request.make_response(
-                    logo_data,
-                    headers=[
-                        ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=3600'),
-                    ]
-                )
-        except Exception as e:
-            pass
-
-        # Fallback to default company logo
-        try:
-            company = request.env['res.company'].sudo().search([], limit=1)
-            if company and company.logo_web:
-                logo_data = base64.b64decode(company.logo_web)
-                return request.make_response(
-                    logo_data,
-                    headers=[
-                        ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=3600'),
-                    ]
-                )
-        except:
-            pass
-
-        # Final fallback - redirect to Odoo default
-        return request.redirect('/web/static/img/logo.png')
 
     @http.route('/vpa_login_theme/get_theme_css', type='http', auth='public')
     def get_theme_css(self, **kwargs):
