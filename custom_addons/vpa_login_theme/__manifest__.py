@@ -83,6 +83,7 @@ Make your Odoo login page truly yours with VPA Login Theme!
     'data': [
         'security/login_theme_security.xml',
         'security/ir.model.access.csv',
+        'views/res_config_settings_views.xml',
         'views/login_theme_config_views.xml',
         'views/web_templates.xml',
         'data/default_theme_data.xml',

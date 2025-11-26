@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit General Settings to add Login Theme section -->
+    <record id="res_config_settings_view_form_inherit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.login.theme</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add VPA Login Theme section in Settings -->
+            <xpath expr="//form[@class='oe_form_configuration']" position="inside">
+                <div class="app_settings_block o_not_app" string="VPA Login Theme" data-string="VPA Login Theme" data-key="vpa_login_theme" groups="base.group_system">
+                    <h2>Login Page Branding</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <div><strong>Customize Login Page</strong></div>
+                                        <div class="text-muted">
+                                            Transform your Odoo login page with custom branding and colors
+                                        </div>
+                                        <div class="mt8">
+                                            <button name="action_open_login_theme"
+                                                    string="Configure Login Theme"
+                                                    type="object"
+                                                    class="btn btn-primary"
+                                                    icon="fa-paint-brush"/>
+                                        </div>
+                                        <div class="mt8">
+                                            <ul class="text-muted small mb-0">
+                                                <li>6 pre-built professional themes</li>
+                                                <li>Custom colors and branding</li>
+                                                <li>Custom favicon support</li>
+                                                <li>Live preview before applying</li>
+                                                <li>No coding required</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
