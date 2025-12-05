@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - Beta
     paths:
       - 'addons/**'
       - 'config/**'
@@ -23,48 +24,49 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to NAS Beta
+      - name: Deploy to NAS Beta (Git Pull)
         env:
           NAS_HOST: ${{ secrets.NAS_HOST }}
           NAS_PORT: ${{ secrets.NAS_PORT }}
           NAS_USER: ${{ secrets.NAS_USER }}
         run: |
-          # Create version tag
           VERSION_TAG="v$(date +%Y%m%d-%H%M%S)"
           echo "Deploying version: $VERSION_TAG to Beta"
+          echo "Commit: ${{ github.sha }}"
+          echo "Message: ${{ github.event.head_commit.message }}"
 
-          # Package addons
-          tar -czf /tmp/ud-addons.tar.gz addons/
-
-          # Transfer files to NAS
-          scp -P $NAS_PORT /tmp/ud-addons.tar.gz $NAS_USER@$NAS_HOST:/tmp/
-
-          # Deploy on NAS
+          # Deploy on NAS using git pull
           ssh -p $NAS_PORT $NAS_USER@$NAS_HOST << 'ENDSSH'
             set -e
 
-            # Navigate to beta directory
-            cd /volume3/docker_1/udesign/beta
+            echo "=== UD Odoo Beta Deployment ==="
 
-            # Backup current addons
-            if [ -d "addons" ]; then
-              mv addons addons.backup.$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+            # Navigate to custom-addons directory
+            cd /volume3/docker_1/udesign/beta/custom-addons
+
+            # Check if it's a git repo, if not clone it
+            if [ ! -d ".git" ]; then
+              echo "Git repo not found, cloning..."
+              cd ..
+              rm -rf custom-addons
+              git clone git@github.com:VPA-Solution/ud-odoo-19.git custom-addons
+              cd custom-addons
             fi
 
-            # Extract new addons
-            tar -xzf /tmp/ud-addons.tar.gz
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git fetch origin
+            git checkout Beta || git checkout main
+            git pull origin $(git branch --show-current)
 
-            # Restart Odoo container
-            /usr/local/bin/docker restart ud-odoo-beta || true
+            echo "Current commit: $(git rev-parse --short HEAD)"
+            echo "Commit message: $(git log -1 --format='%s')"
 
-            # Verify deployment
-            echo "Beta deployment successful!"
+            # Restart Odoo container to load new addons
+            echo "Restarting ud-odoo-beta container..."
+            /usr/local/bin/docker restart ud-odoo-beta 2>/dev/null || echo "Container restart skipped (may not exist yet)"
 
-            # Cleanup
-            rm /tmp/ud-addons.tar.gz
+            echo "=== Beta deployment completed! ==="
           ENDSSH
 
-          # Cleanup local temp files
-          rm /tmp/ud-addons.tar.gz
-
-          echo "Beta deployment completed: $VERSION_TAG"
+          echo "Deployment completed: $VERSION_TAG"
