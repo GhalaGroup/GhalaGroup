@@ -1,0 +1,70 @@
+name: Deploy to Beta
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'addons/**'
+      - 'config/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NAS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to NAS Beta
+        env:
+          NAS_HOST: ${{ secrets.NAS_HOST }}
+          NAS_PORT: ${{ secrets.NAS_PORT }}
+          NAS_USER: ${{ secrets.NAS_USER }}
+        run: |
+          # Create version tag
+          VERSION_TAG="v$(date +%Y%m%d-%H%M%S)"
+          echo "Deploying version: $VERSION_TAG to Beta"
+
+          # Package addons
+          tar -czf /tmp/ud-addons.tar.gz addons/
+
+          # Transfer files to NAS
+          scp -P $NAS_PORT /tmp/ud-addons.tar.gz $NAS_USER@$NAS_HOST:/tmp/
+
+          # Deploy on NAS
+          ssh -p $NAS_PORT $NAS_USER@$NAS_HOST << 'ENDSSH'
+            set -e
+
+            # Navigate to beta directory
+            cd /volume3/docker_1/udesign/beta
+
+            # Backup current addons
+            if [ -d "addons" ]; then
+              mv addons addons.backup.$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+            fi
+
+            # Extract new addons
+            tar -xzf /tmp/ud-addons.tar.gz
+
+            # Restart Odoo container
+            /usr/local/bin/docker restart ud-odoo-beta || true
+
+            # Verify deployment
+            echo "Beta deployment successful!"
+
+            # Cleanup
+            rm /tmp/ud-addons.tar.gz
+          ENDSSH
+
+          # Cleanup local temp files
+          rm /tmp/ud-addons.tar.gz
+
+          echo "Beta deployment completed: $VERSION_TAG"
