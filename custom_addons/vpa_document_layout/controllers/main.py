@@ -94,7 +94,8 @@ class VPATemplatePreview(http.Controller):
             # Get paper format
             size_name = 'A4' if template.paper_size == 'a4' else 'Letter'
 
-            # Build footer URL
+            # Build footer URL (not used anymore, handled by ir_actions_report.py)
+            # Keeping this code for backwards compatibility
             base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
             footer_url = f"{base_url}/vpa/template/footer/{template.id}"
 

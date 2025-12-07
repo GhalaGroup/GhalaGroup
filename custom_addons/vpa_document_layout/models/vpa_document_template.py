@@ -186,6 +186,18 @@ class VPADocumentTemplate(models.Model):
     # Report Action Reference (auto-created)
     report_action_id = fields.Many2one('ir.actions.report', string='Report Action', readonly=True, ondelete='cascade')
 
+    # Default Template Selection
+    is_default_print = fields.Boolean(
+        string='Set as Default Print Template',
+        default=False,
+        help='When enabled, this template will be used by default for printing this document type'
+    )
+    is_default_email = fields.Boolean(
+        string='Set as Default Email Template',
+        default=False,
+        help='When enabled, this template will be used by default when sending this document type via email'
+    )
+
     # Preview field (like the old VPA config)
     preview = fields.Html(compute='_compute_preview', sanitize=False)
 
@@ -269,6 +281,31 @@ class VPADocumentTemplate(models.Model):
 
     def write(self, vals):
         """Update template and refresh report action"""
+        # Handle default template selection - ensure only one default per company/document_type
+        if vals.get('is_default_print') or vals.get('is_default_email'):
+            for template in self:
+                # If setting as default print, unset other defaults
+                if vals.get('is_default_print'):
+                    other_defaults = self.env['vpa.document.template'].search([
+                        ('id', '!=', template.id),
+                        ('company_id', '=', template.company_id.id),
+                        ('document_type', '=', template.document_type),
+                        ('is_default_print', '=', True)
+                    ])
+                    if other_defaults:
+                        other_defaults.write({'is_default_print': False})
+
+                # If setting as default email, unset other defaults
+                if vals.get('is_default_email'):
+                    other_defaults = self.env['vpa.document.template'].search([
+                        ('id', '!=', template.id),
+                        ('company_id', '=', template.company_id.id),
+                        ('document_type', '=', template.document_type),
+                        ('is_default_email', '=', True)
+                    ])
+                    if other_defaults:
+                        other_defaults.write({'is_default_email': False})
+
         result = super(VPADocumentTemplate, self).write(vals)
 
         # Fields that require template regeneration
@@ -278,6 +315,9 @@ class VPADocumentTemplate(models.Model):
             'header_show_circle', 'header_circle_size', 'header_circle_opacity',
             'primary_accent_color', 'secondary_accent_color',
             'footer_show_shape', 'footer_shape_opacity', 'footer_bank_details_show',
+            'footer_layout', 'footer_column_1_title', 'footer_column_1_content',
+            'footer_column_2_title', 'footer_column_2_content',
+            'footer_column_3_title', 'footer_column_3_content',
             'paper_size', 'paper_orientation'  # Paper settings also trigger regeneration
         ]
 
@@ -945,13 +985,13 @@ class VPADocumentTemplate(models.Model):
     </div><!-- Close article -->
 </t>'''
 
-        # NOTE: Footer is now rendered separately via wkhtmltopdf --footer-html
-        # See /vpa/template/footer/<template_id> route
+        # NOTE: Footer is rendered via wkhtmltopdf --footer-html parameter
+        # NOT inline in the template (to avoid duplication)
 
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (30 total - footer removed)
+        # Finalize arch_content with all parameters (30 total)
         arch_content = arch_content % (
             self.id,
             self.id,

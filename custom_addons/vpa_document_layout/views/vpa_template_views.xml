@@ -10,6 +10,8 @@
                 <field name="name"/>
                 <field name="document_type"/>
                 <field name="target_app"/>
+                <field name="is_default_print" string="Default Print" widget="boolean_toggle"/>
+                <field name="is_default_email" string="Default Email" widget="boolean_toggle"/>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
@@ -47,6 +49,13 @@
                                     <field name="company_id" groups="base.group_multi_company"/>
                                     <field name="sequence"/>
                                 </group>
+                            </group>
+
+                            <!-- Default Template Selection -->
+                            <separator string="Default Template"/>
+                            <group>
+                                <field name="is_default_print" string="Default for Print"/>
+                                <field name="is_default_email" string="Default for Email"/>
                             </group>
 
                             <!-- PDF File Naming -->

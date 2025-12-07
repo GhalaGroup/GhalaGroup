@@ -64,6 +64,35 @@ class VPAReportController(ReportController):
                 else:
                     report = report_search
 
+                # Check if this report will be redirected to a VPA template
+                if docids and report:
+                    standard_report_map = {
+                        'sale.report_saleorder': ('sale.order', 'quotation'),
+                        'sale.action_report_saleorder': ('sale.order', 'quotation'),
+                        'account.account_invoices': ('account.move', 'invoice'),
+                        'purchase.action_report_purchase_order': ('purchase.order', 'purchase_order'),
+                        'stock.action_report_delivery': ('stock.picking', 'delivery'),
+                    }
+
+                    if reportname in standard_report_map:
+                        model_name, doc_type = standard_report_map[reportname]
+                        ids = [int(x) for x in docids.split(",") if x.isdigit()]
+                        if ids:
+                            record = http.request.env[model_name].sudo().browse(ids[0])
+                            company_id = record.company_id.id if hasattr(record, 'company_id') else http.request.env.company.id
+
+                            # Search for default VPA template
+                            vpa_template = http.request.env['vpa.document.template'].sudo().search([
+                                ('company_id', '=', company_id),
+                                ('document_type', '=', doc_type),
+                                ('is_default_print', '=', True),
+                                ('active', '=', True),
+                            ], limit=1)
+
+                            if vpa_template and vpa_template.report_action_id:
+                                _logger.info(f"📄 Will redirect to VPA template, using its report for filename: {vpa_template.name}")
+                                report = vpa_template.report_action_id
+
                 filename = "%s.%s" % (report.name, extension)
 
                 _logger.info(f"📄 Using Report ID: {report.id}, name={report.name}")
@@ -76,11 +105,16 @@ class VPAReportController(ReportController):
                     _logger.info(f"📄 Object count: {len(obj)}, IDs: {ids}")
 
                     # For VPA templates, get the print expression from the template directly
-                    if 'vpa_document_layout.report_template_' in reportname and len(obj) == 1:
+                    # Check both reportname AND report.report_name for VPA template
+                    is_vpa_report = ('vpa_document_layout.report_template_' in reportname or
+                                     'vpa_document_layout.report_template_' in (report.report_name or ''))
+
+                    if is_vpa_report and len(obj) == 1:
                         try:
-                            # Extract template ID
-                            template_id = int(reportname.split('_')[-1])
-                            _logger.info(f"📄 VPA template detected, ID: {template_id}")
+                            # Extract template ID from report_name (since reportname might be the standard report)
+                            template_source = report.report_name if 'vpa_document_layout.report_template_' in (report.report_name or '') else reportname
+                            template_id = int(template_source.split('_')[-1])
+                            _logger.info(f"📄 VPA template detected, ID: {template_id} from {template_source}")
 
                             # Get template and its print_name_pattern
                             template = http.request.env['vpa.document.template'].sudo().browse(template_id)

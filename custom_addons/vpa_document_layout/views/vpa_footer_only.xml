@@ -17,13 +17,14 @@
                         font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
                         position: relative;
                         height: 30mm;
+                        overflow: hidden;
                     }
                     .footer-wave {
                         position: absolute;
                         top: 0;
                         left: 0;
                         width: 100%;
-                        height: 100%;
+                        height: 135%;
                         z-index: 0;
                     }
                     .footer-content {
