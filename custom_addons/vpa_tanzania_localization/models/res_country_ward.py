@@ -34,9 +34,10 @@ class CountryWard(models.Model):
         domain="[('country_id', '=', country_id)]",
     )
 
-    _sql_constraints = [
-        ('name_code_uniq', 'unique(country_id, region_id, name)', 'Ward name must be unique per region!'),
-    ]
+    class Constraint(models.Constraint):
+        _constraint_name = 'name_code_uniq'
+        _definition = 'unique(country_id, region_id, name)'
+        _message = 'Ward name must be unique per region!'
 
 
 class CountryRegion(models.Model):
@@ -72,9 +73,10 @@ class CountryRegion(models.Model):
         string='Wards',
     )
 
-    _sql_constraints = [
-        ('name_code_uniq', 'unique(country_id, name)', 'Region name must be unique per country!'),
-    ]
+    class Constraint(models.Constraint):
+        _constraint_name = 'name_code_uniq'
+        _definition = 'unique(country_id, name)'
+        _message = 'Region name must be unique per country!'
 
 
 class ResPartner(models.Model):

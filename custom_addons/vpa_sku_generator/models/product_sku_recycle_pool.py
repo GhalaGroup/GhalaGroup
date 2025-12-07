@@ -56,10 +56,10 @@ class ProductSkuRecyclePool(models.Model):
         help='Name of the deleted product for reference'
     )
 
-    _sql_constraints = [
-        ('unique_sku_company', 'unique(name, company_id)',
-         'This SKU already exists in the recycle pool for this company!')
-    ]
+    class Constraint(models.Constraint):
+        _constraint_name = 'unique_sku_company'
+        _definition = 'unique(name, company_id)'
+        _message = 'This SKU already exists in the recycle pool for this company!'
 
     @api.depends('category_id', 'category_id.parent_id')
     def _compute_category_path(self):

@@ -5,9 +5,11 @@ from odoo import models, fields, api
 class VPADocumentConfig(models.Model):
     _name = 'vpa.document.config'
     _description = 'VPA Document Layout Configuration'
-    _sql_constraints = [
-        ('company_uniq', 'unique(company_id)', 'Only one VPA configuration per company is allowed!')
-    ]
+
+    class Constraint(models.Constraint):
+        _constraint_name = 'company_uniq'
+        _definition = 'unique(company_id)'
+        _message = 'Only one VPA configuration per company is allowed!'
 
     name = fields.Char(string='Configuration Name', required=True, default='VPA Layout Config')
     company_id = fields.Many2one('res.company', string='Company', required=False, ondelete='cascade', default=lambda self: self.env.company)

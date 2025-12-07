@@ -12,9 +12,10 @@ class ProductProduct(models.Model):
     default_code = fields.Char(copy=False)
     sku_locked = fields.Boolean(related='product_tmpl_id.sku_locked', string='SKU Locked', readonly=True, store=False)
 
-    _sql_constraints = [
-        ('default_code_unique', 'UNIQUE(default_code)', 'Internal Reference (SKU) must be unique!')
-    ]
+    class Constraint(models.Constraint):
+        _constraint_name = 'default_code_unique'
+        _definition = 'UNIQUE(default_code)'
+        _message = 'Internal Reference (SKU) must be unique!'
 
     @api.constrains('default_code')
     def _check_sku_required(self):
