@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+# Copyright (C) 2025 VPA Software Limited
+# License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '1.0.0',
+    'version': '19.0.1.0.0',
     'category': 'Manufacturing',
     'summary': 'Advanced Manufacturing Order management with flexible workflows and manual linking',
     'price': 199.00,
@@ -36,18 +38,19 @@ Technical Details:
 * Compatible with procurement_group_id automations
 * Creates Production route automatically on installation
 
-License:
+Support:
 --------
-Odoo Proprietary License v1.0 (OPL-1)
-This module is proprietary software. Use requires a valid Odoo Enterprise subscription.
-Redistribution and resale are prohibited.
+For support, customization, or feature requests:
+* Email: support@vpasoftware.com
+* Website: https://www.vpasoftware.com
 
-This module is separate from VPA Document Layout.
+Author: VPA Software Limited
+Copyright (C) 2025 VPA Software Limited
     """,
-    'author': 'Your Company',
-    'website': 'https://www.yourcompany.com',
-    'maintainer': 'Your Company',
-    'support': 'support@yourcompany.com',
+    'author': 'VPA Software Limited',
+    'website': 'https://www.vpasoftware.com',
+    'maintainer': 'VPA Software Limited',
+    'support': 'support@vpasoftware.com',
     'images': ['static/description/icon.png'],
     'depends': ['sale_mrp', 'mrp', 'stock'],
     'data': [

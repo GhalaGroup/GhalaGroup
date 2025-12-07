@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <!-- Override company logo on login layout -->
-    <template id="login_layout_logo_override" name="VPA Login Theme - Logo Override" inherit_id="web.login_layout" priority="99">
-        <xpath expr="//div[@class='card-body']//img" position="replace">
-            <img src="/vpa_login_theme/company_logo" alt="Logo" style="max-height: 120px; max-width: 100%; width: auto;"/>
-        </xpath>
-    </template>
-</odoo>

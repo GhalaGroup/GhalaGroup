@@ -40,7 +40,8 @@
     """,
 
     'author': 'VPA Software Limited',
-    'website': '',
+    'website': 'https://www.vpasoftware.com',
+    'support': 'support@vpasoftware.com',
     'license': 'OPL-1',
     'category': 'Inventory/Inventory',
     'version': '19.0.1.0.0',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'VPA Document Layout',
-    'version': '1.0.0',
+    'version': '19.0.1.0.0',
     'category': 'Reporting',
     'summary': 'Custom VPA document layout for reports',
     'description': """
@@ -12,8 +12,12 @@
 
         PDF Engine: WeasyPrint for superior CSS rendering
     """,
-    'author': 'VPA',
-    'website': '',
+    'author': 'VPA Software Limited',
+    'website': 'https://www.vpasoftware.com',
+    'support': 'support@vpasoftware.com',
+    'license': 'OPL-1',
+    'price': 79.99,
+    'currency': 'USD',
     'depends': ['web', 'base_setup', 'sale', 'account'],
     # WeasyPrint is optional - will fall back to wkhtmltopdf if not available
     # 'external_dependencies': {
@@ -46,5 +50,4 @@
     'installable': True,
     'application': False,
     'auto_install': False,
-    'license': 'LGPL-3',
 }
