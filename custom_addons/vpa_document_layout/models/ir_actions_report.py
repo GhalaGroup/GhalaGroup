@@ -158,32 +158,39 @@ class IrActionsReport(models.Model):
             template_id = self.env.context.get('vpa_template_id')
 
             if template_id:
-                # Use footer-html approach
-                # In Odoo.sh, wkhtmltopdf runs in same container and external URL requires auth
-                # Use localhost for internal rendering, web.base.url otherwise
+                # In Odoo.sh, wkhtmltopdf cannot access external URLs or localhost
+                # So we skip --footer-html and render footer inline in the HTML instead
                 base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
-                # Detect Odoo.sh environment (check if running on odoo.com domain)
-                if 'odoo.com' in base_url or 'odoo.sh' in base_url:
-                    # Use localhost since wkhtmltopdf runs in same container
-                    base_url = "http://localhost:8069"
-                    _logger.info(f"🔍 Odoo.sh environment detected - using localhost for footer")
+                # Detect Odoo.sh environment
+                is_odoo_sh = 'odoo.com' in base_url or 'odoo.sh' in base_url
 
-                footer_url = f"{base_url}/vpa/template/footer/{template_id}"
+                if is_odoo_sh:
+                    # Skip footer-html for Odoo.sh - footer will be rendered inline in template
+                    _logger.info(f"🔍 Odoo.sh detected - skipping --footer-html (footer rendered inline)")
+                    command_args.extend([
+                        '--margin-top', '0',
+                        '--margin-bottom', '0',  # No bottom margin - footer is inline
+                        '--margin-left', '0',
+                        '--margin-right', '0',
+                        '--header-spacing', '0',
+                        '--footer-spacing', '0',
+                    ])
+                else:
+                    # Non-Odoo.sh: use --footer-html approach
+                    footer_url = f"{base_url}/vpa/template/footer/{template_id}"
+                    _logger.info(f"✅ Using footer-html: {footer_url}")
 
-                _logger.info(f"✅ Using footer-html: {footer_url}")
-
-                # Add footer with margin
-                command_args.extend([
-                    '--enable-local-file-access',
-                    '--margin-top', '0',
-                    '--margin-bottom', '30mm',  # Reserve space for footer
-                    '--margin-left', '0',
-                    '--margin-right', '0',
-                    '--header-spacing', '0',
-                    '--footer-spacing', '0',
-                    '--footer-html', footer_url,
-                ])
+                    command_args.extend([
+                        '--enable-local-file-access',
+                        '--margin-top', '0',
+                        '--margin-bottom', '30mm',  # Reserve space for footer
+                        '--margin-left', '0',
+                        '--margin-right', '0',
+                        '--header-spacing', '0',
+                        '--footer-spacing', '0',
+                        '--footer-html', footer_url,
+                    ])
             else:
                 # No footer
                 command_args.extend([

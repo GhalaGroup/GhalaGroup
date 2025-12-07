@@ -938,6 +938,74 @@ class VPADocumentTemplate(models.Model):
 
             <!-- Document content -->
             <t t-out="0"/>
+
+            <!-- Inline Footer (for Odoo.sh where --footer-html doesn't work) -->
+            <div style="position: relative; margin-top: 30px; padding-top: 20px; font-size: 8pt; line-height: 1.5;">
+                <!-- Footer Wave Shape -->
+                <svg t-if="%s" style="position: absolute; top: 0; left: -18px; width: calc(100%% + 36px); height: 100%%; z-index: 0;" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                          fill="%s" fill-opacity="%s"/>
+                </svg>
+
+                <!-- Footer Content -->
+                <div style="position: relative; z-index: 1; padding: 0;">
+                    <!-- Single Column Layout -->
+                    <t t-if="%s">
+                        <div style="text-align: center;">
+                            <t t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
+                                <span t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_1_title"/>
+                                <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_1_content"/>
+                            </t>
+                        </div>
+                    </t>
+
+                    <!-- Two Column Layout -->
+                    <t t-if="%s">
+                        <table style="width: 100%%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 50%%; vertical-align: top; padding: 0 10px;">
+                                    <t t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
+                                        <span t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_1_title"/>
+                                        <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_1_content"/>
+                                    </t>
+                                </td>
+                                <td style="width: 50%%; vertical-align: top; padding: 0 10px;">
+                                    <t t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
+                                        <span t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_2_title"/>
+                                        <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_2_content"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+
+                    <!-- Three Column Layout -->
+                    <t t-if="%s">
+                        <table style="width: 100%%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 33.33%%; vertical-align: top; padding: 0 10px;">
+                                    <t t-if="vpa_template.footer_column_1_title or vpa_template.footer_column_1_content">
+                                        <span t-if="vpa_template.footer_column_1_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_1_title"/>
+                                        <div t-if="vpa_template.footer_column_1_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_1_content"/>
+                                    </t>
+                                </td>
+                                <td style="width: 33.33%%; vertical-align: top; padding: 0 10px;">
+                                    <t t-if="vpa_template.footer_column_2_title or vpa_template.footer_column_2_content">
+                                        <span t-if="vpa_template.footer_column_2_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_2_title"/>
+                                        <div t-if="vpa_template.footer_column_2_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_2_content"/>
+                                    </t>
+                                </td>
+                                <td style="width: 33.33%%; vertical-align: top; padding: 0 10px;">
+                                    <t t-if="vpa_template.footer_column_3_title or vpa_template.footer_column_3_content">
+                                        <span t-if="vpa_template.footer_column_3_title" style="display: block; margin-bottom: 4px; font-size: 8pt; font-weight: bold; color: %s;" t-esc="vpa_template.footer_column_3_title"/>
+                                        <div t-if="vpa_template.footer_column_3_content" style="color: #666; line-height: 1.6; font-size: 7.5pt;" t-raw="vpa_template.footer_column_3_content"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+                </div>
+            </div>
                     </td><!-- Close content-cell -->
                 </tr>
             </table><!-- Close page-layout-table -->
@@ -945,13 +1013,14 @@ class VPADocumentTemplate(models.Model):
     </div><!-- Close article -->
 </t>'''
 
-        # NOTE: Footer is now rendered separately via wkhtmltopdf --footer-html
-        # See /vpa/template/footer/<template_id> route
+        # NOTE: Footer can be rendered either:
+        # - Inline (Odoo.sh - where --footer-html doesn't work)
+        # - Via --footer-html (other environments - better page break handling)
 
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (30 total - footer removed)
+        # Finalize arch_content with all parameters (43 total - with inline footer)
         arch_content = arch_content % (
             self.id,
             self.id,
@@ -983,6 +1052,19 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
+            # Footer parameters (inline footer for Odoo.sh)
+            str(self.footer_show_shape).lower(),  # Footer wave shape show
+            self.secondary_accent_color,  # Footer wave fill color
+            self.footer_shape_opacity,  # Footer wave opacity
+            str(self.footer_layout == 'single').lower(),  # Single column layout
+            self.primary_accent_color,  # Footer column title color (single)
+            str(self.footer_layout == 'two_col').lower(),  # Two column layout
+            self.primary_accent_color,  # Footer column 1 title color (two col)
+            self.primary_accent_color,  # Footer column 2 title color (two col)
+            str(self.footer_layout == 'three_col').lower(),  # Three column layout
+            self.primary_accent_color,  # Footer column 1 title color (three col)
+            self.primary_accent_color,  # Footer column 2 title color (three col)
+            self.primary_accent_color,  # Footer column 3 title color (three col)
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
