@@ -27,6 +27,48 @@ except ImportError:
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
+    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        """Override to redirect to VPA template if marked as default"""
+        # Map standard report XML IDs to document types
+        standard_report_map = {
+            'sale.report_saleorder': ('sale.order', 'quotation'),
+            'sale.action_report_saleorder': ('sale.order', 'quotation'),
+            'account.account_invoices': ('account.move', 'invoice'),
+            'purchase.action_report_purchase_order': ('purchase.order', 'purchase_order'),
+            'stock.action_report_delivery': ('stock.picking', 'delivery'),
+        }
+
+        # Check if this is a standard report that might have a VPA default
+        report_name = report_ref if isinstance(report_ref, str) else report_ref.report_name
+
+        if report_name in standard_report_map:
+            model_name, doc_type = standard_report_map[report_name]
+
+            # Get the company from the first record
+            if res_ids and len(res_ids) > 0:
+                record = self.env[model_name].browse(res_ids[0])
+                company_id = record.company_id.id if hasattr(record, 'company_id') else self.env.company.id
+
+                # Search for default VPA template
+                vpa_template = self.env['vpa.document.template'].search([
+                    ('company_id', '=', company_id),
+                    ('document_type', '=', doc_type),
+                    ('is_default_print', '=', True),
+                    ('active', '=', True),
+                ], limit=1)
+
+                if vpa_template and vpa_template.report_action_id:
+                    _logger.info(f"🔄 Redirecting {report_name} to VPA template: {vpa_template.name}")
+                    # Use the VPA template report instead
+                    return vpa_template.report_action_id._render_qweb_pdf(
+                        vpa_template.report_action_id,
+                        res_ids=res_ids,
+                        data=data
+                    )
+
+        # No VPA template found, use standard report
+        return super(IrActionsReport, self)._render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
+
     def _run_wkhtmltopdf(
             self,
             bodies,
@@ -59,17 +101,17 @@ class IrActionsReport(models.Model):
         """Override to use custom PDF generation for VPA layout reports"""
         _logger.info(f"🔍 PDF Generation - report_ref: {report_ref}, report_name: {self.report_name}, context.vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}")
 
-        # Check if this is a VPA template report by checking the report_ref
-        is_vpa_template = 'vpa_document_layout.report_template_' in str(report_ref)
-        _logger.info(f"🔍 is_vpa_template={is_vpa_template}, checking if '{report_ref}' contains 'vpa_document_layout.report_template_'")
+        # Check if this is a VPA template report by checking the report_name
+        is_vpa_template = 'vpa_document_layout.report_template_' in (self.report_name or '')
+        _logger.info(f"🔍 is_vpa_template={is_vpa_template}, checking if '{self.report_name}' contains 'vpa_document_layout.report_template_'")
 
         if is_vpa_template:
-            # Extract template ID from report_ref (format: vpa_document_layout.report_template_3)
+            # Extract template ID from report_name (format: vpa_document_layout.report_template_3)
             try:
-                template_id = int(str(report_ref).split('_')[-1])
+                template_id = int(self.report_name.split('_')[-1])
                 _logger.info(f"Extracted template ID: {template_id}")
             except (ValueError, IndexError):
-                _logger.warning(f"Could not extract template ID from report_ref: {report_ref}")
+                _logger.warning(f"Could not extract template ID from report_name: {self.report_name}")
                 template_id = None
 
             if not self.env.context.get('vpa_force_zero_margins'):
@@ -158,39 +200,21 @@ class IrActionsReport(models.Model):
             template_id = self.env.context.get('vpa_template_id')
 
             if template_id:
-                # In Odoo.sh, wkhtmltopdf cannot access external URLs or localhost
-                # So we skip --footer-html and render footer inline in the HTML instead
+                # Use footer-html for all environments
                 base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                footer_url = f"{base_url}/vpa/template/footer/{template_id}"
+                _logger.info(f"✅ Using footer-html: {footer_url}")
 
-                # Detect Odoo.sh environment
-                is_odoo_sh = 'odoo.com' in base_url or 'odoo.sh' in base_url
-
-                if is_odoo_sh:
-                    # Skip footer-html for Odoo.sh - footer will be rendered inline in template
-                    _logger.info(f"🔍 Odoo.sh detected - skipping --footer-html (footer rendered inline)")
-                    command_args.extend([
-                        '--margin-top', '0',
-                        '--margin-bottom', '0',  # No bottom margin - footer is inline
-                        '--margin-left', '0',
-                        '--margin-right', '0',
-                        '--header-spacing', '0',
-                        '--footer-spacing', '0',
-                    ])
-                else:
-                    # Non-Odoo.sh: use --footer-html approach
-                    footer_url = f"{base_url}/vpa/template/footer/{template_id}"
-                    _logger.info(f"✅ Using footer-html: {footer_url}")
-
-                    command_args.extend([
-                        '--enable-local-file-access',
-                        '--margin-top', '0',
-                        '--margin-bottom', '30mm',  # Reserve space for footer
-                        '--margin-left', '0',
-                        '--margin-right', '0',
-                        '--header-spacing', '0',
-                        '--footer-spacing', '0',
-                        '--footer-html', footer_url,
-                    ])
+                command_args.extend([
+                    '--enable-local-file-access',
+                    '--margin-top', '0',
+                    '--margin-bottom', '30mm',  # Reserve space for footer
+                    '--margin-left', '0',
+                    '--margin-right', '0',
+                    '--header-spacing', '0',
+                    '--footer-spacing', '0',
+                    '--footer-html', footer_url,
+                ])
             else:
                 # No footer
                 command_args.extend([

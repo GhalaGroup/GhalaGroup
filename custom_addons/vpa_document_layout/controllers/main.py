@@ -94,16 +94,9 @@ class VPATemplatePreview(http.Controller):
             # Get paper format
             size_name = 'A4' if template.paper_size == 'a4' else 'Letter'
 
-            # Build footer URL
-            # In Odoo.sh, wkhtmltopdf runs in same container and external URL requires auth
+            # Build footer URL (not used anymore, handled by ir_actions_report.py)
+            # Keeping this code for backwards compatibility
             base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
-
-            # Detect Odoo.sh environment (check if running on odoo.com domain)
-            if 'odoo.com' in base_url or 'odoo.sh' in base_url:
-                # Use localhost since wkhtmltopdf runs in same container
-                base_url = "http://localhost:8069"
-                _logger.info(f"🔍 Odoo.sh environment detected - using localhost for footer")
-
             footer_url = f"{base_url}/vpa/template/footer/{template.id}"
 
             pdf_content = IrActionsReport.with_context(
