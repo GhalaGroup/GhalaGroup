@@ -49,7 +49,8 @@ class LoginThemeConfig(models.Model):
         'res.company',
         string='Login Page Company',
         help='Company whose logo will be displayed on the login page. If not set, uses the Company field above.',
-        default=lambda self: self.env.company
+        default=lambda self: self.env.company,
+        store=True  # Explicitly force database column creation
     )
 
     # Branding & Text Settings
