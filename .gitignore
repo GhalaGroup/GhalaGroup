@@ -171,3 +171,4 @@ htmlcov/
 # ✅ README.md, SETUP_SUMMARY.md, etc.
 # ✅ docker-compose.yml (reference only)
 # ============================================
+# Cleaned up third-party modules for v19 upgrade
