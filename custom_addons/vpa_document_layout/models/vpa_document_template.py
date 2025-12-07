@@ -278,6 +278,9 @@ class VPADocumentTemplate(models.Model):
             'header_show_circle', 'header_circle_size', 'header_circle_opacity',
             'primary_accent_color', 'secondary_accent_color',
             'footer_show_shape', 'footer_shape_opacity', 'footer_bank_details_show',
+            'footer_layout', 'footer_column_1_title', 'footer_column_1_content',
+            'footer_column_2_title', 'footer_column_2_content',
+            'footer_column_3_title', 'footer_column_3_content',
             'paper_size', 'paper_orientation'  # Paper settings also trigger regeneration
         ]
 
