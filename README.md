@@ -1,6 +1,6 @@
-# Odoo 19 Enterprise Setup
+# Odoo 19 Enterprise - VPA Custom Modules
 
-This directory contains a complete Odoo 19 Enterprise setup with Docker.
+This repository contains VPA custom modules for Odoo 19 Enterprise deployment on Odoo.sh.
 
 ## Directory Structure
 
