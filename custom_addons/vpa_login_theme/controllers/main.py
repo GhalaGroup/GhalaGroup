@@ -26,7 +26,9 @@ class LoginThemeController(http.Controller):
                     logo_data,
                     headers=[
                         ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=3600'),  # Cache for 1 hour
+                        ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                        ('Pragma', 'no-cache'),
+                        ('Expires', '0'),
                     ]
                 )
         except:
@@ -41,7 +43,9 @@ class LoginThemeController(http.Controller):
                     logo_data,
                     headers=[
                         ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=3600'),  # Cache for 1 hour
+                        ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                        ('Pragma', 'no-cache'),
+                        ('Expires', '0'),
                     ]
                 )
         except:
