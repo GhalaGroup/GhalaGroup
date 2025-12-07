@@ -114,6 +114,14 @@ class LoginThemeConfig(models.Model):
         ('dark', 'Dark Theme'),
     ], string='Preset Theme', default='red')
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Ensure login_company_id defaults to company_id if not set"""
+        for vals in vals_list:
+            if 'login_company_id' not in vals and 'company_id' in vals:
+                vals['login_company_id'] = vals['company_id']
+        return super().create(vals_list)
+
     @api.onchange('preset_theme')
     def _onchange_preset_theme(self):
         """Apply preset theme colors"""
