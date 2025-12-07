@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA - Manufacturing Order Link</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2874A6 0%, #8E44AD 50%, #C0392B 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .header h1 {
+            margin: 0 0 15px 0;
+            font-size: 3em;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        .badge-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .badge-version {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-odoo {
+            background: #8E44AD;
+            color: white;
+        }
+
+        .badge-license {
+            background: #2874A6;
+            color: white;
+        }
+
+        .badge-price {
+            background: #C0392B;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        .container {
+            padding: 40px 20px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #2874A6;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #2874A6;
+            padding-bottom: 10px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border-color: #2874A6;
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            color: #8E44AD;
+            margin: 15px 0 10px 0;
+            font-size: 1.4em;
+        }
+
+        .feature-card p {
+            color: #666;
+            margin: 0;
+            line-height: 1.7;
+        }
+
+        .workflow-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+        }
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .workflow-step {
+            background: white;
+            border: 2px solid #2874A6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            margin: 10px;
+            position: relative;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #2874A6;
+        }
+
+        .workflow-step:last-child::after {
+            content: '';
+        }
+
+        .workflow-step strong {
+            display: block;
+            color: #2874A6;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+
+        .pricing-box {
+            background: linear-gradient(135deg, #2874A6 0%, #8E44AD 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+
+        .pricing-box h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .price-details {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin: 15px 0;
+        }
+
+        .cta-button {
+            background: #C0392B;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #E74C3C;
+            transform: scale(1.05);
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 12px 0 12px 35px;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .benefits-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: #2874A6;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .workflow {
+                flex-direction: column;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -35px;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔗 VPA - Manufacturing Order Link</h1>
+        <p>Advanced Manufacturing Order Management for Odoo 19</p>
+    </div>
+
+    <!-- Badges -->
+    <div class="badge-container">
+        <span class="badge badge-version">Version 1.0</span>
+        <span class="badge badge-odoo">Odoo 19.0 Enterprise</span>
+        <span class="badge badge-license">OPL-1 Licensed</span>
+        <span class="badge badge-price">💰 $199 USD</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>📋 Overview</h2>
+            <p style="font-size: 1.2em; line-height: 1.8; color: #555;">
+                <strong>VPA - Manufacturing Order Link</strong> revolutionizes how you manage Manufacturing Orders in Odoo.
+                This powerful module extends the standard manufacturing integration to provide flexible workflows that adapt
+                to your business needs - whether you need automatic MO creation, manual linking, or support for products
+                without Bills of Materials.
+            </p>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #666; margin-top: 20px;">
+                Perfect for manufacturing businesses that require <strong>full control</strong> over their production process,
+                support <strong>pre-production scenarios</strong>, or work with <strong>custom/engineered products</strong>
+                where BOMs are defined after order confirmation.
+            </p>
+        </div>
+
+        <!-- Key Features -->
+        <div class="section">
+            <h2>✨ Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">📝</span>
+                    <h3>Draft MO Creation</h3>
+                    <p>All automatically created MOs stay in DRAFT state, never auto-confirmed. Review quantities, dates, and components before starting production.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔧</span>
+                    <h3>No-BOM Support</h3>
+                    <p>Create Manufacturing Orders even when Bill of Materials doesn't exist. Perfect for custom or engineered-to-order products.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔗</span>
+                    <h3>Manual MO Linking</h3>
+                    <p>Link pre-created Manufacturing Orders to Sales Orders. Supports make-to-stock and pre-production scenarios seamlessly.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Unified Smart Button</h3>
+                    <p>Single "Manufacturing" button displays ALL linked MOs - both automatic and manual. Clean, organized production visibility.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚙️</span>
+                    <h3>Production Route</h3>
+                    <p>Dedicated "Production" route created automatically. Product-selectable and compatible with multi-warehouse setups.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔄</span>
+                    <h3>Flexible Workflows</h3>
+                    <p>Supports automatic creation, manual linking, pre-production, and custom manufacturing scenarios all in one module.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflows Section -->
+        <div class="section">
+            <h2>🔄 Supported Workflows</h2>
+
+            <div class="workflow-container">
+                <h3 style="color: #2874A6; margin-top: 0;">Workflow 1: Automatic MO Creation</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Assign Production Route to Product
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Create & Confirm Sales Order
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        MO Created Automatically (DRAFT)
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Review & Confirm MO
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-container">
+                <h3 style="color: #8E44AD; margin-top: 0;">Workflow 2: Pre-Production Linking</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Create MO First
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Set Source = "S01234"
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Create Sales Order S01234
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        MO Auto-Links to SO
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-container">
+                <h3 style="color: #C0392B; margin-top: 0;">Workflow 3: Manual Link Action</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Create MO & SO Separately
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Open SO → Action Menu
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Click "MO - Link"
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Link Established
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Choose This Module -->
+        <div class="section">
+            <h2>🎯 Why Choose VPA - Manufacturing Order Link?</h2>
+            <ul class="benefits-list">
+                <li><strong>Save Time:</strong> Automate MO creation while maintaining full control over production</li>
+                <li><strong>Reduce Errors:</strong> Review all MOs in DRAFT before confirming production</li>
+                <li><strong>Increase Flexibility:</strong> Support multiple manufacturing workflows in one system</li>
+                <li><strong>Better Planning:</strong> Link pre-created MOs to sales orders for improved forecasting</li>
+                <li><strong>Custom Products:</strong> Handle engineered-to-order items without predefined BOMs</li>
+                <li><strong>Multi-Warehouse:</strong> Works seamlessly across multiple warehouse locations</li>
+                <li><strong>Audit Trail:</strong> Comprehensive chatter logging for complete traceability</li>
+                <li><strong>User-Friendly:</strong> Intuitive actions and smart buttons for easy navigation</li>
+            </ul>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="section">
+            <h2>📊 Standard Odoo vs VPA MO Link</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Standard Odoo</th>
+                        <th>VPA MO Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Automatic MO Creation</td>
+                        <td>✓ Auto-confirmed</td>
+                        <td>✓ <strong>Stays in DRAFT</strong></td>
+                    </tr>
+                    <tr>
+                        <td>MO Without BOM</td>
+                        <td>✗ Fails or skips</td>
+                        <td>✓ <strong>Creates with warning</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Pre-Production MO Linking</td>
+                        <td>✗ Not supported</td>
+                        <td>✓ <strong>Fully supported</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Manual Link/Unlink Actions</td>
+                        <td>✗ Not available</td>
+                        <td>✓ <strong>One-click actions</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Production Route</td>
+                        <td>Manufacture only</td>
+                        <td>✓ <strong>Production + Manufacture</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Origin-Based Linking</td>
+                        <td>✗ Limited</td>
+                        <td>✓ <strong>Automatic + Manual</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Review Before Confirm</td>
+                        <td>Manual override needed</td>
+                        <td>✓ <strong>Built-in behavior</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="section">
+            <h2>⚙️ Technical Specifications</h2>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #17a2b8;">🔧 Requirements</h3>
+                <ul>
+                    <li><strong>Odoo Version:</strong> 19.0 Enterprise Edition</li>
+                    <li><strong>Dependencies:</strong> sale_mrp, mrp, stock modules</li>
+                    <li><strong>Database:</strong> PostgreSQL 12+ recommended</li>
+                    <li><strong>Users:</strong> Supports unlimited users</li>
+                </ul>
+            </div>
+
+            <h3>Core Components</h3>
+            <ul class="benefits-list">
+                <li><strong>Stock Rule Overrides:</strong> Custom procurement logic for DRAFT MO creation</li>
+                <li><strong>Sale Order Extension:</strong> Enhanced compute method for unified MO display</li>
+                <li><strong>Server Actions:</strong> MO - Link and MO - Unlink for manual control</li>
+                <li><strong>Production Route:</strong> Automatically created on installation</li>
+                <li><strong>Smart Button Integration:</strong> Seamless UI integration with sale_mrp</li>
+            </ul>
+
+            <h3>Performance</h3>
+            <ul class="benefits-list">
+                <li>Optimized database queries for large datasets</li>
+                <li>Computed fields with proper caching</li>
+                <li>Minimal overhead on standard Odoo processes</li>
+                <li>Suitable for high-volume manufacturing operations</li>
+            </ul>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="pricing-box">
+            <h2>💰 Pricing</h2>
+            <div class="price">$199 USD</div>
+            <div class="price-details">
+                <p><strong>One-Time Payment</strong> • Lifetime License</p>
+                <p>✓ Free Updates for 1 Year</p>
+                <p>✓ Email Support Included</p>
+                <p>✓ Installation Documentation</p>
+                <p>✓ Multi-Company Support</p>
+            </div>
+            <a href="#" class="cta-button">Purchase Now</a>
+
+            <div style="margin-top: 30px; opacity: 0.9;">
+                <p><strong>Volume Licensing Available</strong></p>
+                <p>Contact us for enterprise pricing (10+ licenses)</p>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <h3 style="margin-top: 0;">📝 Pricing Methodology</h3>
+            <p><strong>Based on Odoo App Store Guidelines:</strong></p>
+            <ul>
+                <li><strong>Module Complexity:</strong> Medium-High (custom workflows, multiple overrides)</li>
+                <li><strong>Value Delivered:</strong> Significant time savings + workflow flexibility</li>
+                <li><strong>Market Range:</strong> Similar modules: $150-$300</li>
+                <li><strong>Support Included:</strong> 1 year of updates + email support</li>
+                <li><strong>Target Market:</strong> SMB to Enterprise manufacturing companies</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <em>Price positioning: Mid-range for manufacturing modules, reflecting the comprehensive
+                feature set and ongoing support commitment.</em>
+            </p>
+        </div>
+
+        <!-- Installation & Support -->
+        <div class="section">
+            <h2>📦 Installation & Support</h2>
+
+            <h3>Quick Installation</h3>
+            <ol style="font-size: 1.1em; line-height: 1.8;">
+                <li>Purchase and download the module</li>
+                <li>Upload to your Odoo addons folder</li>
+                <li>Restart Odoo server</li>
+                <li>Update Apps List</li>
+                <li>Install "VPA - Manufacturing Order Link"</li>
+            </ol>
+
+            <h3>What's Included</h3>
+            <ul class="benefits-list">
+                <li>Complete module source code</li>
+                <li>Comprehensive README documentation</li>
+                <li>Installation guide</li>
+                <li>Configuration examples</li>
+                <li>Troubleshooting guide</li>
+                <li>1 year of free updates</li>
+                <li>Email support (response within 48 hours)</li>
+            </ul>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">💬 Support Channels</h3>
+                <p><strong>Email:</strong> support@yourcompany.com</p>
+                <p><strong>Response Time:</strong> Within 48 hours (business days)</p>
+                <p><strong>Documentation:</strong> Comprehensive README included</p>
+                <p><strong>Updates:</strong> Free for 1 year, then optional maintenance plan</p>
+            </div>
+        </div>
+
+        <!-- License Information -->
+        <div class="section">
+            <h2>📜 License Information</h2>
+
+            <h3>Odoo Proprietary License v1.0 (OPL-1)</h3>
+            <p style="font-size: 1.05em; line-height: 1.8;">
+                This module is licensed under the <strong>Odoo Proprietary License v1.0</strong>.
+                Key points:
+            </p>
+
+            <ul style="font-size: 1.05em; line-height: 1.8;">
+                <li>✓ Use with valid Odoo Enterprise subscription</li>
+                <li>✓ One license per database instance</li>
+                <li>✓ Modify for your own use</li>
+                <li>✓ Develop custom modules based on this software</li>
+                <li>✗ Cannot redistribute or resell</li>
+                <li>✗ Cannot publish on other app stores</li>
+                <li>✗ Source code remains proprietary</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4 style="margin-top: 0;">⚠️ Important License Terms</h4>
+                <p>
+                    This software may only be used with a valid Odoo Enterprise subscription.
+                    You may develop custom Odoo modules based on this software and distribute them
+                    under a compatible license. However, you may NOT redistribute, sublicense, or
+                    sell copies of this module itself.
+                </p>
+                <p style="margin-top: 10px;">
+                    <strong>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="section">
+            <h2>❓ Frequently Asked Questions</h2>
+
+            <h3 style="color: #2874A6;">Is this compatible with my current Odoo setup?</h3>
+            <p>Yes, if you're running Odoo 19.0 Enterprise with the MRP and Sales modules installed.
+            The module extends standard functionality without breaking existing workflows.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Can I use this with the standard Manufacture route?</h3>
+            <p>Absolutely! The Production route works alongside the standard Manufacture route.
+            You can use both on different products as needed.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">What happens to MOs created before installing this module?</h3>
+            <p>Existing MOs are not affected. The module only changes behavior for newly created MOs
+            after installation.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Do I need developer knowledge to use this?</h3>
+            <p>No! The module is designed for end-users. Installation is simple, and all features
+            are accessible through the standard Odoo interface.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Can I get a refund if it doesn't work for me?</h3>
+            <p>We offer a 14-day money-back guarantee if the module doesn't meet your expectations
+            or has technical issues we cannot resolve.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">How long will I receive updates?</h3>
+            <p>Free updates are included for 1 year from purchase date. After that, you can opt
+            for an optional maintenance plan at a discounted rate.</p>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="section" style="text-align: center; padding: 50px 20px; background: #f8f9fa; border-radius: 15px;">
+            <h2 style="color: #2874A6; font-size: 2.5em;">Ready to Transform Your Manufacturing Process?</h2>
+            <p style="font-size: 1.3em; color: #555; margin: 25px 0;">
+                Join hundreds of manufacturing companies using VPA modules to streamline their operations.
+            </p>
+            <a href="#" class="cta-button" style="font-size: 1.3em; padding: 20px 50px;">
+                Purchase for $199 USD
+            </a>
+            <p style="margin-top: 30px; color: #666;">
+                <small>✓ Instant Download • ✓ 14-Day Money Back Guarantee • ✓ Secure Payment</small>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>VPA - Manufacturing Order Link</h3>
+        <p>Professional Odoo Module Development</p>
+        <p style="margin: 20px 0;">
+            <a href="mailto:support@yourcompany.com">support@yourcompany.com</a> |
+            <a href="https://www.yourcompany.com">www.yourcompany.com</a>
+        </p>
+        <p style="font-size: 0.9em; opacity: 0.8; margin-top: 25px;">
+            © 2024 Your Company. All rights reserved. | Licensed under OPL-1
+        </p>
+        <p style="font-size: 0.85em; opacity: 0.7; margin-top: 10px;">
+            Odoo and the Odoo logo are registered trademarks of Odoo S.A.
+        </p>
+    </div>
+
+</body>
+</html>

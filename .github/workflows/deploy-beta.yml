@@ -1,0 +1,72 @@
+name: Deploy to Beta
+
+on:
+  push:
+    branches:
+      - main
+      - Beta
+    paths:
+      - 'addons/**'
+      - 'config/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.NAS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to NAS Beta (Git Pull)
+        env:
+          NAS_HOST: ${{ secrets.NAS_HOST }}
+          NAS_PORT: ${{ secrets.NAS_PORT }}
+          NAS_USER: ${{ secrets.NAS_USER }}
+        run: |
+          VERSION_TAG="v$(date +%Y%m%d-%H%M%S)"
+          echo "Deploying version: $VERSION_TAG to Beta"
+          echo "Commit: ${{ github.sha }}"
+          echo "Message: ${{ github.event.head_commit.message }}"
+
+          # Deploy on NAS using git pull
+          ssh -p $NAS_PORT $NAS_USER@$NAS_HOST << 'ENDSSH'
+            set -e
+
+            echo "=== UD Odoo Beta Deployment ==="
+
+            # Navigate to custom-addons directory
+            cd /volume3/docker_1/udesign/beta/custom-addons
+
+            # Check if it's a git repo, if not clone it
+            if [ ! -d ".git" ]; then
+              echo "Git repo not found, cloning..."
+              cd ..
+              rm -rf custom-addons
+              git clone git@github.com:VPA-Solution/ud-odoo-19.git custom-addons
+              cd custom-addons
+            fi
+
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git fetch origin
+            git checkout Beta || git checkout main
+            git pull origin $(git branch --show-current)
+
+            echo "Current commit: $(git rev-parse --short HEAD)"
+            echo "Commit message: $(git log -1 --format='%s')"
+
+            # Restart Odoo container to load new addons
+            echo "Restarting ud-odoo-beta container..."
+            /usr/local/bin/docker restart ud-odoo-beta 2>/dev/null || echo "Container restart skipped (may not exist yet)"
+
+            echo "=== Beta deployment completed! ==="
+          ENDSSH
+
+          echo "Deployment completed: $VERSION_TAG"

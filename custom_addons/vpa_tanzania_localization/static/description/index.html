@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Tanzania Localization - Odoo 19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        /* Section */
+        .section {
+            padding: 60px 40px;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            font-size: 1.8em;
+            color: #764ba2;
+            margin: 40px 0 20px 0;
+            font-weight: 600;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 30px;
+            border-radius: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 4px solid #667eea;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .code-block code {
+            color: #a6e22e;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        /* List */
+        ul.feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.feature-list li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        ul.feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        /* Alert Box */
+        .alert {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            color: #1565C0;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+            color: #2E7D32;
+        }
+
+        /* Footer */
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .section {
+                padding: 40px 20px;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🇹🇿 VPA Tanzania Localization</h1>
+            <p>Complete Odoo localization for Tanzanian businesses with TRA compliance, smart address management, and comprehensive administrative data</p>
+            <div class="version-badge">Odoo 19.0 Enterprise Edition</div>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2 class="section-title">Why Choose VPA Tanzania Localization?</h2>
+            <p style="text-align: center; font-size: 1.2em; color: #666; max-width: 900px; margin: 0 auto 40px;">
+                The most comprehensive Tanzania localization module for Odoo 19, designed specifically for businesses operating in Tanzania.
+                Featuring intelligent address auto-fill, TRA-compliant tax number validation, and complete administrative database coverage.
+            </p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">31</div>
+                    <div class="stat-label">Tanzania Regions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">40+</div>
+                    <div class="stat-label">Wards & Districts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">TRA Compliant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,404</div>
+                    <div class="stat-label">Lines of Code</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features -->
+        <div class="section" style="background: #f8f9fa;">
+            <h2 class="section-title">Key Features</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h3>TIN & VRN Management</h3>
+                    <p>Separate fields for Tax Identification Number (TIN) and VAT Registration Number (VRN) with automatic format validation following TRA guidelines.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Smart Address Auto-Fill</h3>
+                    <p>Select a ward and watch as the system automatically fills region, city, and country. Intelligent cascading that saves time and ensures accuracy.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏘️</div>
+                    <h3>Complete Administrative Database</h3>
+                    <p>Pre-loaded with all 31 Tanzania regions and 40+ major wards including detailed Dar es Salaam districts (Kinondoni, Ilala, Temeke, Ubungo, Kigamboni).</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📬</div>
+                    <h3>P.O. Box Support</h3>
+                    <p>Replace generic "Zip" field with Tanzania-specific "P.O. Box" - matching how addresses actually work in Tanzania.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">✅</div>
+                    <h3>TRA Format Validation</h3>
+                    <p>Automatic validation ensures TIN follows 9-digit format and VRN follows 40-XXXXXXX-X format as required by Tanzania Revenue Authority.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Data Migration Safe</h3>
+                    <p>Seamlessly replaces old partner_vat_number module while preserving all existing VRN data - zero data loss guaranteed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section">
+            <h2 class="section-title">How It Works</h2>
+
+            <h3 class="section-subtitle">🎯 Intelligent Address Entry</h3>
+            <div class="highlight-box">
+                <h3>Example: Creating a Partner in Masaki, Dar es Salaam</h3>
+                <ol style="line-height: 2; padding-left: 20px; color: #666;">
+                    <li><strong>Step 1:</strong> User selects <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">Ward: Masaki</code></li>
+                    <li><strong>Step 2:</strong> System auto-fills <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">Region: Kinondoni</code></li>
+                    <li><strong>Step 3:</strong> System auto-fills <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">City: Dar es Salaam</code></li>
+                    <li><strong>Step 4:</strong> System auto-fills <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">Country: Tanzania</code></li>
+                </ol>
+                <p style="margin-top: 20px; color: #666;"><strong>Result:</strong> Complete address filled in seconds with 100% accuracy!</p>
+            </div>
+
+            <h3 class="section-subtitle">🔢 Tax Number Validation</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tax Type</th>
+                        <th>Format</th>
+                        <th>Example</th>
+                        <th>Who Needs It</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>TIN</strong></td>
+                        <td>9 digits</td>
+                        <td>123-456-789</td>
+                        <td>All taxpayers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VRN</strong></td>
+                        <td>40-XXXXXXX-X</td>
+                        <td>40-1234567-X</td>
+                        <td>VAT-registered businesses</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Coverage -->
+        <div class="section" style="background: #f8f9fa;">
+            <h2 class="section-title">Geographic Coverage</h2>
+
+            <div class="alert alert-info">
+                <strong>📍 Complete Tanzania Coverage:</strong> All 31 regions included with major towns and districts pre-configured.
+            </div>
+
+            <h3 class="section-subtitle">Major Regions Included</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🏙️ Dar es Salaam (Detailed)</h3>
+                    <ul class="feature-list">
+                        <li>Kinondoni (8 wards)</li>
+                        <li>Ilala (5 wards)</li>
+                        <li>Temeke (4 wards)</li>
+                        <li>Ubungo (4 wards)</li>
+                        <li>Kigamboni (3 wards)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🏔️ Northern Regions</h3>
+                    <ul class="feature-list">
+                        <li>Arusha</li>
+                        <li>Kilimanjaro</li>
+                        <li>Tanga</li>
+                        <li>Manyara</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🌊 Lake & Western</h3>
+                    <ul class="feature-list">
+                        <li>Mwanza</li>
+                        <li>Kagera</li>
+                        <li>Geita</li>
+                        <li>Shinyanga</li>
+                        <li>Simiyu</li>
+                        <li>Kigoma</li>
+                        <li>Tabora</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🏖️ Islands & Coast</h3>
+                    <ul class="feature-list">
+                        <li>Zanzibar Urban/West</li>
+                        <li>Zanzibar North</li>
+                        <li>Zanzibar South</li>
+                        <li>Pemba North</li>
+                        <li>Pemba South</li>
+                        <li>Pwani (Coast)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🌾 Central & Southern</h3>
+                    <ul class="feature-list">
+                        <li>Dodoma (Capital)</li>
+                        <li>Morogoro</li>
+                        <li>Singida</li>
+                        <li>Iringa</li>
+                        <li>Njombe</li>
+                        <li>Mbeya</li>
+                        <li>Songwe</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🌴 Southern Regions</h3>
+                    <ul class="feature-list">
+                        <li>Ruvuma</li>
+                        <li>Mtwara</li>
+                        <li>Lindi</li>
+                        <li>Rukwa</li>
+                        <li>Katavi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="section">
+            <h2 class="section-title">Technical Specifications</h2>
+
+            <h3 class="section-subtitle">Module Information</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Module Name</td>
+                        <td>vpa_tanzania_localization</td>
+                    </tr>
+                    <tr>
+                        <td>Version</td>
+                        <td>19.0.1.0.0</td>
+                    </tr>
+                    <tr>
+                        <td>Odoo Version</td>
+                        <td>19.0 Enterprise</td>
+                    </tr>
+                    <tr>
+                        <td>License</td>
+                        <td>OPL-1 (Odoo Proprietary License)</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>Localization</td>
+                    </tr>
+                    <tr>
+                        <td>Dependencies</td>
+                        <td>base, account, contacts</td>
+                    </tr>
+                    <tr>
+                        <td>Lines of Code</td>
+                        <td>1,404 lines</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="section-subtitle">What's Included</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>📦 Models</h3>
+                    <ul class="feature-list">
+                        <li>res.partner (extended)</li>
+                        <li>res.country.region</li>
+                        <li>res.country.ward</li>
+                        <li>account.move (enhanced)</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🎨 Views</h3>
+                    <ul class="feature-list">
+                        <li>Partner form (enhanced)</li>
+                        <li>Partner tree/list</li>
+                        <li>Region management</li>
+                        <li>Ward management</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📊 Data Files</h3>
+                    <ul class="feature-list">
+                        <li>31 Tanzania regions</li>
+                        <li>40+ wards/districts</li>
+                        <li>Detailed Dar es Salaam</li>
+                        <li>Security rules</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3>✨ Features</h3>
+                    <ul class="feature-list">
+                        <li>Auto-fill logic</li>
+                        <li>Format validation</li>
+                        <li>TRA compliance</li>
+                        <li>Audit tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installation -->
+        <div class="section" style="background: #f8f9fa;">
+            <h2 class="section-title">Installation & Setup</h2>
+
+            <div class="alert alert-success">
+                <strong>✅ Easy Installation:</strong> Install like any other Odoo module - no complex configuration required!
+            </div>
+
+            <h3 class="section-subtitle">Installation Steps</h3>
+            <ol style="line-height: 2.5; padding-left: 20px; color: #666; font-size: 1.1em;">
+                <li>Download the module from Odoo Apps store</li>
+                <li>Go to <strong>Apps</strong> menu in Odoo</li>
+                <li>Click <strong>Update Apps List</strong></li>
+                <li>Search for <strong>"VPA Tanzania Localization"</strong></li>
+                <li>Click <strong>Install</strong></li>
+                <li>Start using immediately - all data is pre-loaded!</li>
+            </ol>
+
+            <h3 class="section-subtitle">Data Migration</h3>
+            <div class="highlight-box">
+                <h3>Migrating from partner_vat_number?</h3>
+                <p style="color: #666; line-height: 1.8;">
+                    <strong>No worries!</strong> This module is designed as a drop-in replacement. All your existing VRN data
+                    will be automatically preserved and managed by the new system. The transition is seamless with zero data loss.
+                </p>
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class="section">
+            <h2 class="section-title">Perfect For</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏢</div>
+                    <h3>Tanzanian Businesses</h3>
+                    <p>Companies operating in Tanzania requiring TRA-compliant invoicing and tax documentation.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💼</div>
+                    <h3>Accounting Firms</h3>
+                    <p>Accountants managing multiple Tanzanian clients with different tax registrations.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3>International Companies</h3>
+                    <p>Multi-national businesses with operations in Tanzania needing proper local compliance.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h3>E-commerce</h3>
+                    <p>Online retailers shipping to customers across all Tanzania regions.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏭</div>
+                    <h3>Manufacturing</h3>
+                    <p>Manufacturers with suppliers and customers throughout Tanzania.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Logistics & Distribution</h3>
+                    <p>Companies needing accurate address management for deliveries across Tanzania.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div class="section" style="background: #f8f9fa;">
+            <h2 class="section-title">Support & Customization</h2>
+
+            <div class="highlight-box">
+                <h3>Need Help or Custom Features?</h3>
+                <p style="color: #666; line-height: 1.8; margin-bottom: 20px;">
+                    Our team is ready to assist you with installation, customization, or any questions you may have.
+                </p>
+                <ul class="feature-list">
+                    <li><strong>Email:</strong> support@vpasoftware.com</li>
+                    <li><strong>Website:</strong> https://www.vpasoftware.com</li>
+                    <li><strong>Response Time:</strong> Within 24 hours</li>
+                    <li><strong>Custom Development:</strong> Available on request</li>
+                </ul>
+            </div>
+
+            <h3 class="section-subtitle">Additional Services</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🎓 Training</h3>
+                    <p>Comprehensive training for your team on using the module effectively.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>⚙️ Customization</h3>
+                    <p>Tailor the module to your specific business requirements.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🔧 Integration</h3>
+                    <p>Integrate with other Odoo modules or third-party systems.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="section">
+            <h2 class="section-title">Pricing</h2>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px; border-radius: 16px; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
+                    <div style="font-size: 1.2em; opacity: 0.9; margin-bottom: 10px;">One-Time Purchase</div>
+                    <div style="font-size: 4em; font-weight: bold; margin: 20px 0;">$29.99</div>
+                    <div style="font-size: 1.1em; opacity: 0.9; margin-bottom: 30px;">USD per instance</div>
+                    <ul style="text-align: left; list-style: none; padding: 0; font-size: 1.1em;">
+                        <li style="padding: 10px 0;">✓ Lifetime updates</li>
+                        <li style="padding: 10px 0;">✓ Email support</li>
+                        <li style="padding: 10px 0;">✓ All features included</li>
+                        <li style="padding: 10px 0;">✓ No recurring fees</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Excellent Value:</strong> For just $29.99, you get 1,404 lines of professionally crafted code,
+                comprehensive Tanzania data coverage, and ongoing updates. Compare that to custom development costs of thousands of dollars!
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>VPA Tanzania Localization for Odoo 19</strong></p>
+            <p style="opacity: 0.8; margin-bottom: 20px;">Professional Tanzania localization by VPA Software Limited</p>
+            <p>
+                <a href="https://www.vpasoftware.com">www.vpasoftware.com</a> |
+                <a href="mailto:support@vpasoftware.com">support@vpasoftware.com</a>
+            </p>
+            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.6;">
+                © 2025 VPA Software Limited. All rights reserved.<br>
+                Licensed under OPL-1 (Odoo Proprietary License)
+            </p>
+        </div>
+    </div>
+</body>
+</html>

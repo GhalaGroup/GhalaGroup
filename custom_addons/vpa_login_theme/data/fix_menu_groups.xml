@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        This file FORCES the menu groups to be set correctly.
+        It runs at the END of module installation/upgrade to ensure
+        menus are always visible to Administrators.
+    -->
+
+    <!-- Force update VPA Applications menu groups -->
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('vpa_login_theme.menu_vpa_applications')]"/>
+        <value eval="{'group_ids': [(6, 0, [ref('base.group_system')])]}"/>
+    </function>
+
+    <!-- Force update Login Theme menu groups -->
+    <function model="ir.ui.menu" name="write">
+        <value eval="[ref('vpa_login_theme.menu_vpa_login_theme')]"/>
+        <value eval="{'group_ids': [(6, 0, [ref('base.group_system')])]}"/>
+    </function>
+
+</odoo>

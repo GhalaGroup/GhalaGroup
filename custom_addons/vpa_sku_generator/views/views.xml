@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="vpa_sku_generator.list">
+      <field name="name">vpa_sku_generator list</field>
+      <field name="model">vpa_sku_generator.vpa_sku_generator</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </list>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="vpa_sku_generator.action_window">
+      <field name="name">vpa_sku_generator window</field>
+      <field name="res_model">vpa_sku_generator.vpa_sku_generator</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="vpa_sku_generator.action_server">
+      <field name="name">vpa_sku_generator server</field>
+      <field name="model_id" ref="model_vpa_sku_generator_vpa_sku_generator"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="vpa_sku_generator" id="vpa_sku_generator.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="vpa_sku_generator.menu_1" parent="vpa_sku_generator.menu_root"/>
+    <menuitem name="Menu 2" id="vpa_sku_generator.menu_2" parent="vpa_sku_generator.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="vpa_sku_generator.menu_1_list" parent="vpa_sku_generator.menu_1"
+              action="vpa_sku_generator.action_window"/>
+    <menuitem name="Server to list" id="vpa_sku_generator" parent="vpa_sku_generator.menu_2"
+              action="vpa_sku_generator.action_server"/>
+-->
+  </data>
+</odoo>

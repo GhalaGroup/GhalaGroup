@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA sale order inheritance disabled - will be implemented later -->
+    <!-- No modifications to standard Odoo sale order template -->
+</odoo>

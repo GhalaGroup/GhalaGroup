@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA Document Layout - Inline styles for wkhtmltopdf compatibility -->
+    <template id="external_layout_vpa">
+        <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+        <t t-set="primary_color" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+        <t t-set="secondary_color" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+        <!-- BODY (Header moved inside body for WeasyPrint compatibility) -->
+        <div t-attf-class="article o_report_layout_vpa o_report_layout_bubble o_table_boxed-rounded o_company_#{company.id}_layout"
+             style="position: relative; padding: 0; min-height: 400px;"
+             t-att-data-oe-model="o and o._name"
+             t-att-data-oe-id="o and o.id"
+             t-att-data-oe-lang="o and o.env.context.get('lang')">
+
+            <!-- Decorative circle in header (matching Bubble template) -->
+            <svg t-if="vpa_config.header_show_circle"
+                 t-attf-style="position: fixed; top: 0; right: 0; z-index: 0;"
+                 t-att-width="vpa_config.header_circle_size or 550"
+                 t-att-height="vpa_config.header_circle_size or 550"
+                 xmlns="http://www.w3.org/2000/svg">
+                <circle t-att-cx="(vpa_config.header_circle_size or 550) / 2"
+                        t-att-cy="(vpa_config.header_circle_size or 550) / 2"
+                        t-att-r="(vpa_config.header_circle_size or 550) / 2"
+                        t-attf-fill="{{primary_color}}"
+                        t-att-fill-opacity="vpa_config.header_circle_opacity or 0.1"/>
+            </svg>
+
+            <!-- Header content (logo and company info) -->
+            <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 4px solid {{primary_color}};">
+                <div style="text-align: right; margin-bottom: 10px;">
+                    <!-- Use logo field (works for both res.company and base.document.layout) -->
+                    <img t-if="company.logo"
+                         t-att-src="image_data_uri(company.logo)"
+                         t-attf-style="max-width: {{vpa_config.header_logo_width or 140}}px; max-height: {{vpa_config.header_logo_height or 80}}px;"
+                         alt="Logo"/>
+                </div>
+                <div style="text-align: right; font-size: 9pt; line-height: 1.5;">
+                    <t t-if="vpa_config.header_company_details_html">
+                        <span t-out="vpa_config.header_company_details_html"/>
+                    </t>
+                    <t t-elif="company.company_details">
+                        <span t-field="company.company_details"/>
+                    </t>
+                    <t t-else="">
+                        <span t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                    </t>
+                </div>
+            </div>
+
+            <table style="width: 100%; margin-bottom: 25px; border-collapse: collapse;">
+                <tbody>
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                            <!-- Customer address box with VPA styling -->
+                            <div t-attf-style="background-color: #f8f9fa; border-left: 4px solid {{secondary_color}}; padding: 15px; border-radius: 4px; font-size: 9pt; line-height: 1.6;">
+                                <div style="font-size: 8pt; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 8px;">Customer</div>
+                                <t t-if="address">
+                                    <t t-out="address"/>
+                                </t>
+                                <t t-elif="o and o.partner_id">
+                                    <div t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                                </t>
+                            </div>
+                        </td>
+                        <td style="width: 50%; vertical-align: bottom; text-align: right; padding-left: 20px;">
+                            <h2 t-attf-style="font-size: 28pt; font-weight: bold; color: {{primary_color}}; margin: 0; text-align: right;" t-out="layout_document_title"/>
+                            <div t-if="information_block" style="margin-top: 15px; font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                                <t t-out="information_block"/>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Main content area -->
+            <div>
+                <t t-out="0"/>
+            </div>
+
+        </div>
+    </template>
+
+    <!-- Footer (separate from body to prevent page breaks) -->
+    <template id="footer_vpa">
+        <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+        <t t-set="secondary_color" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+        <div t-attf-class="footer o_company_#{company.id}_layout">
+            <!-- Decorative wave in footer (matching Bubble template) -->
+            <svg t-if="vpa_config.footer_show_shape"
+                 style="position: fixed; left: 0; bottom: 0;"
+                 width="500" height="228" viewBox="0 0 500 228" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                      t-attf-fill="{{secondary_color}}"
+                      t-att-fill-opacity="vpa_config.footer_shape_opacity or 0.1"/>
+            </svg>
+
+            <div style="position: relative; z-index: 1; padding: 15px 0; text-align: center; font-size: 8pt; color: #666;">
+                <div style="border-top: 1px solid #ddd; padding-top: 10px;">
+                    <div t-if="company.report_footer" t-field="company.report_footer" style="margin-bottom: 8px;"/>
+                    <!-- Bank details -->
+                    <div t-if="company.partner_id.bank_ids" style="margin-top: 8px;">
+                        <strong>Bank Details:</strong>
+                        <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                            <t t-esc="bank.bank_name"/> - Account: <t t-esc="bank.acc_number"/>
+                            <span t-if="bank.bank_bic"> - BIC: <t t-esc="bank.bank_bic"/></span>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- VPA-specific company styles -->
+    <template id="styles_vpa_report">
+        <t t-foreach="company_ids" t-as="vpa_config" t-translation="off">
+            <t t-set="company" t-value="vpa_config.company_id"/>
+            <t t-set="primary" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+            <t t-set="secondary" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+            .o_company_<t t-esc='company.id'/>_layout {
+                /* VPA-specific styling per company */
+
+                /* Table header styling with VPA primary color */
+                table.o_main_table thead {
+                    background-color: <t t-esc='primary'/> !important;
+                    color: white !important;
+                }
+
+                table.o_main_table thead th {
+                    background-color: <t t-esc='primary'/> !important;
+                    color: white !important;
+                    padding: 10px !important;
+                    font-weight: bold !important;
+                }
+
+                table.o_main_table tbody td {
+                    padding: 8px 10px !important;
+                    border-bottom: 1px solid #e0e0e0 !important;
+                }
+            }
+        </t>
+    </template>
+</odoo>

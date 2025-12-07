@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- PDF-optimized VPA template using only inline styles and tables (no Bootstrap) -->
+    <template id="external_layout_vpa_pdf">
+        <t t-if="not o" t-set="o" t-value="doc"/>
+        <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+        <t t-set="primary_color" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+        <t t-set="secondary_color" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+        <!-- HEADER: Table-based layout with visible decorations -->
+        <div class="header" style="position: relative; padding: 15px 0; border-bottom: 4px solid; margin-bottom: 0;">
+            <t t-set="border_color" t-value="primary_color"/>
+            <style>
+                .header { border-bottom-color: <t t-esc="border_color"/> !important; }
+            </style>
+
+            <!-- Large decorative circle in header -->
+            <div style="position: absolute; top: -80px; right: -80px; width: 250px; height: 250px; border-radius: 50%; z-index: 0; opacity: 0.15;">
+                <t t-set="circle_bg" t-value="primary_color"/>
+                <style>
+                    .header > div:first-child { background-color: <t t-esc="circle_bg"/> !important; }
+                </style>
+            </div>
+
+            <table style="width: 100%; position: relative; z-index: 1;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="width: 35%; vertical-align: middle;">
+                        <!-- Logo -->
+                        <img t-if="company.logo_web" t-att-src="image_data_uri(company.logo_web)"
+                             alt="Logo" style="max-width: 120px; max-height: 65px; display: block;"/>
+                    </td>
+                    <td style="width: 30%; vertical-align: middle; text-align: center;">
+                        <!-- Tagline -->
+                        <div t-if="company.report_header" style="font-weight: bold; font-size: 11pt; color: #333;">
+                            <span t-field="company.report_header"/>
+                        </div>
+                    </td>
+                    <td style="width: 35%; vertical-align: middle; text-align: right; font-size: 8pt; line-height: 1.6; color: #555;">
+                        <!-- Company Details -->
+                        <div t-if="vpa_config.header_company_details_html" t-out="vpa_config.header_company_details_html"/>
+                        <div t-elif="company.company_details" t-field="company.company_details"/>
+                        <div t-else="" t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- BODY: Clean layout with proper spacing -->
+        <div class="article" style="padding: 25px 0; position: relative; min-height: 500px;">
+            <!-- Background circle decoration -->
+            <div style="position: absolute; top: 50px; right: -150px; width: 450px; height: 450px; border-radius: 50%; z-index: -1; opacity: 0.08;">
+                <t t-set="body_circle_bg" t-value="primary_color"/>
+                <style>
+                    .article > div:first-child { background-color: <t t-esc="body_circle_bg"/> !important; }
+                </style>
+            </div>
+
+            <!-- Document Title and Customer Info -->
+            <table style="width: 100%; margin-bottom: 25px; border-bottom: 2px solid #e8e8e8; padding-bottom: 15px;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                        <!-- Customer Address Box -->
+                        <div style="background-color: #f8f9fa; border-left: 3px solid; padding: 12px 15px; border-radius: 4px;">
+                            <t t-set="box_border" t-value="secondary_color"/>
+                            <style>
+                                .article table:first-of-type td:first-child > div { border-left-color: <t t-esc="box_border"/> !important; }
+                            </style>
+                            <div style="font-size: 8pt; font-weight: bold; color: #666; margin-bottom: 8px; text-transform: uppercase;">Customer</div>
+                            <div style="font-size: 9pt; line-height: 1.6;">
+                                <t t-if="address" t-out="address"/>
+                                <t t-else="">
+                                    <div t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                                </t>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="width: 50%; vertical-align: bottom; text-align: right;">
+                        <!-- Document Title -->
+                        <h1 style="margin: 0 0 10px 0; font-size: 26pt; font-weight: bold; color: #333;" t-out="layout_document_title"/>
+                        <!-- Document Info -->
+                        <div t-if="information_block" style="font-size: 9pt; line-height: 1.8; color: #555;" t-out="information_block"/>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Main Content -->
+            <div style="position: relative; z-index: 1;">
+                <t t-out="0"/>
+            </div>
+        </div>
+
+        <!-- FOOTER: Clean footer with decoration -->
+        <div class="footer" style="position: relative; border-top: 4px solid; padding-top: 12px; font-size: 8pt; color: #666;">
+            <t t-set="footer_border" t-value="secondary_color"/>
+            <style>
+                .footer { border-top-color: <t t-esc="footer_border"/> !important; }
+            </style>
+
+            <!-- Decorative wave shape -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; z-index: -1; opacity: 0.12; overflow: hidden;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 228" style="width: 500px; height: 228px; position: absolute; bottom: 0; left: 0;">
+                    <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z">
+                        <t t-set="wave_fill" t-value="secondary_color"/>
+                        <style>
+                            .footer svg path { fill: <t t-esc="wave_fill"/> !important; }
+                        </style>
+                    </path>
+                </svg>
+            </div>
+
+            <!-- Footer Content -->
+            <table style="width: 100%; position: relative; z-index: 1;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="width: 70%; vertical-align: top;">
+                        <div t-if="company.report_footer" t-field="company.report_footer" style="line-height: 1.6;"/>
+                        <!-- Bank Details -->
+                        <div t-if="company.partner_id.bank_ids" style="margin-top: 8px; line-height: 1.6;">
+                            <strong>Bank:</strong>
+                            <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                <span t-field="bank.bank_name"/> - Acc: <span t-field="bank.acc_number"/>
+                            </t>
+                        </div>
+                    </td>
+                    <td style="width: 30%; text-align: right; vertical-align: top;">
+                        <div>Page <span class="page"/> of <span class="topage"/></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+</odoo>

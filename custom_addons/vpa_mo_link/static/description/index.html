@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Manufacturing Order Link</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.7;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #dc2626 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path fill="rgba(255,255,255,0.05)" d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25"/><path fill="rgba(255,255,255,0.05)" d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5"/><path fill="rgba(255,255,255,0.1)" d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"/></svg>') center bottom no-repeat;
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            margin: 0 0 20px 0;
+            font-size: 3.5em;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.4em;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .badge-container {
+            text-align: center;
+            padding: 25px 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px 8px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .badge-version {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .badge-odoo {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        .badge-license {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .badge-price {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 1.15em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section h2 {
+            color: #1e293b;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            border-color: #3b82f6;
+        }
+
+        .feature-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+            filter: grayscale(0.2);
+        }
+
+        .feature-card h3 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .workflow-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .workflow-step {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            margin: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+            background: white;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .workflow-step:last-child::after {
+            content: '';
+        }
+
+        .workflow-step strong {
+            display: block;
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            margin: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.02);
+        }
+
+        .pricing-box {
+            background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #dc2626 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 50px 0;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pricing-box h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-box h2::after {
+            display: none;
+        }
+
+        .price {
+            font-size: 4em;
+            font-weight: 800;
+            margin: 25px 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .price-details {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-button {
+            background: white;
+            color: #dc2626;
+            padding: 18px 45px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.25em;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 15px 0 15px 40px;
+            position: relative;
+            font-size: 1.1em;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .benefits-list li:hover {
+            color: #1e293b;
+            transform: translateX(5px);
+        }
+
+        .benefits-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.5em;
+            background: #d1fae5;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            top: 12px;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 5px solid #f59e0b;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 5px solid #3b82f6;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .comparison-table tr:hover td {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .section h2 {
+                font-size: 2em;
+            }
+
+            .workflow {
+                flex-direction: column;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -35px;
+                transform: translateX(50%);
+            }
+
+            .price {
+                font-size: 3em;
+            }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection color */
+        ::selection {
+            background: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔗 VPA Manufacturing Order Link</h1>
+        <p>Advanced Manufacturing Order Management for Odoo 19</p>
+    </div>
+
+    <!-- Badges -->
+    <div class="badge-container">
+        <span class="badge badge-version">Version 1.0</span>
+        <span class="badge badge-odoo">Odoo 19.0 Enterprise</span>
+        <span class="badge badge-license">OPL-1 Licensed</span>
+        <span class="badge badge-price">💰 $199 USD</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>📋 Overview</h2>
+            <p style="font-size: 1.2em; line-height: 1.8; color: #555;">
+                <strong>VPA Manufacturing Order Link</strong> revolutionizes how you manage Manufacturing Orders in Odoo.
+                This powerful module extends the standard manufacturing integration to provide flexible workflows that adapt
+                to your business needs - whether you need automatic MO creation, manual linking, or support for products
+                without Bills of Materials.
+            </p>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #666; margin-top: 20px;">
+                Perfect for manufacturing businesses that require <strong>full control</strong> over their production process,
+                support <strong>pre-production scenarios</strong>, or work with <strong>custom/engineered products</strong>
+                where BOMs are defined after order confirmation.
+            </p>
+        </div>
+        <!-- Hero Screenshot -->
+        <div style="text-align: center; margin: 40px 0; padding: 30px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px;">
+            <img src="banner.png" alt="VPA MO Link - Complete Overview"
+                 class="screenshot"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'%3E%3Crect fill='%232874A6' width='1200' height='400'/%3E%3Ctext fill='white' font-family='Arial' font-size='40' font-weight='bold' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EVPA - Manufacturing Order Link%3C/text%3E%3C/svg%3E'">
+            <p style="color: #666; font-style: italic; margin-top: 15px; font-size: 1.1em;">Seamless integration with Odoo Sales and Manufacturing</p>
+        </div>
+
+
+        <!-- Key Features -->
+        <div class="section">
+            <h2>✨ Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">📝</span>
+                    <h3>Draft MO Creation</h3>
+                    <p>All automatically created MOs stay in DRAFT state, never auto-confirmed. Review quantities, dates, and components before starting production.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔧</span>
+                    <h3>No-BOM Support</h3>
+                    <p>Create Manufacturing Orders even when Bill of Materials doesn't exist. Perfect for custom or engineered-to-order products.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔗</span>
+                    <h3>Manual MO Linking</h3>
+                    <p>Link pre-created Manufacturing Orders to Sales Orders. Supports make-to-stock and pre-production scenarios seamlessly.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Unified Smart Button</h3>
+                    <p>Single "Manufacturing" button displays ALL linked MOs - both automatic and manual. Clean, organized production visibility.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚙️</span>
+                    <h3>Production Route</h3>
+                    <p>Dedicated "Production" route created automatically. Product-selectable and compatible with multi-warehouse setups.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔄</span>
+                    <h3>Flexible Workflows</h3>
+                    <p>Supports automatic creation, manual linking, pre-production, and custom manufacturing scenarios all in one module.</p>
+                </div>
+            
+        <!-- Feature Screenshots Grid -->
+        <div style="margin: 50px 0;">
+            <h3 style="color: #2874A6; text-align: center; font-size: 1.8em; margin-bottom: 30px;">📸 See It In Action</h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 30px;">
+                <!-- Smart Button Screenshot -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img src="screenshot_smart_button.png" alt="Manufacturing Smart Button" class="screenshot"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect fill='%238E44AD' width='800' height='500'/%3E%3Ctext fill='white' font-family='Arial' font-size='32' x='50%25' y='45%25' text-anchor='middle'%3EManufacturing Smart Button%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='18' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3EUnified MO Display%3C/text%3E%3C/svg%3E'">
+                    <h4 style="color: #8E44AD; margin-top: 15px;">Unified Smart Button</h4>
+                    <p style="color: #666;">All Manufacturing Orders in one place - both automatic and manual</p>
+                </div>
+
+                <!-- MO Link Action Screenshot -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img src="screenshot_mo_link_action.png" alt="MO Link Action" class="screenshot"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect fill='%232874A6' width='800' height='500'/%3E%3Ctext fill='white' font-family='Arial' font-size='32' x='50%25' y='45%25' text-anchor='middle'%3EMO - Link Action%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='18' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3EOne-Click Manual Linking%3C/text%3E%3C/svg%3E'">
+                    <h4 style="color: #2874A6; margin-top: 15px;">MO - Link/Unlink Actions</h4>
+                    <p style="color: #666;">Easy manual control over MO-SO relationships</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 30px;">
+                <!-- Draft MO Screenshot -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img src="screenshot_mo_draft.png" alt="MO in Draft State" class="screenshot"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect fill='%2328a745' width='800' height='500'/%3E%3Ctext fill='white' font-family='Arial' font-size='32' x='50%25' y='45%25' text-anchor='middle'%3EMO in DRAFT State%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='18' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3EReview Before Confirm%3C/text%3E%3C/svg%3E'">
+                    <h4 style="color: #28a745; margin-top: 15px;">Draft MO Creation</h4>
+                    <p style="color: #666;">All MOs stay in DRAFT for your review and approval</p>
+                </div>
+
+                <!-- No BOM Screenshot -->
+                <div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img src="screenshot_no_bom.png" alt="MO Without BOM" class="screenshot"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect fill='%23ffc107' width='800' height='500'/%3E%3Ctext fill='%23333' font-family='Arial' font-size='32' x='50%25' y='45%25' text-anchor='middle'%3EMO Without BOM%3C/text%3E%3Ctext fill='%23333' font-family='Arial' font-size='18' x='50%25' y='55%25' text-anchor='middle' opacity='0.8'%3ESet BOM After Creation%3C/text%3E%3C/svg%3E'">
+                    <h4 style="color: #ffc107; margin-top: 15px;">No-BOM Support</h4>
+                    <p style="color: #666;">Create MOs even when BOM doesn't exist yet</p>
+                </div>
+            </div>
+        </div>
+</div>
+        </div>
+
+        <!-- Workflows Section -->
+        <div class="section">
+            <h2>🔄 Supported Workflows</h2>
+
+            <div class="workflow-container">
+                <h3 style="color: #2874A6; margin-top: 0;">Workflow 1: Automatic MO Creation</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Assign Production Route to Product
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Create & Confirm Sales Order
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        MO Created Automatically (DRAFT)
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Review & Confirm MO
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-container">
+                <h3 style="color: #8E44AD; margin-top: 0;">Workflow 2: Pre-Production Linking</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Create MO First
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Set Source = "S01234"
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Create Sales Order S01234
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        MO Auto-Links to SO
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-container">
+                <h3 style="color: #C0392B; margin-top: 0;">Workflow 3: Manual Link Action</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Create MO & SO Separately
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Open SO → Action Menu
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Click "MO - Link"
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Link Established
+                    </div>
+                
+        <!-- Configuration Screenshots -->
+        <div style="margin: 50px 0; padding: 40px; background: #f8f9fa; border-radius: 15px;">
+            <h3 style="color: #2874A6; text-align: center; font-size: 1.8em; margin-bottom: 30px;">⚙️ Easy Configuration</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center;">
+                <div>
+                    <img src="screenshot_production_route.png" alt="Production Route Configuration" class="screenshot"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect fill='%23C0392B' width='800' height='500'/%3E%3Ctext fill='white' font-family='Arial' font-size='32' x='50%25' y='45%25' text-anchor='middle'%3EProduction Route%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='18' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3ESimple Product Setup%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div>
+                    <h4 style="color: #C0392B; font-size: 1.6em;">Production Route</h4>
+                    <p style="font-size: 1.1em; line-height: 1.8; color: #555;">
+                        Simply check the <strong>"Production"</strong> route on your product's Inventory tab,
+                        and the module handles the rest. No complex configuration needed!
+                    </p>
+                    <ul style="font-size: 1.05em; color: #666; line-height: 1.8;">
+                        <li>✓ Created automatically on installation</li>
+                        <li>✓ Product-selectable for easy assignment</li>
+                        <li>✓ Works with multi-warehouse setups</li>
+                        <li>✓ Compatible with standard Manufacture route</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+</div>
+            </div>
+        </div>
+
+        <!-- Why Choose This Module -->
+        <div class="section">
+            <h2>🎯 Why Choose VPA - Manufacturing Order Link?</h2>
+            <ul class="benefits-list">
+                <li><strong>Save Time:</strong> Automate MO creation while maintaining full control over production</li>
+                <li><strong>Reduce Errors:</strong> Review all MOs in DRAFT before confirming production</li>
+                <li><strong>Increase Flexibility:</strong> Support multiple manufacturing workflows in one system</li>
+                <li><strong>Better Planning:</strong> Link pre-created MOs to sales orders for improved forecasting</li>
+                <li><strong>Custom Products:</strong> Handle engineered-to-order items without predefined BOMs</li>
+                <li><strong>Multi-Warehouse:</strong> Works seamlessly across multiple warehouse locations</li>
+                <li><strong>Audit Trail:</strong> Comprehensive chatter logging for complete traceability</li>
+                <li><strong>User-Friendly:</strong> Intuitive actions and smart buttons for easy navigation</li>
+            </ul>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="section">
+            <h2>📊 Standard Odoo vs VPA MO Link</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Standard Odoo</th>
+                        <th>VPA MO Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Automatic MO Creation</td>
+                        <td>✓ Auto-confirmed</td>
+                        <td>✓ <strong>Stays in DRAFT</strong></td>
+                    </tr>
+                    <tr>
+                        <td>MO Without BOM</td>
+                        <td>✗ Fails or skips</td>
+                        <td>✓ <strong>Creates with warning</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Pre-Production MO Linking</td>
+                        <td>✗ Not supported</td>
+                        <td>✓ <strong>Fully supported</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Manual Link/Unlink Actions</td>
+                        <td>✗ Not available</td>
+                        <td>✓ <strong>One-click actions</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Production Route</td>
+                        <td>Manufacture only</td>
+                        <td>✓ <strong>Production + Manufacture</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Origin-Based Linking</td>
+                        <td>✗ Limited</td>
+                        <td>✓ <strong>Automatic + Manual</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Review Before Confirm</td>
+                        <td>Manual override needed</td>
+                        <td>✓ <strong>Built-in behavior</strong></td>
+                    </tr>
+                </tbody>
+            
+        <!-- Real-World Example Screenshots -->
+        <div style="margin: 50px 0;">
+            <h3 style="color: #2874A6; text-align: center; font-size: 1.8em; margin-bottom: 30px;">💼 Real-World Usage</h3>
+
+            <div style="background: white; border: 2px solid #2874A6; border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: center;">
+                    <div>
+                        <img src="screenshot_mo_list.png" alt="Manufacturing Orders List" class="screenshot"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='600'%3E%3Crect fill='%232874A6' width='1000' height='600'/%3E%3Ctext fill='white' font-family='Arial' font-size='36' x='50%25' y='45%25' text-anchor='middle'%3EManufacturing Orders List%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='20' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3ELinked to Sales Order%3C/text%3E%3C/svg%3E'">
+                    </div>
+                    <div>
+                        <h4 style="color: #2874A6; font-size: 1.5em;">Complete Visibility</h4>
+                        <p style="color: #666; font-size: 1.05em; line-height: 1.7;">
+                            Click the smart button to instantly view all Manufacturing Orders linked to your Sales Order.
+                            See production status, origin, quantities, and more at a glance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; border: 2px solid #8E44AD; border-radius: 15px; padding: 30px;">
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: center;">
+                    <div>
+                        <h4 style="color: #8E44AD; font-size: 1.5em;">Audit Trail</h4>
+                        <p style="color: #666; font-size: 1.05em; line-height: 1.7;">
+                            Complete traceability with chatter integration. Every link, unlink, and creation
+                            is logged with timestamps and clickable references.
+                        </p>
+                    </div>
+                    <div>
+                        <img src="screenshot_chatter_link.png" alt="Chatter Audit Trail" class="screenshot"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400'%3E%3Crect fill='%238E44AD' width='700' height='400'/%3E%3Ctext fill='white' font-family='Arial' font-size='28' x='50%25' y='45%25' text-anchor='middle'%3EChatter Integration%3C/text%3E%3Ctext fill='white' font-family='Arial' font-size='16' x='50%25' y='55%25' text-anchor='middle' opacity='0.9'%3EComplete Audit Trail%3C/text%3E%3C/svg%3E'">
+                    </div>
+                </div>
+            </div>
+        </div>
+</table>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="section">
+            <h2>⚙️ Technical Specifications</h2>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #17a2b8;">🔧 Requirements</h3>
+                <ul>
+                    <li><strong>Odoo Version:</strong> 19.0 Enterprise Edition</li>
+                    <li><strong>Dependencies:</strong> sale_mrp, mrp, stock modules</li>
+                    <li><strong>Database:</strong> PostgreSQL 12+ recommended</li>
+                    <li><strong>Users:</strong> Supports unlimited users</li>
+                </ul>
+            </div>
+
+            <h3>Core Components</h3>
+            <ul class="benefits-list">
+                <li><strong>Stock Rule Overrides:</strong> Custom procurement logic for DRAFT MO creation</li>
+                <li><strong>Sale Order Extension:</strong> Enhanced compute method for unified MO display</li>
+                <li><strong>Server Actions:</strong> MO - Link and MO - Unlink for manual control</li>
+                <li><strong>Production Route:</strong> Automatically created on installation</li>
+                <li><strong>Smart Button Integration:</strong> Seamless UI integration with sale_mrp</li>
+            </ul>
+
+            <h3>Performance</h3>
+            <ul class="benefits-list">
+                <li>Optimized database queries for large datasets</li>
+                <li>Computed fields with proper caching</li>
+                <li>Minimal overhead on standard Odoo processes</li>
+                <li>Suitable for high-volume manufacturing operations</li>
+            </ul>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="pricing-box">
+            <h2>💰 Pricing</h2>
+            <div class="price">$199 USD</div>
+            <div class="price-details">
+                <p><strong>One-Time Payment</strong> • Lifetime License</p>
+                <p>✓ Free Updates for 1 Year</p>
+                <p>✓ Email Support Included</p>
+                <p>✓ Installation Documentation</p>
+                <p>✓ Multi-Company Support</p>
+            </div>
+            <a href="#" class="cta-button">Purchase Now</a>
+
+            <div style="margin-top: 30px; opacity: 0.9;">
+                <p><strong>Volume Licensing Available</strong></p>
+                <p>Contact us for enterprise pricing (10+ licenses)</p>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <h3 style="margin-top: 0;">📝 Pricing Methodology</h3>
+            <p><strong>Based on Odoo App Store Guidelines:</strong></p>
+            <ul>
+                <li><strong>Module Complexity:</strong> Medium-High (custom workflows, multiple overrides)</li>
+                <li><strong>Value Delivered:</strong> Significant time savings + workflow flexibility</li>
+                <li><strong>Market Range:</strong> Similar modules: $150-$300</li>
+                <li><strong>Support Included:</strong> 1 year of updates + email support</li>
+                <li><strong>Target Market:</strong> SMB to Enterprise manufacturing companies</li>
+            </ul>
+            <p style="margin-top: 15px;">
+                <em>Price positioning: Mid-range for manufacturing modules, reflecting the comprehensive
+                feature set and ongoing support commitment.</em>
+            </p>
+        </div>
+
+        <!-- Installation & Support -->
+        <div class="section">
+            <h2>📦 Installation & Support</h2>
+
+            <h3>Quick Installation</h3>
+            <ol style="font-size: 1.1em; line-height: 1.8;">
+                <li>Purchase and download the module</li>
+                <li>Upload to your Odoo addons folder</li>
+                <li>Restart Odoo server</li>
+                <li>Update Apps List</li>
+                <li>Install "VPA - Manufacturing Order Link"</li>
+            </ol>
+
+            <h3>What's Included</h3>
+            <ul class="benefits-list">
+                <li>Complete module source code</li>
+                <li>Comprehensive README documentation</li>
+                <li>Installation guide</li>
+                <li>Configuration examples</li>
+                <li>Troubleshooting guide</li>
+                <li>1 year of free updates</li>
+                <li>Email support (response within 48 hours)</li>
+            </ul>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">💬 Support Channels</h3>
+                <p><strong>Email:</strong> support@yourcompany.com</p>
+                <p><strong>Response Time:</strong> Within 48 hours (business days)</p>
+                <p><strong>Documentation:</strong> Comprehensive README included</p>
+                <p><strong>Updates:</strong> Free for 1 year, then optional maintenance plan</p>
+            </div>
+        </div>
+
+        <!-- License Information -->
+        <div class="section">
+            <h2>📜 License Information</h2>
+
+            <h3>Odoo Proprietary License v1.0 (OPL-1)</h3>
+            <p style="font-size: 1.05em; line-height: 1.8;">
+                This module is licensed under the <strong>Odoo Proprietary License v1.0</strong>.
+                Key points:
+            </p>
+
+            <ul style="font-size: 1.05em; line-height: 1.8;">
+                <li>✓ Use with valid Odoo Enterprise subscription</li>
+                <li>✓ One license per database instance</li>
+                <li>✓ Modify for your own use</li>
+                <li>✓ Develop custom modules based on this software</li>
+                <li>✗ Cannot redistribute or resell</li>
+                <li>✗ Cannot publish on other app stores</li>
+                <li>✗ Source code remains proprietary</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4 style="margin-top: 0;">⚠️ Important License Terms</h4>
+                <p>
+                    This software may only be used with a valid Odoo Enterprise subscription.
+                    You may develop custom Odoo modules based on this software and distribute them
+                    under a compatible license. However, you may NOT redistribute, sublicense, or
+                    sell copies of this module itself.
+                </p>
+                <p style="margin-top: 10px;">
+                    <strong>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="section">
+            <h2>❓ Frequently Asked Questions</h2>
+
+            <h3 style="color: #2874A6;">Is this compatible with my current Odoo setup?</h3>
+            <p>Yes, if you're running Odoo 19.0 Enterprise with the MRP and Sales modules installed.
+            The module extends standard functionality without breaking existing workflows.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Can I use this with the standard Manufacture route?</h3>
+            <p>Absolutely! The Production route works alongside the standard Manufacture route.
+            You can use both on different products as needed.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">What happens to MOs created before installing this module?</h3>
+            <p>Existing MOs are not affected. The module only changes behavior for newly created MOs
+            after installation.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Do I need developer knowledge to use this?</h3>
+            <p>No! The module is designed for end-users. Installation is simple, and all features
+            are accessible through the standard Odoo interface.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">Can I get a refund if it doesn't work for me?</h3>
+            <p>We offer a 14-day money-back guarantee if the module doesn't meet your expectations
+            or has technical issues we cannot resolve.</p>
+
+            <h3 style="color: #2874A6; margin-top: 25px;">How long will I receive updates?</h3>
+            <p>Free updates are included for 1 year from purchase date. After that, you can opt
+            for an optional maintenance plan at a discounted rate.</p>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="section" style="text-align: center; padding: 50px 20px; background: #f8f9fa; border-radius: 15px;">
+            <h2 style="color: #1e40af; font-size: 2.5em;">Ready to Transform Your Manufacturing Process?</h2>
+            <p style="font-size: 1.3em; color: #555; margin: 25px 0;">
+                Join hundreds of manufacturing companies using VPA modules to streamline their operations.
+            </p>
+            <a href="#" class="cta-button" style="font-size: 1.3em; padding: 20px 50px;">
+                Purchase for $199 USD
+            </a>
+            <p style="margin-top: 30px; color: #666;">
+                <small>✓ Instant Download • ✓ 14-Day Money Back Guarantee • ✓ Secure Payment</small>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>VPA Manufacturing Order Link</h3>
+        <p>Professional Odoo Module Development</p>
+        <p style="margin: 20px 0;">
+            <a href="mailto:support@yourcompany.com">support@yourcompany.com</a> |
+            <a href="https://www.yourcompany.com">www.yourcompany.com</a>
+        </p>
+        <p style="font-size: 0.9em; opacity: 0.8; margin-top: 25px;">
+            © 2024 Your Company. All rights reserved. | Licensed under OPL-1
+        </p>
+        <p style="font-size: 0.85em; opacity: 0.7; margin-top: 10px;">
+            Odoo and the Odoo logo are registered trademarks of Odoo S.A.
+        </p>
+    </div>
+
+</body>
+</html>

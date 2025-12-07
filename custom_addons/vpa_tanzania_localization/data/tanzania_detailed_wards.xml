@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- MORE DETAILED WARDS FOR DAR ES SALAAM -->
+        <!-- Creating district-level regions for proper hierarchy -->
+
+        <!-- Kinondoni District (Municipal/District within Dar es Salaam Region) -->
+        <record id="region_kinondoni" model="res.country.region">
+            <field name="name">Kinondoni</field>
+            <field name="code">DSM-KIN</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="city_name">Dar es Salaam</field>
+        </record>
+
+        <!-- Ilala District -->
+        <record id="region_ilala" model="res.country.region">
+            <field name="name">Ilala</field>
+            <field name="code">DSM-ILA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="city_name">Dar es Salaam</field>
+        </record>
+
+        <!-- Temeke District -->
+        <record id="region_temeke" model="res.country.region">
+            <field name="name">Temeke</field>
+            <field name="code">DSM-TEM</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="city_name">Dar es Salaam</field>
+        </record>
+
+        <!-- Ubungo District -->
+        <record id="region_ubungo" model="res.country.region">
+            <field name="name">Ubungo</field>
+            <field name="code">DSM-UBU</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="city_name">Dar es Salaam</field>
+        </record>
+
+        <!-- Kigamboni District -->
+        <record id="region_kigamboni" model="res.country.region">
+            <field name="name">Kigamboni</field>
+            <field name="code">DSM-KIG</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="city_name">Dar es Salaam</field>
+        </record>
+
+        <!-- Kinondoni District - Popular Areas -->
+        <record id="ward_masaki" model="res.country.ward">
+            <field name="name">Masaki</field>
+            <field name="code">DSM-KIN-MSK</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_oyster_bay" model="res.country.ward">
+            <field name="name">Oysterbay</field>
+            <field name="code">DSM-KIN-OYS</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mikocheni" model="res.country.ward">
+            <field name="name">Mikocheni</field>
+            <field name="code">DSM-KIN-MIK</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_msasani" model="res.country.ward">
+            <field name="name">Msasani</field>
+            <field name="code">DSM-KIN-MSA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_kawe" model="res.country.ward">
+            <field name="name">Kawe</field>
+            <field name="code">DSM-KIN-KAW</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mbezi" model="res.country.ward">
+            <field name="name">Mbezi</field>
+            <field name="code">DSM-KIN-MBZ</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_sinza" model="res.country.ward">
+            <field name="name">Sinza</field>
+            <field name="code">DSM-KIN-SIN</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <record id="ward_mwenge" model="res.country.ward">
+            <field name="name">Mwenge</field>
+            <field name="code">DSM-KIN-MWE</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kinondoni"/>
+        </record>
+
+        <!-- Ilala District - Popular Areas -->
+        <record id="ward_kariakoo" model="res.country.ward">
+            <field name="name">Kariakoo</field>
+            <field name="code">DSM-ILA-KAR</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_kisutu" model="res.country.ward">
+            <field name="name">Kisutu</field>
+            <field name="code">DSM-ILA-KIS</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_upanga" model="res.country.ward">
+            <field name="name">Upanga</field>
+            <field name="code">DSM-ILA-UPA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_pugu" model="res.country.ward">
+            <field name="name">Pugu</field>
+            <field name="code">DSM-ILA-PUG</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <record id="ward_buguruni" model="res.country.ward">
+            <field name="name">Buguruni</field>
+            <field name="code">DSM-ILA-BUG</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ilala"/>
+        </record>
+
+        <!-- Temeke District - Popular Areas -->
+        <record id="ward_mbagala" model="res.country.ward">
+            <field name="name">Mbagala</field>
+            <field name="code">DSM-TEM-MBA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_chang_ombe" model="res.country.ward">
+            <field name="name">Chang'ombe</field>
+            <field name="code">DSM-TEM-CHA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_miburani" model="res.country.ward">
+            <field name="name">Miburani</field>
+            <field name="code">DSM-TEM-MIB</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <record id="ward_mtoni" model="res.country.ward">
+            <field name="name">Mtoni</field>
+            <field name="code">DSM-TEM-MTO</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_temeke"/>
+        </record>
+
+        <!-- Ubungo District - Popular Areas -->
+        <record id="ward_manzese" model="res.country.ward">
+            <field name="name">Manzese</field>
+            <field name="code">DSM-UBU-MAN</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_makumbusho" model="res.country.ward">
+            <field name="name">Makumbusho</field>
+            <field name="code">DSM-UBU-MAK</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_kimara" model="res.country.ward">
+            <field name="name">Kimara</field>
+            <field name="code">DSM-UBU-KIM</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <record id="ward_saranga" model="res.country.ward">
+            <field name="name">Saranga</field>
+            <field name="code">DSM-UBU-SAR</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_ubungo"/>
+        </record>
+
+        <!-- Kigamboni District - Popular Areas -->
+        <record id="ward_kigamboni_town" model="res.country.ward">
+            <field name="name">Kigamboni Town</field>
+            <field name="code">DSM-KIG-TWN</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+        <record id="ward_mbagala_kuu" model="res.country.ward">
+            <field name="name">Mbagala Kuu</field>
+            <field name="code">DSM-KIG-MBK</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+        <record id="ward_vijibweni" model="res.country.ward">
+            <field name="name">Vijibweni</field>
+            <field name="code">DSM-KIG-VIJ</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kigamboni"/>
+        </record>
+
+    </data>
+</odoo>

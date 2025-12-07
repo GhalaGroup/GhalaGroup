@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Tanzania Country Reference -->
+        <record id="base.tz" model="res.country">
+            <field name="name">Tanzania</field>
+            <field name="code">TZ</field>
+        </record>
+
+        <!-- REGIONS -->
+
+        <!-- Dar es Salaam Region -->
+        <record id="region_dar_es_salaam" model="res.country.region">
+            <field name="name">Dar es Salaam</field>
+            <field name="code">DSM</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <!-- Dar es Salaam Wards -->
+        <record id="ward_kinondoni" model="res.country.ward">
+            <field name="name">Kinondoni</field>
+            <field name="code">DSM-KIN</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dar_es_salaam"/>
+        </record>
+
+        <record id="ward_ilala" model="res.country.ward">
+            <field name="name">Ilala</field>
+            <field name="code">DSM-ILA</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dar_es_salaam"/>
+        </record>
+
+        <record id="ward_temeke" model="res.country.ward">
+            <field name="name">Temeke</field>
+            <field name="code">DSM-TEM</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dar_es_salaam"/>
+        </record>
+
+        <record id="ward_ubungo" model="res.country.ward">
+            <field name="name">Ubungo</field>
+            <field name="code">DSM-UBU</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dar_es_salaam"/>
+        </record>
+
+        <record id="ward_kigamboni" model="res.country.ward">
+            <field name="name">Kigamboni</field>
+            <field name="code">DSM-KIG</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dar_es_salaam"/>
+        </record>
+
+        <!-- Arusha Region -->
+        <record id="region_arusha" model="res.country.region">
+            <field name="name">Arusha</field>
+            <field name="code">ARU</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_arusha_city" model="res.country.ward">
+            <field name="name">Arusha City</field>
+            <field name="code">ARU-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_arusha"/>
+        </record>
+
+        <record id="ward_meru" model="res.country.ward">
+            <field name="name">Meru</field>
+            <field name="code">ARU-MER</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_arusha"/>
+        </record>
+
+        <!-- Mwanza Region -->
+        <record id="region_mwanza" model="res.country.region">
+            <field name="name">Mwanza</field>
+            <field name="code">MWA</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_mwanza_city" model="res.country.ward">
+            <field name="name">Mwanza City</field>
+            <field name="code">MWA-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_mwanza"/>
+        </record>
+
+        <record id="ward_ilemela" model="res.country.ward">
+            <field name="name">Ilemela</field>
+            <field name="code">MWA-ILE</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_mwanza"/>
+        </record>
+
+        <!-- Dodoma Region -->
+        <record id="region_dodoma" model="res.country.region">
+            <field name="name">Dodoma</field>
+            <field name="code">DOD</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_dodoma_city" model="res.country.ward">
+            <field name="name">Dodoma City</field>
+            <field name="code">DOD-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_dodoma"/>
+        </record>
+
+        <!-- Mbeya Region -->
+        <record id="region_mbeya" model="res.country.region">
+            <field name="name">Mbeya</field>
+            <field name="code">MBE</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_mbeya_city" model="res.country.ward">
+            <field name="name">Mbeya City</field>
+            <field name="code">MBE-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_mbeya"/>
+        </record>
+
+        <!-- Morogoro Region -->
+        <record id="region_morogoro" model="res.country.region">
+            <field name="name">Morogoro</field>
+            <field name="code">MOR</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_morogoro_city" model="res.country.ward">
+            <field name="name">Morogoro City</field>
+            <field name="code">MOR-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_morogoro"/>
+        </record>
+
+        <!-- Tanga Region -->
+        <record id="region_tanga" model="res.country.region">
+            <field name="name">Tanga</field>
+            <field name="code">TAN</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_tanga_city" model="res.country.ward">
+            <field name="name">Tanga City</field>
+            <field name="code">TAN-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_tanga"/>
+        </record>
+
+        <!-- Kilimanjaro Region -->
+        <record id="region_kilimanjaro" model="res.country.region">
+            <field name="name">Kilimanjaro</field>
+            <field name="code">KIL</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_moshi" model="res.country.ward">
+            <field name="name">Moshi</field>
+            <field name="code">KIL-MOS</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_kilimanjaro"/>
+        </record>
+
+        <!-- Zanzibar -->
+        <record id="region_zanzibar" model="res.country.region">
+            <field name="name">Zanzibar</field>
+            <field name="code">ZNZ</field>
+            <field name="country_id" ref="base.tz"/>
+        </record>
+
+        <record id="ward_zanzibar_city" model="res.country.ward">
+            <field name="name">Zanzibar City</field>
+            <field name="code">ZNZ-CTY</field>
+            <field name="country_id" ref="base.tz"/>
+            <field name="region_id" ref="region_zanzibar"/>
+        </record>
+
+    </data>
+</odoo>

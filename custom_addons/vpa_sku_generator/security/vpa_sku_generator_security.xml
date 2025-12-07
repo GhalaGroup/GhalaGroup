@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Part of Product Sequence Configuration. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<odoo>
+    <data noupdate="0">
+        <!-- Security Category -->
+        <record id="module_category_vpa_sku_generator" model="ir.module.category">
+            <field name="name">VPA SKU Generator</field>
+            <field name="description">Manage SKU generation and product sequences</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- Privilege for Product Sequence -->
+        <record model="res.groups.privilege" id="res_groups_privilege_vpa_sku_generator">
+            <field name="name">VPA SKU Generator</field>
+            <field name="category_id" ref="module_category_vpa_sku_generator"/>
+        </record>
+
+        <!-- User Group -->
+        <record id="group_vpa_sku_generator_user" model="res.groups">
+            <field name="name">SKU Manager</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_sku_generator"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_system'))]"/>
+            <field name="comment">User can manage SKU generation, lock/unlock products, and regenerate sequences.</field>
+        </record>
+
+        <!-- Manager Group -->
+        <record id="group_vpa_sku_generator_manager" model="res.groups">
+            <field name="name">SKU Administrator</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_sku_generator"/>
+            <field name="implied_ids" eval="[(4, ref('group_vpa_sku_generator_user'))]"/>
+            <field name="comment">Full access to all SKU management features including settings and recycle pool.</field>
+        </record>
+
+    </data>
+</odoo>

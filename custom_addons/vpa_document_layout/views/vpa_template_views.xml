@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="vpa_document_template_list" model="ir.ui.view">
+        <field name="name">vpa.document.template.list</field>
+        <field name="model">vpa.document.template</field>
+        <field name="arch" type="xml">
+            <list string="Document Templates">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="target_app"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View - Following Odoo's base.document.layout pattern exactly -->
+    <record id="vpa_document_template_form" model="ir.ui.view">
+        <field name="name">vpa.document.template.form</field>
+        <field name="model">vpa.document.template</field>
+        <field name="arch" type="xml">
+            <form string="Document Template" class="o_document_layout">
+                <header>
+                    <button name="action_preview_template" string="Download PDF Preview" type="object" class="btn-primary" icon="fa-download"/>
+                    <button name="action_preview_footer" string="Preview Footer" type="object" class="btn-secondary" icon="fa-eye" help="Preview how footer will appear on PDF pages"/>
+                    <button name="action_regenerate_templates" string="Regenerate Template" type="object" class="btn-secondary" icon="fa-refresh" help="Regenerate QWeb template from current settings"/>
+                </header>
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Template Name</strong> will appear in the Print menu when users print this document type.
+                    </div>
+
+                    <group>
+                        <!-- Left Panel: Settings -->
+                        <group class="o_document_layout_company">
+                            <!-- Basic Info -->
+                            <group>
+                                <group>
+                                    <field name="name" placeholder="e.g., Modern Sales Quote" colspan="2"/>
+                                    <field name="target_app"/>
+                                    <field name="document_type"/>
+                                </group>
+                                <group>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="sequence"/>
+                                </group>
+                            </group>
+
+                            <!-- PDF File Naming -->
+                            <separator string="PDF File Naming"/>
+                            <field name="print_name_pattern" string="Filename Format"/>
+                            <field name="print_name_preview" readonly="1" string="Example" class="text-muted fst-italic"/>
+                            <field name="print_name_expression" invisible="print_name_pattern != 'custom'" placeholder="e.g., object.name + ' - ' + object.partner_id.name" string="Custom Expression"/>
+
+                            <!-- Settings Notebook -->
+                            <notebook>
+                                <!-- Paper Settings Tab -->
+                                <page string="Paper" name="paper">
+                                    <group>
+                                        <group string="Paper Format">
+                                            <field name="paper_size" widget="radio" options="{'horizontal': true}"/>
+                                            <field name="paper_orientation" widget="radio" options="{'horizontal': true}"/>
+                                        </group>
+                                    </group>
+                                </page>
+
+                                <!-- Header Tab -->
+                                <page string="Header" name="header">
+                                    <group>
+                                        <group string="Odoo Standard Header">
+                                            <field name="hide_odoo_header"/>
+                                        </group>
+                                    </group>
+
+                                    <separator string="Logo Settings"/>
+                                    <group>
+                                        <group>
+                                            <field name="header_logo_alignment" string="Alignment" widget="radio" options="{'horizontal': true}"/>
+                                            <field name="header_logo_aspect_ratio" string="Sizing Mode" widget="radio" options="{'horizontal': true}"/>
+                                        </group>
+                                        <group>
+                                            <field name="header_logo_width" string="Width (px)"/>
+                                            <field name="header_logo_height" string="Height (px)"/>
+                                        </group>
+                                    </group>
+
+                                    <separator string="Decorative Circle (Top Right)"/>
+                                    <group>
+                                        <group>
+                                            <field name="header_show_circle"/>
+                                            <field name="header_circle_size" string="Size (px)" invisible="not header_show_circle"/>
+                                            <field name="header_circle_opacity" string="Opacity (0-1)" invisible="not header_show_circle"/>
+                                        </group>
+                                        <group/>
+                                    </group>
+
+                                    <separator string="Company Information"/>
+                                    <group>
+                                        <group>
+                                            <button name="action_load_company_details"
+                                                    string="📥 Load Company Details"
+                                                    type="object"
+                                                    class="btn-primary"
+                                                    help="Click to load company address, phone, email, etc."/>
+                                        </group>
+                                        <group>
+                                            <field name="header_company_info_alignment" string="Text Alignment" widget="radio" options="{'horizontal': true}"/>
+                                            <field name="header_company_info_color" widget="color" string="Text Color"/>
+                                        </group>
+                                    </group>
+                                    <group>
+                                        <field name="header_company_details_html" widget="html" nolabel="1" placeholder="Leave empty to use company address automatically. Click 'Load Company Details' button above to populate this field."/>
+                                    </group>
+                                </page>
+
+                                <!-- Colors Tab -->
+                                <page string="Colors" name="colors">
+                                    <group>
+                                        <group string="Primary Color">
+                                            <field name="primary_accent_color" widget="color"/>
+                                            <p class="text-muted">Used for: Document titles, borders, footer titles</p>
+                                        </group>
+                                        <group string="Secondary Color">
+                                            <field name="secondary_accent_color" widget="color"/>
+                                            <p class="text-muted">Used for: Customer box border, footer shapes</p>
+                                        </group>
+                                    </group>
+                                </page>
+
+                                <!-- Tables Tab -->
+                                <page string="Tables" name="tables">
+                                    <separator string="Table Styling"/>
+                                    <group>
+                                        <group string="Table Style Preset">
+                                            <field name="table_style" widget="radio"/>
+                                        </group>
+                                    </group>
+
+                                    <div class="alert alert-info" role="alert">
+                                        <strong>Table Styles:</strong> Choose from beautiful preset styles or customize colors below
+                                    </div>
+
+                                    <group string="Advanced Table Colors (Optional - Overrides preset)">
+                                        <group>
+                                            <field name="table_header_bg_color" widget="color" string="Header Background"/>
+                                            <field name="table_header_text_color" widget="color" string="Header Text"/>
+                                        </group>
+                                        <group>
+                                            <field name="table_border_color" widget="color" string="Border Color"/>
+                                            <field name="table_row_alt_bg" widget="color" string="Alternate Row BG"/>
+                                        </group>
+                                    </group>
+                                </page>
+
+                                <!-- Footer Tab -->
+                                <page string="Footer" name="footer">
+                                    <group>
+                                        <group string="Odoo Standard Footer">
+                                            <field name="hide_odoo_footer"/>
+                                        </group>
+                                    </group>
+
+                                    <group string="Footer Shape">
+                                        <group>
+                                            <field name="footer_show_shape"/>
+                                            <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
+                                        </group>
+                                    </group>
+
+                                    <notebook>
+                                        <page string="Footer Layout" name="footer_layout_page">
+                                            <group>
+                                                <group string="Choose Footer Layout">
+                                                    <field name="footer_layout" widget="radio"/>
+                                                </group>
+                                                <group string="Options">
+                                                    <field name="footer_bank_details_show"/>
+                                                </group>
+                                            </group>
+
+                                            <div class="alert alert-info mt-3" role="alert">
+                                                <i class="fa fa-info-circle"/>
+                                                <strong>How it works:</strong><br/>
+                                                • Choose the number of columns you want in your footer<br/>
+                                                • Fill in the title and content for each column<br/>
+                                                • Bank details can auto-fill in empty columns if enabled<br/>
+                                                • Each column will appear side-by-side in your documents
+                                            </div>
+                                        </page>
+
+                                        <page string="📝 Column 1" name="footer_col1">
+                                            <group>
+                                                <group string="Column 1 Settings">
+                                                    <label for="footer_column_1_title" string="Column Title"/>
+                                                    <field name="footer_column_1_title" placeholder="e.g., Payment Terms" nolabel="1"/>
+                                                </group>
+                                            </group>
+
+                                            <separator string="Column 1 Content"/>
+                                            <div class="alert alert-success" role="alert">
+                                                <strong>Example:</strong> Add payment terms, terms &amp; conditions, or any important notes
+                                            </div>
+                                            <field name="footer_column_1_content" widget="html" nolabel="1"
+                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Payment Terms:&lt;/strong&gt; Net 30 Days&lt;/p&gt;&#10;&lt;p&gt;Payment is due within 30 days of invoice date&lt;/p&gt;"/>
+                                        </page>
+
+                                        <page string="📝 Column 2" name="footer_col2" invisible="footer_layout == 'single'">
+                                            <group>
+                                                <group string="Column 2 Settings">
+                                                    <label for="footer_column_2_title" string="Column Title"/>
+                                                    <field name="footer_column_2_title" placeholder="e.g., Bank Details" nolabel="1"/>
+                                                </group>
+                                            </group>
+
+                                            <separator string="Column 2 Content"/>
+                                            <div class="alert alert-success" role="alert">
+                                                <strong>Tip:</strong> Leave empty to auto-fill with bank account details (if "Show Bank Details" is enabled)<br/>
+                                                <strong>Example:</strong> Add contact information, company registration details, or website
+                                            </div>
+                                            <field name="footer_column_2_content" widget="html" nolabel="1"
+                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Contact Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;Email: info@company.com&lt;/p&gt;&#10;&lt;p&gt;Phone: +1 555-0123&lt;/p&gt;"/>
+                                        </page>
+
+                                        <page string="📝 Column 3" name="footer_col3" invisible="footer_layout != 'three_col'">
+                                            <group>
+                                                <group string="Column 3 Settings">
+                                                    <label for="footer_column_3_title" string="Column Title"/>
+                                                    <field name="footer_column_3_title" placeholder="e.g., Contact Information" nolabel="1"/>
+                                                </group>
+                                            </group>
+
+                                            <separator string="Column 3 Content"/>
+                                            <div class="alert alert-success" role="alert">
+                                                <strong>Example:</strong> Add social media links, additional contact details, or certifications
+                                            </div>
+                                            <field name="footer_column_3_content" widget="html" nolabel="1"
+                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Follow Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;🌐 www.company.com&lt;/p&gt;&#10;&lt;p&gt;📧 support@company.com&lt;/p&gt;"/>
+                                        </page>
+
+                                        <page string="⚙️ Advanced" name="footer_advanced">
+                                            <div class="alert alert-warning" role="alert">
+                                                <i class="fa fa-exclamation-triangle"/>
+                                                <strong>Advanced Users Only:</strong><br/>
+                                                Use this field to completely override the footer with custom HTML.<br/>
+                                                This will ignore all column settings above.
+                                            </div>
+                                            <separator string="Custom Footer HTML (Overrides Everything Above)"/>
+                                            <field name="footer_custom_html" widget="html" nolabel="1"
+                                                   placeholder="Enter custom HTML here to completely replace the footer layout..."/>
+                                        </page>
+                                    </notebook>
+                                </page>
+
+                                <!-- Preview Tab -->
+                                <page string="Preview" name="preview">
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Live Preview</strong><br/>
+                                        Click "Preview Template" button at the top to see how this template will look with real data.
+                                    </div>
+                                    <group>
+                                        <field name="report_action_id" readonly="1"/>
+                                    </group>
+                                </page>
+                            </notebook>
+                        </group>
+
+                        <!-- Right Panel: Live Preview -->
+                        <div class="o_preview">
+                            <field name="preview" nolabel="1" widget="html"/>
+                        </div>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vpa_document_template" model="ir.actions.act_window">
+        <field name="name">Document Templates</field>
+        <field name="res_model">vpa.document.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="domain">[]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first document template
+            </p>
+            <p>
+                Design custom templates for quotations, invoices, and more with your company branding.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_vpa_document_template"
+              name="Document Templates"
+              parent="vpa_document_layout.menu_vpa_document_layout_root"
+              action="action_vpa_document_template"
+              sequence="10"/>
+</odoo>

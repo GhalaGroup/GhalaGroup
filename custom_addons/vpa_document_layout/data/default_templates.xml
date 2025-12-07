@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Sales Quotation Template -->
+        <record id="default_quotation_template" model="vpa.document.template">
+            <field name="name">VPA - Quote Template</field>
+            <field name="active" eval="True"/>
+            <field name="sequence">10</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="target_app">sale</field>
+            <field name="document_type">quotation</field>
+
+            <!-- Header Settings -->
+            <field name="header_logo_width">250</field>
+            <field name="header_logo_height">100</field>
+            <field name="header_show_circle" eval="True"/>
+            <field name="header_circle_size">300</field>
+            <field name="header_circle_opacity">0.25</field>
+
+            <!-- Colors -->
+            <field name="primary_accent_color">#875a7b</field>
+            <field name="secondary_accent_color">#21b799</field>
+
+            <!-- Footer Settings -->
+            <field name="footer_show_shape" eval="True"/>
+            <field name="footer_shape_opacity">0.1</field>
+            <field name="footer_bank_details_show" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vpa_document_config_user,vpa.document.config.user,model_vpa_document_config,base.group_user,1,1,1,1
+access_vpa_document_template_user,vpa.document.template.user,model_vpa_document_template,base.group_system,1,1,1,1

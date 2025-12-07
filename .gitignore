@@ -1,0 +1,174 @@
+# ============================================
+# Odoo.sh Deployment - .gitignore
+# ============================================
+# Only commit code and configuration
+# Exclude data, backups, and local files
+# ============================================
+
+# ============================================
+# DATA FILES (Never commit to Odoo.sh)
+# ============================================
+
+# Database files
+*.sql
+*.dump
+*.backup
+postgres_data/
+dump.sql
+
+# Filestore (images, attachments - too large for Git)
+/data/
+filestore/
+
+# Backups
+backup_files/
+*.bak
+*~
+
+# Odoo source code (exclude from git, only commit custom addons)
+odoo-*/
+enterprise/
+
+# ============================================
+# PYTHON CACHE (Never commit)
+# ============================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ============================================
+# DOCKER & LOCAL CONFIG (Never commit)
+# ============================================
+
+# Docker volumes and local data
+docker-compose.override.yml
+.env.local
+
+# Local Odoo config (Odoo.sh has its own)
+config/odoo.conf
+
+# ============================================
+# IDE & EDITOR FILES (Never commit)
+# ============================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*.swn
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================
+# OS FILES (Never commit)
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================
+# CLAUDE CODE (AI Assistant Config)
+# ============================================
+
+# Claude Code settings (local only)
+.claude/
+.claude-code/
+
+# ============================================
+# DOCUMENTATION ARCHIVE (Optional)
+# ============================================
+
+# Archived technical docs (not needed on Odoo.sh)
+docs_archive/
+
+# Local dev scripts (not needed on Odoo.sh)
+scripts/
+fix_*.sh
+start.sh
+import_db.sh
+status.sh
+
+# ============================================
+# LOGS (Never commit)
+# ============================================
+
+*.log
+logs/
+odoo.log
+
+# ============================================
+# TEMPORARY FILES (Never commit)
+# ============================================
+
+# Temp files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ============================================
+# WHAT WILL BE COMMITTED TO ODOO.SH:
+# ============================================
+# ✅ enterprise/ (if in repo)
+# ✅ custom_addons/ (your modules)
+# ✅ README.md, SETUP_SUMMARY.md, etc.
+# ✅ docker-compose.yml (reference only)
+# ============================================
+# Cleaned up third-party modules for v19 upgrade

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA Settings integration disabled - VPA templates now work as separate print actions
+         instead of being a global document layout option.
+         Users can access VPA templates from the VPA Layout menu in the app drawer.
+    -->
+    <!--
+    <record id="res_config_settings_view_form_inherit_vpa" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.vpa</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='document_layout_setting']//div[@class='content-group']" position="inside">
+                <br invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"/>
+                <button string="Edit VPA Document Layout (Old)"
+                        type="object"
+                        name="action_open_vpa_config"
+                        class="oe_link"
+                        icon="oi-arrow-right"
+                        invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"
+                        help="Customize VPA layout: header, footer, colors, and more"/>
+                <br invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"/>
+                <button string="→ Manage Document Templates (NEW!)"
+                        type="action"
+                        name="%(vpa_document_layout.action_vpa_document_template)d"
+                        class="btn-primary"
+                        invisible="external_report_layout_id != %(vpa_document_layout.report_layout_vpa)d"
+                        help="Create custom templates for quotations, invoices, etc."/>
+            </xpath>
+        </field>
+    </record>
+    -->
+</odoo>

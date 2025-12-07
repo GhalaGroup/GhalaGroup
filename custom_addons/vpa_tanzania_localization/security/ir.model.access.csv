@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_partner_vpa_tanzania,res.partner.vpa.tanzania,base.model_res_partner,base.group_user,1,1,1,1
+access_res_country_region_user,res.country.region.user,model_res_country_region,base.group_user,1,0,0,0
+access_res_country_region_manager,res.country.region.manager,model_res_country_region,base.group_system,1,1,1,1
+access_res_country_ward_user,res.country.ward.user,model_res_country_ward,base.group_user,1,0,0,0
+access_res_country_ward_manager,res.country.ward.manager,model_res_country_ward,base.group_system,1,1,1,1

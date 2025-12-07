@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="external_layout_vpa">
+        <!-- Set document object if not defined -->
+        <t t-if="not o" t-set="o" t-value="doc"/>
+
+        <!-- Load VPA Configuration using company's env -->
+        <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+
+        <!-- Set color variables -->
+        <t t-set="primary_color" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+        <t t-set="secondary_color" t-value="vpa_config.secondary_accent_color or company.secondary_color or '#21b799'"/>
+
+        <!-- HEADER with colored border for VPA branding -->
+        <div t-attf-class="header o_company_#{company.id}_layout" t-attf-style="border-bottom: 4px solid {{primary_color}}; padding-bottom: 10px;">
+            <!-- Tagline and Company Details -->
+            <table style="width: 100%; margin: 0; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 50%; vertical-align: middle; padding: 0;">
+                        <div t-if="vpa_config.header_show_tagline and company.report_header"
+                             style="font-weight: bold; font-size: 12pt; color: #333;">
+                            <span t-field="company.report_header"/>
+                        </div>
+                    </td>
+                    <td style="width: 50%; text-align: right; vertical-align: middle; padding: 0; font-size: 8.5pt; line-height: 1.5;">
+                        <div t-if="vpa_config.header_company_details_html" t-out="vpa_config.header_company_details_html"/>
+                        <div t-elif="company.company_details" t-field="company.company_details"/>
+                        <div t-else="" t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- BODY -->
+        <t t-set="layout_background_url" t-value="'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/demo_logo_report.png' if company.layout_background == 'Demo logo' else ''"/>
+        <t t-set="table_class" t-value="'o_table_boxed-rounded' if vpa_config.body_table_style == 'boxed-rounded' else 'o_table_striped' if vpa_config.body_table_style == 'striped' else 'table-bordered' if vpa_config.body_table_style == 'bordered' else ''"/>
+
+        <div t-attf-class="article o_report_layout_bubble {{table_class}} o_company_#{company.id}_layout {{'o_report_layout_background' if company.layout_background != 'Blank' else ''}}"
+             t-attf-style="margin-top: {{vpa_config.body_margin_top}}px; margin-bottom: {{vpa_config.body_margin_bottom}}px; color: {{vpa_config.text_color_body}}; {{ 'background-image: url(%s);' % layout_background_url if layout_background_url else '' }}"
+             t-att-data-oe-model="o and o._name"
+             t-att-data-oe-id="o and o.id"
+             t-att-data-oe-lang="o and o.env.context.get('lang')">
+
+            <!-- Logo at top of body (since wkhtmltopdf can't render images in header reliably) -->
+            <div class="mb-3" t-if="company.logo_web">
+                <img t-att-src="image_data_uri(company.logo_web)" alt="Company Logo"
+                     t-attf-style="max-width: {{vpa_config.header_logo_width or 128}}px; max-height: {{vpa_config.header_logo_height or 80}}px;"/>
+            </div>
+
+            <table class="o_ignore_layout_styling table table-borderless mb-0">
+                <tbody>
+                    <tr>
+                        <td t-if="vpa_config.body_show_customer_address and vpa_config.body_customer_address_position == 'left'" t-attf-class="p-0 {{'pt-3' if information_block else ''}}">
+                            <t t-call="web.address_layout" custom_layout_address="true"/>
+                        </td>
+                        <td t-if="not information_block" class="align-bottom p-0 ps-2">
+                            <h2 t-attf-class="mb-4 text-nowrap text-{{vpa_config.body_title_position}}" t-out="layout_document_title"/>
+                        </td>
+                        <td t-if="vpa_config.body_show_customer_address and vpa_config.body_customer_address_position == 'right'" t-attf-class="p-0 {{'pt-3' if information_block else ''}}">
+                            <t t-call="web.address_layout" custom_layout_address="true"/>
+                        </td>
+                    </tr>
+                    <tr t-if="information_block">
+                        <td colspan="2" class="align-bottom p-0">
+                            <h2 t-attf-class="text-nowrap text-{{vpa_config.body_title_position}}" t-out="layout_document_title"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <t t-out="0"/>
+        </div>
+
+        <!-- FOOTER with colored border for VPA branding -->
+        <div t-attf-class="footer o_company_#{company.id}_layout {{report_type != 'pdf' and 'position-relative mt-auto mx-n5'}}" t-attf-style="border-top: 4px solid {{secondary_color}}; padding-top: {{vpa_config.footer_padding_top or 10}}px; padding-bottom: {{vpa_config.footer_padding_bottom or 5}}px; color: {{vpa_config.text_color_footer or '#666'}};">
+            <!-- Footer Background Shape -->
+            <svg t-if="vpa_config.footer_show_shape" xmlns="http://www.w3.org/2000/svg" t-attf-class="{{report_type == 'pdf' and 'position-fixed start-0'}}" style="z-index: -1;" width="500" height="228" viewBox="0 0 500 228" fill="none">
+                <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z" t-att-fill="vpa_config.footer_shape_color or secondary_color" t-attf-fill-opacity="{{vpa_config.footer_shape_opacity or 0.15}}"/>
+            </svg>
+
+            <!-- Custom Multi-Row Footer -->
+            <div t-if="vpa_config.footer_enable_custom_sections and vpa_config.footer_layout == 'custom'" t-attf-class="o_footer_content {{report_type != 'pdf' and 'position-absolute end-0 start-0 bottom-0 mx-5'}}">
+                <!-- Row 1: Company Information -->
+                <div t-if="vpa_config.footer_row1_enable" t-attf-style="margin-bottom: {{vpa_config.footer_row_spacing}}px;">
+                    <div t-if="vpa_config.footer_row1_align != 'split'" t-attf-class="text-{{vpa_config.footer_row1_align}}" t-raw="vpa_config.footer_row1_content"/>
+                    <div t-if="vpa_config.footer_row1_align == 'split'" class="d-flex justify-content-between">
+                        <div class="flex-grow-1" t-raw="vpa_config.footer_row1_left_content"/>
+                        <div class="text-end" t-raw="vpa_config.footer_row1_right_content"/>
+                    </div>
+                </div>
+
+                <!-- Row 2: Contact Information -->
+                <div t-if="vpa_config.footer_row2_enable" t-attf-style="margin-bottom: {{vpa_config.footer_row_spacing}}px;">
+                    <div t-if="vpa_config.footer_row2_align != 'split'" t-attf-class="text-{{vpa_config.footer_row2_align}}" t-raw="vpa_config.footer_row2_content"/>
+                    <div t-if="vpa_config.footer_row2_align == 'split'" class="d-flex justify-content-between">
+                        <div class="flex-grow-1" t-raw="vpa_config.footer_row2_left_content"/>
+                        <div class="text-end" t-raw="vpa_config.footer_row2_right_content"/>
+                    </div>
+                </div>
+
+                <!-- Row 3: Bank Information -->
+                <div t-if="vpa_config.footer_row3_enable">
+                    <div t-if="vpa_config.footer_row3_align != 'split'" t-attf-class="text-{{vpa_config.footer_row3_align}}" t-raw="vpa_config.footer_row3_content"/>
+                    <div t-if="vpa_config.footer_row3_align == 'split'" class="d-flex justify-content-between">
+                        <div class="flex-grow-1" t-raw="vpa_config.footer_row3_left_content"/>
+                        <div class="text-end" t-raw="vpa_config.footer_row3_right_content"/>
+                    </div>
+                </div>
+
+                <!-- Page Numbers -->
+                <div t-if="vpa_config.footer_show_page_numbers and report_type == 'pdf'" class="text-center mt-2">
+                    <span t-if="vpa_config.footer_show_document_name and display_name_in_footer" class="text-muted" t-out="str(o.name) + ', '">(document name)</span>
+                    <span class="text-muted">Page <span class="page"/> / <span class="topage"/></span>
+                </div>
+            </div>
+
+            <!-- Standard Footer (Centered or Split) -->
+            <div t-if="not vpa_config.footer_enable_custom_sections or vpa_config.footer_layout != 'custom'" t-attf-class="o_footer_content {{report_type != 'pdf' and 'position-absolute end-0 start-0 bottom-0 mx-5'}} pt-4">
+                <div t-if="vpa_config.footer_layout == 'centered'" class="text-center">
+                    <div class="border-top pt-2" t-field="company.report_footer"/>
+                    <span t-if="report_type == 'pdf' and vpa_config.footer_show_document_name and display_name_in_footer" class="text-muted" t-out="str(o.name) + ', '">(document name)</span>
+                    <span t-if="report_type == 'pdf' and vpa_config.footer_show_page_numbers" class="text-muted">Page <span class="page"/> / <span class="topage"/></span>
+                </div>
+                <div t-if="vpa_config.footer_layout == 'split'" class="d-flex border-top pt-2">
+                    <div class="flex-grow-1 me-2 text-start" t-field="company.report_footer"/>
+                    <div class="text-end text-muted">
+                        <div t-if="report_type == 'pdf' and vpa_config.footer_show_document_name and display_name_in_footer" t-out="o.name">(document name)</div>
+                        <div t-if="report_type == 'pdf' and vpa_config.footer_show_page_numbers" class="text-nowrap">Page <span class="page"/> / <span class="topage"/></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>
