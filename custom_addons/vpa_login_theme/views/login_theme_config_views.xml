@@ -33,6 +33,10 @@
                     <group>
                         <group>
                             <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="login_company_id"
+                                   string="Login Page Company"
+                                   help="Select which company's logo to display on the login page"
+                                   groups="base.group_multi_company"/>
                             <field name="preset_theme"/>
                         </group>
                         <group>

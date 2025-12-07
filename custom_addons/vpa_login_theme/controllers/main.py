@@ -23,23 +23,27 @@ class LoginThemeController(http.Controller):
             theme = LoginThemeConfig.search([('active', '=', True)], limit=1)
 
             _logger.info(f"VPA Login Theme: Found active theme: {theme.theme_name if theme else 'None'}")
-            if theme:
-                _logger.info(f"VPA Login Theme: Theme company: {theme.company_id.name if theme.company_id else 'None'}")
-                _logger.info(f"VPA Login Theme: Has logo: {bool(theme.company_id.logo_web) if theme.company_id else False}")
 
-            # If theme exists and has a company with logo, serve that logo
-            if theme and theme.company_id and theme.company_id.logo_web:
-                logo_data = base64.b64decode(theme.company_id.logo_web)
-                _logger.info(f"VPA Login Theme: Serving logo from {theme.company_id.name}")
-                return request.make_response(
-                    logo_data,
-                    headers=[
-                        ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'no-cache, no-store, must-revalidate'),
-                        ('Pragma', 'no-cache'),
-                        ('Expires', '0'),
-                    ]
-                )
+            if theme:
+                # Use login_company_id if set, otherwise fall back to company_id
+                login_company = theme.login_company_id if theme.login_company_id else theme.company_id
+
+                _logger.info(f"VPA Login Theme: Login company: {login_company.name if login_company else 'None'}")
+                _logger.info(f"VPA Login Theme: Has logo: {bool(login_company.logo_web) if login_company else False}")
+
+                # If theme exists and has a login company with logo, serve that logo
+                if login_company and login_company.logo_web:
+                    logo_data = base64.b64decode(login_company.logo_web)
+                    _logger.info(f"VPA Login Theme: Serving logo from {login_company.name}")
+                    return request.make_response(
+                        logo_data,
+                        headers=[
+                            ('Content-Type', 'image/png'),
+                            ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                            ('Pragma', 'no-cache'),
+                            ('Expires', '0'),
+                        ]
+                    )
         except Exception as e:
             _logger.error(f"VPA Login Theme: Error in theme lookup: {e}")
             pass

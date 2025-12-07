@@ -45,6 +45,12 @@ class LoginThemeConfig(models.Model):
     )
     active = fields.Boolean(string='Active', default=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    login_company_id = fields.Many2one(
+        'res.company',
+        string='Login Page Company',
+        help='Company whose logo will be displayed on the login page. If not set, uses the Company field above.',
+        default=lambda self: self.env.company
+    )
 
     # Branding & Text Settings
     page_title = fields.Char(
