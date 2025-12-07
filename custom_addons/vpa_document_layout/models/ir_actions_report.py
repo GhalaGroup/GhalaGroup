@@ -159,8 +159,16 @@ class IrActionsReport(models.Model):
 
             if template_id:
                 # Use footer-html approach
-                # Get the actual Odoo base URL from system parameters (works in all environments)
+                # In Odoo.sh, wkhtmltopdf runs in same container and external URL requires auth
+                # Use localhost for internal rendering, web.base.url otherwise
                 base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+
+                # Detect Odoo.sh environment (check if running on odoo.com domain)
+                if 'odoo.com' in base_url or 'odoo.sh' in base_url:
+                    # Use localhost since wkhtmltopdf runs in same container
+                    base_url = "http://localhost:8069"
+                    _logger.info(f"🔍 Odoo.sh environment detected - using localhost for footer")
+
                 footer_url = f"{base_url}/vpa/template/footer/{template_id}"
 
                 _logger.info(f"✅ Using footer-html: {footer_url}")
