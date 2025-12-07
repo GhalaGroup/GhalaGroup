@@ -2,8 +2,11 @@
 # Part of VPA Login Theme. See LICENSE file for full copyright and licensing details.
 
 import base64
+import logging
 from odoo import http
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 
 class LoginThemeController(http.Controller):
@@ -19,9 +22,15 @@ class LoginThemeController(http.Controller):
             LoginThemeConfig = request.env['login.theme.config'].sudo()
             theme = LoginThemeConfig.search([('active', '=', True)], limit=1)
 
+            _logger.info(f"VPA Login Theme: Found active theme: {theme.theme_name if theme else 'None'}")
+            if theme:
+                _logger.info(f"VPA Login Theme: Theme company: {theme.company_id.name if theme.company_id else 'None'}")
+                _logger.info(f"VPA Login Theme: Has logo: {bool(theme.company_id.logo_web) if theme.company_id else False}")
+
             # If theme exists and has a company with logo, serve that logo
             if theme and theme.company_id and theme.company_id.logo_web:
                 logo_data = base64.b64decode(theme.company_id.logo_web)
+                _logger.info(f"VPA Login Theme: Serving logo from {theme.company_id.name}")
                 return request.make_response(
                     logo_data,
                     headers=[
@@ -31,12 +40,14 @@ class LoginThemeController(http.Controller):
                         ('Expires', '0'),
                     ]
                 )
-        except:
+        except Exception as e:
+            _logger.error(f"VPA Login Theme: Error in theme lookup: {e}")
             pass
 
         # Fallback to default Odoo behavior - get first company's logo
         try:
             company = request.env['res.company'].sudo().search([], limit=1)
+            _logger.warning(f"VPA Login Theme: Using fallback - serving logo from first company: {company.name if company else 'None'}")
             if company and company.logo_web:
                 logo_data = base64.b64decode(company.logo_web)
                 return request.make_response(
@@ -48,7 +59,8 @@ class LoginThemeController(http.Controller):
                         ('Expires', '0'),
                     ]
                 )
-        except:
+        except Exception as e:
+            _logger.error(f"VPA Login Theme: Error in fallback: {e}")
             pass
 
         # Final fallback - redirect to Odoo default logo
