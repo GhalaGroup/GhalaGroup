@@ -1,6 +1,6 @@
 {
     'name': 'VPA Login Theme',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.4',
     'category': 'Website/Website',
     'summary': 'Customize login page colors, branding, logo & favicon. 6 pre-built themes. Live preview. No coding!',
     'description': """
@@ -65,16 +65,16 @@ Technical Details
 Support
 -------
 * Comprehensive documentation included
-* Email support: support@vpa-solutions.com
+* Email support: info@vpa.co.tz
 * Regular updates and improvements
 * Active maintenance and bug fixes
 
 Make your Odoo login page truly yours with VPA Login Theme!
     """,
-    'author': 'VPA Software Limited',
-    'website': 'https://www.vpa-solutions.com',
-    'maintainer': 'VPA Software Limited',
-    'support': 'support@vpa-solutions.com',
+    'author': 'VPA Solutions Limited',
+    'website': 'https://www.vpa.co.tz',
+    'maintainer': 'VPA Solutions Limited',
+    'support': 'info@vpa.co.tz',
     'license': 'LGPL-3',
     'price': 25.00,
     'currency': 'USD',

@@ -2,8 +2,11 @@
 # Part of VPA Login Theme. See LICENSE file for full copyright and licensing details.
 
 import base64
+import logging
 from odoo import http
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 
 class LoginThemeController(http.Controller):
@@ -19,32 +22,49 @@ class LoginThemeController(http.Controller):
             LoginThemeConfig = request.env['login.theme.config'].sudo()
             theme = LoginThemeConfig.search([('active', '=', True)], limit=1)
 
-            # If theme exists and has a company with logo, serve that logo
-            if theme and theme.company_id and theme.company_id.logo_web:
-                logo_data = base64.b64decode(theme.company_id.logo_web)
-                return request.make_response(
-                    logo_data,
-                    headers=[
-                        ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=604800'),  # Cache for 1 week
-                    ]
-                )
-        except:
+            _logger.info(f"VPA Login Theme: Found active theme: {theme.theme_name if theme else 'None'}")
+
+            if theme:
+                # Use login_company_id if set, otherwise fall back to company_id
+                login_company = theme.login_company_id if theme.login_company_id else theme.company_id
+
+                _logger.info(f"VPA Login Theme: Login company: {login_company.name if login_company else 'None'}")
+                _logger.info(f"VPA Login Theme: Has logo: {bool(login_company.logo_web) if login_company else False}")
+
+                # If theme exists and has a login company with logo, serve that logo
+                if login_company and login_company.logo_web:
+                    logo_data = base64.b64decode(login_company.logo_web)
+                    _logger.info(f"VPA Login Theme: Serving logo from {login_company.name}")
+                    return request.make_response(
+                        logo_data,
+                        headers=[
+                            ('Content-Type', 'image/png'),
+                            ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                            ('Pragma', 'no-cache'),
+                            ('Expires', '0'),
+                        ]
+                    )
+        except Exception as e:
+            _logger.error(f"VPA Login Theme: Error in theme lookup: {e}")
             pass
 
         # Fallback to default Odoo behavior - get first company's logo
         try:
             company = request.env['res.company'].sudo().search([], limit=1)
+            _logger.warning(f"VPA Login Theme: Using fallback - serving logo from first company: {company.name if company else 'None'}")
             if company and company.logo_web:
                 logo_data = base64.b64decode(company.logo_web)
                 return request.make_response(
                     logo_data,
                     headers=[
                         ('Content-Type', 'image/png'),
-                        ('Cache-Control', 'public, max-age=604800'),
+                        ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                        ('Pragma', 'no-cache'),
+                        ('Expires', '0'),
                     ]
                 )
-        except:
+        except Exception as e:
+            _logger.error(f"VPA Login Theme: Error in fallback: {e}")
             pass
 
         # Final fallback - redirect to Odoo default logo

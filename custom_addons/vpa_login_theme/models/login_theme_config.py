@@ -45,6 +45,13 @@ class LoginThemeConfig(models.Model):
     )
     active = fields.Boolean(string='Active', default=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    login_company_id = fields.Many2one(
+        'res.company',
+        string='Login Page Company',
+        help='Company whose logo will be displayed on the login page. If not set, uses the Company field above.',
+        default=lambda self: self.env.company,
+        store=True  # Explicitly force database column creation
+    )
 
     # Branding & Text Settings
     page_title = fields.Char(
@@ -107,6 +114,39 @@ class LoginThemeConfig(models.Model):
         ('orange', 'Orange Theme'),
         ('dark', 'Dark Theme'),
     ], string='Preset Theme', default='red')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Ensure login_company_id defaults to company_id and only one active theme"""
+        for vals in vals_list:
+            # Default login_company_id to company_id
+            if 'login_company_id' not in vals and 'company_id' in vals:
+                vals['login_company_id'] = vals['company_id']
+
+            # If creating an active theme, deactivate all existing themes
+            if vals.get('active', True):  # default is True
+                existing_themes = self.search([])
+                if existing_themes:
+                    existing_themes.write({'active': False})
+
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Ensure only one theme is active at a time"""
+        # If activating this theme, deactivate all others
+        if vals.get('active') is True:
+            # Deactivate all other themes
+            other_themes = self.search([('id', 'not in', self.ids)])
+            if other_themes:
+                super(LoginThemeConfig, other_themes).write({'active': False})
+
+        return super().write(vals)
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        """Auto-update login_company_id when company_id changes"""
+        if self.company_id and not self.login_company_id:
+            self.login_company_id = self.company_id
 
     @api.onchange('preset_theme')
     def _onchange_preset_theme(self):

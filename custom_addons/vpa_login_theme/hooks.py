@@ -32,12 +32,25 @@ def _fix_menu_groups(env):
     except Exception as e:
         _logger.error("Error configuring VPA Login Theme menus: %s", e)
 
+def _set_default_login_company(env):
+    """Set login_company_id to company_id for existing themes that don't have it set"""
+    try:
+        themes = env['login.theme.config'].search([('login_company_id', '=', False)])
+        for theme in themes:
+            if theme.company_id:
+                theme.login_company_id = theme.company_id
+                _logger.info(f"✓ Set login_company_id to {theme.company_id.name} for theme {theme.theme_name}")
+        _logger.info("✓ Default login companies set successfully!")
+    except Exception as e:
+        _logger.error(f"Error setting default login companies: {e}")
+
 def post_init_hook(env):
     """
     Post-installation hook - runs after module installation.
     """
     _logger.info("Running post_init_hook for VPA Login Theme...")
     _fix_menu_groups(env)
+    _set_default_login_company(env)
 
 def post_load_hook():
     """
