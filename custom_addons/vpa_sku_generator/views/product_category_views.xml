@@ -7,7 +7,9 @@
             <field name="model">product.category</field>
             <field name="inherit_id" ref="product.product_category_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='name']" position="after">
+                <!-- Add SKU fields after parent_id (at the end of the standard form) -->
+                <xpath expr="//field[@name='parent_id']" position="after">
+                    <separator string="SKU Generator Settings"/>
                     <!-- SKU Configuration & Sequence Information -->
                     <group>
                         <group string="SKU Configuration">
