@@ -1,17 +1,20 @@
 <odoo>
     <data>
 
-        <!-- Category Form View - Enhanced with SKU Information -->
+        <!--
+            Category Form View - SKU Generator Tab
+            This adds a notebook with SKU Generator tab at the end of the category form.
+            Fields are ONLY in the tab, not at the top of the form.
+        -->
         <record model="ir.ui.view" id="product_category_form_view_inherit2">
             <field name="name">product.category.form.inherit.sku</field>
             <field name="model">product.category</field>
             <field name="inherit_id" ref="product.product_category_form_view"/>
+            <field name="priority">50</field>
             <field name="arch" type="xml">
-                <!-- Add SKU Generator section at the end of the form (after all standard fields) -->
                 <xpath expr="//sheet" position="inside">
                     <notebook>
                         <page string="SKU Generator" name="sku_generator">
-                            <!-- SKU Configuration -->
                             <group>
                                 <group string="SKU Configuration">
                                     <field name="short_name" placeholder="e.g., FUR, TBL"/>
@@ -22,8 +25,6 @@
                                     <field name="next_sku_number" readonly="1"/>
                                 </group>
                             </group>
-
-                            <!-- Product Statistics -->
                             <group>
                                 <group string="Product Statistics">
                                     <field name="product_count" readonly="1"/>
@@ -31,8 +32,6 @@
                                     <field name="locked_product_count" readonly="1"/>
                                 </group>
                             </group>
-
-                            <!-- Warning when no short code -->
                             <div class="alert alert-warning" role="alert" invisible="short_name">
                                 <i class="fa fa-info-circle me-2"/>
                                 Set a <strong>Category Short Name</strong> above to enable automatic SKU generation for products in this category.
