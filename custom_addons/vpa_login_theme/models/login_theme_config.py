@@ -123,6 +123,34 @@ class LoginThemeConfig(models.Model):
                 vals['login_company_id'] = vals['company_id']
         return super().create(vals_list)
 
+    def write(self, vals):
+        """Override write to debug login_company_id save issue"""
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        _logger.info(f"VPA Login Theme WRITE called with vals: {vals}")
+        _logger.info(f"  - login_company_id in vals: {'login_company_id' in vals}")
+        if 'login_company_id' in vals:
+            _logger.info(f"  - login_company_id value: {vals['login_company_id']}")
+
+        # Log current values before write
+        for record in self:
+            _logger.info(f"  - Current record {record.id} login_company_id: {record.login_company_id.name if record.login_company_id else 'None'}")
+
+        result = super().write(vals)
+
+        # Log values after write
+        for record in self:
+            _logger.info(f"  - After write record {record.id} login_company_id: {record.login_company_id.name if record.login_company_id else 'None'}")
+
+        return result
+
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        """Auto-update login_company_id when company_id changes"""
+        if self.company_id and not self.login_company_id:
+            self.login_company_id = self.company_id
+
     @api.onchange('preset_theme')
     def _onchange_preset_theme(self):
         """Apply preset theme colors"""
