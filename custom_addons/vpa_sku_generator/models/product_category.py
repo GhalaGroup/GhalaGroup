@@ -56,11 +56,16 @@ class ProductCategory(models.Model):
 
     @api.depends('name')
     def _compute_product_statistics(self):
-        """Compute product statistics for this category"""
+        """Compute product statistics for this category
+
+        Uses product.product (variants) for accurate SKU counting since
+        SKUs are typically assigned at the variant level.
+        """
         for category in self:
-            products = self.env['product.template'].search([('categ_id', '=', category.id)])
+            # Use product.product for accurate variant-level statistics
+            products = self.env['product.product'].search([('categ_id', '=', category.id)])
             category.product_count = len(products)
-            category.product_with_sku_count = len(products.filtered('default_code'))
+            category.product_with_sku_count = len(products.filtered(lambda p: p.default_code and p.default_code != 'False'))
             category.locked_product_count = len(products.filtered('sku_locked'))
 
     @api.depends('short_name', 'parent_id', 'parent_id.short_name')
@@ -79,18 +84,108 @@ class ProductCategory(models.Model):
             else:
                 category.sku_preview = "No short code set"
 
-    @api.depends('short_name', 'company_id')
+    def _get_max_sku_number_from_products(self):
+        """Scan products to find highest SKU sequence number for imported products.
+
+        This handles cases where products were imported with SKUs directly,
+        bypassing the sequence creation. Returns the highest number found
+        so the next SKU can continue from there.
+        """
+        self.ensure_one()
+        if not self.short_name:
+            return 0
+
+        # Build SKU prefix from category hierarchy
+        parent_categories = self.env['product.category'].search([
+            ('id', 'parent_of', self.id)
+        ], order="id asc")
+
+        if not all(cat.short_name for cat in parent_categories):
+            return 0
+
+        sku_prefix = "/".join(parent_categories.mapped("short_name")) + "/"
+
+        # Search products with matching SKUs
+        products = self.env['product.product'].search([
+            ('categ_id', '=', self.id),
+            ('default_code', '!=', False),
+            ('default_code', '=like', sku_prefix + '%')
+        ])
+
+        max_number = 0
+        for product in products:
+            sku = product.default_code
+            if not sku or not sku.startswith(sku_prefix):
+                continue
+            try:
+                remainder = sku[len(sku_prefix):]
+                # Handle variant suffix (e.g., 00001-001 -> 00001)
+                number_part = remainder.split('-')[0]
+                sku_number = int(number_part)
+                max_number = max(max_number, sku_number)
+            except (ValueError, IndexError):
+                continue
+
+        return max_number
+
+    def _get_next_sku_number_preview(self):
+        """Get the next SKU number for preview purposes (doesn't consume the sequence)"""
+        self.ensure_one()
+        if not self.short_name:
+            return 1
+
+        # Check if sequence exists
+        sequence_code = self._get_sequence_code()
+        if sequence_code:
+            sequence = self.env['ir.sequence'].sudo().search([
+                ('code', '=', sequence_code),
+                ('company_id', '=', self.company_id.id or self.env.company.id)
+            ], limit=1)
+
+            if sequence:
+                return sequence.number_next_actual
+
+        # No sequence - detect from existing products
+        max_sku = self._get_max_sku_number_from_products()
+        return max_sku + 1 if max_sku > 0 else 1
+
+    def _get_sequence_code(self):
+        """Build sequence code from full category hierarchy path"""
+        self.ensure_one()
+        if not self.short_name:
+            return False
+
+        # Build path from all parent categories
+        parent_categories = self.env['product.category'].search([
+            ('id', 'parent_of', self.id)
+        ], order="id asc")
+
+        if not all(cat.short_name for cat in parent_categories):
+            return False
+
+        # Use full path for unique sequence code (e.g., "UDI_OFF" for UDI/OFF category)
+        path = "_".join(parent_categories.mapped("short_name"))
+        company_id = self.company_id.id or self.env.company.id
+        return f"product_category_{path}_{company_id}"
+
+    @api.depends('short_name', 'company_id', 'parent_id', 'parent_id.short_name')
     def _compute_sequence_id(self):
         for category in self:
-            if category.short_name:
-                sequence_code = f"product_category_{category.short_name}_{category.company_id.id or self.env.company.id}"
+            sequence_code = category._get_sequence_code()
+            if sequence_code:
                 sequence = self.env['ir.sequence'].sudo().search([
                     ('code', '=', sequence_code),
                     ('company_id', '=', category.company_id.id or self.env.company.id)
                 ], limit=1)
 
                 category.sequence_id = sequence
-                category.next_sku_number = sequence.number_next_actual if sequence else 1
+
+                if sequence:
+                    category.next_sku_number = sequence.number_next_actual
+                else:
+                    # No sequence - detect from existing products (handles imports)
+                    max_sku = category._get_max_sku_number_from_products()
+                    category.next_sku_number = max_sku + 1 if max_sku > 0 else 1
             else:
                 category.sequence_id = False
                 category.next_sku_number = 0

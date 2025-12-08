@@ -75,25 +75,40 @@ class ProductTemplate(models.Model):
                     self.default_code = new_sku
 
     def get_or_create_ir_sequence(self):
-        """Get or create sequence for category"""
+        """Get or create sequence for category, accounting for imported SKUs"""
         self.ensure_one()
-        sequence_code = f"product_category_{self.categ_id.short_name}_{self.company_id.id or self.env.company.id}"
+        # Use the category's method to get the sequence code (includes full hierarchy path)
+        sequence_code = self.categ_id._get_sequence_code()
+        if not sequence_code:
+            return False
+
+        company_id = self.company_id.id or self.env.company.id
 
         # Check if sequence exists
         IrSequence = self.env["ir.sequence"].sudo().search([
             ("code", "=", sequence_code),
-            ("company_id", "=", self.company_id.id or self.env.company.id)
+            ("company_id", "=", company_id)
         ])
 
         # Create if doesn't exist
         if not IrSequence:
+            # Check for existing SKUs from imports to set correct starting number
+            max_sku = self.categ_id._get_max_sku_number_from_products()
+            next_number = max_sku + 1 if max_sku > 0 else 1
+
+            # Build full category path for sequence name
+            parent_categories = self.env['product.category'].search([
+                ('id', 'parent_of', self.categ_id.id)
+            ], order="id asc")
+            full_path = "/".join(parent_categories.mapped("short_name"))
+
             IrSequence = self.env["ir.sequence"].sudo().create({
-                "name": f"Product Internal Reference Sequence: {self.categ_id.short_name}",
+                "name": f"Product SKU Sequence: {full_path}",
                 "code": sequence_code,
                 "padding": 5,
-                "number_next": 1,
+                "number_next": next_number,
                 "number_increment": 1,
-                "company_id": self.company_id.id or self.env.company.id,
+                "company_id": company_id,
             })
 
         # Get next number using _next method
