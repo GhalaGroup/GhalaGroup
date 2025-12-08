@@ -13,7 +13,7 @@ try:
     WEASYPRINT_AVAILABLE = True
 except ImportError:
     WEASYPRINT_AVAILABLE = False
-    _logger.warning("WeasyPrint not available. Falling back to wkhtmltopdf for PDF generation.")
+    # Don't log warning at module load - only log when actually attempting to use it
 
 # Check if Playwright is available
 try:
@@ -21,7 +21,7 @@ try:
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
-    _logger.warning("Playwright not available. Falling back to wkhtmltopdf for PDF generation.")
+    # Don't log warning at module load - only log when actually attempting to use it
 
 
 class IrActionsReport(models.Model):
