@@ -128,6 +128,27 @@ class ProductCategory(models.Model):
 
         return max_number
 
+    def _get_next_sku_number_preview(self):
+        """Get the next SKU number for preview purposes (doesn't consume the sequence)"""
+        self.ensure_one()
+        if not self.short_name:
+            return 1
+
+        # Check if sequence exists
+        sequence_code = self._get_sequence_code()
+        if sequence_code:
+            sequence = self.env['ir.sequence'].sudo().search([
+                ('code', '=', sequence_code),
+                ('company_id', '=', self.company_id.id or self.env.company.id)
+            ], limit=1)
+
+            if sequence:
+                return sequence.number_next_actual
+
+        # No sequence - detect from existing products
+        max_sku = self._get_max_sku_number_from_products()
+        return max_sku + 1 if max_sku > 0 else 1
+
     def _get_sequence_code(self):
         """Build sequence code from full category hierarchy path"""
         self.ensure_one()

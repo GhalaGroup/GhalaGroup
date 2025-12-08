@@ -101,32 +101,8 @@ class RegenerateSkuWizard(models.TransientModel):
         if not templates:
             raise UserError(_('No products found for the selected scope.'))
 
-        # If reset_sequence, we need to simulate sequential SKU assignment
-        if self.reset_sequence:
-            preview_lines = self._generate_reset_sequence_preview(templates)
-        else:
-            # Normal preview - just show format
-            preview_lines = []
-            for template in templates:
-                # For templates with variants, show each variant
-                for variant in template.product_variant_ids:
-                    is_locked = template.sku_locked
-                    will_skip = is_locked and self.respect_locks
-
-                    # Generate new SKU (simulation)
-                    if not will_skip:
-                        new_sku = self._simulate_new_sku(template)
-                    else:
-                        new_sku = variant.default_code
-
-                    preview_lines.append((0, 0, {
-                        'product_tmpl_id': template.id,
-                        'product_variant_id': variant.id,
-                        'current_sku': variant.default_code or '',
-                        'new_sku': new_sku or '',
-                        'is_locked': is_locked,
-                        'will_update': not will_skip and (variant.default_code != new_sku),
-                    }))
+        # Both reset_sequence and normal mode now use sequential preview
+        preview_lines = self._generate_sequential_preview(templates)
 
         self.preview_line_ids = preview_lines
         self.state = 'preview'
@@ -237,94 +213,123 @@ class RegenerateSkuWizard(models.TransientModel):
         else:  # all
             return self.env['product.template'].search([])
 
-    def _simulate_new_sku(self, product):
-        """Simulate what the new SKU would be"""
-        if not product.categ_id:
-            return False
+    def _generate_sequential_preview(self, templates):
+        """Generate preview with actual sequential SKU numbers
 
-        # Build category path
-        parent_categories = self.env['product.category'].search([
-            ('id', 'parent_of', product.categ_id.id)
-        ], order="id asc")
-
-        if not all(cat.short_name for cat in parent_categories):
-            return False
-
-        short_names = "/".join(parent_categories.mapped("short_name"))
-
-        # For preview, just show format (don't actually consume sequences)
-        return f"{short_names}/XXXXX"
-
-    def _generate_reset_sequence_preview(self, templates):
-        """Generate preview with actual SKU numbers when reset_sequence is enabled"""
+        Groups templates by category and assigns sequential numbers within each category.
+        For reset_sequence mode: starts from 00001
+        For normal mode: continues from existing sequence or recycle pool
+        """
         preview_lines = []
 
-        # Build category path
         if not templates:
             return preview_lines
 
-        first_template = templates[0]
-        parent_categories = self.env['product.category'].search([
-            ('id', 'parent_of', first_template.categ_id.id)
-        ], order="id asc")
-
-        if not all(cat.short_name for cat in parent_categories):
-            return preview_lines
-
-        short_names = "/".join(parent_categories.mapped("short_name"))
-
-        # Simulate sequential assignment starting from 00001
-        sku_counter = 1
-
+        # Group templates by category
+        templates_by_category = {}
         for template in templates:
-            is_locked = template.sku_locked
-            will_skip = is_locked and self.respect_locks
+            categ_id = template.categ_id.id if template.categ_id else False
+            if categ_id not in templates_by_category:
+                templates_by_category[categ_id] = []
+            templates_by_category[categ_id].append(template)
 
-            if will_skip:
-                # Skip locked products
-                for variant in template.product_variant_ids:
-                    preview_lines.append((0, 0, {
-                        'product_tmpl_id': template.id,
-                        'product_variant_id': variant.id,
-                        'current_sku': variant.default_code or '',
-                        'new_sku': variant.default_code or '',
-                        'is_locked': is_locked,
-                        'will_update': False,
-                    }))
-            else:
-                # Assign new SKU
-                base_sku = f"{short_names}/{str(sku_counter).zfill(5)}"
-
-                # Get all variants
-                all_variants = template.product_variant_ids.sorted(
-                    lambda v: (','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))), v.id)
-                )
-
-                if len(all_variants) == 1:
-                    # Single variant - no suffix
-                    variant = all_variants[0]
-                    preview_lines.append((0, 0, {
-                        'product_tmpl_id': template.id,
-                        'product_variant_id': variant.id,
-                        'current_sku': variant.default_code or '',
-                        'new_sku': base_sku,
-                        'is_locked': is_locked,
-                        'will_update': True,
-                    }))
-                else:
-                    # Multiple variants - add suffix
-                    for idx, variant in enumerate(all_variants, 1):
-                        variant_sku = f"{base_sku}-{str(idx).zfill(3)}"
+        # Process each category
+        for categ_id, categ_templates in templates_by_category.items():
+            if not categ_id:
+                # No category - skip or show as-is
+                for template in categ_templates:
+                    for variant in template.product_variant_ids:
                         preview_lines.append((0, 0, {
                             'product_tmpl_id': template.id,
                             'product_variant_id': variant.id,
                             'current_sku': variant.default_code or '',
-                            'new_sku': variant_sku,
+                            'new_sku': variant.default_code or '',
+                            'is_locked': template.sku_locked,
+                            'will_update': False,
+                        }))
+                continue
+
+            category = self.env['product.category'].browse(categ_id)
+
+            # Build category path
+            parent_categories = self.env['product.category'].search([
+                ('id', 'parent_of', category.id)
+            ], order="id asc")
+
+            if not all(cat.short_name for cat in parent_categories):
+                # Missing short names - skip
+                for template in categ_templates:
+                    for variant in template.product_variant_ids:
+                        preview_lines.append((0, 0, {
+                            'product_tmpl_id': template.id,
+                            'product_variant_id': variant.id,
+                            'current_sku': variant.default_code or '',
+                            'new_sku': variant.default_code or '',
+                            'is_locked': template.sku_locked,
+                            'will_update': False,
+                        }))
+                continue
+
+            short_names = "/".join(parent_categories.mapped("short_name"))
+
+            # Determine starting number
+            if self.reset_sequence:
+                # Reset mode: start from 1
+                sku_counter = 1
+            else:
+                # Normal mode: get next available number from sequence or recycle pool
+                sku_counter = category._get_next_sku_number_preview()
+
+            # Process templates in this category
+            for template in categ_templates:
+                is_locked = template.sku_locked
+                will_skip = is_locked and self.respect_locks
+
+                if will_skip:
+                    # Skip locked products
+                    for variant in template.product_variant_ids:
+                        preview_lines.append((0, 0, {
+                            'product_tmpl_id': template.id,
+                            'product_variant_id': variant.id,
+                            'current_sku': variant.default_code or '',
+                            'new_sku': variant.default_code or '',
+                            'is_locked': is_locked,
+                            'will_update': False,
+                        }))
+                else:
+                    # Assign new SKU
+                    base_sku = f"{short_names}/{str(sku_counter).zfill(5)}"
+
+                    # Get all variants sorted consistently
+                    all_variants = template.product_variant_ids.sorted(
+                        lambda v: (','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))), v.id)
+                    )
+
+                    if len(all_variants) == 1:
+                        # Single variant - no suffix
+                        variant = all_variants[0]
+                        preview_lines.append((0, 0, {
+                            'product_tmpl_id': template.id,
+                            'product_variant_id': variant.id,
+                            'current_sku': variant.default_code or '',
+                            'new_sku': base_sku,
                             'is_locked': is_locked,
                             'will_update': True,
                         }))
+                    else:
+                        # Multiple variants - add suffix
+                        for idx, variant in enumerate(all_variants, 1):
+                            variant_sku = f"{base_sku}-{str(idx).zfill(3)}"
+                            preview_lines.append((0, 0, {
+                                'product_tmpl_id': template.id,
+                                'product_variant_id': variant.id,
+                                'current_sku': variant.default_code or '',
+                                'new_sku': variant_sku,
+                                'is_locked': is_locked,
+                                'will_update': True,
+                            }))
 
-                sku_counter += 1
+                    sku_counter += 1
 
         return preview_lines
 
