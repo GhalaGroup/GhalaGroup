@@ -44,7 +44,7 @@
     'support': 'support@vpasoftware.com',
     'license': 'OPL-1',
     'category': 'Inventory/Inventory',
-    'version': '19.0.1.0.4',
+    'version': '19.0.1.0.5',
     'price': 79.99,
     'currency': 'USD',
 
