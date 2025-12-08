@@ -1,17 +1,41 @@
 <odoo>
     <data>
 
-        <!-- Category Form View - Add Short Name -->
+        <!-- Category Form View - Enhanced with SKU Information -->
         <record model="ir.ui.view" id="product_category_form_view_inherit2">
-            <field name="name">product.category.form.inherit</field>
+            <field name="name">product.category.form.inherit.sku</field>
             <field name="model">product.category</field>
-            <field name = "inherit_id" ref ="product.product_category_form_view" />
+            <field name="inherit_id" ref="product.product_category_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='name']" position="after">
+                    <!-- SKU Configuration & Sequence Information -->
                     <group>
-                        <field name="short_name" />
-                        <field name="company_id" />
+                        <group string="SKU Configuration">
+                            <field name="short_name" placeholder="e.g., FUR, TBL"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Sequence Information">
+                            <field name="sku_preview" readonly="1"/>
+                            <field name="next_sku_number" readonly="1"/>
+                        </group>
                     </group>
+
+                    <!-- Product Statistics (readonly) -->
+                    <group string="Product Statistics">
+                        <group>
+                            <field name="product_count" readonly="1"/>
+                            <field name="product_with_sku_count" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="locked_product_count" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Warning when no short code -->
+                    <div class="alert alert-warning mt-2" role="alert" invisible="short_name">
+                        <i class="fa fa-info-circle"/>
+                        Set a <strong>Category Short Name</strong> to enable SKU generation.
+                    </div>
                 </xpath>
             </field>
         </record>

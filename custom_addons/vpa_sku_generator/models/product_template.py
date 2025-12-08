@@ -75,7 +75,7 @@ class ProductTemplate(models.Model):
                     self.default_code = new_sku
 
     def get_or_create_ir_sequence(self):
-        """Get or create sequence for category"""
+        """Get or create sequence for category, accounting for imported SKUs"""
         self.ensure_one()
         sequence_code = f"product_category_{self.categ_id.short_name}_{self.company_id.id or self.env.company.id}"
 
@@ -87,11 +87,15 @@ class ProductTemplate(models.Model):
 
         # Create if doesn't exist
         if not IrSequence:
+            # Check for existing SKUs from imports to set correct starting number
+            max_sku = self.categ_id._get_max_sku_number_from_products()
+            next_number = max_sku + 1 if max_sku > 0 else 1
+
             IrSequence = self.env["ir.sequence"].sudo().create({
                 "name": f"Product Internal Reference Sequence: {self.categ_id.short_name}",
                 "code": sequence_code,
                 "padding": 5,
-                "number_next": 1,
+                "number_next": next_number,
                 "number_increment": 1,
                 "company_id": self.company_id.id or self.env.company.id,
             })
