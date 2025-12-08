@@ -117,33 +117,30 @@ class LoginThemeConfig(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Ensure login_company_id defaults to company_id if not set"""
+        """Ensure login_company_id defaults to company_id and only one active theme"""
         for vals in vals_list:
+            # Default login_company_id to company_id
             if 'login_company_id' not in vals and 'company_id' in vals:
                 vals['login_company_id'] = vals['company_id']
+
+            # If creating an active theme, deactivate all existing themes
+            if vals.get('active', True):  # default is True
+                existing_themes = self.search([])
+                if existing_themes:
+                    existing_themes.write({'active': False})
+
         return super().create(vals_list)
 
     def write(self, vals):
-        """Override write to debug login_company_id save issue"""
-        import logging
-        _logger = logging.getLogger(__name__)
+        """Ensure only one theme is active at a time"""
+        # If activating this theme, deactivate all others
+        if vals.get('active') is True:
+            # Deactivate all other themes
+            other_themes = self.search([('id', 'not in', self.ids)])
+            if other_themes:
+                super(LoginThemeConfig, other_themes).write({'active': False})
 
-        _logger.info(f"VPA Login Theme WRITE called with vals: {vals}")
-        _logger.info(f"  - login_company_id in vals: {'login_company_id' in vals}")
-        if 'login_company_id' in vals:
-            _logger.info(f"  - login_company_id value: {vals['login_company_id']}")
-
-        # Log current values before write
-        for record in self:
-            _logger.info(f"  - Current record {record.id} login_company_id: {record.login_company_id.name if record.login_company_id else 'None'}")
-
-        result = super().write(vals)
-
-        # Log values after write
-        for record in self:
-            _logger.info(f"  - After write record {record.id} login_company_id: {record.login_company_id.name if record.login_company_id else 'None'}")
-
-        return result
+        return super().write(vals)
 
     @api.onchange('company_id')
     def _onchange_company_id(self):

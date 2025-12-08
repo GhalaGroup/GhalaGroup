@@ -1,6 +1,6 @@
 {
     'name': 'VPA Login Theme',
-    'version': '19.0.1.2.3',
+    'version': '19.0.1.2.4',
     'category': 'Website/Website',
     'summary': 'Customize login page colors, branding, logo & favicon. 6 pre-built themes. Live preview. No coding!',
     'description': """
