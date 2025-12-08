@@ -7,37 +7,38 @@
             <field name="model">product.category</field>
             <field name="inherit_id" ref="product.product_category_form_view"/>
             <field name="arch" type="xml">
-                <!-- Add SKU fields after parent_id (at the end of the standard form) -->
-                <xpath expr="//field[@name='parent_id']" position="after">
-                    <separator string="SKU Generator Settings"/>
-                    <!-- SKU Configuration & Sequence Information -->
-                    <group>
-                        <group string="SKU Configuration">
-                            <field name="short_name" placeholder="e.g., FUR, TBL"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                        </group>
-                        <group string="Sequence Information">
-                            <field name="sku_preview" readonly="1"/>
-                            <field name="next_sku_number" readonly="1"/>
-                        </group>
-                    </group>
+                <!-- Add SKU Generator section at the end of the form (after all standard fields) -->
+                <xpath expr="//sheet" position="inside">
+                    <notebook>
+                        <page string="SKU Generator" name="sku_generator">
+                            <!-- SKU Configuration -->
+                            <group>
+                                <group string="SKU Configuration">
+                                    <field name="short_name" placeholder="e.g., FUR, TBL"/>
+                                    <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                                </group>
+                                <group string="Sequence Information">
+                                    <field name="sku_preview" readonly="1"/>
+                                    <field name="next_sku_number" readonly="1"/>
+                                </group>
+                            </group>
 
-                    <!-- Product Statistics (readonly) -->
-                    <group string="Product Statistics">
-                        <group>
-                            <field name="product_count" readonly="1"/>
-                            <field name="product_with_sku_count" readonly="1"/>
-                        </group>
-                        <group>
-                            <field name="locked_product_count" readonly="1"/>
-                        </group>
-                    </group>
+                            <!-- Product Statistics -->
+                            <group>
+                                <group string="Product Statistics">
+                                    <field name="product_count" readonly="1"/>
+                                    <field name="product_with_sku_count" readonly="1"/>
+                                    <field name="locked_product_count" readonly="1"/>
+                                </group>
+                            </group>
 
-                    <!-- Warning when no short code -->
-                    <div class="alert alert-warning mt-2" role="alert" invisible="short_name">
-                        <i class="fa fa-info-circle"/>
-                        Set a <strong>Category Short Name</strong> to enable SKU generation.
-                    </div>
+                            <!-- Warning when no short code -->
+                            <div class="alert alert-warning" role="alert" invisible="short_name">
+                                <i class="fa fa-info-circle me-2"/>
+                                Set a <strong>Category Short Name</strong> above to enable automatic SKU generation for products in this category.
+                            </div>
+                        </page>
+                    </notebook>
                 </xpath>
             </field>
         </record>

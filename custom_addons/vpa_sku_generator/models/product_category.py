@@ -56,11 +56,16 @@ class ProductCategory(models.Model):
 
     @api.depends('name')
     def _compute_product_statistics(self):
-        """Compute product statistics for this category"""
+        """Compute product statistics for this category
+
+        Uses product.product (variants) for accurate SKU counting since
+        SKUs are typically assigned at the variant level.
+        """
         for category in self:
-            products = self.env['product.template'].search([('categ_id', '=', category.id)])
+            # Use product.product for accurate variant-level statistics
+            products = self.env['product.product'].search([('categ_id', '=', category.id)])
             category.product_count = len(products)
-            category.product_with_sku_count = len(products.filtered('default_code'))
+            category.product_with_sku_count = len(products.filtered(lambda p: p.default_code and p.default_code != 'False'))
             category.locked_product_count = len(products.filtered('sku_locked'))
 
     @api.depends('short_name', 'parent_id', 'parent_id.short_name')
