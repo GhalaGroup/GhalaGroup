@@ -368,11 +368,13 @@ class RegenerateSkuWizard(models.TransientModel):
         pool_skus.unlink()
 
         # Step 2: Reset the sequence for this category to 1
-        sequence_code = f"product_category_{self.category_id.short_name}_{templates[0].company_id.id or self.env.company.id}"
+        # Use the category's method to get the sequence code (includes full hierarchy path)
+        sequence_code = self.category_id._get_sequence_code()
+        company_id = templates[0].company_id.id or self.env.company.id
         sequence = self.env['ir.sequence'].sudo().search([
             ('code', '=', sequence_code),
-            ('company_id', '=', templates[0].company_id.id or self.env.company.id)
-        ], limit=1)
+            ('company_id', '=', company_id)
+        ], limit=1) if sequence_code else False
 
         if sequence:
             sequence.sudo().write({'number_next': 1})

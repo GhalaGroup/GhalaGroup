@@ -128,11 +128,30 @@ class ProductCategory(models.Model):
 
         return max_number
 
-    @api.depends('short_name', 'company_id')
+    def _get_sequence_code(self):
+        """Build sequence code from full category hierarchy path"""
+        self.ensure_one()
+        if not self.short_name:
+            return False
+
+        # Build path from all parent categories
+        parent_categories = self.env['product.category'].search([
+            ('id', 'parent_of', self.id)
+        ], order="id asc")
+
+        if not all(cat.short_name for cat in parent_categories):
+            return False
+
+        # Use full path for unique sequence code (e.g., "UDI_OFF" for UDI/OFF category)
+        path = "_".join(parent_categories.mapped("short_name"))
+        company_id = self.company_id.id or self.env.company.id
+        return f"product_category_{path}_{company_id}"
+
+    @api.depends('short_name', 'company_id', 'parent_id', 'parent_id.short_name')
     def _compute_sequence_id(self):
         for category in self:
-            if category.short_name:
-                sequence_code = f"product_category_{category.short_name}_{category.company_id.id or self.env.company.id}"
+            sequence_code = category._get_sequence_code()
+            if sequence_code:
                 sequence = self.env['ir.sequence'].sudo().search([
                     ('code', '=', sequence_code),
                     ('company_id', '=', category.company_id.id or self.env.company.id)
