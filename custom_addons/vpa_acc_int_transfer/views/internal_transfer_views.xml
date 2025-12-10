@@ -234,22 +234,6 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="memo"/>
-                <field name="source_journal_id"/>
-                <field name="destination_journal_id"/>
-                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
-                <filter name="filter_submitted" string="Pending Approval" domain="[('state', '=', 'submitted')]"/>
-                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
-                <filter name="filter_rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
-                <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
-                <filter name="filter_my_transfers" string="My Transfers" domain="[('create_uid', '=', uid)]"/>
-                <filter name="filter_to_approve" string="To Approve" domain="[('state', '=', 'submitted')]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
-                    <filter name="group_source" string="Source Journal" context="{'group_by': 'source_journal_id'}"/>
-                    <filter name="group_destination" string="Destination Journal" context="{'group_by': 'destination_journal_id'}"/>
-                </group>
             </search>
         </field>
     </record>
