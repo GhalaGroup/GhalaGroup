@@ -82,7 +82,7 @@ class InternalTransfer(models.Model):
         string='Internal Transfer Account',
         required=True,
         tracking=True,
-        domain="[('account_type', '=', 'asset_current'), ('company_id', '=', company_id), ('reconcile', '=', True)]",
+        domain="[('account_type', '=', 'asset_current'), ('reconcile', '=', True)]",
         help='Intermediate account used for proper double-entry accounting. Must be reconcilable.',
         states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
