@@ -2,48 +2,17 @@
 <!-- Copyright (C) 2025 VPA Software Limited -->
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
-    <!-- Internal Transfers menu item under Accounting > Transactions section -->
-    <menuitem id="menu_internal_transfer_root"
+    <!-- Single menu entry under Accounting > Transactions -->
+    <menuitem id="menu_internal_transfer_main"
               name="Internal Transfers"
-              parent="account.menu_finance_entries"
-              sequence="35"/>
-
-    <!-- Dashboard/Main Menu -->
-    <menuitem id="menu_internal_transfer_all"
-              name="All Transfers"
-              parent="menu_internal_transfer_root"
               action="internal_transfer_action"
-              sequence="10"/>
+              parent="account.menu_finance_entries"
+              sequence="15"/>
 
-    <menuitem id="menu_internal_transfer_pending"
-              name="Pending Approvals"
-              parent="menu_internal_transfer_root"
-              action="internal_transfer_action_pending"
-              sequence="20"
-              groups="vpa_acc_int_transfer.group_transfer_manager"/>
-
-    <menuitem id="menu_internal_transfer_rejected"
-              name="Rejected Transfers"
-              parent="menu_internal_transfer_root"
-              action="internal_transfer_action_rejected"
-              sequence="30"/>
-
-    <menuitem id="menu_internal_transfer_approved"
-              name="Approved Transfers"
-              parent="menu_internal_transfer_root"
-              action="internal_transfer_action_approved"
-              sequence="40"/>
-
-    <!-- Configuration Menu -->
-    <menuitem id="menu_internal_transfer_config"
-              name="Configuration"
-              parent="menu_internal_transfer_root"
-              sequence="100"
-              groups="vpa_acc_int_transfer.group_transfer_admin"/>
-
+    <!-- Approval Thresholds under Accounting > Configuration -->
     <menuitem id="menu_approval_thresholds"
-              name="Approval Thresholds"
-              parent="menu_internal_transfer_config"
+              name="Internal Transfer Thresholds"
+              parent="account.menu_finance_configuration"
               action="approval_threshold_action"
-              sequence="10"/>
+              sequence="50"/>
 </odoo>
