@@ -38,7 +38,6 @@ class InternalTransfer(models.Model):
         required=True,
         default=fields.Date.context_today,
         tracking=True,
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
     create_date = fields.Datetime(string='Created On', readonly=True)
     submit_date = fields.Datetime(string='Submitted On', readonly=True, copy=False)
@@ -51,7 +50,6 @@ class InternalTransfer(models.Model):
         required=True,
         tracking=True,
         domain="[('type', 'in', ['bank', 'cash']), ('company_id', '=', company_id)]",
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
     source_account_id = fields.Many2one(
         'account.account',
@@ -67,7 +65,6 @@ class InternalTransfer(models.Model):
         required=True,
         tracking=True,
         domain="[('type', 'in', ['bank', 'cash']), ('company_id', '=', company_id)]",
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
     destination_account_id = fields.Many2one(
         'account.account',
@@ -84,7 +81,6 @@ class InternalTransfer(models.Model):
         tracking=True,
         domain="[('account_type', '=', 'asset_current'), ('reconcile', '=', True)]",
         help='Intermediate account used for proper double-entry accounting. Must be reconcilable.',
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
 
     # === AMOUNTS ===
@@ -92,7 +88,6 @@ class InternalTransfer(models.Model):
         string='Amount',
         required=True,
         tracking=True,
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
     currency_id = fields.Many2one(
         'res.currency',
@@ -100,7 +95,6 @@ class InternalTransfer(models.Model):
         required=True,
         default=lambda self: self.env.company.currency_id,
         tracking=True,
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
 
     # === MULTI-CURRENCY SUPPORT ===
@@ -145,7 +139,6 @@ class InternalTransfer(models.Model):
         string='Memo',
         tracking=True,
         help='Short description for journal entry reference',
-        states={'approved': [('readonly', True)], 'cancelled': [('readonly', True)]},
     )
     notes = fields.Text(
         string='Internal Notes',
@@ -242,13 +235,6 @@ class InternalTransfer(models.Model):
         readonly=True,
         copy=False,
     )
-
-    # === SQL CONSTRAINTS ===
-    _sql_constraints = [
-        ('amount_positive', 'CHECK(amount > 0)', 'Transfer amount must be positive!'),
-        ('different_journals', 'CHECK(source_journal_id != destination_journal_id)',
-         'Source and destination journals must be different!'),
-    ]
 
     # === COMPUTED METHODS ===
     @api.depends('source_journal_id')
