@@ -79,8 +79,9 @@ class InternalTransfer(models.Model):
         string='Internal Transfer Account',
         required=True,
         tracking=True,
+        default=lambda self: self.env.company.transfer_account_id,
         domain="[('account_type', '=', 'asset_current'), ('reconcile', '=', True)]",
-        help='Intermediate account used for proper double-entry accounting. Must be reconcilable.',
+        help='Intermediate account used for proper double-entry accounting. Uses company default from Accounting Settings.',
     )
 
     # === AMOUNTS ===
