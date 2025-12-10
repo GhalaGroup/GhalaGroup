@@ -26,7 +26,8 @@
                             groups="account.group_account_manager"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-secondary"
-                            invisible="state != 'rejected'"/>
+                            invisible="state in ('draft', 'approved')"
+                            groups="account.group_account_manager"/>
                     <button name="%(action_report_internal_transfer)d" string="Print"
                             type="action" class="btn-secondary"/>
                     <field name="state" widget="statusbar"
@@ -34,6 +35,20 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button name="action_view_source_journal"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-sign-out"
+                                invisible="not source_journal_id">
+                            <field name="source_journal_id" widget="statinfo" string="From Journal"/>
+                        </button>
+                        <button name="action_view_destination_journal"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-sign-in"
+                                invisible="not destination_journal_id">
+                            <field name="destination_journal_id" widget="statinfo" string="To Journal"/>
+                        </button>
                         <button name="action_view_journal_entries"
                                 type="object"
                                 class="oe_stat_button"
@@ -66,7 +81,9 @@
                             <field name="company_id" invisible="1"/>
                             <field name="approver_id" options="{'no_create': True}"
                                    readonly="state != 'draft'"/>
-                            <field name="memo" placeholder="Auto-generated memo..."/>
+                            <field name="memo_type"/>
+                            <field name="memo" placeholder="Auto-generated memo..."
+                                   readonly="memo_type != 'custom'"/>
                         </group>
                         <group string="Amount">
                             <field name="amount"/>

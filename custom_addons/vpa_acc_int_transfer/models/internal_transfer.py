@@ -136,13 +136,22 @@ class InternalTransfer(models.Model):
     )
 
     # === DESCRIPTION ===
+    memo_type = fields.Selection([
+        ('internal_transfer', 'Internal Transfer'),
+        ('bank_deposit', 'Bank Deposit'),
+        ('cash_withdrawal', 'Cash Withdrawal'),
+        ('petty_cash', 'Petty Cash Replenishment'),
+        ('fund_transfer', 'Fund Transfer'),
+        ('custom', 'Custom Memo'),
+    ], string='Memo Type', default='internal_transfer',
+       help='Select a predefined memo type or choose Custom to write your own.')
     memo = fields.Char(
         string='Memo',
         tracking=True,
         compute='_compute_memo',
         store=True,
         readonly=False,
-        help='Auto-generated from company template. Can be manually overridden.',
+        help='Auto-generated based on memo type. Can be manually overridden when Custom is selected.',
     )
     notes = fields.Text(
         string='Internal Notes',
@@ -249,12 +258,28 @@ class InternalTransfer(models.Model):
     )
 
     # === COMPUTED METHODS ===
-    @api.depends('source_journal_id', 'destination_journal_id', 'amount', 'date', 'company_id')
+    @api.depends('memo_type', 'source_journal_id', 'destination_journal_id', 'amount', 'date')
     def _compute_memo(self):
+        """Generate memo based on selected memo type"""
+        memo_templates = {
+            'internal_transfer': _('Internal Transfer from {source} to {destination}'),
+            'bank_deposit': _('Bank Deposit to {destination} from {source}'),
+            'cash_withdrawal': _('Cash Withdrawal from {source} to {destination}'),
+            'petty_cash': _('Petty Cash Replenishment - {source} to {destination}'),
+            'fund_transfer': _('Fund Transfer: {source} → {destination}'),
+        }
         for transfer in self:
+            # Skip if custom memo type - user will enter manually
+            if transfer.memo_type == 'custom':
+                if not transfer.memo:
+                    transfer.memo = ''
+                continue
+
             if transfer.source_journal_id and transfer.destination_journal_id:
-                template = transfer.company_id.internal_transfer_memo_template or \
-                           'Internal Transfer from {source} to {destination} by {user}'
+                template = memo_templates.get(
+                    transfer.memo_type,
+                    _('Internal Transfer from {source} to {destination}')
+                )
                 try:
                     transfer.memo = template.format(
                         source=transfer.source_journal_id.name or '',
@@ -264,8 +289,7 @@ class InternalTransfer(models.Model):
                         date=str(transfer.date or fields.Date.today()),
                     )
                 except (KeyError, ValueError):
-                    # Fallback if template has invalid placeholders
-                    transfer.memo = _('Internal Transfer from %s to %s') % (
+                    transfer.memo = _('Transfer from %s to %s') % (
                         transfer.source_journal_id.name,
                         transfer.destination_journal_id.name,
                     )
@@ -492,22 +516,63 @@ class InternalTransfer(models.Model):
         }
 
     def action_reset_to_draft(self):
-        """Reset rejected transfer to draft"""
+        """Reset transfer to draft - for rejected, submitted or cancelled transfers"""
         self.ensure_one()
-        if self.state != 'rejected':
-            raise UserError(_('Only rejected transfers can be reset to draft.'))
+        if self.state == 'draft':
+            raise UserError(_('This transfer is already in draft state.'))
+        if self.state == 'approved':
+            raise UserError(_('Approved transfers cannot be reset to draft. Use Cancel instead.'))
 
-        self.write({
+        # Clear relevant fields based on previous state
+        vals = {
             'state': 'draft',
-            'rejected_by_id': False,
-            'rejection_reason': False,
-            'rejection_date': False,
-        })
+            'submitted_by_id': False,
+            'submit_date': False,
+        }
+        if self.state == 'rejected':
+            vals.update({
+                'rejected_by_id': False,
+                'rejection_reason': False,
+                'rejection_date': False,
+            })
+        if self.state == 'cancelled':
+            vals.update({
+                'cancelled_by_id': False,
+                'cancellation_reason': False,
+                'cancellation_date': False,
+            })
+
+        # Cancel any pending activities
+        self.activity_unlink(['mail.mail_activity_data_todo'])
+
+        self.write(vals)
         self.message_post(
-            body=_('Transfer reset to draft.'),
+            body=_('Transfer reset to draft by %s.') % self.env.user.name,
             subtype_xmlid='mail.mt_note',
         )
         return True
+
+    def action_view_source_journal(self):
+        """Open source journal"""
+        self.ensure_one()
+        return {
+            'name': _('Source Journal'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.journal',
+            'res_id': self.source_journal_id.id,
+            'view_mode': 'form',
+        }
+
+    def action_view_destination_journal(self):
+        """Open destination journal"""
+        self.ensure_one()
+        return {
+            'name': _('Destination Journal'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.journal',
+            'res_id': self.destination_journal_id.id,
+            'view_mode': 'form',
+        }
 
     # === HELPER METHODS ===
     def _check_approval_permission(self):
