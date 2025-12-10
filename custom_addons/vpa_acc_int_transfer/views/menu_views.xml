@@ -7,15 +7,13 @@
     <menuitem id="menu_internal_transfer_main"
               name="Internal Transfers"
               action="internal_transfer_action"
-              parent="account.menu_finance_entries"
-              sequence="30"
-              groups="account.group_account_user,account.group_account_manager"/>
+              parent="account.account_transactions_menu"
+              sequence="50"/>
 
     <!-- Configuration under Accounting > Configuration -->
     <menuitem id="menu_approval_thresholds"
               name="Internal Transfer Thresholds"
               action="approval_threshold_action"
               parent="account.menu_finance_configuration"
-              sequence="200"
-              groups="account.group_account_manager"/>
+              sequence="200"/>
 </odoo>
