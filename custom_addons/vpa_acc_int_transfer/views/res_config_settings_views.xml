@@ -8,7 +8,18 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//app[@name='account']" position="inside">
-                <block title="Internal Transfers" name="internal_transfer_settings">
+                <block title="VPA Internal Transfer" name="vpa_internal_transfer_settings">
+                    <setting string="Memo Template" help="Template for auto-generated memo on internal transfers">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="internal_transfer_memo_template" class="col-lg-3 o_light_label"/>
+                                <field name="internal_transfer_memo_template" class="col-lg-9"/>
+                            </div>
+                            <div class="text-muted mt8">
+                                Use placeholders: {source}, {destination}, {user}, {amount}, {date}
+                            </div>
+                        </div>
+                    </setting>
                     <setting string="Approval Thresholds" help="Configure amount-based approval routing">
                         <div class="content-group">
                             <div class="mt8">

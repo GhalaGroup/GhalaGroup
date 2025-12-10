@@ -27,6 +27,8 @@
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-secondary"
                             invisible="state != 'rejected'"/>
+                    <button name="%(action_report_internal_transfer)d" string="Print"
+                            type="action" class="btn-secondary"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
@@ -62,7 +64,9 @@
                         <group string="Transfer Details">
                             <field name="date"/>
                             <field name="company_id" invisible="1"/>
-                            <field name="memo" placeholder="Enter a memo for reference..."/>
+                            <field name="approver_id" options="{'no_create': True}"
+                                   readonly="state != 'draft'"/>
+                            <field name="memo" placeholder="Auto-generated memo..."/>
                         </group>
                         <group string="Amount">
                             <field name="amount"/>

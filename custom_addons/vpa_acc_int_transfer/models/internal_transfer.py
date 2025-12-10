@@ -139,11 +139,23 @@ class InternalTransfer(models.Model):
     memo = fields.Char(
         string='Memo',
         tracking=True,
-        help='Short description for journal entry reference',
+        compute='_compute_memo',
+        store=True,
+        readonly=False,
+        help='Auto-generated from company template. Can be manually overridden.',
     )
     notes = fields.Text(
         string='Internal Notes',
         tracking=True,
+    )
+
+    # === APPROVER SELECTION ===
+    approver_id = fields.Many2one(
+        'res.users',
+        string='Approver',
+        tracking=True,
+        domain="[('groups_id', 'in', %(account.group_account_manager)d)]",
+        help='Select the user who should approve this transfer. They will receive an activity notification.',
     )
 
     # === APPROVAL TRACKING ===
@@ -238,6 +250,29 @@ class InternalTransfer(models.Model):
     )
 
     # === COMPUTED METHODS ===
+    @api.depends('source_journal_id', 'destination_journal_id', 'amount', 'date', 'company_id')
+    def _compute_memo(self):
+        for transfer in self:
+            if transfer.source_journal_id and transfer.destination_journal_id:
+                template = transfer.company_id.internal_transfer_memo_template or \
+                           'Internal Transfer from {source} to {destination} by {user}'
+                try:
+                    transfer.memo = template.format(
+                        source=transfer.source_journal_id.name or '',
+                        destination=transfer.destination_journal_id.name or '',
+                        user=self.env.user.name or '',
+                        amount='{:,.2f}'.format(transfer.amount or 0),
+                        date=str(transfer.date or fields.Date.today()),
+                    )
+                except (KeyError, ValueError):
+                    # Fallback if template has invalid placeholders
+                    transfer.memo = _('Internal Transfer from %s to %s') % (
+                        transfer.source_journal_id.name,
+                        transfer.destination_journal_id.name,
+                    )
+            elif not transfer.memo:
+                transfer.memo = False
+
     @api.depends('source_journal_id')
     def _compute_source_account(self):
         for transfer in self:
@@ -371,13 +406,31 @@ class InternalTransfer(models.Model):
         if self.state != 'draft':
             raise UserError(_('Only draft transfers can be submitted.'))
 
+        if not self.approver_id:
+            raise UserError(_('Please select an approver before submitting.'))
+
         self.write({
             'state': 'submitted',
             'submitted_by_id': self.env.uid,
             'submit_date': fields.Datetime.now(),
         })
+
+        # Create activity for the selected approver
+        self.activity_schedule(
+            'mail.mail_activity_data_todo',
+            user_id=self.approver_id.id,
+            summary=_('Internal Transfer Approval Required'),
+            note=_('Please review and approve internal transfer %s for %s %s from %s to %s.') % (
+                self.name,
+                '{:,.2f}'.format(self.amount),
+                self.currency_id.name,
+                self.source_journal_id.name,
+                self.destination_journal_id.name,
+            ),
+        )
+
         self.message_post(
-            body=_('Transfer submitted for approval.'),
+            body=_('Transfer submitted for approval to %s.') % self.approver_id.name,
             subtype_xmlid='mail.mt_note',
         )
         return True
@@ -402,6 +455,10 @@ class InternalTransfer(models.Model):
             'approved_by_id': self.env.uid,
             'approval_date': fields.Datetime.now(),
         })
+
+        # Mark approval activity as done
+        self.activity_feedback(['mail.mail_activity_data_todo'])
+
         self.message_post(
             body=_('Transfer approved by %s. Journal entries created and reconciled.') % self.env.user.name,
             subtype_xmlid='mail.mt_note',
