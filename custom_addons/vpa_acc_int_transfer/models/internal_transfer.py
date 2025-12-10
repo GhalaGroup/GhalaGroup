@@ -154,7 +154,6 @@ class InternalTransfer(models.Model):
         'res.users',
         string='Approver',
         tracking=True,
-        domain="[('groups_id', 'in', %(account.group_account_manager)d)]",
         help='Select the user who should approve this transfer. They will receive an activity notification.',
     )
 
