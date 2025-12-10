@@ -60,15 +60,6 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
-                <filter name="filter_inactive" string="Archived" domain="[('active', '=', False)]"/>
-                <separator/>
-                <filter name="filter_manager" string="Manager Level" domain="[('approval_level', '=', 'manager')]"/>
-                <filter name="filter_admin" string="Admin Level" domain="[('approval_level', '=', 'admin')]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_level" string="Approval Level" context="{'group_by': 'approval_level'}"/>
-                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-                </group>
             </search>
         </field>
     </record>
