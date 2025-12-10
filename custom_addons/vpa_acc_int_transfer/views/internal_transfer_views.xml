@@ -7,7 +7,7 @@
         <field name="name">internal.transfer.view.form</field>
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
-            <form string="Internal Transfer">
+            <form string="Internal Transfer" class="o_form_view">
                 <header>
                     <button name="action_submit" string="Submit for Approval"
                             type="object" class="btn-primary"
@@ -52,18 +52,19 @@
                     <widget name="web_ribbon" title="Cancelled"
                             bg_color="text-bg-secondary"
                             invisible="state != 'cancelled'"/>
-                    <div class="oe_title">
+                    <div class="oe_title mb-3">
+                        <label for="name"/>
                         <h1>
-                            <field name="name" readonly="1"/>
+                            <field name="name" readonly="1" placeholder="New"/>
                         </h1>
                     </div>
-                    <group>
-                        <group name="transfer_details" string="Transfer Details">
+                    <group col="2">
+                        <group string="Transfer Details">
                             <field name="date"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="memo" placeholder="Enter a memo for reference..."/>
                         </group>
-                        <group name="amounts" string="Amount">
+                        <group string="Amount">
                             <field name="amount"/>
                             <field name="currency_id"/>
                             <field name="is_multi_currency" invisible="1"/>
@@ -72,35 +73,33 @@
                             <field name="destination_amount" invisible="not is_multi_currency"/>
                         </group>
                     </group>
-                    <group>
-                        <group name="source" string="From (Source)">
+                    <group col="2">
+                        <group string="From (Source)">
                             <field name="source_journal_id" options="{'no_create': True}"/>
                             <field name="source_account_id" readonly="1"/>
                         </group>
-                        <group name="destination" string="To (Destination)">
+                        <group string="To (Destination)">
                             <field name="destination_journal_id" options="{'no_create': True}"/>
                             <field name="destination_account_id" readonly="1"/>
                         </group>
                     </group>
-                    <group>
-                        <group name="transfer_account" string="Intermediate Account">
+                    <group col="2">
+                        <group string="Intermediate Account">
                             <field name="transfer_account_id" options="{'no_create': True}"/>
                         </group>
-                        <group name="approval_info" string="Approval Information"
-                               invisible="state == 'draft'">
+                        <group string="Approval Information" invisible="state == 'draft'">
                             <field name="required_approval_level" readonly="1"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Notes" name="notes">
-                            <field name="notes" placeholder="Internal notes..."/>
+                            <field name="notes" placeholder="Internal notes..." nolabel="1"/>
                         </page>
                         <page string="Attachments" name="attachments">
-                            <field name="attachment_ids" widget="many2many_binary"/>
+                            <field name="attachment_ids" widget="many2many_binary" nolabel="1"/>
                         </page>
-                        <page string="Audit Trail" name="audit"
-                              invisible="state == 'draft'">
-                            <group>
+                        <page string="Audit Trail" name="audit" invisible="state == 'draft'">
+                            <group col="2">
                                 <group string="Submission" invisible="not submitted_by_id">
                                     <field name="submitted_by_id"/>
                                     <field name="submit_date"/>
@@ -110,13 +109,14 @@
                                     <field name="approval_date"/>
                                 </group>
                             </group>
-                            <group invisible="state not in ('approved', 'cancelled')">
+                            <group col="2" invisible="state not in ('approved', 'cancelled')">
                                 <group string="Journal Entries" invisible="not source_move_id">
                                     <field name="source_move_id"/>
                                     <field name="destination_move_id"/>
                                 </group>
+                                <group/>
                             </group>
-                            <group invisible="state != 'rejected'" string="Rejection Details">
+                            <group col="2" invisible="state != 'rejected'" string="Rejection Details">
                                 <group>
                                     <field name="rejected_by_id"/>
                                     <field name="rejection_date"/>
@@ -125,7 +125,7 @@
                                     <field name="rejection_reason"/>
                                 </group>
                             </group>
-                            <group invisible="state != 'cancelled'" string="Cancellation Details">
+                            <group col="2" invisible="state != 'cancelled'" string="Cancellation Details">
                                 <group>
                                     <field name="cancelled_by_id"/>
                                     <field name="cancellation_date"/>
@@ -137,11 +137,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
