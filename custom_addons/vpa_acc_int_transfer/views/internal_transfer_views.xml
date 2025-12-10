@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Form View -->
+    <record id="internal_transfer_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.view.form</field>
+        <field name="model">internal.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Internal Transfer">
+                <header>
+                    <button name="action_submit" string="Submit for Approval"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"
+                            groups="vpa_acc_int_transfer.group_transfer_user"/>
+                    <button name="action_approve" string="Approve"
+                            type="object" class="btn-primary"
+                            invisible="state != 'submitted'"
+                            groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                    <button name="action_reject" string="Reject"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'submitted'"
+                            groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                    <button name="action_cancel" string="Cancel"
+                            type="object" class="btn-secondary"
+                            invisible="state in ('cancelled', 'rejected', 'draft')"
+                            groups="vpa_acc_int_transfer.group_transfer_admin"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'rejected'"
+                            groups="vpa_acc_int_transfer.group_transfer_user"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_journal_entries"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-book"
+                                invisible="move_count == 0">
+                            <field name="move_count" widget="statinfo" string="Journal Entries"/>
+                        </button>
+                        <button name="action_view_attachments"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-paperclip">
+                            <field name="attachment_count" widget="statinfo" string="Attachments"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Rejected"
+                            bg_color="text-bg-danger"
+                            invisible="state != 'rejected'"/>
+                    <widget name="web_ribbon" title="Cancelled"
+                            bg_color="text-bg-secondary"
+                            invisible="state != 'cancelled'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="transfer_details" string="Transfer Details">
+                            <field name="date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="memo" placeholder="Enter a memo for reference..."/>
+                        </group>
+                        <group name="amounts" string="Amount">
+                            <field name="amount"/>
+                            <field name="currency_id"/>
+                            <field name="is_multi_currency" invisible="1"/>
+                            <field name="destination_currency_id" invisible="not is_multi_currency"/>
+                            <field name="exchange_rate" invisible="not is_multi_currency"/>
+                            <field name="destination_amount" invisible="not is_multi_currency"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="source" string="From (Source)">
+                            <field name="source_journal_id" options="{'no_create': True}"/>
+                            <field name="source_account_id" readonly="1"/>
+                        </group>
+                        <group name="destination" string="To (Destination)">
+                            <field name="destination_journal_id" options="{'no_create': True}"/>
+                            <field name="destination_account_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="transfer_account" string="Intermediate Account">
+                            <field name="transfer_account_id" options="{'no_create': True}"/>
+                        </group>
+                        <group name="approval_info" string="Approval Information"
+                               invisible="state == 'draft'">
+                            <field name="required_approval_level" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes..."/>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="Audit Trail" name="audit"
+                              invisible="state == 'draft'">
+                            <group>
+                                <group string="Submission" invisible="not submitted_by_id">
+                                    <field name="submitted_by_id"/>
+                                    <field name="submit_date"/>
+                                </group>
+                                <group string="Approval" invisible="not approved_by_id">
+                                    <field name="approved_by_id"/>
+                                    <field name="approval_date"/>
+                                </group>
+                            </group>
+                            <group invisible="state not in ('approved', 'cancelled')">
+                                <group string="Journal Entries" invisible="not source_move_id">
+                                    <field name="source_move_id"/>
+                                    <field name="destination_move_id"/>
+                                </group>
+                            </group>
+                            <group invisible="state != 'rejected'" string="Rejection Details">
+                                <group>
+                                    <field name="rejected_by_id"/>
+                                    <field name="rejection_date"/>
+                                </group>
+                                <group>
+                                    <field name="rejection_reason"/>
+                                </group>
+                            </group>
+                            <group invisible="state != 'cancelled'" string="Cancellation Details">
+                                <group>
+                                    <field name="cancelled_by_id"/>
+                                    <field name="cancellation_date"/>
+                                </group>
+                                <group>
+                                    <field name="cancellation_reason"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="internal_transfer_view_tree" model="ir.ui.view">
+        <field name="name">internal.transfer.view.tree</field>
+        <field name="model">internal.transfer</field>
+        <field name="arch" type="xml">
+            <tree string="Internal Transfers"
+                  decoration-info="state == 'draft'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_journal_id"/>
+                <field name="destination_journal_id"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id"/>
+                <field name="memo" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="submitted_by_id" optional="hide"/>
+                <field name="approved_by_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="internal_transfer_view_kanban" model="ir.ui.view">
+        <field name="name">internal.transfer.view.kanban</field>
+        <field name="model">internal.transfer</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="currency_id"/>
+                <field name="state"/>
+                <field name="source_journal_id"/>
+                <field name="destination_journal_id"/>
+                <field name="memo"/>
+                <progressbar field="state"
+                    colors='{"draft": "info", "submitted": "warning", "approved": "success", "rejected": "danger", "cancelled": "muted"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {'draft': 'info', 'submitted': 'warning', 'approved': 'success', 'rejected': 'danger', 'cancelled': 'secondary'}}"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div>
+                                        <strong>
+                                            <field name="amount" widget="monetary"/>
+                                            <field name="currency_id"/>
+                                        </strong>
+                                    </div>
+                                    <div><field name="date"/></div>
+                                    <div class="text-muted">
+                                        <field name="source_journal_id"/> → <field name="destination_journal_id"/>
+                                    </div>
+                                    <div t-if="record.memo.raw_value" class="text-muted">
+                                        <i class="fa fa-comment-o"/> <field name="memo"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="internal_transfer_view_search" model="ir.ui.view">
+        <field name="name">internal.transfer.view.search</field>
+        <field name="model">internal.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Search Transfers">
+                <field name="name"/>
+                <field name="memo"/>
+                <field name="source_journal_id"/>
+                <field name="destination_journal_id"/>
+                <field name="submitted_by_id"/>
+                <field name="approved_by_id"/>
+                <separator/>
+                <filter name="filter_draft" string="Draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_submitted" string="Pending Approval"
+                        domain="[('state', '=', 'submitted')]"/>
+                <filter name="filter_approved" string="Approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter name="filter_rejected" string="Rejected"
+                        domain="[('state', '=', 'rejected')]"/>
+                <filter name="filter_cancelled" string="Cancelled"
+                        domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="filter_my_transfers" string="My Transfers"
+                        domain="[('create_uid', '=', uid)]"/>
+                <filter name="filter_to_approve" string="To Approve"
+                        domain="[('state', '=', 'submitted')]"
+                        groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                <separator/>
+                <filter name="filter_this_month" string="This Month"
+                        domain="[
+                            ('date', '>=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')),
+                            ('date', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))
+                        ]"/>
+                <filter name="filter_last_month" string="Last Month"
+                        domain="[
+                            ('date', '>=', (context_today() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')),
+                            ('date', '&lt;', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))
+                        ]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_date" string="Date"
+                            context="{'group_by': 'date:month'}"/>
+                    <filter name="group_source" string="Source Journal"
+                            context="{'group_by': 'source_journal_id'}"/>
+                    <filter name="group_destination" string="Destination Journal"
+                            context="{'group_by': 'destination_journal_id'}"/>
+                    <filter name="group_company" string="Company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="internal_transfer_action" model="ir.actions.act_window">
+        <field name="name">Internal Transfers</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="internal_transfer_view_search"/>
+        <field name="context">{'search_default_filter_this_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first internal transfer
+            </p>
+            <p>
+                Transfer funds between your bank and cash accounts with full approval workflow and audit trail.
+            </p>
+        </field>
+    </record>
+
+    <record id="internal_transfer_action_pending" model="ir.actions.act_window">
+        <field name="name">Pending Approvals</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('state', '=', 'submitted')]</field>
+        <field name="context">{'search_default_filter_to_approve': 1}</field>
+        <field name="search_view_id" ref="internal_transfer_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No transfers pending approval
+            </p>
+            <p>
+                All submitted transfers have been processed.
+            </p>
+        </field>
+    </record>
+
+    <record id="internal_transfer_action_rejected" model="ir.actions.act_window">
+        <field name="name">Rejected Transfers</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'rejected')]</field>
+        <field name="search_view_id" ref="internal_transfer_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No rejected transfers
+            </p>
+        </field>
+    </record>
+
+    <record id="internal_transfer_action_approved" model="ir.actions.act_window">
+        <field name="name">Approved Transfers</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'approved')]</field>
+        <field name="search_view_id" ref="internal_transfer_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No approved transfers yet
+            </p>
+        </field>
+    </record>
+</odoo>

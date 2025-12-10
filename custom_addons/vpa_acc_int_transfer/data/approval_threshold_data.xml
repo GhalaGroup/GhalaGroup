@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Software Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data noupdate="1">
+        <!-- Default threshold: Manager can approve up to 10,000, Admin for higher -->
+        <record id="threshold_manager_default" model="internal.transfer.threshold">
+            <field name="name">Manager Approval (Standard)</field>
+            <field name="min_amount">0</field>
+            <field name="max_amount">10000</field>
+            <field name="approval_level">manager</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="notes">Transfers up to 10,000 can be approved by Transfer Managers.</field>
+        </record>
+
+        <record id="threshold_admin_default" model="internal.transfer.threshold">
+            <field name="name">Administrator Approval (High Value)</field>
+            <field name="min_amount">10000.01</field>
+            <field name="max_amount">0</field>
+            <field name="approval_level">admin</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="currency_id" ref="base.USD"/>
+            <field name="notes">Transfers above 10,000 require Administrator approval.</field>
+        </record>
+    </data>
+</odoo>

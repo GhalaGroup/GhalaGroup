@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<!--
+████████████████████████████████████████████████████████████████████████████████████████████
+█                                                                                          █
+█  VPA ACCOUNTING INTERNAL TRANSFER - PROMOTIONAL HTML FILE                               █
+█  ═══════════════════════════════════════════════════════                                █
+█                                                                                          █
+█  FILE PURPOSE:                                                                          █
+█  This HTML file serves as a promotional document for VPA Accounting Internal Transfer.  █
+█                                                                                          █
+█  AUTHOR: VPA Software Limited                                                           █
+█  LAST UPDATED: December 2025                                                            █
+█  CURRENT VERSION: 19.0.1.0.0                                                            █
+█                                                                                          █
+████████████████████████████████████████████████████████████████████████████████████████████
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VPA Accounting Internal Transfer - Professional Internal Fund Transfer Management for Odoo with multi-level approval workflow, auto journal entries, and reconciliation.">
+    <meta name="keywords" content="Odoo, Internal Transfer, Accounting, Bank Transfer, Cash Transfer, Approval Workflow, Journal Entry, Reconciliation, Odoo 19">
+    <title>VPA Accounting Internal Transfer - Professional Fund Transfer Management for Odoo</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2C3E50 0%, #1a252f 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 2000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .side-menu-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #DC143C 0%, #a01030 100%);
+            text-align: center;
+            border-bottom: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .side-menu-header h2 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .side-menu-header p {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .side-menu-nav {
+            padding: 20px 0;
+        }
+
+        .side-menu-nav ul {
+            list-style: none;
+        }
+
+        .side-menu-nav li {
+            margin: 0;
+        }
+
+        .side-menu-nav a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            gap: 15px;
+        }
+
+        .side-menu-nav a:hover {
+            background: rgba(220, 20, 60, 0.3);
+            color: white;
+            border-left-color: #DC143C;
+        }
+
+        .side-menu-nav a.active {
+            background: rgba(220, 20, 60, 0.4);
+            color: white;
+            border-left-color: #DC143C;
+            font-weight: 600;
+        }
+
+        .side-menu-footer {
+            padding: 30px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .side-menu-footer p {
+            margin: 8px 0;
+        }
+
+        .side-menu-footer strong {
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2001;
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            font-size: 1.2em;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Content Wrapper */
+        .page-wrapper {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #DC143C 0%, #a01030 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin: 5px;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sections */
+        .section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.8em;
+            color: #DC143C;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25em;
+            color: #666;
+            margin-bottom: 50px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Version Timeline */
+        .timeline {
+            max-width: 1000px;
+            margin: 50px auto;
+            position: relative;
+            padding: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #DC143C 0%, #28a745 100%);
+            top: 0;
+        }
+
+        .timeline-item {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            text-align: right;
+            padding-right: calc(50% + 50px);
+        }
+
+        .timeline-item:nth-child(even) {
+            text-align: left;
+            padding-left: calc(50% + 50px);
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            z-index: 10;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #DC143C;
+        }
+
+        .timeline-content h3 {
+            color: #DC143C;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .timeline-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-date {
+            justify-content: flex-end;
+        }
+
+        .odoo-version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .timeline-changes {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .timeline-changes li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .timeline-changes li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid #DC143C;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(220, 20, 60, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #DC143C;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        .feature-card p {
+            line-height: 1.7;
+            color: #555;
+        }
+
+        /* Workflow Diagram */
+        .workflow-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 50px 0;
+        }
+
+        .workflow-step {
+            background: white;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .workflow-step.draft { border-top: 4px solid #6c757d; }
+        .workflow-step.submitted { border-top: 4px solid #ffc107; }
+        .workflow-step.approved { border-top: 4px solid #28a745; }
+        .workflow-step.rejected { border-top: 4px solid #dc3545; }
+
+        .workflow-step h4 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .workflow-step p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .workflow-arrow {
+            font-size: 2em;
+            color: #DC143C;
+        }
+
+        /* Benefits List */
+        .benefits-list {
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+            border-left: 5px solid #28a745;
+        }
+
+        .benefit-icon {
+            font-size: 2.2em;
+            color: #28a745;
+            margin-right: 25px;
+            min-width: 40px;
+        }
+
+        .benefit-text {
+            flex: 1;
+            line-height: 1.7;
+        }
+
+        .benefit-text strong {
+            color: #DC143C;
+            font-size: 1.1em;
+        }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 45px;
+            margin-top: 50px;
+        }
+
+        .step {
+            position: relative;
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-top: 5px solid #DC143C;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -30px;
+            left: 35px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .step h3 {
+            color: #DC143C;
+            margin: 25px 0 15px;
+            font-size: 1.6em;
+        }
+
+        .step p {
+            line-height: 1.8;
+            margin: 10px 0;
+            color: #555;
+        }
+
+        .step strong {
+            color: #333;
+        }
+
+        /* Technical Specs Table */
+        .specs-table {
+            max-width: 1000px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .specs-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .specs-table th,
+        .specs-table td {
+            padding: 22px 30px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .specs-table th {
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            color: white;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .specs-table td:first-child {
+            font-weight: 600;
+            color: #DC143C;
+            width: 40%;
+        }
+
+        .specs-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        /* Security Section */
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+
+        .security-card {
+            background: white;
+            padding: 45px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-left: 6px solid #875A7B;
+        }
+
+        .security-card h3 {
+            color: #875A7B;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .security-card ul {
+            list-style: none;
+        }
+
+        .security-card li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            line-height: 1.7;
+        }
+
+        .security-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+
+        /* Pricing */
+        .pricing-card {
+            max-width: 650px;
+            margin: 50px auto;
+            background: white;
+            padding: 65px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            text-align: center;
+            border: 4px solid #DC143C;
+        }
+
+        .pricing-card h3 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 5em;
+            color: #DC143C;
+            font-weight: bold;
+            margin: 35px 0;
+        }
+
+        .price-period {
+            font-size: 0.28em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .pricing-features {
+            text-align: left;
+            margin: 35px 0;
+            list-style: none;
+        }
+
+        .pricing-features li {
+            padding: 12px 0;
+            font-size: 1.15em;
+            line-height: 1.6;
+        }
+
+        .pricing-features li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #DC143C, #a01030);
+            color: white;
+            padding: 22px 60px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.4em;
+            font-weight: bold;
+            box-shadow: 0 8px 30px rgba(220, 20, 60, 0.4);
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(220, 20, 60, 0.5);
+        }
+
+        /* Contact Section */
+        .contact-box {
+            max-width: 900px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #ffe5e5 0%, #fff0f0 100%);
+            padding: 55px;
+            border-radius: 20px;
+            border: 3px solid #DC143C;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            font-size: 1.25em;
+        }
+
+        .contact-icon {
+            font-size: 1.8em;
+            color: #DC143C;
+            margin-right: 25px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .contact-item a {
+            color: #DC143C;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #d1ecf1;
+            border-left: 8px solid #0c5460;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 50px auto;
+            max-width: 1000px;
+        }
+
+        .info-box h3 {
+            color: #0c5460;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .info-box ul {
+            column-count: 2;
+            column-gap: 50px;
+            list-style: none;
+        }
+
+        .info-box li {
+            padding: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            background: #2C3E50;
+            color: white;
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #DC143C;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .side-menu {
+                transform: translateX(-280px);
+            }
+
+            .side-menu.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .page-wrapper {
+                margin-left: 0;
+            }
+
+            .container {
+                padding: 0 25px;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 60px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+            }
+
+            .timeline-marker {
+                left: 20px;
+                transform: translateX(0);
+            }
+
+            .timeline-date {
+                justify-content: flex-start !important;
+            }
+
+            .workflow-diagram {
+                flex-direction: column;
+            }
+
+            .workflow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .features-grid,
+            .steps,
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-box ul {
+                column-count: 1;
+            }
+
+            .pricing-card {
+                padding: 40px 30px;
+            }
+
+            .price {
+                font-size: 3.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </button>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2>VPA Internal Transfer</h2>
+            <p>Professional Fund Transfer</p>
+        </div>
+
+        <nav class="side-menu-nav">
+            <ul>
+                <li><a href="#overview" class="menu-link">Overview</a></li>
+                <li><a href="#version-history" class="menu-link">Version History</a></li>
+                <li><a href="#features" class="menu-link">Key Features</a></li>
+                <li><a href="#workflow" class="menu-link">Workflow</a></li>
+                <li><a href="#benefits" class="menu-link">Benefits</a></li>
+                <li><a href="#how-it-works" class="menu-link">How It Works</a></li>
+                <li><a href="#security" class="menu-link">Security</a></li>
+                <li><a href="#technical" class="menu-link">Technical</a></li>
+                <li><a href="#included" class="menu-link">What's Included</a></li>
+                <li><a href="#pricing" class="menu-link">Pricing</a></li>
+                <li><a href="#contact" class="menu-link">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="side-menu-footer">
+            <p><strong>Latest Version:</strong> 19.0.1.0.0</p>
+            <p><strong>License:</strong> OPL-1</p>
+            <p><strong>Author:</strong> VPA Software Limited</p>
+            <p style="margin-top: 15px; opacity: 0.5; font-size: 0.8em;">© 2025 VPA Software Limited</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="container">
+                <h1>VPA Accounting Internal Transfer</h1>
+                <div style="background: rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 10px;">
+                    <strong>Latest: v19.0.1.0.0</strong>
+                </div>
+                <p>Professional Internal Fund Transfer Management for Odoo</p>
+                <p>Bank-to-Bank, Bank-to-Cash transfers with multi-level approval and auto-reconciliation!</p>
+                <div>
+                    <span class="badge">Multi-Level Approval</span>
+                    <span class="badge">Auto Journal Entries</span>
+                    <span class="badge">Auto Reconciliation</span>
+                    <span class="badge">Full Audit Trail</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <div class="container">
+                <h2 class="section-title">Overview</h2>
+                <p class="section-subtitle">
+                    <strong>VPA Accounting Internal Transfer</strong> is a comprehensive solution for managing internal fund transfers
+                    between bank and cash accounts in Odoo. Features multi-level approval workflow, automatic journal entry creation,
+                    auto-reconciliation, and complete audit trail. Perfect for businesses requiring proper authorization and
+                    accounting controls for internal fund movements.
+                </p>
+            </div>
+        </section>
+
+        <!-- Version History Timeline Section -->
+        <section id="version-history" class="section">
+            <div class="container">
+                <h2 class="section-title">Version History & Changelog</h2>
+                <p class="section-subtitle">Complete version history</p>
+
+                <!-- Odoo 19 Timeline -->
+                <div class="timeline">
+                    <!-- Version 19.0.1.0.0 -->
+                    <div class="timeline-item">
+                        <div class="timeline-marker">v1</div>
+                        <div class="timeline-content">
+                            <h3>Version 19.0.1.0.0</h3>
+                            <div class="timeline-date">
+                                Released: December 2025
+                                <span class="odoo-version-badge">Odoo 19</span>
+                            </div>
+                            <p style="color: #666; margin-bottom: 15px; font-style: italic;">Initial release with comprehensive internal transfer management</p>
+
+                            <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">Core Features</h4>
+                            <ul class="timeline-changes">
+                                <li>Internal transfers between Bank/Cash accounts</li>
+                                <li>Multi-level approval workflow (Manager/Admin)</li>
+                                <li>Threshold-based approval routing</li>
+                                <li>Automatic journal entry creation with detailed narrations</li>
+                                <li>Auto-reconciliation of transfer account entries</li>
+                                <li>Complete audit trail via mail.thread</li>
+                            </ul>
+
+                            <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">Transfer Types</h4>
+                            <ul class="timeline-changes">
+                                <li>Bank to Bank transfers</li>
+                                <li>Bank to Cash transfers</li>
+                                <li>Cash to Bank transfers</li>
+                                <li>Cash to Cash transfers</li>
+                                <li>Multi-currency support with exchange rates</li>
+                            </ul>
+
+                            <h4 style="color: #0c5460; margin-top: 20px; margin-bottom: 10px;">Security & Architecture</h4>
+                            <ul class="timeline-changes">
+                                <li>Three security roles: User, Manager, Admin</li>
+                                <li>Record-level access rules per company</li>
+                                <li>Rejection workflow with mandatory reasons</li>
+                                <li>Cancellation with automatic reversal entries</li>
+                                <li>Multi-company support</li>
+                            </ul>
+
+                            <h4 style="color: #875A7B; margin-top: 20px; margin-bottom: 10px;">Views & Reports</h4>
+                            <ul class="timeline-changes">
+                                <li>Dashboard views: All, Pending, Rejected, Approved</li>
+                                <li>Kanban view grouped by status</li>
+                                <li>Professional PDF transfer voucher</li>
+                                <li>Signature lines for authorization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Internal Transfers</h3>
+                        <p>Transfer funds between bank and cash accounts with proper double-entry accounting and intermediate transfer account.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">✅</div>
+                        <h3>Multi-Level Approval</h3>
+                        <p>Configure threshold-based approval routing. Managers approve standard amounts, Administrators handle high-value transfers.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Auto Journal Entries</h3>
+                        <p>Automatic creation of paired journal entries with comprehensive narrations including transfer details and approver info.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Auto Reconciliation</h3>
+                        <p>Transfer account entries are automatically reconciled upon approval, keeping your accounts clean and balanced.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">💱</div>
+                        <h3>Multi-Currency</h3>
+                        <p>Full support for transfers between accounts with different currencies, with automatic exchange rate calculation.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📝</div>
+                        <h3>Complete Audit Trail</h3>
+                        <p>Track every action via chatter - submissions, approvals, rejections, and cancellations with timestamps and reasons.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workflow Section -->
+        <section id="workflow" class="section">
+            <div class="container">
+                <h2 class="section-title">Approval Workflow</h2>
+                <p class="section-subtitle">Simple yet powerful workflow ensures proper authorization for all fund transfers</p>
+
+                <div class="workflow-diagram">
+                    <div class="workflow-step draft">
+                        <h4>Draft</h4>
+                        <p>Create Transfer</p>
+                    </div>
+                    <span class="workflow-arrow">→</span>
+                    <div class="workflow-step submitted">
+                        <h4>Submitted</h4>
+                        <p>Awaiting Approval</p>
+                    </div>
+                    <span class="workflow-arrow">→</span>
+                    <div class="workflow-step approved">
+                        <h4>Approved</h4>
+                        <p>Auto-Posted</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <p><strong>Rejection Path:</strong> Rejected transfers can be reset to draft for correction and resubmission.</p>
+                    <p><strong>Cancellation:</strong> Approved transfers can be cancelled with automatic reversal journal entries.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section id="benefits" class="section">
+            <div class="container">
+                <h2 class="section-title">Business Benefits</h2>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Proper Authorization:</strong> Ensure all fund transfers go through proper approval channels based on amount thresholds
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Accurate Accounting:</strong> Automatic journal entries with proper double-entry accounting and intermediate transfer account
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Clean Reconciliation:</strong> Auto-reconciliation keeps your transfer account balanced and your books clean
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Full Traceability:</strong> Complete audit trail with chatter integration - know who did what and when
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Multi-Currency Ready:</strong> Handle transfers between accounts with different currencies seamlessly
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Professional Documents:</strong> Generate PDF transfer vouchers with all details and signature lines
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in 3 simple steps</p>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Create Transfer</h3>
+                        <p><strong>Select Source:</strong> Choose source bank/cash journal</p>
+                        <p><strong>Select Destination:</strong> Choose destination journal</p>
+                        <p><strong>Enter Amount:</strong> Specify transfer amount</p>
+                        <p><strong>Add Memo:</strong> Optional description for reference</p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Submit & Approve</h3>
+                        <p><strong>Submit:</strong> Send for approval</p>
+                        <p><strong>Threshold Check:</strong> System determines required approval level</p>
+                        <p><strong>Approve:</strong> Manager or Admin approves based on amount</p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Auto-Posted!</h3>
+                        <p><strong>Journal Entries:</strong> Created automatically</p>
+                        <p><strong>Reconciliation:</strong> Transfer account reconciled</p>
+                        <p><strong>Print Voucher:</strong> PDF report available</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="section">
+            <div class="container">
+                <h2 class="section-title">Enterprise-Grade Security</h2>
+                <p class="section-subtitle">Role-based access control with proper segregation of duties</p>
+
+                <div class="security-grid">
+                    <div class="security-card">
+                        <h3>Security Roles</h3>
+                        <ul>
+                            <li><strong>Transfer User:</strong> Create and submit transfers, view own transfers</li>
+                            <li><strong>Transfer Manager:</strong> Approve up to threshold, view all transfers</li>
+                            <li><strong>Transfer Administrator:</strong> Approve all amounts, configure thresholds, full access</li>
+                        </ul>
+                    </div>
+
+                    <div class="security-card">
+                        <h3>Access Controls</h3>
+                        <ul>
+                            <li><strong>Company-Based:</strong> Multi-company isolation with record rules</li>
+                            <li><strong>Threshold Routing:</strong> Automatic approval level based on amount</li>
+                            <li><strong>Audit Logging:</strong> All actions tracked via chatter</li>
+                            <li><strong>Rejection Reasons:</strong> Mandatory reason for rejections</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Specifications Section -->
+        <section id="technical" class="section">
+            <div class="container">
+                <h2 class="section-title">Technical Specifications</h2>
+                <div class="specs-table">
+                    <table>
+                        <tr>
+                            <th colspan="2">Module Information</th>
+                        </tr>
+                        <tr>
+                            <td>Module Name</td>
+                            <td>VPA Accounting Internal Transfer</td>
+                        </tr>
+                        <tr>
+                            <td>Technical Name</td>
+                            <td>vpa_acc_int_transfer</td>
+                        </tr>
+                        <tr>
+                            <td>Latest Version</td>
+                            <td>19.0.1.0.0</td>
+                        </tr>
+                        <tr>
+                            <td>License</td>
+                            <td>OPL-1 (Odoo Proprietary License)</td>
+                        </tr>
+                        <tr>
+                            <td>Author</td>
+                            <td>VPA Software Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Category</td>
+                            <td>Accounting/Accounting</td>
+                        </tr>
+                        <tr>
+                            <td>Odoo Versions</td>
+                            <td>19.0 (Community & Enterprise)</td>
+                        </tr>
+                        <tr>
+                            <td>Dependencies</td>
+                            <td>account, mail</td>
+                        </tr>
+                        <tr>
+                            <td>Models</td>
+                            <td>internal.transfer, internal.transfer.threshold</td>
+                        </tr>
+                        <tr>
+                            <td>Reports</td>
+                            <td>PDF Transfer Voucher</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- What's Included Section -->
+        <section id="included" class="section">
+            <div class="container">
+                <h2 class="section-title">What's Included</h2>
+                <div class="info-box">
+                    <h3>✓ Complete Package</h3>
+                    <ul>
+                        <li>✓ Internal Transfer Model</li>
+                        <li>✓ Approval Threshold Configuration</li>
+                        <li>✓ Multi-Level Approval Workflow</li>
+                        <li>✓ Auto Journal Entry Creation</li>
+                        <li>✓ Auto Reconciliation</li>
+                        <li>✓ Multi-Currency Support</li>
+                        <li>✓ Rejection Workflow with Reasons</li>
+                        <li>✓ Cancellation with Reversal Entries</li>
+                        <li>✓ PDF Transfer Voucher Report</li>
+                        <li>✓ Dashboard Views (All, Pending, Rejected, Approved)</li>
+                        <li>✓ Kanban View</li>
+                        <li>✓ Three Security Roles</li>
+                        <li>✓ Multi-Company Support</li>
+                        <li>✓ Chatter Integration</li>
+                        <li>✓ Attachment Support</li>
+                        <li>✓ Professional Support Included</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section">
+            <div class="container">
+                <h2 class="section-title">Pricing</h2>
+                <div class="pricing-card">
+                    <h3>Professional Edition</h3>
+                    <div class="price">
+                        $99<span class="price-period">USD</span>
+                    </div>
+                    <p style="color: #28a745; font-size: 1.2em; font-weight: 600; margin-bottom: 20px;">One-Time Purchase!</p>
+                    <ul class="pricing-features">
+                        <li>One-time purchase per Odoo version</li>
+                        <li>Lifetime updates for purchased version</li>
+                        <li>Professional support included</li>
+                        <li>Email support (24h response)</li>
+                        <li>All features included</li>
+                        <li>No monthly fees</li>
+                        <li>No user limits</li>
+                        <li>Multi-company support</li>
+                        <li>Source code included</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">Get Started Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="container">
+                <h2 class="section-title">Support & Contact</h2>
+                <p class="section-subtitle">We're here to help you succeed with VPA Accounting Internal Transfer</p>
+
+                <div class="contact-box">
+                    <div class="contact-item">
+                        <div>
+                            <strong>Email:</strong>
+                            <a href="mailto:support@vpasoftware.com">support@vpasoftware.com</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Website:</strong>
+                            <a href="https://www.vpasoftware.com" target="_blank">www.vpasoftware.com</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Response Time:</strong> Within 24 hours on business days
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Documentation:</strong> Comprehensive user guide included
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p style="font-size: 1.3em; margin-bottom: 15px;">
+                    <strong>VPA Accounting Internal Transfer</strong> - Professional Fund Transfer Management
+                </p>
+                <p style="margin: 12px 0;">
+                    Copyright &copy; 2025 <a href="https://www.vpasoftware.com">VPA Software Limited</a>. All rights reserved.
+                </p>
+                <p style="margin: 12px 0; color: #aaa;">
+                    Developed with ❤️ for the Odoo community
+                </p>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
+                    Odoo is a trademark of Odoo S.A. This module is not affiliated with Odoo S.A.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Active section highlighting on scroll
+        const menuLinks = document.querySelectorAll('.menu-link');
+        const sections = document.querySelectorAll('.section, .header');
+
+        function setActiveLink() {
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', setActiveLink);
+        window.addEventListener('load', setActiveLink);
+
+        // Close mobile menu when clicking a link
+        menuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sideMenu').classList.remove('active');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('sideMenu');
+            const toggle = document.querySelector('.menu-toggle');
+
+            if (window.innerWidth <= 1024 &&
+                !menu.contains(e.target) &&
+                !toggle.contains(e.target) &&
+                menu.classList.contains('active')) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
