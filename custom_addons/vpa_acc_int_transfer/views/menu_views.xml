@@ -2,10 +2,10 @@
 <!-- Copyright (C) 2025 VPA Software Limited -->
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
-    <!-- Root Menu under Accounting -->
+    <!-- Internal Transfers menu item under Accounting > Transactions section -->
     <menuitem id="menu_internal_transfer_root"
               name="Internal Transfers"
-              parent="account.menu_finance"
+              parent="account.menu_finance_entries"
               sequence="35"/>
 
     <!-- Dashboard/Main Menu -->
