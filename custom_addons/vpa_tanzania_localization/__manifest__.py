@@ -3,7 +3,7 @@
 # Copyright (C) 2025 VPA Software Limited
 {
     'name': 'VPA Tanzania Localization',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Localization',
     'summary': 'Tanzania localization with TIN and VRN tax identification numbers',
     'description': """
@@ -85,6 +85,9 @@ Copyright (C) 2025 VPA Software Limited
     'price': 29.99,
     'currency': 'USD',
     'depends': ['base', 'account', 'contacts'],
+
+    'pre_init_hook': 'pre_init_hook',
+
     'data': [
         'security/ir.model.access.csv',
         'data/tanzania_regions_wards.xml',
