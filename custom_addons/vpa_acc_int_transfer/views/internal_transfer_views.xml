@@ -235,7 +235,7 @@
         <field name="name">internal.transfer.view.search</field>
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
-            <search string="Search Transfers">
+            <search>
                 <field name="name"/>
                 <field name="memo"/>
                 <field name="source_journal_id"/>
@@ -243,36 +243,21 @@
                 <field name="submitted_by_id"/>
                 <field name="approved_by_id"/>
                 <separator/>
-                <filter name="filter_draft" string="Draft"
-                        domain="[('state', '=', 'draft')]"/>
-                <filter name="filter_submitted" string="Pending Approval"
-                        domain="[('state', '=', 'submitted')]"/>
-                <filter name="filter_approved" string="Approved"
-                        domain="[('state', '=', 'approved')]"/>
-                <filter name="filter_rejected" string="Rejected"
-                        domain="[('state', '=', 'rejected')]"/>
-                <filter name="filter_cancelled" string="Cancelled"
-                        domain="[('state', '=', 'cancelled')]"/>
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_submitted" string="Pending Approval" domain="[('state', '=', 'submitted')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="filter_rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
+                <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-                <filter name="filter_my_transfers" string="My Transfers"
-                        domain="[('create_uid', '=', uid)]"/>
-                <filter name="filter_to_approve" string="To Approve"
-                        domain="[('state', '=', 'submitted')]"
-                        groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                <filter name="filter_my_transfers" string="My Transfers" domain="[('create_uid', '=', uid)]"/>
+                <filter name="filter_to_approve" string="To Approve" domain="[('state', '=', 'submitted')]"/>
                 <separator/>
-                <filter name="filter_date" string="Date" date="date"/>
                 <group expand="0" string="Group By">
-                    <filter name="group_state" string="Status"
-                            context="{'group_by': 'state'}"/>
-                    <filter name="group_date" string="Date"
-                            context="{'group_by': 'date:month'}"/>
-                    <filter name="group_source" string="Source Journal"
-                            context="{'group_by': 'source_journal_id'}"/>
-                    <filter name="group_destination" string="Destination Journal"
-                            context="{'group_by': 'destination_journal_id'}"/>
-                    <filter name="group_company" string="Company"
-                            context="{'group_by': 'company_id'}"
-                            groups="base.group_multi_company"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date:month'}"/>
+                    <filter name="group_source" string="Source Journal" context="{'group_by': 'source_journal_id'}"/>
+                    <filter name="group_destination" string="Destination Journal" context="{'group_by': 'destination_journal_id'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                 </group>
             </search>
         </field>
