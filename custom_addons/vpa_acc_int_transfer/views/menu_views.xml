@@ -2,17 +2,17 @@
 <!-- Copyright (C) 2025 VPA Software Limited -->
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
-    <!-- Single menu entry under Accounting > Transactions -->
+    <!-- Internal Transfers under Accounting > Transactions -->
     <menuitem id="menu_internal_transfer_main"
               name="Internal Transfers"
               action="internal_transfer_action"
-              parent="account.menu_finance_entries"
-              sequence="15"/>
+              parent="account.account_transactions_menu"
+              sequence="20"/>
 
     <!-- Approval Thresholds under Accounting > Configuration -->
     <menuitem id="menu_approval_thresholds"
               name="Internal Transfer Thresholds"
-              parent="account.menu_finance_configuration"
+              parent="account.account_closing_menu"
               action="approval_threshold_action"
-              sequence="50"/>
+              sequence="90"/>
 </odoo>
