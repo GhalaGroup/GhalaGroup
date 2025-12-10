@@ -61,7 +61,7 @@
                     <group col="2">
                         <group string="Transfer Details">
                             <field name="date"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="1"/>
                             <field name="memo" placeholder="Enter a memo for reference..."/>
                         </group>
                         <group string="Amount">
@@ -167,7 +167,6 @@
                        decoration-danger="state == 'rejected'"/>
                 <field name="submitted_by_id" optional="hide"/>
                 <field name="approved_by_id" optional="hide"/>
-                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>
         </field>
     </record>
