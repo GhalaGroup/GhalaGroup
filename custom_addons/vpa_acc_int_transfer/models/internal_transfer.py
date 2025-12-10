@@ -647,7 +647,7 @@ class InternalTransfer(models.Model):
             'name': _('Journal Entries'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('id', 'in', move_ids)],
             'context': {'create': False},
         }
@@ -659,7 +659,7 @@ class InternalTransfer(models.Model):
             'name': _('Attachments'),
             'type': 'ir.actions.act_window',
             'res_model': 'ir.attachment',
-            'view_mode': 'kanban,tree,form',
+            'view_mode': 'kanban,list,form',
             'domain': [('id', 'in', self.attachment_ids.ids)],
             'context': {
                 'default_res_model': 'internal.transfer',

@@ -34,12 +34,12 @@
         </field>
     </record>
 
-    <!-- Tree View -->
-    <record id="internal_transfer_threshold_view_tree" model="ir.ui.view">
-        <field name="name">internal.transfer.threshold.view.tree</field>
+    <!-- List View -->
+    <record id="internal_transfer_threshold_view_list" model="ir.ui.view">
+        <field name="name">internal.transfer.threshold.view.list</field>
         <field name="model">internal.transfer.threshold</field>
         <field name="arch" type="xml">
-            <tree string="Approval Thresholds">
+            <list string="Approval Thresholds">
                 <field name="name"/>
                 <field name="min_amount"/>
                 <field name="max_amount"/>
@@ -49,7 +49,7 @@
                        decoration-warning="approval_level == 'admin'"/>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="active"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -84,7 +84,7 @@
     <record id="approval_threshold_action" model="ir.actions.act_window">
         <field name="name">Approval Thresholds</field>
         <field name="res_model">internal.transfer.threshold</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="internal_transfer_threshold_view_search"/>
         <field name="context">{'search_default_filter_active': 1}</field>
         <field name="help" type="html">
