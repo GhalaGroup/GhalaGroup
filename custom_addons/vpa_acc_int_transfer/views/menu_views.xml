@@ -2,17 +2,49 @@
 <!-- Copyright (C) 2025 VPA Software Limited -->
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
-    <!-- Internal Transfers under Accounting > Transactions -->
-    <menuitem id="menu_internal_transfer_main"
+    <!-- Standalone App Menu in Main Navigation -->
+    <menuitem id="menu_internal_transfer_root"
               name="Internal Transfers"
+              web_icon="vpa_acc_int_transfer,static/description/icon.png"
+              sequence="45"/>
+
+    <!-- All Transfers -->
+    <menuitem id="menu_internal_transfer_all"
+              name="All Transfers"
+              parent="menu_internal_transfer_root"
               action="internal_transfer_action"
-              parent="account.account_transactions_menu"
+              sequence="10"/>
+
+    <!-- Pending Approvals -->
+    <menuitem id="menu_internal_transfer_pending"
+              name="Pending Approvals"
+              parent="menu_internal_transfer_root"
+              action="internal_transfer_action_pending"
               sequence="20"/>
 
-    <!-- Approval Thresholds under Accounting > Configuration -->
+    <!-- Approved Transfers -->
+    <menuitem id="menu_internal_transfer_approved"
+              name="Approved Transfers"
+              parent="menu_internal_transfer_root"
+              action="internal_transfer_action_approved"
+              sequence="30"/>
+
+    <!-- Rejected Transfers -->
+    <menuitem id="menu_internal_transfer_rejected"
+              name="Rejected Transfers"
+              parent="menu_internal_transfer_root"
+              action="internal_transfer_action_rejected"
+              sequence="40"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_internal_transfer_config"
+              name="Configuration"
+              parent="menu_internal_transfer_root"
+              sequence="100"/>
+
     <menuitem id="menu_approval_thresholds"
-              name="Internal Transfer Thresholds"
-              parent="account.account_closing_menu"
+              name="Approval Thresholds"
+              parent="menu_internal_transfer_config"
               action="approval_threshold_action"
-              sequence="90"/>
+              sequence="10"/>
 </odoo>
