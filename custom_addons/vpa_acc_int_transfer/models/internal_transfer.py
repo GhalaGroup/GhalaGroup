@@ -472,16 +472,11 @@ class InternalTransfer(models.Model):
         self.ensure_one()
         user = self.env.user
 
-        if self.required_approval_level == 'admin':
-            if not user.has_group('vpa_acc_int_transfer.group_transfer_admin'):
-                raise UserError(_(
-                    'This transfer requires Administrator approval '
-                    '(amount: %s %s exceeds manager threshold).'
-                ) % (self.amount, self.currency_id.name))
-        else:  # manager level
-            if not (user.has_group('vpa_acc_int_transfer.group_transfer_manager') or
-                    user.has_group('vpa_acc_int_transfer.group_transfer_admin')):
-                raise UserError(_('You do not have permission to approve transfers.'))
+        # Use standard Odoo accounting groups for permission checks
+        # account.group_account_manager can approve all transfers
+        if not user.has_group('account.group_account_manager'):
+            raise UserError(_('You do not have permission to approve transfers. '
+                             'Only Account Managers can approve internal transfers.'))
 
     def _get_journal_entry_narration(self):
         """Build comprehensive narration for journal entries"""

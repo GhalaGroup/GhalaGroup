@@ -24,11 +24,10 @@ Key Features
 * **Cancellation Workflow**: Proper reversal entries on cancellation
 * **PDF Reports**: Professional transfer voucher printout
 
-Security Roles
---------------
-* **Transfer User**: Create and submit transfers
-* **Transfer Manager**: Approve transfers up to configured threshold
-* **Transfer Administrator**: Full access, approve all amounts, configure settings
+Security Roles (Uses Standard Odoo Groups)
+------------------------------------------
+* **Accountant (group_account_user)**: Create and submit transfers
+* **Account Manager (group_account_manager)**: Approve, reject, cancel transfers and configure settings
 
 Dashboard Views
 ---------------

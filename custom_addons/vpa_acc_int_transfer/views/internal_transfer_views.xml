@@ -11,24 +11,22 @@
                 <header>
                     <button name="action_submit" string="Submit for Approval"
                             type="object" class="btn-primary"
-                            invisible="state != 'draft'"
-                            groups="vpa_acc_int_transfer.group_transfer_user"/>
+                            invisible="state != 'draft'"/>
                     <button name="action_approve" string="Approve"
                             type="object" class="btn-primary"
                             invisible="state != 'submitted'"
-                            groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                            groups="account.group_account_manager"/>
                     <button name="action_reject" string="Reject"
                             type="object" class="btn-secondary"
                             invisible="state != 'submitted'"
-                            groups="vpa_acc_int_transfer.group_transfer_manager"/>
+                            groups="account.group_account_manager"/>
                     <button name="action_cancel" string="Cancel"
                             type="object" class="btn-secondary"
                             invisible="state in ('cancelled', 'rejected', 'draft')"
-                            groups="vpa_acc_int_transfer.group_transfer_admin"/>
+                            groups="account.group_account_manager"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-secondary"
-                            invisible="state != 'rejected'"
-                            groups="vpa_acc_int_transfer.group_transfer_user"/>
+                            invisible="state != 'rejected'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
