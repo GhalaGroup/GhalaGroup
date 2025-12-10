@@ -192,8 +192,6 @@
                 <field name="source_journal_id"/>
                 <field name="destination_journal_id"/>
                 <field name="memo"/>
-                <progressbar field="state"
-                    colors='{"draft": "info", "submitted": "warning", "approved": "success", "rejected": "danger", "cancelled": "muted"}'/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_card oe_kanban_global_click">
@@ -204,8 +202,7 @@
                                             <field name="name"/>
                                         </strong>
                                     </div>
-                                    <field name="state" widget="label_selection"
-                                           options="{'classes': {'draft': 'info', 'submitted': 'warning', 'approved': 'success', 'rejected': 'danger', 'cancelled': 'secondary'}}"/>
+                                    <field name="state" widget="badge"/>
                                 </div>
                                 <div class="o_kanban_record_body">
                                     <div>
