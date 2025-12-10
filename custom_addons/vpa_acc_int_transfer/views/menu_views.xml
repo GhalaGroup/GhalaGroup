@@ -6,8 +6,7 @@
     <menuitem id="menu_internal_transfer_root"
               name="Internal Transfers"
               parent="account.menu_finance"
-              sequence="35"
-              groups="vpa_acc_int_transfer.group_transfer_user"/>
+              sequence="35"/>
 
     <!-- Dashboard/Main Menu -->
     <menuitem id="menu_internal_transfer_all"
