@@ -252,7 +252,47 @@
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
             <search>
+                <!-- Search Fields -->
                 <field name="name"/>
+                <field name="memo"/>
+                <field name="source_journal_id"/>
+                <field name="destination_journal_id"/>
+                <field name="approver_id"/>
+                <field name="submitted_by_id"/>
+                <field name="approved_by_id"/>
+
+                <!-- Status Filters -->
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_submitted" string="Pending Approval" domain="[('state', '=', 'submitted')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="filter_rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
+                <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+
+                <!-- Date Filters -->
+                <filter name="filter_today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_week" string="This Week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_this_month" string="This Month" domain="[('date', '>=', context_today().strftime('%Y-%m-01'))]"/>
+                <filter name="filter_this_year" string="This Year" domain="[('date', '>=', context_today().strftime('%Y-01-01'))]"/>
+                <separator/>
+
+                <!-- Special Filters -->
+                <filter name="filter_locked" string="Locked" domain="[('is_locked', '=', True)]"/>
+                <filter name="filter_multi_currency" string="Multi-Currency" domain="[('is_multi_currency', '=', True)]"/>
+                <separator/>
+
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_source_journal" string="From Journal" context="{'group_by': 'source_journal_id'}"/>
+                    <filter name="group_destination_journal" string="To Journal" context="{'group_by': 'destination_journal_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_date_month" string="Month" context="{'group_by': 'date:month'}"/>
+                    <filter name="group_date_year" string="Year" context="{'group_by': 'date:year'}"/>
+                    <filter name="group_approver" string="Approver" context="{'group_by': 'approver_id'}"/>
+                    <filter name="group_submitted_by" string="Submitted By" context="{'group_by': 'submitted_by_id'}"/>
+                    <filter name="group_currency" string="Currency" context="{'group_by': 'currency_id'}"/>
+                </group>
             </search>
         </field>
     </record>
