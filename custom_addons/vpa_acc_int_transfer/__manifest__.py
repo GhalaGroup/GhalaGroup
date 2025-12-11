@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2025 VPA Software Limited
+# Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Accounting Internal Transfer',
@@ -37,10 +37,10 @@ Dashboard Views
 * Rejected Transfers
 * Posted Transfers
 
-Developed by VPA Software Limited
+Developed by VPA Solutions Limited
 Support: info@vpa.co.tz
     """,
-    'author': 'VPA Software Limited',
+    'author': 'VPA Solutions Limited',
     'website': 'https://www.vpa.co.tz',
     'license': 'OPL-1',
     'price': 199.00,
