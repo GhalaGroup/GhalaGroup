@@ -269,11 +269,8 @@
                 <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
 
-                <!-- Date Filters -->
-                <filter name="filter_today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter name="filter_this_week" string="This Week" domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
-                <filter name="filter_this_month" string="This Month" domain="[('date', '>=', context_today().strftime('%Y-%m-01'))]"/>
-                <filter name="filter_this_year" string="This Year" domain="[('date', '>=', context_today().strftime('%Y-01-01'))]"/>
+                <!-- Date Filter -->
+                <filter name="filter_date" string="Transfer Date" date="date"/>
                 <separator/>
 
                 <!-- Special Filters -->
@@ -286,7 +283,7 @@
                     <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
                     <filter name="group_source_journal" string="From Journal" context="{'group_by': 'source_journal_id'}"/>
                     <filter name="group_destination_journal" string="To Journal" context="{'group_by': 'destination_journal_id'}"/>
-                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date:day'}"/>
                     <filter name="group_date_month" string="Month" context="{'group_by': 'date:month'}"/>
                     <filter name="group_date_year" string="Year" context="{'group_by': 'date:year'}"/>
                     <filter name="group_approver" string="Approver" context="{'group_by': 'approver_id'}"/>
