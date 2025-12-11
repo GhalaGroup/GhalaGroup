@@ -38,10 +38,10 @@ Dashboard Views
 * Posted Transfers
 
 Developed by VPA Software Limited
-Support: support@vpasoftware.com
+Support: info@vpa.co.tz
     """,
     'author': 'VPA Software Limited',
-    'website': 'https://www.vpasoftware.com',
+    'website': 'https://www.vpa.co.tz',
     'license': 'OPL-1',
     'price': 199.00,
     'currency': 'USD',
