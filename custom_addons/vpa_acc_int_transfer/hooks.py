@@ -19,6 +19,11 @@ def pre_uninstall_hook(env):
     """
     _logger.info("VPA Internal Transfer: Pre-uninstall hook triggered...")
 
+    # Safety check - if models don't exist yet (during tests), skip
+    if 'internal.transfer' not in env:
+        _logger.info("VPA Internal Transfer: Model not found, skipping hook.")
+        return
+
     Transfer = env['internal.transfer']
     transfers = Transfer.search([])
 
@@ -27,6 +32,10 @@ def pre_uninstall_hook(env):
         return
 
     # Check if a recent backup exists (within last hour)
+    if 'internal.transfer.backup' not in env:
+        _logger.info("VPA Internal Transfer: Backup model not found, skipping backup check.")
+        return
+
     Backup = env['internal.transfer.backup']
     one_hour_ago = datetime.now() - timedelta(hours=1)
     recent_backup = Backup.search([
