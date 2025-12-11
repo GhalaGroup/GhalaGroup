@@ -293,7 +293,7 @@ class InternalTransfer(models.Model):
         string='Attachments',
     )
     attachment_count = fields.Integer(
-        string='Attachments',
+        string='Attachment Count',
         compute='_compute_attachment_count',
     )
 
