@@ -16,4 +16,12 @@
               action="approval_threshold_action"
               parent="account.menu_finance_configuration"
               sequence="200"/>
+
+    <!-- Backup/Restore under Accounting > Configuration -->
+    <menuitem id="menu_transfer_backups"
+              name="Internal Transfer Backups"
+              action="internal_transfer_backup_action"
+              parent="account.menu_finance_configuration"
+              sequence="201"
+              groups="account.group_account_manager"/>
 </odoo>

@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Accounting Internal Transfer',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Accounting/Accounting',
     'summary': 'Internal fund transfers with multi-level approval workflow',
     'description': """
@@ -23,6 +23,7 @@ Key Features
 * **Multi-Company**: Full multi-company support
 * **Cancellation Workflow**: Proper reversal entries on cancellation
 * **PDF Reports**: Professional transfer voucher printout
+* **Backup/Restore**: Automatic backup before uninstall, restore wizard after reinstall
 
 Security Roles (Uses Standard Odoo Groups)
 ------------------------------------------
@@ -59,6 +60,7 @@ Support: support@vpasoftware.com
         'views/internal_transfer_views.xml',
         'views/approval_threshold_views.xml',
         'views/res_config_settings_views.xml',
+        'views/backup_views.xml',
         'views/menu_views.xml',
     ],
     'images': [
@@ -68,4 +70,7 @@ Support: support@vpasoftware.com
     'installable': True,
     'application': True,
     'auto_install': False,
+    'pre_init_hook': 'pre_uninstall_hook',
+    'uninstall_hook': 'pre_uninstall_hook',
+    'post_init_hook': 'post_init_hook',
 }

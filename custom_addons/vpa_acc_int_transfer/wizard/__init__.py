@@ -4,3 +4,4 @@
 
 from . import transfer_reject_wizard
 from . import transfer_cancel_wizard
+from . import restore_backup_wizard
