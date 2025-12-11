@@ -606,6 +606,7 @@ class InternalTransfer(models.Model):
 
         # Company currency for comparison
         company_currency = self.company_id.currency_id
+        source_currency = self.currency_id or company_currency
 
         # === SOURCE JOURNAL ENTRY ===
         # Debit: Transfer Account, Credit: Source Bank/Cash Account
@@ -615,22 +616,23 @@ class InternalTransfer(models.Model):
             'narration': ref,
             'journal_id': self.source_journal_id.id,
             'company_id': self.company_id.id,
+            'currency_id': source_currency.id,
             'line_ids': [
                 (0, 0, {
                     'name': short_ref,
                     'account_id': self.transfer_account_id.id,
-                    'debit': self.amount if self.currency_id == company_currency else 0.0,
+                    'debit': self.amount,
                     'credit': 0.0,
-                    'currency_id': self.currency_id.id if self.currency_id != company_currency else False,
-                    'amount_currency': self.amount if self.currency_id != company_currency else 0.0,
+                    'currency_id': source_currency.id,
+                    'amount_currency': self.amount,
                 }),
                 (0, 0, {
                     'name': short_ref,
                     'account_id': self.source_account_id.id,
                     'debit': 0.0,
-                    'credit': self.amount if self.currency_id == company_currency else 0.0,
-                    'currency_id': self.currency_id.id if self.currency_id != company_currency else False,
-                    'amount_currency': -self.amount if self.currency_id != company_currency else 0.0,
+                    'credit': self.amount,
+                    'currency_id': source_currency.id,
+                    'amount_currency': -self.amount,
                 }),
             ],
         }
@@ -640,7 +642,7 @@ class InternalTransfer(models.Model):
         # === DESTINATION JOURNAL ENTRY ===
         # Debit: Destination Bank/Cash Account, Credit: Transfer Account
         dest_amount = self.destination_amount if self.is_multi_currency else self.amount
-        dest_currency = self.destination_currency_id if self.is_multi_currency else self.currency_id
+        dest_currency = self.destination_currency_id if self.is_multi_currency else source_currency
 
         destination_move_vals = {
             'date': self.date,
@@ -648,22 +650,23 @@ class InternalTransfer(models.Model):
             'narration': ref,
             'journal_id': self.destination_journal_id.id,
             'company_id': self.company_id.id,
+            'currency_id': dest_currency.id,
             'line_ids': [
                 (0, 0, {
                     'name': short_ref,
                     'account_id': self.destination_account_id.id,
-                    'debit': dest_amount if dest_currency == company_currency else 0.0,
+                    'debit': dest_amount,
                     'credit': 0.0,
-                    'currency_id': dest_currency.id if dest_currency != company_currency else False,
-                    'amount_currency': dest_amount if dest_currency != company_currency else 0.0,
+                    'currency_id': dest_currency.id,
+                    'amount_currency': dest_amount,
                 }),
                 (0, 0, {
                     'name': short_ref,
                     'account_id': self.transfer_account_id.id,
                     'debit': 0.0,
-                    'credit': dest_amount if dest_currency == company_currency else 0.0,
-                    'currency_id': dest_currency.id if dest_currency != company_currency else False,
-                    'amount_currency': -dest_amount if dest_currency != company_currency else 0.0,
+                    'credit': dest_amount,
+                    'currency_id': dest_currency.id,
+                    'amount_currency': -dest_amount,
                 }),
             ],
         }
