@@ -686,10 +686,11 @@ class InternalTransfer(models.Model):
 
         BankStatementLine = self.env['account.bank.statement.line']
 
-        # Build reference
-        short_ref = _('Internal Transfer: %s') % self.name
+        # Build reference - use memo if available, otherwise just the transfer name
         if self.memo:
-            short_ref = '%s - %s' % (short_ref, self.memo)
+            short_ref = '%s - %s' % (self.name, self.memo)
+        else:
+            short_ref = _('%s: %s → %s') % (self.name, self.source_journal_id.name, self.destination_journal_id.name)
 
         # === SOURCE BANK STATEMENT LINE (Outgoing - negative amount) ===
         source_st_line = BankStatementLine.create({
@@ -737,10 +738,11 @@ class InternalTransfer(models.Model):
         if not transfer_account:
             return
 
-        # Build reference
-        short_ref = _('Internal Transfer: %s') % self.name
+        # Build reference - use memo if available, otherwise just the transfer name
         if self.memo:
-            short_ref = '%s - %s' % (short_ref, self.memo)
+            short_ref = '%s - %s' % (self.name, self.memo)
+        else:
+            short_ref = _('%s: %s → %s') % (self.name, self.source_journal_id.name, self.destination_journal_id.name)
 
         # === RECONCILE SOURCE STATEMENT LINE ===
         # Source line is negative (outgoing), so we debit the transfer account
