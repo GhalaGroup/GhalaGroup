@@ -68,6 +68,20 @@
                             </div>
                         </div>
                     </setting>
+                    <setting string="Backup &amp; Restore" help="Manage transfer data backups">
+                        <div class="content-group">
+                            <div class="mt8">
+                                <button name="%(internal_transfer_backup_action)d"
+                                        string="View Backups"
+                                        type="action"
+                                        class="btn-link"
+                                        icon="fa-arrow-right"/>
+                            </div>
+                            <div class="text-muted mt8" style="font-size: 0.85em;">
+                                Backups are created automatically before module uninstall
+                            </div>
+                        </div>
+                    </setting>
                 </block>
             </xpath>
         </field>
