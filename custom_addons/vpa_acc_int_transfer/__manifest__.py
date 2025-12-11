@@ -45,7 +45,7 @@ Support: support@vpasoftware.com
     'price': 99.00,
     'currency': 'USD',
     'depends': [
-        'account',
+        'account_accountant',
         'mail',
     ],
     'data': [

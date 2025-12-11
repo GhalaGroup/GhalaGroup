@@ -44,10 +44,12 @@ class InternalTransferThreshold(models.Model):
     active = fields.Boolean(default=True)
     notes = fields.Text(string='Notes')
 
-    _sql_constraints = [
-        ('min_max_check', 'CHECK(max_amount = 0 OR max_amount >= min_amount)',
-         'Maximum amount must be greater than or equal to minimum amount!'),
-    ]
+    @api.constrains('min_amount', 'max_amount')
+    def _check_min_max_amount(self):
+        """Ensure max_amount is greater than or equal to min_amount"""
+        for threshold in self:
+            if threshold.max_amount and threshold.max_amount < threshold.min_amount:
+                raise ValidationError(_('Maximum amount must be greater than or equal to minimum amount!'))
 
     @api.constrains('min_amount', 'max_amount', 'company_id', 'active')
     def _check_overlapping_thresholds(self):
