@@ -251,8 +251,7 @@
         <field name="name">internal.transfer.view.search</field>
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
-            <search>
-                <!-- Search Fields -->
+            <search string="Search Internal Transfers">
                 <field name="name"/>
                 <field name="memo"/>
                 <field name="source_journal_id"/>
@@ -260,35 +259,27 @@
                 <field name="approver_id"/>
                 <field name="submitted_by_id"/>
                 <field name="approved_by_id"/>
-
-                <!-- Status Filters -->
-                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
-                <filter name="filter_submitted" string="Pending Approval" domain="[('state', '=', 'submitted')]"/>
-                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
-                <filter name="filter_rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
-                <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-
-                <!-- Date Filter -->
-                <filter name="filter_date" string="Transfer Date" date="date"/>
+                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Pending Approval" name="filter_submitted" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Approved" name="filter_approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="filter_rejected" domain="[('state', '=', 'rejected')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-
-                <!-- Special Filters -->
-                <filter name="filter_locked" string="Locked" domain="[('is_locked', '=', True)]"/>
-                <filter name="filter_multi_currency" string="Multi-Currency" domain="[('is_multi_currency', '=', True)]"/>
+                <filter string="Transfer Date" name="filter_date" date="date"/>
                 <separator/>
-
-                <!-- Group By -->
+                <filter string="Locked" name="filter_locked" domain="[('is_locked', '=', True)]"/>
+                <separator/>
                 <group expand="0" string="Group By">
-                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="group_source_journal" string="From Journal" context="{'group_by': 'source_journal_id'}"/>
-                    <filter name="group_destination_journal" string="To Journal" context="{'group_by': 'destination_journal_id'}"/>
-                    <filter name="group_date" string="Date" context="{'group_by': 'date:day'}"/>
-                    <filter name="group_date_month" string="Month" context="{'group_by': 'date:month'}"/>
-                    <filter name="group_date_year" string="Year" context="{'group_by': 'date:year'}"/>
-                    <filter name="group_approver" string="Approver" context="{'group_by': 'approver_id'}"/>
-                    <filter name="group_submitted_by" string="Submitted By" context="{'group_by': 'submitted_by_id'}"/>
-                    <filter name="group_currency" string="Currency" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="From Journal" name="group_source_journal" context="{'group_by': 'source_journal_id'}"/>
+                    <filter string="To Journal" name="group_destination_journal" context="{'group_by': 'destination_journal_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
+                    <filter string="Month" name="group_date_month" context="{'group_by': 'date:month'}"/>
+                    <filter string="Year" name="group_date_year" context="{'group_by': 'date:year'}"/>
+                    <filter string="Approver" name="group_approver" context="{'group_by': 'approver_id'}"/>
+                    <filter string="Submitted By" name="group_submitted_by" context="{'group_by': 'submitted_by_id'}"/>
+                    <filter string="Currency" name="group_currency" context="{'group_by': 'currency_id'}"/>
                 </group>
             </search>
         </field>
