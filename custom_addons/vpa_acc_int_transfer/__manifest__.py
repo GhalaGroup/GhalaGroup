@@ -43,7 +43,7 @@ Support: support@vpasoftware.com
     'author': 'VPA Software Limited',
     'website': 'https://www.vpasoftware.com',
     'license': 'OPL-1',
-    'price': 99.00,
+    'price': 199.00,
     'currency': 'USD',
     'depends': [
         'account_accountant',

@@ -2,15 +2,25 @@
 <!--
 ████████████████████████████████████████████████████████████████████████████████████████████
 █                                                                                          █
-█  VPA ACCOUNTING INTERNAL TRANSFER - PROMOTIONAL HTML FILE                               █
-█  ═══════════════════════════════════════════════════════                                █
+█  VPA INTERNAL TRANSFER - PROMOTIONAL HTML FILE                                           █
+█  ═════════════════════════════════════════════                                           █
 █                                                                                          █
 █  FILE PURPOSE:                                                                          █
-█  This HTML file serves as a promotional document for VPA Accounting Internal Transfer.  █
+█  This HTML file serves as a master promotional document for VPA Internal Transfer across █
+█  all Odoo versions (17, 18, 19). It contains version history, features, and pricing.    █
+█                                                                                          █
+█  MAINTENANCE INSTRUCTIONS:                                                              █
+█  ════════════════════════                                                               █
+█                                                                                          █
+█  When adding a NEW VERSION or NEW FEATURES, search for these comments in this file:     █
+█                                                                                          █
+█  1. "UPDATE INSTRUCTION #1" - Update Latest Version in Side Menu                        █
+█  2. "UPDATE INSTRUCTION #2" - Update Version Badge in Header                            █
+█  3. "UPDATE INSTRUCTION #3" - Add New Version to Timeline                               █
 █                                                                                          █
 █  AUTHOR: VPA Software Limited                                                           █
-█  LAST UPDATED: December 2025                                                            █
-█  CURRENT VERSION: 19.0.1.0.0                                                            █
+█  LAST UPDATED: December 11, 2025                                                        █
+█  CURRENT VERSION: 19.0.1.2.0                                                            █
 █                                                                                          █
 ████████████████████████████████████████████████████████████████████████████████████████████
 -->
@@ -18,9 +28,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="VPA Accounting Internal Transfer - Professional Internal Fund Transfer Management for Odoo with multi-level approval workflow, auto journal entries, and reconciliation.">
-    <meta name="keywords" content="Odoo, Internal Transfer, Accounting, Bank Transfer, Cash Transfer, Approval Workflow, Journal Entry, Reconciliation, Odoo 19">
-    <title>VPA Accounting Internal Transfer - Professional Fund Transfer Management for Odoo</title>
+    <meta name="description" content="VPA Accounting Internal Transfer - Professional internal fund transfers with multi-level approval workflow for Odoo Enterprise. Bank transfers, cash transfers, auto-reconciliation.">
+    <meta name="keywords" content="Odoo, Internal Transfer, Bank Transfer, Cash Transfer, Approval Workflow, Multi-Currency, Odoo 19, Enterprise">
+    <title>VPA Internal Transfer - Professional Fund Transfer Management for Odoo</title>
 
     <style>
         * {
@@ -57,7 +67,7 @@
 
         .side-menu-header {
             padding: 30px 20px;
-            background: linear-gradient(135deg, #DC143C 0%, #a01030 100%);
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
             text-align: center;
             border-bottom: 3px solid rgba(255,255,255,0.2);
         }
@@ -65,10 +75,6 @@
         .side-menu-header h2 {
             font-size: 1.4em;
             margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
         .side-menu-header p {
@@ -85,10 +91,6 @@
             list-style: none;
         }
 
-        .side-menu-nav li {
-            margin: 0;
-        }
-
         .side-menu-nav a {
             display: flex;
             align-items: center;
@@ -101,13 +103,13 @@
         }
 
         .side-menu-nav a:hover {
-            background: rgba(220, 20, 60, 0.3);
+            background: rgba(220, 20, 60, 0.2);
             color: white;
             border-left-color: #DC143C;
         }
 
         .side-menu-nav a.active {
-            background: rgba(220, 20, 60, 0.4);
+            background: rgba(220, 20, 60, 0.3);
             color: white;
             border-left-color: #DC143C;
             font-weight: 600;
@@ -137,7 +139,7 @@
             top: 20px;
             left: 20px;
             z-index: 2001;
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
             border: none;
             padding: 12px 18px;
@@ -145,10 +147,6 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
             font-size: 1.2em;
-        }
-
-        .menu-toggle:hover {
-            transform: scale(1.05);
         }
 
         /* Main Content Wrapper */
@@ -165,7 +163,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #DC143C 0%, #a01030 100%);
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
             color: white;
             padding: 40px 0;
             text-align: center;
@@ -207,10 +205,6 @@
             font-size: 2.8em;
             color: #DC143C;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
         }
 
         .section-subtitle {
@@ -238,7 +232,7 @@
             transform: translateX(-50%);
             width: 4px;
             height: 100%;
-            background: linear-gradient(180deg, #DC143C 0%, #28a745 100%);
+            background: linear-gradient(180deg, #DC143C 0%, #875A7B 100%);
             top: 0;
         }
 
@@ -264,7 +258,7 @@
             transform: translateX(-50%);
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #DC143C, #B22222);
             border-radius: 50%;
             border: 4px solid white;
             box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
@@ -306,7 +300,7 @@
 
         .odoo-version-badge {
             display: inline-block;
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #875A7B, #6B4868);
             color: white;
             padding: 5px 15px;
             border-radius: 15px;
@@ -333,6 +327,47 @@
             color: #28a745;
             font-weight: bold;
             font-size: 1.2em;
+        }
+
+        /* Version Selector Tabs */
+        .version-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .version-tab {
+            padding: 15px 35px;
+            background: white;
+            border: 3px solid #DC143C;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #DC143C;
+            font-size: 1.1em;
+        }
+
+        .version-tab:hover {
+            background: #DC143C;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(220, 20, 60, 0.3);
+        }
+
+        .version-tab.active {
+            background: #DC143C;
+            color: white;
+        }
+
+        .version-content {
+            display: none;
+        }
+
+        .version-content.active {
+            display: block;
         }
 
         /* Features Grid */
@@ -374,43 +409,57 @@
             color: #555;
         }
 
-        /* Workflow Diagram */
-        .workflow-diagram {
+        /* Workflow Steps */
+        .workflow-steps {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
             margin: 50px 0;
         }
 
         .workflow-step {
-            background: white;
-            padding: 25px 35px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             text-align: center;
-            min-width: 150px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            width: 180px;
+            position: relative;
         }
 
-        .workflow-step.draft { border-top: 4px solid #6c757d; }
-        .workflow-step.submitted { border-top: 4px solid #ffc107; }
-        .workflow-step.approved { border-top: 4px solid #28a745; }
-        .workflow-step.rejected { border-top: 4px solid #dc3545; }
+        .workflow-step:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #DC143C;
+        }
+
+        .workflow-step .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
 
         .workflow-step h4 {
-            margin-bottom: 5px;
-            color: #333;
+            color: #DC143C;
+            margin-bottom: 10px;
         }
 
         .workflow-step p {
             font-size: 0.9em;
             color: #666;
-        }
-
-        .workflow-arrow {
-            font-size: 2em;
-            color: #DC143C;
         }
 
         /* Benefits List */
@@ -470,7 +519,7 @@
             left: 35px;
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -491,10 +540,6 @@
             line-height: 1.8;
             margin: 10px 0;
             color: #555;
-        }
-
-        .step strong {
-            color: #333;
         }
 
         /* Technical Specs Table */
@@ -520,7 +565,7 @@
         }
 
         .specs-table th {
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
             font-weight: 600;
             font-size: 1.2em;
@@ -543,7 +588,7 @@
         /* Security Section */
         .security-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 35px;
             margin-top: 50px;
         }
@@ -560,9 +605,6 @@
             color: #875A7B;
             margin-bottom: 25px;
             font-size: 1.6em;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .security-card ul {
@@ -639,7 +681,7 @@
         /* CTA Button */
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, #DC143C, #a01030);
+            background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
             padding: 22px 60px;
             text-decoration: none;
@@ -660,7 +702,7 @@
         .contact-box {
             max-width: 900px;
             margin: 50px auto;
-            background: linear-gradient(135deg, #ffe5e5 0%, #fff0f0 100%);
+            background: linear-gradient(135deg, #ffe5e5 0%, #f8e7f7 100%);
             padding: 55px;
             border-radius: 20px;
             border: 3px solid #DC143C;
@@ -691,6 +733,20 @@
             text-decoration: underline;
         }
 
+        /* Footer */
+        .footer {
+            background: #2C3E50;
+            color: white;
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #DC143C;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
         /* Info Box */
         .info-box {
             background: #d1ecf1;
@@ -716,24 +772,6 @@
         .info-box li {
             padding: 10px 0;
             line-height: 1.6;
-        }
-
-        /* Footer */
-        .footer {
-            background: #2C3E50;
-            color: white;
-            padding: 50px 0;
-            text-align: center;
-        }
-
-        .footer a {
-            color: #DC143C;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
         }
 
         /* Responsive */
@@ -777,22 +815,14 @@
                 justify-content: flex-start !important;
             }
 
-            .workflow-diagram {
-                flex-direction: column;
-            }
-
-            .workflow-arrow {
-                transform: rotate(90deg);
+            .workflow-step:not(:last-child)::after {
+                display: none;
             }
         }
 
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.2em;
-            }
-
-            .header p {
-                font-size: 1.1em;
             }
 
             .section-title {
@@ -809,10 +839,6 @@
                 column-count: 1;
             }
 
-            .pricing-card {
-                padding: 40px 30px;
-            }
-
             .price {
                 font-size: 3.5em;
             }
@@ -821,15 +847,13 @@
 </head>
 <body>
     <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </button>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
 
     <!-- Side Menu -->
     <div class="side-menu" id="sideMenu">
         <div class="side-menu-header">
             <h2>VPA Internal Transfer</h2>
-            <p>Professional Fund Transfer</p>
+            <p>Fund Transfer Management</p>
         </div>
 
         <nav class="side-menu-nav">
@@ -849,9 +873,15 @@
         </nav>
 
         <div class="side-menu-footer">
-            <p><strong>Latest Version:</strong> 19.0.1.0.0</p>
+            <!--
+            ============================================
+            UPDATE INSTRUCTION #1: LATEST VERSION NUMBER
+            ============================================
+            When releasing a new version, update this version number below:
+            -->
+            <p><strong>Latest Version:</strong> 19.0.1.2.0</p>
             <p><strong>License:</strong> OPL-1</p>
-            <p><strong>Author:</strong> VPA Software Limited</p>
+            <p><strong>Author:</strong> VPA</p>
             <p style="margin-top: 15px; opacity: 0.5; font-size: 0.8em;">© 2025 VPA Software Limited</p>
         </div>
     </div>
@@ -861,17 +891,23 @@
         <!-- Header -->
         <div class="header">
             <div class="container">
-                <h1>VPA Accounting Internal Transfer</h1>
+                <h1>VPA Internal Transfer</h1>
+                <!--
+                ============================================
+                UPDATE INSTRUCTION #2: HEADER VERSION BADGE
+                ============================================
+                Update the version number in the badge below when releasing a new version
+                -->
                 <div style="background: rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 10px;">
-                    <strong>Latest: v19.0.1.0.0</strong>
+                    <strong>Latest: v19.0.1.2.0</strong>
                 </div>
-                <p>Professional Internal Fund Transfer Management for Odoo</p>
-                <p>Bank-to-Bank, Bank-to-Cash transfers with multi-level approval and auto-reconciliation!</p>
+                <p>Professional Internal Fund Transfer Management for Odoo Enterprise</p>
+                <p>Multi-level approval workflow, auto-reconciliation, and comprehensive audit trail</p>
                 <div>
-                    <span class="badge">Multi-Level Approval</span>
-                    <span class="badge">Auto Journal Entries</span>
-                    <span class="badge">Auto Reconciliation</span>
-                    <span class="badge">Full Audit Trail</span>
+                    <span class="badge">Bank Transfers</span>
+                    <span class="badge">Cash Transfers</span>
+                    <span class="badge">Approval Workflow</span>
+                    <span class="badge">Multi-Currency</span>
                 </div>
             </div>
         </div>
@@ -881,10 +917,9 @@
             <div class="container">
                 <h2 class="section-title">Overview</h2>
                 <p class="section-subtitle">
-                    <strong>VPA Accounting Internal Transfer</strong> is a comprehensive solution for managing internal fund transfers
-                    between bank and cash accounts in Odoo. Features multi-level approval workflow, automatic journal entry creation,
-                    auto-reconciliation, and complete audit trail. Perfect for businesses requiring proper authorization and
-                    accounting controls for internal fund movements.
+                    <strong>VPA Accounting Internal Transfer</strong> is a professional solution for managing internal fund transfers
+                    in Odoo Enterprise. Handle bank-to-bank, bank-to-cash, cash-to-bank, and cash-to-cash transfers with
+                    configurable multi-level approval workflow, automatic bank statement line creation, and auto-reconciliation.
                 </p>
             </div>
         </section>
@@ -893,56 +928,196 @@
         <section id="version-history" class="section">
             <div class="container">
                 <h2 class="section-title">Version History & Changelog</h2>
-                <p class="section-subtitle">Complete version history</p>
+                <p class="section-subtitle">Complete version history across all Odoo releases</p>
+
+                <!-- Version Selector Tabs -->
+                <div class="version-tabs">
+                    <div class="version-tab active" onclick="showVersion('odoo19')">Odoo 19</div>
+                    <div class="version-tab" onclick="showVersion('odoo18')">Odoo 18</div>
+                    <div class="version-tab" onclick="showVersion('odoo17')">Odoo 17</div>
+                </div>
 
                 <!-- Odoo 19 Timeline -->
-                <div class="timeline">
-                    <!-- Version 19.0.1.0.0 -->
-                    <div class="timeline-item">
-                        <div class="timeline-marker">v1</div>
-                        <div class="timeline-content">
-                            <h3>Version 19.0.1.0.0</h3>
-                            <div class="timeline-date">
-                                Released: December 2025
-                                <span class="odoo-version-badge">Odoo 19</span>
+                <div id="odoo19" class="version-content active">
+                    <div class="timeline">
+                        <!--
+                        ████████████████████████████████████████████████████████████████████████████████
+                        █                                                                              █
+                        █  UPDATE INSTRUCTION #3: ADD NEW VERSION TO TIMELINE                         █
+                        █                                                                              █
+                        █  HOW TO ADD A NEW VERSION:                                                   █
+                        █  1. Copy the entire block below (from "Version 19.0.1.0.0" to </div>)       █
+                        █  2. Paste it RIGHT HERE (ABOVE the existing versions)                       █
+                        █  3. Update the version details in your new copy                             █
+                        █                                                                              █
+                        ████████████████████████████████████████████████████████████████████████████████
+                        -->
+
+                        <!-- Version 19.0.1.2.0 -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker">v3</div>
+                            <div class="timeline-content">
+                                <h3>Version 19.0.1.2.0</h3>
+                                <div class="timeline-date">
+                                    Released: December 11, 2025
+                                    <span class="odoo-version-badge">Odoo 19</span>
+                                </div>
+                                <p style="color: #666; margin-bottom: 15px; font-style: italic;">Enhancement release with backup/restore system and settings reorganization</p>
+
+                                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">✨ New Features</h4>
+                                <ul class="timeline-changes">
+                                    <li><strong>Backup/Restore System:</strong> Complete data protection with automatic backups before module uninstall</li>
+                                    <li><strong>Uninstall Protection:</strong> Blocks uninstallation if transfers exist without recent backup</li>
+                                    <li><strong>Manual Backup:</strong> Create backups anytime via Actions menu in Internal Transfers</li>
+                                    <li><strong>Restore Wizard:</strong> Easily restore transfers after module reinstallation</li>
+                                    <li><strong>Download Backup:</strong> Export backup data as JSON for external storage</li>
+                                </ul>
+
+                                <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">🔧 Improvements</h4>
+                                <ul class="timeline-changes">
+                                    <li><strong>Settings Reorganization:</strong> All settings now in VPA Internal Transfer block under Accounting settings</li>
+                                    <li><strong>Role-Based Permissions:</strong> Configure Transfer Managers, Approvers, and Cancellers</li>
+                                    <li><strong>Memo Template:</strong> Configurable template with placeholders for auto-generated memos</li>
+                                    <li><strong>Cleaner Navigation:</strong> Removed separate Configuration menu items</li>
+                                </ul>
+
+                                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">🐛 Bug Fixes</h4>
+                                <ul class="timeline-changes">
+                                    <li><strong>Search View Fix:</strong> Resolved Odoo 19 search view validation error</li>
+                                    <li><strong>Report Action Fix:</strong> Fixed manifest load order for report actions</li>
+                                    <li><strong>Hook Import Fix:</strong> Fixed missing hooks import for uninstall protection</li>
+                                </ul>
+
+                                <h4 style="color: #17a2b8; margin-top: 20px; margin-bottom: 10px;">🔧 Technical</h4>
+                                <ul class="timeline-changes">
+                                    <li>Added hooks.py with pre_uninstall_hook and post_init_hook</li>
+                                    <li>Added internal.transfer.backup model for backup management</li>
+                                    <li>Added restore_backup_wizard for data restoration</li>
+                                    <li>Backups stored in ir.attachment to survive uninstallation</li>
+                                </ul>
                             </div>
-                            <p style="color: #666; margin-bottom: 15px; font-style: italic;">Initial release with comprehensive internal transfer management</p>
+                        </div>
 
-                            <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">Core Features</h4>
-                            <ul class="timeline-changes">
-                                <li>Internal transfers between Bank/Cash accounts</li>
-                                <li>Multi-level approval workflow (Manager/Admin)</li>
-                                <li>Threshold-based approval routing</li>
-                                <li>Automatic journal entry creation with detailed narrations</li>
-                                <li>Auto-reconciliation of transfer account entries</li>
-                                <li>Complete audit trail via mail.thread</li>
-                            </ul>
+                        <!-- Version 19.0.1.1.0 -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker">v2</div>
+                            <div class="timeline-content">
+                                <h3>Version 19.0.1.1.0</h3>
+                                <div class="timeline-date">
+                                    Released: December 11, 2025
+                                    <span class="odoo-version-badge">Odoo 19</span>
+                                </div>
+                                <p style="color: #666; margin-bottom: 15px; font-style: italic;">Bug fix release addressing Odoo 19 compatibility issues</p>
 
-                            <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">Transfer Types</h4>
-                            <ul class="timeline-changes">
-                                <li>Bank to Bank transfers</li>
-                                <li>Bank to Cash transfers</li>
-                                <li>Cash to Bank transfers</li>
-                                <li>Cash to Cash transfers</li>
-                                <li>Multi-currency support with exchange rates</li>
-                            </ul>
+                                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">🐛 Bug Fixes</h4>
+                                <ul class="timeline-changes">
+                                    <li><strong>Search View Fix:</strong> Resolved "Invalid view internal.transfer.view.search" error in Odoo 19 by removing unsupported group wrapper for filter elements</li>
+                                    <li><strong>Report Action Fix:</strong> Fixed "External ID not found: action_report_internal_transfer" by correcting manifest data load order - reports now load before views</li>
+                                </ul>
 
-                            <h4 style="color: #0c5460; margin-top: 20px; margin-bottom: 10px;">Security & Architecture</h4>
-                            <ul class="timeline-changes">
-                                <li>Three security roles: User, Manager, Admin</li>
-                                <li>Record-level access rules per company</li>
-                                <li>Rejection workflow with mandatory reasons</li>
-                                <li>Cancellation with automatic reversal entries</li>
-                                <li>Multi-company support</li>
-                            </ul>
+                                <h4 style="color: #17a2b8; margin-top: 20px; margin-bottom: 10px;">🔧 Technical</h4>
+                                <ul class="timeline-changes">
+                                    <li>Updated search view to use flat filter elements with domain="[]" and context for group by</li>
+                                    <li>Reordered manifest data files: reports before views</li>
+                                    <li>Module version updated to 19.0.1.1.0</li>
+                                </ul>
+                            </div>
+                        </div>
 
-                            <h4 style="color: #875A7B; margin-top: 20px; margin-bottom: 10px;">Views & Reports</h4>
-                            <ul class="timeline-changes">
-                                <li>Dashboard views: All, Pending, Rejected, Approved</li>
-                                <li>Kanban view grouped by status</li>
-                                <li>Professional PDF transfer voucher</li>
-                                <li>Signature lines for authorization</li>
-                            </ul>
+                        <!-- Version 19.0.1.0.0 -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker">v1</div>
+                            <div class="timeline-content">
+                                <h3>Version 19.0.1.0.0</h3>
+                                <div class="timeline-date">
+                                    Released: December 11, 2025
+                                    <span class="odoo-version-badge">Odoo 19</span>
+                                </div>
+                                <p style="color: #666; margin-bottom: 15px; font-style: italic;">Initial release with comprehensive internal transfer management and approval workflow</p>
+
+                                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">✨ Transfer Management</h4>
+                                <ul class="timeline-changes">
+                                    <li>Bank-to-bank transfers with automatic journal entries</li>
+                                    <li>Bank-to-cash and cash-to-bank transfers</li>
+                                    <li>Cash-to-cash transfers between petty cash accounts</li>
+                                    <li>Multi-currency support with dual exchange rate display</li>
+                                    <li>Automatic bank statement line creation</li>
+                                    <li>Auto-reconciliation with transfer account</li>
+                                </ul>
+
+                                <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">🔐 Approval Workflow</h4>
+                                <ul class="timeline-changes">
+                                    <li>Configurable approval thresholds by amount</li>
+                                    <li>Multi-level approval (Manager/Admin)</li>
+                                    <li>Approver selection per transfer</li>
+                                    <li>Activity notifications for approvers</li>
+                                    <li>Full approval tracking and audit trail</li>
+                                </ul>
+
+                                <h4 style="color: #0c5460; margin-top: 20px; margin-bottom: 10px;">🔒 Security & Accounting</h4>
+                                <ul class="timeline-changes">
+                                    <li>Lock/Unlock approved transfers</li>
+                                    <li>Uses standard Odoo accounting groups</li>
+                                    <li>Company-based record rules</li>
+                                    <li>Proper double-entry accounting</li>
+                                    <li>Reversal entries on cancellation</li>
+                                    <li>Full audit trail via chatter</li>
+                                </ul>
+
+                                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">📄 Reporting</h4>
+                                <ul class="timeline-changes">
+                                    <li>Professional PDF transfer voucher</li>
+                                    <li>A4 optimized layout</li>
+                                    <li>Complete approval trail on printout</li>
+                                    <li>Multi-currency amounts display</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Odoo 18 Timeline -->
+                <div id="odoo18" class="version-content">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Soon</div>
+                            <div class="timeline-content">
+                                <h3>Odoo 18 Version</h3>
+                                <div class="timeline-date">
+                                    Coming Soon
+                                    <span class="odoo-version-badge" style="background: linear-gradient(135deg, #1E40AF, #1E3A8A);">Odoo 18</span>
+                                </div>
+                                <p style="color: #666; margin-top: 15px;">
+                                    VPA Internal Transfer for Odoo 18 is currently in development. This version will include all the features from the Odoo 19 release,
+                                    optimized and tested specifically for Odoo 18 compatibility.
+                                </p>
+                                <p style="color: #DC143C; font-weight: 600; margin-top: 15px;">
+                                    Expected Release: Q1 2026
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Odoo 17 Timeline -->
+                <div id="odoo17" class="version-content">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Soon</div>
+                            <div class="timeline-content">
+                                <h3>Odoo 17 Version</h3>
+                                <div class="timeline-date">
+                                    Coming Soon
+                                    <span class="odoo-version-badge" style="background: linear-gradient(135deg, #059669, #047857);">Odoo 17</span>
+                                </div>
+                                <p style="color: #666; margin-top: 15px;">
+                                    VPA Internal Transfer for Odoo 17 is planned for development. As Odoo 17 has the largest market share,
+                                    this version is a high priority and will receive the full feature set adapted for Odoo 17.
+                                </p>
+                                <p style="color: #DC143C; font-weight: 600; margin-top: 15px;">
+                                    Expected Release: Q1 2026
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -955,39 +1130,39 @@
                 <h2 class="section-title">Key Features</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon">🔄</div>
-                        <h3>Internal Transfers</h3>
-                        <p>Transfer funds between bank and cash accounts with proper double-entry accounting and intermediate transfer account.</p>
+                        <div class="feature-icon">🏦</div>
+                        <h3>Multiple Transfer Types</h3>
+                        <p>Bank-to-bank, bank-to-cash, cash-to-bank, and cash-to-cash transfers. All your internal fund movements in one place!</p>
                     </div>
 
                     <div class="feature-card">
                         <div class="feature-icon">✅</div>
-                        <h3>Multi-Level Approval</h3>
-                        <p>Configure threshold-based approval routing. Managers approve standard amounts, Administrators handle high-value transfers.</p>
+                        <h3>Approval Workflow</h3>
+                        <p>Configurable threshold-based approval routing. Manager and Admin approval levels with activity notifications!</p>
                     </div>
 
                     <div class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <h3>Auto Journal Entries</h3>
-                        <p>Automatic creation of paired journal entries with comprehensive narrations including transfer details and approver info.</p>
-                    </div>
-
-                    <div class="feature-card">
-                        <div class="feature-icon">🔗</div>
-                        <h3>Auto Reconciliation</h3>
-                        <p>Transfer account entries are automatically reconciled upon approval, keeping your accounts clean and balanced.</p>
+                        <div class="feature-icon">🔄</div>
+                        <h3>Auto-Reconciliation</h3>
+                        <p>Automatic bank statement line creation and reconciliation. Transfers appear in bank transactions view, already matched!</p>
                     </div>
 
                     <div class="feature-card">
                         <div class="feature-icon">💱</div>
                         <h3>Multi-Currency</h3>
-                        <p>Full support for transfers between accounts with different currencies, with automatic exchange rate calculation.</p>
+                        <p>Full multi-currency support with dual exchange rate display. Enter rates in either direction for convenience!</p>
                     </div>
 
                     <div class="feature-card">
-                        <div class="feature-icon">📝</div>
-                        <h3>Complete Audit Trail</h3>
-                        <p>Track every action via chatter - submissions, approvals, rejections, and cancellations with timestamps and reasons.</p>
+                        <div class="feature-icon">📋</div>
+                        <h3>Full Audit Trail</h3>
+                        <p>Complete tracking via chatter integration. Who created, submitted, approved, rejected, or cancelled - all tracked!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>PDF Voucher</h3>
+                        <p>Professional A4-optimized transfer voucher printout with complete approval trail and multi-currency amounts!</p>
                     </div>
                 </div>
             </div>
@@ -996,29 +1171,40 @@
         <!-- Workflow Section -->
         <section id="workflow" class="section">
             <div class="container">
-                <h2 class="section-title">Approval Workflow</h2>
-                <p class="section-subtitle">Simple yet powerful workflow ensures proper authorization for all fund transfers</p>
+                <h2 class="section-title">Transfer Workflow</h2>
+                <p class="section-subtitle">Simple 6-step workflow from creation to completion</p>
 
-                <div class="workflow-diagram">
-                    <div class="workflow-step draft">
-                        <h4>Draft</h4>
-                        <p>Create Transfer</p>
+                <div class="workflow-steps">
+                    <div class="workflow-step">
+                        <div class="step-number">1</div>
+                        <h4>Create</h4>
+                        <p>User creates transfer in draft</p>
                     </div>
-                    <span class="workflow-arrow">→</span>
-                    <div class="workflow-step submitted">
-                        <h4>Submitted</h4>
-                        <p>Awaiting Approval</p>
+                    <div class="workflow-step">
+                        <div class="step-number">2</div>
+                        <h4>Submit</h4>
+                        <p>Select approver & submit</p>
                     </div>
-                    <span class="workflow-arrow">→</span>
-                    <div class="workflow-step approved">
-                        <h4>Approved</h4>
-                        <p>Auto-Posted</p>
+                    <div class="workflow-step">
+                        <div class="step-number">3</div>
+                        <h4>Review</h4>
+                        <p>Approver reviews transfer</p>
                     </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 30px;">
-                    <p><strong>Rejection Path:</strong> Rejected transfers can be reset to draft for correction and resubmission.</p>
-                    <p><strong>Cancellation:</strong> Approved transfers can be cancelled with automatic reversal journal entries.</p>
+                    <div class="workflow-step">
+                        <div class="step-number">4</div>
+                        <h4>Approve</h4>
+                        <p>Approve or reject</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">5</div>
+                        <h4>Auto-Post</h4>
+                        <p>Bank lines created & reconciled</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-number">6</div>
+                        <h4>Lock</h4>
+                        <p>Optional lock to prevent changes</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1031,42 +1217,42 @@
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Proper Authorization:</strong> Ensure all fund transfers go through proper approval channels based on amount thresholds
+                            <strong>Complete Control:</strong> Multi-level approval ensures proper authorization for all fund movements
                         </div>
                     </div>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Accurate Accounting:</strong> Automatic journal entries with proper double-entry accounting and intermediate transfer account
+                            <strong>Time Savings:</strong> Automatic bank statement lines and reconciliation eliminate manual data entry
                         </div>
                     </div>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Clean Reconciliation:</strong> Auto-reconciliation keeps your transfer account balanced and your books clean
+                            <strong>Audit Ready:</strong> Complete audit trail with chatter integration for all transfer activities
                         </div>
                     </div>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Full Traceability:</strong> Complete audit trail with chatter integration - know who did what and when
+                            <strong>Multi-Currency:</strong> Handle transfers between accounts in different currencies with ease
                         </div>
                     </div>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Multi-Currency Ready:</strong> Handle transfers between accounts with different currencies seamlessly
+                            <strong>Professional Output:</strong> Generate professional transfer vouchers for documentation
                         </div>
                     </div>
 
                     <div class="benefit-item">
                         <div class="benefit-icon">✓</div>
                         <div class="benefit-text">
-                            <strong>Professional Documents:</strong> Generate PDF transfer vouchers with all details and signature lines
+                            <strong>Proper Accounting:</strong> Double-entry journal entries with proper reversal on cancellation
                         </div>
                     </div>
                 </div>
@@ -1082,27 +1268,26 @@
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <h3>Create Transfer</h3>
-                        <p><strong>Select Source:</strong> Choose source bank/cash journal</p>
-                        <p><strong>Select Destination:</strong> Choose destination journal</p>
-                        <p><strong>Enter Amount:</strong> Specify transfer amount</p>
-                        <p><strong>Add Memo:</strong> Optional description for reference</p>
+                        <h3>Install & Configure</h3>
+                        <p><strong>Install:</strong> Search for "VPA Accounting Internal Transfer" in Apps</p>
+                        <p><strong>Configure:</strong> Set default transfer account in Accounting Settings</p>
+                        <p><strong>Thresholds:</strong> Configure approval thresholds by amount</p>
                     </div>
 
                     <div class="step">
                         <div class="step-number">2</div>
-                        <h3>Submit & Approve</h3>
-                        <p><strong>Submit:</strong> Send for approval</p>
-                        <p><strong>Threshold Check:</strong> System determines required approval level</p>
-                        <p><strong>Approve:</strong> Manager or Admin approves based on amount</p>
+                        <h3>Create Transfer</h3>
+                        <p><strong>Select Journals:</strong> Choose source and destination journals</p>
+                        <p><strong>Enter Amount:</strong> Amount with optional multi-currency</p>
+                        <p><strong>Submit:</strong> Select approver and submit for approval</p>
                     </div>
 
                     <div class="step">
                         <div class="step-number">3</div>
-                        <h3>Auto-Posted!</h3>
-                        <p><strong>Journal Entries:</strong> Created automatically</p>
-                        <p><strong>Reconciliation:</strong> Transfer account reconciled</p>
-                        <p><strong>Print Voucher:</strong> PDF report available</p>
+                        <h3>Approve & Done!</h3>
+                        <p><strong>Notification:</strong> Approver receives activity notification</p>
+                        <p><strong>Review:</strong> Approve or reject with reason</p>
+                        <p><strong>Auto-Post:</strong> Bank lines created and reconciled automatically!</p>
                     </div>
                 </div>
             </div>
@@ -1112,25 +1297,26 @@
         <section id="security" class="section">
             <div class="container">
                 <h2 class="section-title">Enterprise-Grade Security</h2>
-                <p class="section-subtitle">Role-based access control with proper segregation of duties</p>
+                <p class="section-subtitle">Uses standard Odoo accounting security groups</p>
 
                 <div class="security-grid">
                     <div class="security-card">
-                        <h3>Security Roles</h3>
+                        <h3>🔐 Access Control</h3>
                         <ul>
-                            <li><strong>Transfer User:</strong> Create and submit transfers, view own transfers</li>
-                            <li><strong>Transfer Manager:</strong> Approve up to threshold, view all transfers</li>
-                            <li><strong>Transfer Administrator:</strong> Approve all amounts, configure thresholds, full access</li>
+                            <li><strong>Accountant (group_account_user):</strong> Create and submit transfers</li>
+                            <li><strong>Account Manager (group_account_manager):</strong> Approve, reject, cancel transfers</li>
+                            <li><strong>Company Rules:</strong> Users only see their company's transfers</li>
+                            <li><strong>Lock Feature:</strong> Lock approved transfers to prevent changes</li>
                         </ul>
                     </div>
 
                     <div class="security-card">
-                        <h3>Access Controls</h3>
+                        <h3>📋 Audit Features</h3>
                         <ul>
-                            <li><strong>Company-Based:</strong> Multi-company isolation with record rules</li>
-                            <li><strong>Threshold Routing:</strong> Automatic approval level based on amount</li>
-                            <li><strong>Audit Logging:</strong> All actions tracked via chatter</li>
-                            <li><strong>Rejection Reasons:</strong> Mandatory reason for rejections</li>
+                            <li><strong>Chatter Integration:</strong> All actions logged with timestamps</li>
+                            <li><strong>Approval Trail:</strong> Who submitted, approved, rejected tracked</li>
+                            <li><strong>Cancellation Reason:</strong> Required reason for all cancellations</li>
+                            <li><strong>Reversal Entries:</strong> Proper reversals on cancellation</li>
                         </ul>
                     </div>
                 </div>
@@ -1156,11 +1342,11 @@
                         </tr>
                         <tr>
                             <td>Latest Version</td>
-                            <td>19.0.1.0.0</td>
+                            <td>19.0.1.2.0</td>
                         </tr>
                         <tr>
                             <td>License</td>
-                            <td>OPL-1 (Odoo Proprietary License)</td>
+                            <td>OPL-1 (Proprietary)</td>
                         </tr>
                         <tr>
                             <td>Author</td>
@@ -1172,19 +1358,15 @@
                         </tr>
                         <tr>
                             <td>Odoo Versions</td>
-                            <td>19.0 (Community & Enterprise)</td>
+                            <td>19.0 Enterprise<br>18.0 (Coming Soon)<br>17.0 (Coming Soon)</td>
                         </tr>
                         <tr>
                             <td>Dependencies</td>
-                            <td>account, mail</td>
+                            <td>account_accountant (Odoo Enterprise), mail</td>
                         </tr>
                         <tr>
-                            <td>Models</td>
-                            <td>internal.transfer, internal.transfer.threshold</td>
-                        </tr>
-                        <tr>
-                            <td>Reports</td>
-                            <td>PDF Transfer Voucher</td>
+                            <td>Multi-Company</td>
+                            <td>Full support with company-based rules</td>
                         </tr>
                     </table>
                 </div>
@@ -1198,22 +1380,22 @@
                 <div class="info-box">
                     <h3>✓ Complete Package</h3>
                     <ul>
-                        <li>✓ Internal Transfer Model</li>
-                        <li>✓ Approval Threshold Configuration</li>
+                        <li>✓ All Transfer Types (Bank/Cash)</li>
                         <li>✓ Multi-Level Approval Workflow</li>
-                        <li>✓ Auto Journal Entry Creation</li>
-                        <li>✓ Auto Reconciliation</li>
+                        <li>✓ Configurable Thresholds</li>
+                        <li>✓ Automatic Bank Statement Lines</li>
+                        <li>✓ Auto-Reconciliation</li>
                         <li>✓ Multi-Currency Support</li>
-                        <li>✓ Rejection Workflow with Reasons</li>
-                        <li>✓ Cancellation with Reversal Entries</li>
-                        <li>✓ PDF Transfer Voucher Report</li>
-                        <li>✓ Dashboard Views (All, Pending, Rejected, Approved)</li>
-                        <li>✓ Kanban View</li>
-                        <li>✓ Three Security Roles</li>
+                        <li>✓ Dual Exchange Rate Display</li>
+                        <li>✓ Lock/Unlock Feature</li>
+                        <li>✓ Cancellation with Reversal</li>
+                        <li>✓ Professional PDF Voucher</li>
+                        <li>✓ Full Audit Trail (Chatter)</li>
+                        <li>✓ Activity Notifications</li>
                         <li>✓ Multi-Company Support</li>
-                        <li>✓ Chatter Integration</li>
-                        <li>✓ Attachment Support</li>
-                        <li>✓ Professional Support Included</li>
+                        <li>✓ Standard Odoo Security Groups</li>
+                        <li>✓ Free Lifetime Updates</li>
+                        <li>✓ Professional Support</li>
                     </ul>
                 </div>
             </div>
@@ -1224,9 +1406,9 @@
             <div class="container">
                 <h2 class="section-title">Pricing</h2>
                 <div class="pricing-card">
-                    <h3>Professional Edition</h3>
+                    <h3>Enterprise Edition</h3>
                     <div class="price">
-                        $99<span class="price-period">USD</span>
+                        $199<span class="price-period">USD</span>
                     </div>
                     <p style="color: #28a745; font-size: 1.2em; font-weight: 600; margin-bottom: 20px;">One-Time Purchase!</p>
                     <ul class="pricing-features">
@@ -1238,7 +1420,8 @@
                         <li>No monthly fees</li>
                         <li>No user limits</li>
                         <li>Multi-company support</li>
-                        <li>Source code included</li>
+                        <li>Full audit trail</li>
+                        <li>PDF voucher generation</li>
                     </ul>
                     <a href="#contact" class="cta-button">Get Started Now</a>
                 </div>
@@ -1249,7 +1432,7 @@
         <section id="contact" class="section">
             <div class="container">
                 <h2 class="section-title">Support & Contact</h2>
-                <p class="section-subtitle">We're here to help you succeed with VPA Accounting Internal Transfer</p>
+                <p class="section-subtitle">We're here to help you succeed with VPA Internal Transfer</p>
 
                 <div class="contact-box">
                     <div class="contact-item">
@@ -1274,7 +1457,7 @@
 
                     <div class="contact-item">
                         <div>
-                            <strong>Documentation:</strong> Comprehensive user guide included
+                            <strong>Documentation:</strong> Comprehensive user guide included with module
                         </div>
                     </div>
                 </div>
@@ -1285,10 +1468,10 @@
         <footer class="footer">
             <div class="container">
                 <p style="font-size: 1.3em; margin-bottom: 15px;">
-                    <strong>VPA Accounting Internal Transfer</strong> - Professional Fund Transfer Management
+                    <strong>VPA Internal Transfer</strong> - Professional Fund Transfer Management
                 </p>
                 <p style="margin: 12px 0;">
-                    Copyright &copy; 2025 <a href="https://www.vpasoftware.com">VPA Software Limited</a>. All rights reserved.
+                    Copyright © 2025 <a href="https://www.vpasoftware.com">VPA Software Limited</a>. All rights reserved.
                 </p>
                 <p style="margin: 12px 0; color: #aaa;">
                     Developed with ❤️ for the Odoo community
@@ -1307,6 +1490,20 @@
             menu.classList.toggle('active');
         }
 
+        // Version tab switcher
+        function showVersion(version) {
+            document.querySelectorAll('.version-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelectorAll('.version-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(version).classList.add('active');
+            event.target.classList.add('active');
+        }
+
         // Active section highlighting on scroll
         const menuLinks = document.querySelectorAll('.menu-link');
         const sections = document.querySelectorAll('.section, .header');
@@ -1316,7 +1513,6 @@
 
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
                 if (pageYOffset >= sectionTop - 150) {
                     current = section.getAttribute('id');
                 }
