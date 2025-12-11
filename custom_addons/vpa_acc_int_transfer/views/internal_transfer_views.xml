@@ -251,26 +251,8 @@
         <field name="name">internal.transfer.view.search</field>
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
-            <search string="Search Internal Transfers">
+            <search>
                 <field name="name"/>
-                <field name="memo"/>
-                <field name="source_journal_id"/>
-                <field name="destination_journal_id"/>
-                <separator/>
-                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
-                <filter string="Pending Approval" name="filter_submitted" domain="[('state', '=', 'submitted')]"/>
-                <filter string="Approved" name="filter_approved" domain="[('state', '=', 'approved')]"/>
-                <filter string="Rejected" name="filter_rejected" domain="[('state', '=', 'rejected')]"/>
-                <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
-                <separator/>
-                <filter string="Locked" name="filter_locked" domain="[('is_locked', '=', True)]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
-                    <filter string="Date" name="groupby_date" context="{'group_by': 'date:month'}"/>
-                    <filter string="Source Journal" name="groupby_source" context="{'group_by': 'source_journal_id'}"/>
-                    <filter string="Destination Journal" name="groupby_destination" context="{'group_by': 'destination_journal_id'}"/>
-                </group>
             </search>
         </field>
     </record>
