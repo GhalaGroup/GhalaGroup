@@ -5,7 +5,9 @@
 import json
 import base64
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
+from odoo import _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -13,10 +15,9 @@ _logger = logging.getLogger(__name__)
 def pre_uninstall_hook(env):
     """
     Hook called before module uninstallation.
-    Creates an automatic backup of all internal transfers to prevent data loss.
-    The backup is stored in ir.attachment so it survives the uninstall.
+    Warns user about data loss and creates automatic backup.
     """
-    _logger.info("VPA Internal Transfer: Starting pre-uninstall backup...")
+    _logger.info("VPA Internal Transfer: Pre-uninstall hook triggered...")
 
     Transfer = env['internal.transfer']
     transfers = Transfer.search([])
@@ -25,11 +26,39 @@ def pre_uninstall_hook(env):
         _logger.info("VPA Internal Transfer: No transfers to backup.")
         return
 
-    # Prepare backup data
+    # Check if a recent backup exists (within last hour)
+    Backup = env['internal.transfer.backup']
+    one_hour_ago = datetime.now() - timedelta(hours=1)
+    recent_backup = Backup.search([
+        ('backup_date', '>=', one_hour_ago)
+    ], limit=1)
+
+    if not recent_backup:
+        # Warn user about data loss - raise error to block uninstall
+        raise UserError(_(
+            "⚠️ WARNING: Data Loss Prevention ⚠️\n\n"
+            "You have %d internal transfer(s) that will be PERMANENTLY DELETED!\n\n"
+            "Before uninstalling, you MUST create a backup:\n\n"
+            "1. Go to Accounting → Internal Transfers\n"
+            "2. Click the gear icon (⚙️) → Actions → Create Backup\n"
+            "3. After backup is created, you can uninstall safely\n\n"
+            "The backup can be restored after reinstalling the module.\n"
+            "Go to Settings → Accounting → VPA Internal Transfer → View Backups"
+        ) % len(transfers))
+
+    # If we get here, a recent backup exists - proceed with uninstall
+    _logger.info("VPA Internal Transfer: Recent backup found. Proceeding with uninstall.")
+
+    # Create one more automatic backup just in case
+    _create_backup(env, transfers, 'Pre-uninstall automatic backup')
+
+
+def _create_backup(env, transfers, reason):
+    """Helper to create a backup attachment."""
     backup_data = {
         'version': '1.0',
         'backup_date': datetime.now().isoformat(),
-        'reason': 'Pre-uninstall automatic backup',
+        'reason': reason,
         'transfer_count': len(transfers),
         'transfers': [],
     }
@@ -94,18 +123,18 @@ def pre_uninstall_hook(env):
         'type': 'binary',
         'datas': encoded_data,
         'mimetype': 'application/json',
-        'description': 'VPA Internal Transfer - Automatic backup before uninstall (%d transfers)' % len(transfers),
+        'description': 'VPA Internal Transfer - %s (%d transfers)' % (reason, len(transfers)),
         'res_model': 'ir.module.module',
-        'res_id': 0,  # Not linked to specific record
+        'res_id': 0,
     })
 
-    _logger.info("VPA Internal Transfer: Backup completed. %d transfers saved to attachment: %s", len(transfers), filename)
+    _logger.info("VPA Internal Transfer: Backup completed. %d transfers saved to: %s", len(transfers), filename)
 
 
 def post_init_hook(env):
     """
     Hook called after module installation.
-    Checks for existing backups and notifies user.
+    Checks for existing backups and notifies user via log.
     """
     _logger.info("VPA Internal Transfer: Checking for existing backups...")
 
@@ -118,6 +147,6 @@ def post_init_hook(env):
     if backups:
         _logger.info(
             "VPA Internal Transfer: Found %d backup(s). "
-            "Go to Accounting > Configuration > Internal Transfer Backups to restore.",
+            "Go to Settings > Accounting > VPA Internal Transfer > View Backups to restore.",
             len(backups)
         )

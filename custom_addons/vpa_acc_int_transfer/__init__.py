@@ -4,3 +4,4 @@
 
 from . import models
 from . import wizard
+from .hooks import pre_uninstall_hook, post_init_hook

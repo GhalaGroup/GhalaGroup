@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Accounting Internal Transfer',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'category': 'Accounting/Accounting',
     'summary': 'Internal fund transfers with multi-level approval workflow',
     'description': """
@@ -70,7 +70,6 @@ Support: support@vpasoftware.com
     'installable': True,
     'application': True,
     'auto_install': False,
-    'pre_init_hook': 'pre_uninstall_hook',
     'uninstall_hook': 'pre_uninstall_hook',
     'post_init_hook': 'post_init_hook',
 }
