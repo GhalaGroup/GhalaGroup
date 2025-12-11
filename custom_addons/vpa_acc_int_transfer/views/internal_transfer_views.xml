@@ -271,10 +271,6 @@
                 <filter name="filter_my_transfers" string="My Transfers" domain="[('create_uid', '=', uid)]"/>
                 <filter name="filter_my_approvals" string="Awaiting My Approval" domain="[('state', '=', 'submitted'), ('approver_id', '=', uid)]"/>
                 <separator/>
-                <filter name="filter_today" string="Today" date="date" offset="0"/>
-                <filter name="filter_this_week" string="This Week" date="date" offset="0" period="week"/>
-                <filter name="filter_this_month" string="This Month" date="date" offset="0" period="month"/>
-                <separator/>
                 <group expand="0" string="Group By">
                     <filter name="groupby_state" string="Status" context="{'group_by': 'state'}"/>
                     <filter name="groupby_date" string="Date" context="{'group_by': 'date:month'}"/>
