@@ -63,36 +63,36 @@
                     </div>
                     <group col="2">
                         <group string="Transfer Details">
-                            <field name="date"/>
+                            <field name="date" readonly="state == 'approved'"/>
                             <field name="company_id" invisible="1"/>
                             <field name="approver_id" options="{'no_create': True}"
                                    readonly="state != 'draft'"/>
-                            <field name="memo_type"/>
+                            <field name="memo_type" readonly="state == 'approved'"/>
                             <field name="memo" placeholder="Auto-generated memo..."
-                                   readonly="memo_type != 'custom'"/>
+                                   readonly="memo_type != 'custom' or state == 'approved'"/>
                         </group>
                         <group string="Amount">
-                            <field name="amount"/>
-                            <field name="currency_id"/>
+                            <field name="amount" readonly="state == 'approved'"/>
+                            <field name="currency_id" readonly="state == 'approved'"/>
                             <field name="is_multi_currency" invisible="1"/>
                             <field name="destination_currency_id" invisible="not is_multi_currency"/>
-                            <field name="exchange_rate" invisible="not is_multi_currency"/>
-                            <field name="destination_amount" invisible="not is_multi_currency"/>
+                            <field name="exchange_rate" invisible="not is_multi_currency" readonly="state == 'approved'"/>
+                            <field name="destination_amount" invisible="not is_multi_currency" readonly="state == 'approved'"/>
                         </group>
                     </group>
                     <group col="2">
                         <group string="From (Source)">
-                            <field name="source_journal_id" options="{'no_create': True}"/>
+                            <field name="source_journal_id" options="{'no_create': True}" readonly="state == 'approved'"/>
                             <field name="source_account_id" readonly="1"/>
                         </group>
                         <group string="To (Destination)">
-                            <field name="destination_journal_id" options="{'no_create': True}"/>
+                            <field name="destination_journal_id" options="{'no_create': True}" readonly="state == 'approved'"/>
                             <field name="destination_account_id" readonly="1"/>
                         </group>
                     </group>
                     <group col="2">
                         <group string="Intermediate Account">
-                            <field name="transfer_account_id" options="{'no_create': True}"/>
+                            <field name="transfer_account_id" options="{'no_create': True}" readonly="state == 'approved'"/>
                         </group>
                         <group string="Approval Information" invisible="state == 'draft'">
                             <field name="required_approval_level" readonly="1"/>
@@ -100,10 +100,10 @@
                     </group>
                     <notebook>
                         <page string="Notes" name="notes">
-                            <field name="notes" placeholder="Internal notes..." nolabel="1"/>
+                            <field name="notes" placeholder="Internal notes..." nolabel="1" readonly="state == 'approved'"/>
                         </page>
                         <page string="Attachments" name="attachments">
-                            <field name="attachment_ids" widget="many2many_binary" nolabel="1"/>
+                            <field name="attachment_ids" widget="many2many_binary" nolabel="1" readonly="state == 'approved'"/>
                         </page>
                         <page string="Audit Trail" name="audit" invisible="state == 'draft'">
                             <group col="2">
@@ -117,11 +117,14 @@
                                 </group>
                             </group>
                             <group col="2" invisible="state not in ('approved', 'cancelled')">
+                                <group string="Payments" invisible="not source_payment_id">
+                                    <field name="source_payment_id"/>
+                                    <field name="destination_payment_id"/>
+                                </group>
                                 <group string="Journal Entries" invisible="not source_move_id">
                                     <field name="source_move_id"/>
                                     <field name="destination_move_id"/>
                                 </group>
-                                <group/>
                             </group>
                             <group col="2" invisible="state != 'rejected'" string="Rejection Details">
                                 <group>

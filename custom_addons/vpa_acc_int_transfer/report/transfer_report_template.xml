@@ -216,28 +216,40 @@
                             </div>
                         </div>
 
-                        <!-- Journal Entries Reference -->
-                        <t t-if="doc.source_move_id or doc.destination_move_id">
+                        <!-- Payments and Journal Entries Reference -->
+                        <t t-if="doc.source_payment_id or doc.source_move_id or doc.destination_move_id">
                             <div class="row mt-3">
                                 <div class="col-12">
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
                                                 <th colspan="2" class="text-center" style="background-color: #28a745; color: white;">
-                                                    Journal Entries
+                                                    Payments &amp; Journal Entries
                                                 </th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <t t-if="doc.source_payment_id">
+                                                <tr>
+                                                    <td style="width: 50%;"><strong>Source Payment:</strong></td>
+                                                    <td style="width: 50%;"><span t-field="doc.source_payment_id.name"/></td>
+                                                </tr>
+                                            </t>
+                                            <t t-if="doc.destination_payment_id">
+                                                <tr>
+                                                    <td><strong>Destination Payment:</strong></td>
+                                                    <td><span t-field="doc.destination_payment_id.name"/></td>
+                                                </tr>
+                                            </t>
                                             <t t-if="doc.source_move_id">
                                                 <tr>
-                                                    <td style="width: 50%;"><strong>Source Entry:</strong></td>
-                                                    <td style="width: 50%;"><span t-field="doc.source_move_id.name"/></td>
+                                                    <td><strong>Source Journal Entry:</strong></td>
+                                                    <td><span t-field="doc.source_move_id.name"/></td>
                                                 </tr>
                                             </t>
                                             <t t-if="doc.destination_move_id">
                                                 <tr>
-                                                    <td><strong>Destination Entry:</strong></td>
+                                                    <td><strong>Destination Journal Entry:</strong></td>
                                                     <td><span t-field="doc.destination_move_id.name"/></td>
                                                 </tr>
                                             </t>

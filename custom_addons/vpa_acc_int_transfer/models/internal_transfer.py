@@ -219,6 +219,18 @@ class InternalTransfer(models.Model):
         readonly=True,
         copy=False,
     )
+    source_payment_id = fields.Many2one(
+        'account.payment',
+        string='Source Payment',
+        readonly=True,
+        copy=False,
+    )
+    destination_payment_id = fields.Many2one(
+        'account.payment',
+        string='Destination Payment',
+        readonly=True,
+        copy=False,
+    )
     move_count = fields.Integer(
         string='Journal Entry Count',
         compute='_compute_move_count',
@@ -593,13 +605,18 @@ class InternalTransfer(models.Model):
         return '\n'.join(lines)
 
     def _create_journal_entries(self):
-        """Create paired journal entries for the transfer"""
+        """Create paired payments for the internal transfer using Odoo's payment system.
+
+        This uses account.payment with is_internal_transfer=True to ensure:
+        1. Entries appear properly in bank/cash transaction lists
+        2. Entries are classified correctly (not as Misc. Operations)
+        3. Proper double-entry accounting is maintained
+        """
         self.ensure_one()
 
-        AccountMove = self.env['account.move']
+        AccountPayment = self.env['account.payment']
 
-        # Build comprehensive reference
-        ref = self._get_journal_entry_narration()
+        # Build reference for memo
         short_ref = _('Internal Transfer: %s') % self.name
         if self.memo:
             short_ref = '%s - %s' % (short_ref, self.memo)
@@ -608,90 +625,61 @@ class InternalTransfer(models.Model):
         company_currency = self.company_id.currency_id
         source_currency = self.currency_id or company_currency
 
-        # === SOURCE JOURNAL ENTRY ===
-        # Debit: Transfer Account, Credit: Source Bank/Cash Account
-        source_move_vals = {
+        # === CREATE OUTBOUND PAYMENT (FROM SOURCE) ===
+        # This creates a payment going OUT of the source bank/cash
+        outbound_payment_vals = {
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',  # Required but not actually used for internal transfer
             'date': self.date,
-            'ref': short_ref,
-            'narration': ref,
-            'journal_id': self.source_journal_id.id,
-            'company_id': self.company_id.id,
+            'amount': self.amount,
             'currency_id': source_currency.id,
-            'line_ids': [
-                (0, 0, {
-                    'name': short_ref,
-                    'account_id': self.transfer_account_id.id,
-                    'debit': self.amount,
-                    'credit': 0.0,
-                    'currency_id': source_currency.id,
-                    'amount_currency': self.amount,
-                }),
-                (0, 0, {
-                    'name': short_ref,
-                    'account_id': self.source_account_id.id,
-                    'debit': 0.0,
-                    'credit': self.amount,
-                    'currency_id': source_currency.id,
-                    'amount_currency': -self.amount,
-                }),
-            ],
-        }
-        source_move = AccountMove.create(source_move_vals)
-        source_move.action_post()
-
-        # === DESTINATION JOURNAL ENTRY ===
-        # Debit: Destination Bank/Cash Account, Credit: Transfer Account
-        dest_amount = self.destination_amount if self.is_multi_currency else self.amount
-        dest_currency = self.destination_currency_id if self.is_multi_currency else source_currency
-
-        destination_move_vals = {
-            'date': self.date,
+            'journal_id': self.source_journal_id.id,
+            'destination_journal_id': self.destination_journal_id.id,
+            'is_internal_transfer': True,
             'ref': short_ref,
-            'narration': ref,
-            'journal_id': self.destination_journal_id.id,
             'company_id': self.company_id.id,
-            'currency_id': dest_currency.id,
-            'line_ids': [
-                (0, 0, {
-                    'name': short_ref,
-                    'account_id': self.destination_account_id.id,
-                    'debit': dest_amount,
-                    'credit': 0.0,
-                    'currency_id': dest_currency.id,
-                    'amount_currency': dest_amount,
-                }),
-                (0, 0, {
-                    'name': short_ref,
-                    'account_id': self.transfer_account_id.id,
-                    'debit': 0.0,
-                    'credit': dest_amount,
-                    'currency_id': dest_currency.id,
-                    'amount_currency': -dest_amount,
-                }),
-            ],
         }
-        destination_move = AccountMove.create(destination_move_vals)
-        destination_move.action_post()
+
+        outbound_payment = AccountPayment.create(outbound_payment_vals)
+        outbound_payment.action_post()
+
+        # Get the paired inbound payment (created automatically by Odoo for internal transfers)
+        # The paired payment is linked via paired_internal_transfer_payment_id
+        paired_payment = AccountPayment.search([
+            ('paired_internal_transfer_payment_id', '=', outbound_payment.id)
+        ], limit=1)
+
+        # Store references to the journal entries and payments
+        source_move = outbound_payment.move_id
+        destination_move = paired_payment.move_id if paired_payment else False
 
         self.write({
-            'source_move_id': source_move.id,
-            'destination_move_id': destination_move.id,
+            'source_move_id': source_move.id if source_move else False,
+            'destination_move_id': destination_move.id if destination_move else False,
+            'source_payment_id': outbound_payment.id,
+            'destination_payment_id': paired_payment.id if paired_payment else False,
         })
 
     def _auto_reconcile(self):
-        """Auto-reconcile the transfer account entries"""
+        """Auto-reconcile the transfer account entries.
+
+        Note: When using account.payment with is_internal_transfer=True,
+        Odoo automatically handles the reconciliation of the transfer account
+        lines. This method provides a fallback for manual reconciliation if needed.
+        """
         self.ensure_one()
 
         if not self.source_move_id or not self.destination_move_id:
             return
 
-        # Find the transfer account lines from both moves
+        # Check if already reconciled (Odoo may have done it automatically)
         transfer_lines = self.env['account.move.line'].search([
             ('move_id', 'in', [self.source_move_id.id, self.destination_move_id.id]),
             ('account_id', '=', self.transfer_account_id.id),
             ('reconciled', '=', False),
         ])
 
+        # If there are unreconciled lines, try to reconcile them
         if len(transfer_lines) == 2:
             try:
                 transfer_lines.reconcile()
@@ -703,23 +691,36 @@ class InternalTransfer(models.Model):
                 )
 
     def _create_reversal_entries(self, reason):
-        """Create reversal journal entries for cancellation"""
+        """Create reversal journal entries for cancellation.
+
+        This handles both payment-based and move-based cancellations.
+        """
         self.ensure_one()
 
-        if not self.source_move_id or not self.destination_move_id:
-            return
+        # Cancel payments if they exist (preferred method)
+        if self.source_payment_id:
+            try:
+                # Cancel the source payment - this will also handle the paired payment
+                self.source_payment_id.action_cancel()
+            except Exception as e:
+                self.message_post(
+                    body=_('Payment cancellation warning: %s') % str(e),
+                    subtype_xmlid='mail.mt_note',
+                )
 
-        # Reverse both moves
-        for move in [self.source_move_id, self.destination_move_id]:
-            reversal_wizard = self.env['account.move.reversal'].with_context(
-                active_model='account.move',
-                active_ids=move.ids,
-            ).create({
-                'reason': reason or _('Transfer Cancellation: %s') % self.name,
-                'refund_method': 'cancel',
-                'journal_id': move.journal_id.id,
-            })
-            reversal_wizard.refund_moves()
+        # Fallback: Reverse moves if no payments or if payment cancellation failed
+        if not self.source_payment_id and self.source_move_id and self.destination_move_id:
+            for move in [self.source_move_id, self.destination_move_id]:
+                if move.state == 'posted':
+                    reversal_wizard = self.env['account.move.reversal'].with_context(
+                        active_model='account.move',
+                        active_ids=move.ids,
+                    ).create({
+                        'reason': reason or _('Transfer Cancellation: %s') % self.name,
+                        'refund_method': 'cancel',
+                        'journal_id': move.journal_id.id,
+                    })
+                    reversal_wizard.refund_moves()
 
     # === ACTION METHODS FOR VIEWS ===
     def action_view_journal_entries(self):
