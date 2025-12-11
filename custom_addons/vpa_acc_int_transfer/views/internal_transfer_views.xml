@@ -58,6 +58,9 @@
                             <field name="attachment_count" widget="statinfo" string="Attachments"/>
                         </button>
                     </div>
+                    <widget name="web_ribbon" title="Approved"
+                            bg_color="text-bg-success"
+                            invisible="state != 'approved' or is_locked"/>
                     <widget name="web_ribbon" title="Locked"
                             bg_color="text-bg-warning"
                             invisible="not is_locked"/>
