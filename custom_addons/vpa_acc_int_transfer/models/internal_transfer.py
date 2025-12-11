@@ -32,6 +32,14 @@ class InternalTransfer(models.Model):
         ('cancelled', 'Cancelled'),
     ], string='Status', default='draft', required=True, tracking=True, copy=False)
 
+    is_locked = fields.Boolean(
+        string='Locked',
+        default=False,
+        copy=False,
+        tracking=True,
+        help='When locked, the transfer cannot be cancelled. Only Account Managers can lock/unlock.',
+    )
+
     # === DATES ===
     date = fields.Date(
         string='Transfer Date',
@@ -412,10 +420,11 @@ class InternalTransfer(models.Model):
 
     @api.onchange('company_id')
     def _onchange_company(self):
-        """Reset journals when company changes"""
+        """Reset journals and reload transfer account when company changes"""
         self.source_journal_id = False
         self.destination_journal_id = False
-        self.transfer_account_id = False
+        # Reload transfer account from new company's accounting settings
+        self.transfer_account_id = self.company_id.transfer_account_id if self.company_id else False
 
     # === CONSTRAINT METHODS ===
     @api.constrains('source_journal_id', 'destination_journal_id')
@@ -529,6 +538,8 @@ class InternalTransfer(models.Model):
         self.ensure_one()
         if self.state == 'cancelled':
             raise UserError(_('This transfer is already cancelled.'))
+        if self.is_locked:
+            raise UserError(_('This transfer is locked and cannot be cancelled. Please unlock it first.'))
 
         return {
             'name': _('Cancel Transfer'),
@@ -538,6 +549,28 @@ class InternalTransfer(models.Model):
             'target': 'new',
             'context': {'default_transfer_id': self.id},
         }
+
+    def action_lock(self):
+        """Lock the transfer to prevent cancellation"""
+        self.ensure_one()
+        if self.state != 'approved':
+            raise UserError(_('Only approved transfers can be locked.'))
+        self.write({'is_locked': True})
+        self.message_post(
+            body=_('Transfer locked by %s.') % self.env.user.name,
+            subtype_xmlid='mail.mt_note',
+        )
+        return True
+
+    def action_unlock(self):
+        """Unlock the transfer to allow cancellation"""
+        self.ensure_one()
+        self.write({'is_locked': False})
+        self.message_post(
+            body=_('Transfer unlocked by %s.') % self.env.user.name,
+            subtype_xmlid='mail.mt_note',
+        )
+        return True
 
     def action_reset_to_draft(self):
         """Reset transfer to draft - for rejected, submitted or cancelled transfers"""

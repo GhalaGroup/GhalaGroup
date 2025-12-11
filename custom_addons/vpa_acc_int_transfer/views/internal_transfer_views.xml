@@ -22,7 +22,15 @@
                             groups="account.group_account_manager"/>
                     <button name="action_cancel" string="Cancel"
                             type="object" class="btn-secondary"
-                            invisible="state in ('cancelled', 'rejected', 'draft')"
+                            invisible="state in ('cancelled', 'rejected', 'draft') or is_locked"
+                            groups="account.group_account_manager"/>
+                    <button name="action_lock" string="Lock"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'approved' or is_locked"
+                            groups="account.group_account_manager"/>
+                    <button name="action_unlock" string="Unlock"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'approved' or not is_locked"
                             groups="account.group_account_manager"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-secondary"
@@ -30,6 +38,7 @@
                             groups="account.group_account_manager"/>
                     <button name="%(action_report_internal_transfer)d" string="Print"
                             type="action" class="btn-secondary"/>
+                    <field name="is_locked" invisible="1"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
@@ -49,6 +58,9 @@
                             <field name="attachment_count" widget="statinfo" string="Attachments"/>
                         </button>
                     </div>
+                    <widget name="web_ribbon" title="Locked"
+                            bg_color="text-bg-warning"
+                            invisible="not is_locked"/>
                     <widget name="web_ribbon" title="Rejected"
                             bg_color="text-bg-danger"
                             invisible="state != 'rejected'"/>
