@@ -9,4 +9,8 @@
               action="internal_transfer_action"
               parent="account.account_transactions_menu"
               sequence="50"/>
+
+    <!-- Remove old menu items that are now in Settings -->
+    <delete model="ir.ui.menu" search="[('id', '=', ref('menu_approval_thresholds'))]"/>
+    <delete model="ir.ui.menu" search="[('id', '=', ref('menu_transfer_backups'))]"/>
 </odoo>
