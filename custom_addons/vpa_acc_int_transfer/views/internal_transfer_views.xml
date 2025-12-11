@@ -129,9 +129,9 @@
                                 </group>
                             </group>
                             <group col="2" invisible="state not in ('approved', 'cancelled')">
-                                <group string="Payments" invisible="not source_payment_id">
-                                    <field name="source_payment_id"/>
-                                    <field name="destination_payment_id"/>
+                                <group string="Bank Transactions" invisible="not source_statement_line_id">
+                                    <field name="source_statement_line_id"/>
+                                    <field name="destination_statement_line_id"/>
                                 </group>
                                 <group string="Journal Entries" invisible="not source_move_id">
                                     <field name="source_move_id"/>
