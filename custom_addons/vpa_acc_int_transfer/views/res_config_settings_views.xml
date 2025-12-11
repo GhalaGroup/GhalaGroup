@@ -31,6 +31,46 @@
                             </div>
                         </div>
                     </setting>
+                    <setting string="Transfer Permissions" help="Configure who can manage transfers">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="transfer_manager_ids" string="Transfer Managers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_manager_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       domain="[('groups_id.category_id.xml_id', '=', 'base.module_category_accounting_accounting')]"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Full control: approve, reject, cancel, reset, lock, unlock
+                            </div>
+                            <div class="row mt16">
+                                <label for="transfer_approver_ids" string="Transfer Approvers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_approver_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       domain="[('groups_id.category_id.xml_id', '=', 'base.module_category_accounting_accounting')]"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Can approve and reject transfers
+                            </div>
+                            <div class="row mt16">
+                                <label for="transfer_canceller_ids" string="Transfer Cancellers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_canceller_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       domain="[('groups_id.category_id.xml_id', '=', 'base.module_category_accounting_accounting')]"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Can cancel and reset transfers to draft
+                            </div>
+                            <div class="text-muted mt16" style="font-size: 0.85em; font-style: italic;">
+                                Note: If no users are configured, Account Managers can perform all actions.
+                            </div>
+                        </div>
+                    </setting>
                 </block>
             </xpath>
         </field>

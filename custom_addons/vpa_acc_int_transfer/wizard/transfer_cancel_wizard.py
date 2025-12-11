@@ -58,6 +58,9 @@ class InternalTransferCancelWizard(models.TransientModel):
         self.ensure_one()
         transfer = self.transfer_id
 
+        # Check cancel permission
+        transfer._check_cancel_permission()
+
         # Create reversal entries if approved and has journal entries
         if transfer.state == 'approved' and self.has_journal_entries and self.create_reversal:
             transfer._create_reversal_entries(self.cancellation_reason)

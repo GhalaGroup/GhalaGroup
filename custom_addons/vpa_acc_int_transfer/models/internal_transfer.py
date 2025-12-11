@@ -182,6 +182,25 @@ class InternalTransfer(models.Model):
         tracking=True,
         help='Select the user who should approve this transfer. They will receive an activity notification.',
     )
+    available_approver_ids = fields.Many2many(
+        'res.users',
+        compute='_compute_available_approvers',
+        string='Available Approvers',
+    )
+
+    # === USER PERMISSION FLAGS (for button visibility) ===
+    can_approve = fields.Boolean(
+        compute='_compute_user_permissions',
+        string='Can Approve',
+    )
+    can_cancel = fields.Boolean(
+        compute='_compute_user_permissions',
+        string='Can Cancel',
+    )
+    can_manage = fields.Boolean(
+        compute='_compute_user_permissions',
+        string='Can Manage',
+    )
 
     # === APPROVAL TRACKING ===
     submitted_by_id = fields.Many2one(
@@ -443,6 +462,67 @@ class InternalTransfer(models.Model):
                 count += 1
             transfer.move_count = count
 
+    @api.depends('company_id')
+    @api.depends_context('uid')
+    def _compute_available_approvers(self):
+        """Get users who can approve transfers for the company"""
+        for transfer in self:
+            company = transfer.company_id
+            managers = company.transfer_manager_ids
+            approvers = company.transfer_approver_ids
+
+            # If specific users configured, use them
+            if managers or approvers:
+                transfer.available_approver_ids = managers | approvers
+            else:
+                # Fallback: all account managers for this company
+                account_manager_group = self.env.ref('account.group_account_manager', raise_if_not_found=False)
+                if account_manager_group:
+                    transfer.available_approver_ids = account_manager_group.users.filtered(
+                        lambda u: company.id in u.company_ids.ids
+                    )
+                else:
+                    transfer.available_approver_ids = self.env['res.users']
+
+    @api.depends('company_id')
+    @api.depends_context('uid')
+    def _compute_user_permissions(self):
+        """Compute permission flags for the current user"""
+        for transfer in self:
+            user = self.env.user
+            company = transfer.company_id
+            is_account_manager = user.has_group('account.group_account_manager')
+
+            # Get configured permission users
+            managers = company.transfer_manager_ids
+            approvers = company.transfer_approver_ids
+            cancellers = company.transfer_canceller_ids
+
+            # Transfer Managers have full control
+            if managers:
+                is_manager = user in managers
+            else:
+                # Fallback: account managers are transfer managers
+                is_manager = is_account_manager
+
+            # Approvers: managers + dedicated approvers
+            if managers or approvers:
+                can_approve = user in (managers | approvers)
+            else:
+                # Fallback: account managers can approve
+                can_approve = is_account_manager
+
+            # Cancellers: managers + dedicated cancellers
+            if managers or cancellers:
+                can_cancel = user in (managers | cancellers)
+            else:
+                # Fallback: account managers can cancel
+                can_cancel = is_account_manager
+
+            transfer.can_approve = can_approve
+            transfer.can_cancel = can_cancel
+            transfer.can_manage = is_manager
+
     # === ONCHANGE METHODS ===
     @api.onchange('source_journal_id')
     def _onchange_source_journal(self):
@@ -590,6 +670,10 @@ class InternalTransfer(models.Model):
         self.ensure_one()
         if self.state != 'approved':
             raise UserError(_('Only approved transfers can be locked.'))
+
+        # Check manager permission
+        self._check_manager_permission()
+
         self.write({'is_locked': True})
         self.message_post(
             body=_('Transfer locked by %s.') % self.env.user.name,
@@ -600,6 +684,10 @@ class InternalTransfer(models.Model):
     def action_unlock(self):
         """Unlock the transfer to allow cancellation"""
         self.ensure_one()
+
+        # Check manager permission
+        self._check_manager_permission()
+
         self.write({'is_locked': False})
         self.message_post(
             body=_('Transfer unlocked by %s.') % self.env.user.name,
@@ -614,6 +702,9 @@ class InternalTransfer(models.Model):
             raise UserError(_('This transfer is already in draft state.'))
         if self.state == 'approved':
             raise UserError(_('Approved transfers cannot be reset to draft. Use Cancel instead.'))
+
+        # Check cancel permission (cancellers can reset to draft)
+        self._check_cancel_permission()
 
         # Clear relevant fields based on previous state
         vals = {
@@ -645,16 +736,27 @@ class InternalTransfer(models.Model):
         return True
 
     # === HELPER METHODS ===
-    def _check_approval_permission(self):
-        """Check if current user can approve based on required level"""
+    def _check_approve_permission(self):
+        """Check if current user can approve/reject transfers"""
         self.ensure_one()
-        user = self.env.user
+        if not self.can_approve:
+            raise UserError(_('You are not authorized to approve/reject transfers.'))
 
-        # Use standard Odoo accounting groups for permission checks
-        # account.group_account_manager can approve all transfers
-        if not user.has_group('account.group_account_manager'):
-            raise UserError(_('You do not have permission to approve transfers. '
-                             'Only Account Managers can approve internal transfers.'))
+    def _check_cancel_permission(self):
+        """Check if current user can cancel/reset transfers"""
+        self.ensure_one()
+        if not self.can_cancel:
+            raise UserError(_('You are not authorized to cancel/reset transfers.'))
+
+    def _check_manager_permission(self):
+        """Check if current user has manager permissions (lock/unlock)"""
+        self.ensure_one()
+        if not self.can_manage:
+            raise UserError(_('You are not authorized to lock/unlock transfers.'))
+
+    def _check_approval_permission(self):
+        """Check if current user can approve based on required level (legacy wrapper)"""
+        return self._check_approve_permission()
 
     def _get_journal_entry_narration(self):
         """Build comprehensive narration for journal entries"""

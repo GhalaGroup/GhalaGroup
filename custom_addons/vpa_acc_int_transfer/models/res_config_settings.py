@@ -13,3 +13,22 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         string='Memo Template',
     )
+
+    # Transfer Permission Settings
+    transfer_manager_ids = fields.Many2many(
+        related='company_id.transfer_manager_ids',
+        readonly=False,
+        string='Transfer Managers',
+    )
+
+    transfer_approver_ids = fields.Many2many(
+        related='company_id.transfer_approver_ids',
+        readonly=False,
+        string='Transfer Approvers',
+    )
+
+    transfer_canceller_ids = fields.Many2many(
+        related='company_id.transfer_canceller_ids',
+        readonly=False,
+        string='Transfer Cancellers',
+    )

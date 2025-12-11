@@ -14,31 +14,28 @@
                             invisible="state != 'draft'"/>
                     <button name="action_approve" string="Approve"
                             type="object" class="btn-primary"
-                            invisible="state != 'submitted'"
-                            groups="account.group_account_manager"/>
+                            invisible="state != 'submitted' or not can_approve"/>
                     <button name="action_reject" string="Reject"
                             type="object" class="btn-secondary"
-                            invisible="state != 'submitted'"
-                            groups="account.group_account_manager"/>
+                            invisible="state != 'submitted' or not can_approve"/>
                     <button name="action_cancel" string="Cancel"
                             type="object" class="btn-secondary"
-                            invisible="state in ('cancelled', 'rejected', 'draft') or is_locked"
-                            groups="account.group_account_manager"/>
+                            invisible="state in ('cancelled', 'rejected', 'draft') or is_locked or not can_cancel"/>
                     <button name="action_lock" string="Lock"
                             type="object" class="btn-secondary"
-                            invisible="state != 'approved' or is_locked"
-                            groups="account.group_account_manager"/>
+                            invisible="state != 'approved' or is_locked or not can_manage"/>
                     <button name="action_unlock" string="Unlock"
                             type="object" class="btn-secondary"
-                            invisible="state != 'approved' or not is_locked"
-                            groups="account.group_account_manager"/>
+                            invisible="state != 'approved' or not is_locked or not can_manage"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                             type="object" class="btn-secondary"
-                            invisible="state in ('draft', 'approved')"
-                            groups="account.group_account_manager"/>
+                            invisible="state in ('draft', 'approved') or not can_cancel"/>
                     <button name="%(action_report_internal_transfer)d" string="Print"
                             type="action" class="btn-secondary"/>
                     <field name="is_locked" invisible="1"/>
+                    <field name="can_approve" invisible="1"/>
+                    <field name="can_cancel" invisible="1"/>
+                    <field name="can_manage" invisible="1"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
@@ -80,7 +77,10 @@
                         <group string="Transfer Details">
                             <field name="date" readonly="state == 'approved'"/>
                             <field name="company_id" invisible="1"/>
-                            <field name="approver_id" options="{'no_create': True}"
+                            <field name="available_approver_ids" invisible="1"/>
+                            <field name="approver_id"
+                                   domain="[('id', 'in', available_approver_ids)]"
+                                   options="{'no_create': True}"
                                    readonly="state != 'draft'"/>
                             <field name="memo_type" readonly="state == 'approved'"/>
                             <field name="memo" placeholder="Auto-generated memo..."

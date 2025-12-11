@@ -37,6 +37,10 @@ class InternalTransferRejectWizard(models.TransientModel):
     def action_reject(self):
         """Reject the transfer with reason"""
         self.ensure_one()
+
+        # Check approve permission (approvers can reject)
+        self.transfer_id._check_approve_permission()
+
         self.transfer_id.write({
             'state': 'rejected',
             'rejected_by_id': self.env.uid,
