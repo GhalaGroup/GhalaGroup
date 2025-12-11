@@ -234,7 +234,7 @@
                                         <field name="source_journal_id"/> → <field name="destination_journal_id"/>
                                     </div>
                                     <div t-if="record.memo.raw_value" class="text-muted">
-                                        <i class="fa fa-comment-o"/> <field name="memo"/>
+                                        <i class="fa fa-comment-o" title="Memo"/> <field name="memo"/>
                                     </div>
                                 </div>
                             </div>
