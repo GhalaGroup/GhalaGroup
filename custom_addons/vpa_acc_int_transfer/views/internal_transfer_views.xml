@@ -263,13 +263,11 @@
                 <filter string="Rejected" name="filter_rejected" domain="[('state', '=', 'rejected')]"/>
                 <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="From Journal" name="group_source_journal" context="{'group_by': 'source_journal_id'}"/>
-                    <filter string="To Journal" name="group_destination_journal" context="{'group_by': 'destination_journal_id'}"/>
-                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
-                    <filter string="Currency" name="group_currency" context="{'group_by': 'currency_id'}"/>
-                </group>
+                <filter string="Status" name="group_state" domain="[]" context="{'group_by': 'state'}"/>
+                <filter string="From Journal" name="group_source_journal" domain="[]" context="{'group_by': 'source_journal_id'}"/>
+                <filter string="To Journal" name="group_destination_journal" domain="[]" context="{'group_by': 'destination_journal_id'}"/>
+                <filter string="Date" name="group_date" domain="[]" context="{'group_by': 'date'}"/>
+                <filter string="Currency" name="group_currency" domain="[]" context="{'group_by': 'currency_id'}"/>
             </search>
         </field>
     </record>
