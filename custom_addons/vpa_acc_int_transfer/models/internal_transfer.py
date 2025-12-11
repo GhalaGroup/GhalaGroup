@@ -552,28 +552,6 @@ class InternalTransfer(models.Model):
         )
         return True
 
-    def action_view_source_journal(self):
-        """Open source journal"""
-        self.ensure_one()
-        return {
-            'name': _('Source Journal'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.journal',
-            'res_id': self.source_journal_id.id,
-            'view_mode': 'form',
-        }
-
-    def action_view_destination_journal(self):
-        """Open destination journal"""
-        self.ensure_one()
-        return {
-            'name': _('Destination Journal'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.journal',
-            'res_id': self.destination_journal_id.id,
-            'view_mode': 'form',
-        }
-
     # === HELPER METHODS ===
     def _check_approval_permission(self):
         """Check if current user can approve based on required level"""

@@ -35,20 +35,6 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_source_journal"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-sign-out"
-                                invisible="not source_journal_id">
-                            <field name="source_journal_id" widget="statinfo" string="From Journal"/>
-                        </button>
-                        <button name="action_view_destination_journal"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-sign-in"
-                                invisible="not destination_journal_id">
-                            <field name="destination_journal_id" widget="statinfo" string="To Journal"/>
-                        </button>
                         <button name="action_view_journal_entries"
                                 type="object"
                                 class="oe_stat_button"
