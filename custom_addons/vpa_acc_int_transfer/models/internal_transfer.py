@@ -127,6 +127,15 @@ class InternalTransfer(models.Model):
         compute='_compute_exchange_rate',
         store=True,
         readonly=False,
+        help='Rate to convert source currency to destination currency',
+    )
+    exchange_rate_inverse = fields.Float(
+        string='Inverse Rate',
+        digits=(12, 6),
+        compute='_compute_exchange_rate_inverse',
+        inverse='_inverse_exchange_rate_inverse',
+        store=True,
+        help='Rate to convert destination currency to source currency (e.g., 1 USD = X TZS)',
     )
     is_multi_currency = fields.Boolean(
         string='Multi-Currency Transfer',
@@ -380,6 +389,20 @@ class InternalTransfer(models.Model):
                 transfer.exchange_rate = rate
             else:
                 transfer.exchange_rate = 1.0
+
+    @api.depends('exchange_rate')
+    def _compute_exchange_rate_inverse(self):
+        for transfer in self:
+            if transfer.exchange_rate and transfer.exchange_rate != 0:
+                transfer.exchange_rate_inverse = 1.0 / transfer.exchange_rate
+            else:
+                transfer.exchange_rate_inverse = 0.0
+
+    def _inverse_exchange_rate_inverse(self):
+        """Allow user to enter the inverse rate (e.g., 2850 instead of 0.000351)"""
+        for transfer in self:
+            if transfer.exchange_rate_inverse and transfer.exchange_rate_inverse != 0:
+                transfer.exchange_rate = 1.0 / transfer.exchange_rate_inverse
 
     @api.depends('amount', 'exchange_rate', 'is_multi_currency')
     def _compute_destination_amount(self):

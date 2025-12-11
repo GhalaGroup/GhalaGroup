@@ -91,7 +91,8 @@
                             <field name="currency_id" readonly="state == 'approved'"/>
                             <field name="is_multi_currency" invisible="1"/>
                             <field name="destination_currency_id" invisible="not is_multi_currency"/>
-                            <field name="exchange_rate" invisible="not is_multi_currency" readonly="state == 'approved'"/>
+                            <field name="exchange_rate" string="Rate (Source→Dest)" invisible="not is_multi_currency" readonly="state == 'approved'"/>
+                            <field name="exchange_rate_inverse" string="Rate (Dest→Source)" invisible="not is_multi_currency" readonly="state == 'approved'"/>
                             <field name="destination_amount" invisible="not is_multi_currency" readonly="state == 'approved'"/>
                         </group>
                     </group>
