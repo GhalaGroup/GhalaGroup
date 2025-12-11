@@ -251,32 +251,25 @@
         <field name="name">internal.transfer.view.search</field>
         <field name="model">internal.transfer</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="Search Internal Transfers">
                 <field name="name"/>
                 <field name="memo"/>
                 <field name="source_journal_id"/>
                 <field name="destination_journal_id"/>
-                <field name="submitted_by_id"/>
-                <field name="approved_by_id"/>
-                <field name="approver_id"/>
                 <separator/>
-                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
-                <filter name="filter_submitted" string="Pending Approval" domain="[('state', '=', 'submitted')]"/>
-                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
-                <filter name="filter_rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
-                <filter name="filter_cancelled" string="Cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <filter string="Draft" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Pending Approval" name="filter_submitted" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Approved" name="filter_approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="filter_rejected" domain="[('state', '=', 'rejected')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-                <filter name="filter_locked" string="Locked" domain="[('is_locked', '=', True)]"/>
-                <separator/>
-                <filter name="filter_my_transfers" string="My Transfers" domain="[('create_uid', '=', uid)]"/>
-                <filter name="filter_my_approvals" string="Awaiting My Approval" domain="[('state', '=', 'submitted'), ('approver_id', '=', uid)]"/>
+                <filter string="Locked" name="filter_locked" domain="[('is_locked', '=', True)]"/>
                 <separator/>
                 <group expand="0" string="Group By">
-                    <filter name="groupby_state" string="Status" context="{'group_by': 'state'}"/>
-                    <filter name="groupby_date" string="Date" context="{'group_by': 'date:month'}"/>
-                    <filter name="groupby_source" string="Source Journal" context="{'group_by': 'source_journal_id'}"/>
-                    <filter name="groupby_destination" string="Destination Journal" context="{'group_by': 'destination_journal_id'}"/>
-                    <filter name="groupby_approver" string="Approver" context="{'group_by': 'approver_id'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="groupby_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Source Journal" name="groupby_source" context="{'group_by': 'source_journal_id'}"/>
+                    <filter string="Destination Journal" name="groupby_destination" context="{'group_by': 'destination_journal_id'}"/>
                 </group>
             </search>
         </field>
