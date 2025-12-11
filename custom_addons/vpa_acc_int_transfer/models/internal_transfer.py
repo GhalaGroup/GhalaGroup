@@ -700,22 +700,61 @@ class InternalTransfer(models.Model):
     def _auto_reconcile(self):
         """Auto-reconcile the bank statement line transactions.
 
-        For bank statement lines, we reconcile each line with its
-        corresponding liquidity line from the other transaction.
+        For internal transfers, we reconcile each bank statement line by adding
+        a counterpart entry to the transfer account. This properly closes out
+        the suspense account entries and marks the transactions as reconciled.
         """
         self.ensure_one()
 
         if not self.source_statement_line_id or not self.destination_statement_line_id:
             return
 
-        # Bank statement lines auto-reconciliation is handled differently
-        # The source and destination statement lines should be matched with each other
-        # via the bank reconciliation mechanism.
+        # Get the transfer account
+        transfer_account = self.transfer_account_id
+        if not transfer_account:
+            return
 
-        # For now, we leave them unreconciled so they appear in the bank reconciliation
-        # widget where the user can match them if needed.
-        # In Odoo 19, bank statement lines are reconciled through the bank rec widget.
-        pass
+        # Build reference
+        short_ref = _('Internal Transfer: %s') % self.name
+        if self.memo:
+            short_ref = '%s - %s' % (short_ref, self.memo)
+
+        # === RECONCILE SOURCE STATEMENT LINE ===
+        # Source line is negative (outgoing), so we debit the transfer account
+        source_st_line = self.source_statement_line_id
+        source_counterpart = {
+            'name': short_ref,
+            'account_id': transfer_account.id,
+            'balance': self.amount,  # Debit (positive)
+            'amount_currency': self.amount,
+            'currency_id': self.currency_id.id,
+        }
+        source_st_line._add_move_line_to_statement_line_move([source_counterpart])
+
+        # === RECONCILE DESTINATION STATEMENT LINE ===
+        # Destination line is positive (incoming), so we credit the transfer account
+        dest_st_line = self.destination_statement_line_id
+        dest_amount = self.destination_amount if self.is_multi_currency else self.amount
+        dest_currency = self.destination_currency_id if self.is_multi_currency else self.currency_id
+        dest_counterpart = {
+            'name': short_ref,
+            'account_id': transfer_account.id,
+            'balance': -dest_amount,  # Credit (negative)
+            'amount_currency': -dest_amount,
+            'currency_id': dest_currency.id,
+        }
+        dest_st_line._add_move_line_to_statement_line_move([dest_counterpart])
+
+        # === RECONCILE TRANSFER ACCOUNT LINES ===
+        # Now reconcile the two transfer account entries against each other
+        # Find the transfer account lines from both moves
+        transfer_lines = self.env['account.move.line'].search([
+            ('account_id', '=', transfer_account.id),
+            ('move_id', 'in', [source_st_line.move_id.id, dest_st_line.move_id.id]),
+            ('reconciled', '=', False),
+        ])
+        if len(transfer_lines) == 2:
+            transfer_lines.reconcile()
 
     def _create_reversal_entries(self, reason):
         """Delete bank statement lines for cancellation.
