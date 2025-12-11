@@ -257,44 +257,56 @@ class InternalTransfer(models.Model):
         copy=False,
     )
 
+    # === MEMO TEMPLATES ===
+    MEMO_TEMPLATES = {
+        'internal_transfer': 'Internal Transfer from {source} to {destination}',
+        'bank_deposit': 'Bank Deposit to {destination} from {source}',
+        'cash_withdrawal': 'Cash Withdrawal from {source} to {destination}',
+        'petty_cash': 'Petty Cash Replenishment - {source} to {destination}',
+        'fund_transfer': 'Fund Transfer: {source} → {destination}',
+    }
+
+    def _get_memo_from_template(self):
+        """Generate memo text from template"""
+        self.ensure_one()
+        if self.memo_type == 'custom':
+            return self.memo or ''
+        if not self.source_journal_id or not self.destination_journal_id:
+            return ''
+        template = self.MEMO_TEMPLATES.get(
+            self.memo_type,
+            'Internal Transfer from {source} to {destination}'
+        )
+        try:
+            return template.format(
+                source=self.source_journal_id.name or '',
+                destination=self.destination_journal_id.name or '',
+                user=self.env.user.name or '',
+                amount='{:,.2f}'.format(self.amount or 0),
+                date=str(self.date or fields.Date.today()),
+            )
+        except (KeyError, ValueError):
+            return 'Transfer from %s to %s' % (
+                self.source_journal_id.name,
+                self.destination_journal_id.name,
+            )
+
     # === COMPUTED METHODS ===
     @api.depends('memo_type', 'source_journal_id', 'destination_journal_id', 'amount', 'date')
     def _compute_memo(self):
         """Generate memo based on selected memo type"""
-        memo_templates = {
-            'internal_transfer': _('Internal Transfer from {source} to {destination}'),
-            'bank_deposit': _('Bank Deposit to {destination} from {source}'),
-            'cash_withdrawal': _('Cash Withdrawal from {source} to {destination}'),
-            'petty_cash': _('Petty Cash Replenishment - {source} to {destination}'),
-            'fund_transfer': _('Fund Transfer: {source} → {destination}'),
-        }
         for transfer in self:
-            # Skip if custom memo type - user will enter manually
             if transfer.memo_type == 'custom':
                 if not transfer.memo:
                     transfer.memo = ''
-                continue
+            else:
+                transfer.memo = transfer._get_memo_from_template()
 
-            if transfer.source_journal_id and transfer.destination_journal_id:
-                template = memo_templates.get(
-                    transfer.memo_type,
-                    _('Internal Transfer from {source} to {destination}')
-                )
-                try:
-                    transfer.memo = template.format(
-                        source=transfer.source_journal_id.name or '',
-                        destination=transfer.destination_journal_id.name or '',
-                        user=self.env.user.name or '',
-                        amount='{:,.2f}'.format(transfer.amount or 0),
-                        date=str(transfer.date or fields.Date.today()),
-                    )
-                except (KeyError, ValueError):
-                    transfer.memo = _('Transfer from %s to %s') % (
-                        transfer.source_journal_id.name,
-                        transfer.destination_journal_id.name,
-                    )
-            elif not transfer.memo:
-                transfer.memo = False
+    @api.onchange('memo_type', 'source_journal_id', 'destination_journal_id')
+    def _onchange_memo_fields(self):
+        """Regenerate memo when memo type or journals change"""
+        if self.memo_type != 'custom':
+            self.memo = self._get_memo_from_template()
 
     @api.depends('source_journal_id')
     def _compute_source_account(self):
