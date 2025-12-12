@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
     <data>
         <record model="ir.ui.view" id="effective_date_change">
@@ -6,15 +8,9 @@
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
-
-            <field name="origin" position="after">
-                <field name="date_of_transfer" groups="base.group_user" invisible="state == 'done'"/>
-            </field>
-
-<!--            <xpath expr="//button[@name='action_toggle_is_locked']" position="after">-->
-<!--                <button name="wiz_open" class="oe_button_box" groups="base.group_user" type="object" string="Change Effective Date"  attrs="{'invisible':[('state','!=','done')]}"/>-->
-<!--            </xpath>-->
-
+                <field name="origin" position="after">
+                    <field name="date_of_transfer" groups="base.group_user" invisible="state == 'done'"/>
+                </field>
             </field>
         </record>
     </data>

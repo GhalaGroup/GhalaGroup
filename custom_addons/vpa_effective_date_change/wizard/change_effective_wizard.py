@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# Copyright (C) 2025 VPA Solutions Limited
+# License OPL-1 - See LICENSE file for full copyright and licensing details.
+
 from odoo import models, fields
 from odoo.exceptions import UserError
 from datetime import date
@@ -8,7 +12,7 @@ class ChangeEffectiveWizard(models.TransientModel):
     _name = "change.effective.wizard"
     _description = "Change Effective Date"
 
-    # Definisikan field wizard
+    # Define wizard fields
     original_date = fields.Datetime(string="Original Effective Date", readonly=True)
     effective_date = fields.Datetime(string="New Effective Date", help="Date at which the transfer is processed", required=True)
 
@@ -40,40 +44,40 @@ class ChangeEffectiveWizard(models.TransientModel):
         has_accounting = self.env.cr.fetchone()[0]
 
         for picking in self.env['stock.picking'].browse(self._context.get('active_ids', [])):
-            # Mengatur tanggal done
+            # Set the done date
             selected_date = self.effective_date
             picking.date_done = selected_date
 
-            # Mengganti tanggal stock.valuation.layer (only if table exists)
+            # Update stock.valuation.layer dates (only if table exists)
             if has_valuation_layer:
                 self.env.cr.execute("UPDATE stock_valuation_layer SET create_date = (%s) WHERE description LIKE (%s)",
                                     [selected_date, str(picking.name + "%")])
 
-            # Mengganti tanggal stock.move.line
+            # Update stock.move.line dates
             for stock_move_line in self.env['stock.move.line'].search([('reference', 'ilike', str(picking.name + "%"))]):
                 stock_move_line.date = selected_date
 
-            # Mengganti tanggal stock.move
+            # Update stock.move dates
             for stock_move in self.env['stock.move'].search([('reference', 'ilike', str(picking.name + "%"))]):
                 stock_move.date = selected_date
 
-            # Mengganti tanggal account.move.line
+            # Update account.move.line dates
             if has_accounting:
                 self.env.cr.execute("UPDATE account_move_line SET date = (%s) WHERE ref SIMILAR TO %s",
                                     [selected_date, str(picking.name + "%")])
 
-            # Mengganti tanggal account.move
+            # Update account.move dates
             if has_accounting:
                 self.env.cr.execute("UPDATE account_move set date = (%s) WHERE ref SIMILAR TO %s",
                                     [selected_date, str(picking.name + "%")])
 
-            # Mengambil Currency System ID
+            # Get system default currency ID
             system_default_currency = int(self.env.ref('base.main_company').currency_id)
             current_picking_id = picking.picking_type_id.code
             purchase_orders_ids = self.env['purchase.order'].search([('name', '=', str(picking.origin))])
 
-            # Jika PO picking merupakan incoming transfer serta Purchase Order menggunakan currency asing
-            # Maka lakukan perhitungan ulang valuasi
+            # If PO picking is an incoming transfer and Purchase Order uses foreign currency,
+            # recalculate the valuation with the correct exchange rate
             if current_picking_id == 'internal':
                 pass
             elif current_picking_id == 'outgoing':
@@ -111,7 +115,7 @@ class ChangeEffectiveWizard(models.TransientModel):
                                 price_unit.append(float(unit_value))
                             counter += 1
 
-                        # Menghitung stock.valuation.layer
+                        # Calculate stock.valuation.layer values
                         if has_valuation_layer:
                             counter = 0
                             for product in self.env['stock.valuation.layer'].search([('description', 'ilike', str(picking.name + "%"))]):
@@ -120,7 +124,7 @@ class ChangeEffectiveWizard(models.TransientModel):
                                 product.remaining_value = product.remaining_qty * (price_unit[counter] / product.quantity)
                                 counter += 1
 
-                        # Menghitung account.move
+                        # Calculate account.move values
                         account_move_ids = []
                         account_move_search = self.env['account.move'].search([('ref', 'like', str(picking.name + "%"))])
                         for item in account_move_search:
@@ -150,7 +154,7 @@ class ChangeEffectiveWizard(models.TransientModel):
 
                             counter += 1
 
-                        # Update Cost di master product, initially
+                        # Update product cost in master data
                         if has_valuation_layer:
                             for product in picking.move_ids_without_package:
                                 if product.product_tmpl_id.categ_id.property_cost_method == 'average':
@@ -164,7 +168,6 @@ class ChangeEffectiveWizard(models.TransientModel):
                                         standard_price = sum / qty
                                         res_id = 'product.product,' + str(product.product_id.id)
 
-                                        # self.env.cr.execute("UPDATE ir_property SET value_float = (%s) WHERE res_id = (%s)", [standard_price, res_id])
                                         ir_property_standard = self.env['ir.property'].sudo().search([('res_id', '=', res_id), ('name', '=', 'standard_price')])
                                         ir_property_standard.value_float = standard_price
 
@@ -192,7 +195,7 @@ class ChangeEffectiveWizard(models.TransientModel):
 
                     max_sequence_number += 1
 
-            # Mengambil nama journal serta menentukan tanggal dan tahun dari tanggal yang dipilih
+            # Get journal name and determine year/month from selected date
             account_move = self.env['account.move'].search([('ref', 'ilike', str(picking.name))])
             account_move_short_code = account_move.journal_id.code or self.env["account.journal"].search([('name', '=', 'Inventory Valuation')]).code
             selected_year = selected_date.strftime("%Y")
@@ -200,9 +203,9 @@ class ChangeEffectiveWizard(models.TransientModel):
             currentMonth = datetime.now().month
             currentYear = datetime.now().year
 
-            # Forming nama journal entry baru
+            # Form new journal entry name with selected date
             selected_prefix = str(account_move_short_code + "/" + selected_year + "/" + selected_month + "/")
-            collected_name = []  # Simply put query recursion into list for performance
+            collected_name = []
             for created_journals in self.env['account.move'].search([('name', 'like', str(selected_prefix))]):
                 collected_name.append(created_journals.name)
             sorted_collected_name = sorted(collected_name, reverse=True)
@@ -218,4 +221,3 @@ class ChangeEffectiveWizard(models.TransientModel):
                     update_journal_name(selected_prefix, picking_name)
             else:
                 pass
-

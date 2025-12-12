@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<!--
+████████████████████████████████████████████████████████████████████████████████████████████
+█                                                                                          █
+█  VPA EFFECTIVE DATE CHANGE - PROMOTIONAL HTML FILE                                      █
+█  ═════════════════════════════════════════════                                          █
+█                                                                                          █
+█  FILE PURPOSE:                                                                          █
+█  This HTML file serves as a master promotional document for VPA Effective Date Change   █
+█  across all Odoo versions (17, 18, 19). Version history, features, and pricing.         █
+█                                                                                          █
+█  MAINTENANCE INSTRUCTIONS:                                                              █
+█  ════════════════════════                                                               █
+█                                                                                          █
+█  When adding a NEW VERSION or NEW FEATURES, search for these comments in this file:     █
+█                                                                                          █
+█  1. "UPDATE INSTRUCTION #1" - Update Latest Version in Side Menu (line ~920)           █
+█  2. "UPDATE INSTRUCTION #2" - Update Version Badge in Header (line ~945)               █
+█  3. "UPDATE INSTRUCTION #3" - Add New Version to Timeline (line ~990)                  █
+█                                                                                          █
+█  QUICK START GUIDE FOR UPDATES:                                                         █
+█  ════════════════════════════                                                           █
+█                                                                                          █
+█  Step 1: Update version numbers (Instructions #1 and #2)                               █
+█  Step 2: Copy the existing version timeline block                                      █
+█  Step 3: Paste it at Instruction #3 location (ABOVE existing versions)                 █
+█  Step 4: Modify the copied block with your new version details                         █
+█  Step 5: Save the file                                                                 █
+█                                                                                          █
+█  EXAMPLE VERSION NUMBER: 19.0.2.0.0                                                     █
+█  EXAMPLE RELEASE DATE: December 15, 2025                                               █
+█                                                                                          █
+█  For detailed instructions with examples, see the comments at each UPDATE INSTRUCTION   █
+█  location within this file.                                                             █
+█                                                                                          █
+█  AUTHOR: VPA Solutions Limited                                                           █
+█  LAST UPDATED: December 12, 2025                                                        █
+█  CURRENT VERSION: 19.0.1.0.0                                                            █
+█                                                                                          █
+████████████████████████████████████████████████████████████████████████████████████████████
+█                                                                                          █
+█  FILE STRUCTURE & ARCHITECTURE                                                          █
+█  ══════════════════════════════                                                         █
+█                                                                                          █
+█  This HTML file is structured in the following sections:                                █
+█                                                                                          █
+█  1. HEAD SECTION (Lines 43-898)                                                         █
+█     └─ CSS Styles                                                                       █
+█        ├─ Layout: Side menu (fixed left), main content area                            █
+█        ├─ Components: Timeline, tabs, cards, tables, buttons                           █
+█        ├─ Colors: Primary #DC143C (Red), Secondary #875A7B (Purple)                    █
+█        └─ Responsive: Mobile breakpoints at 1024px and 768px                           █
+█                                                                                          █
+█  2. BODY STRUCTURE (Lines 899-1574)                                                     █
+█     ├─ Mobile Menu Toggle Button (Line 901)                                            █
+█     ├─ Fixed Side Menu (Lines 905-970)                                                 █
+█     │  ├─ Header with title                                                            █
+█     │  ├─ Navigation menu (12 links)                                                   █
+█     │  └─ Footer with version info [UPDATE INSTRUCTION #1]                            █
+█     │                                                                                   █
+█     └─ Main Content Area (Lines 974-1562)                                              █
+█        ├─ Header Section (Lines 975-1000)                                              █
+█        │  ├─ Logo (base64 encoded image)                                               █
+█        │  ├─ Title                                                                     █
+█        │  └─ Version Badge [UPDATE INSTRUCTION #2]                                     █
+█        │                                                                                █
+█        ├─ Overview Section (Lines 1002-1012)                                           █
+█        │  └─ Brief product description                                                 █
+█        │                                                                                █
+█        ├─ Version History Section (Lines 1014-1197) [UPDATE INSTRUCTION #3]           █
+█        │  ├─ Version Selector Tabs (Odoo 19, 18, 17)                                  █
+█        │  ├─ Timeline for Odoo 19 (Lines 1029-1143)                                   █
+█        │  │  └─ Version Entries (newest first)                                        █
+█        │  │     ├─ Timeline marker (v1, v2, v3...)                                    █
+█        │  │     ├─ Version number                                                     █
+█        │  │     ├─ Release date                                                       █
+█        │  │     └─ Categorized features:                                              █
+█        │  │        • Core Features                                                    █
+█        │  │        • Customization Options                                            █
+█        │  │        • Security & Architecture                                          █
+█        │  │        • Technical Highlights                                             █
+█        │  │        • New Features (for updates)                                       █
+█        │  │        • Improvements (for updates)                                       █
+█        │  │        • Bug Fixes (for updates)                                          █
+█        │  ├─ Timeline for Odoo 18 (Coming Soon)                                       █
+█        │  └─ Timeline for Odoo 17 (Coming Soon)                                       █
+█        │                                                                                █
+█        ├─ Key Features Section (Lines 1199-1235)                                       █
+█        │  └─ 6 Feature Cards (Grid layout)                                            █
+█        │                                                                                █
+█        ├─ Themes Section (Lines 1237-1281)                                             █
+█        │  └─ 6 Color Swatches (Red, Blue, Green, Purple, Orange, Dark)               █
+█        │                                                                                █
+█        ├─ Benefits Section (Lines 1283-1331)                                           █
+█        │  └─ 6 Benefit Items with checkmarks                                          █
+█        │                                                                                █
+█        ├─ How It Works Section (Lines 1333-1366)                                       █
+█        │  └─ 3 Steps (Install, Configure, Enjoy)                                      █
+█        │                                                                                █
+█        ├─ Use Cases Section (Lines 1368-1389)                                          █
+█        │  └─ 3 Use Cases (Corporate, White-Label, Multi-Tenant)                       █
+█        │                                                                                █
+█        ├─ Security Section (Lines 1391-1419)                                           █
+█        │  └─ 2 Security Cards (Access Control, Permission Management)                 █
+█        │                                                                                █
+█        ├─ Technical Specifications Section (Lines 1421-1473)                           █
+█        │  └─ Specifications Table (Module info)                                       █
+█        │                                                                                █
+█        ├─ What's Included Section (Lines 1475-1499)                                    █
+█        │  └─ Feature Checklist (14 items)                                             █
+█        │                                                                                █
+█        ├─ Pricing Section (Lines 1501-1526)                                            █
+█        │  └─ Pricing Card ($25 USD with features list)                                █
+█        │                                                                                █
+█        ├─ Contact Section (Lines 1528-1560)                                            █
+█        │  └─ Contact Information Box (Email, Website, Response Time, Docs)            █
+█        │                                                                                █
+█        └─ Footer (Lines 1562-1574)                                                     █
+█           └─ Copyright and legal information                                           █
+█                                                                                          █
+█  3. JAVASCRIPT SECTION (Lines 1576-1656)                                               █
+█     ├─ Mobile menu toggle function                                                     █
+█     ├─ Version tab switcher (showVersion function)                                     █
+█     ├─ Active section highlighting on scroll                                           █
+█     └─ Menu interaction handlers                                                       █
+█                                                                                          █
+████████████████████████████████████████████████████████████████████████████████████████████
+█                                                                                          █
+█  DESIGN PATTERNS & CONVENTIONS                                                          █
+█  ═══════════════════════════════                                                        █
+█                                                                                          █
+█  COLOR SCHEME:                                                                          █
+█  • Primary Red: #DC143C (Crimson) - Used for headers, buttons, accents                 █
+█  • Secondary Purple: #875A7B - Used for security sections, alternate highlights         █
+█  • Success Green: #28a745 - Used for checkmarks, positive indicators                    █
+█  • Info Blue: #1E40AF - Used for informational elements                                 █
+█  • Dark Gray: #2C3E50 - Used for side menu background                                   █
+█  • Light Gray: #f5f5f5 - Used for page background                                       █
+█                                                                                          █
+█  CSS CLASSES (Key Components):                                                          █
+█  • .side-menu: Fixed left navigation panel (280px wide)                                 █
+█  • .page-wrapper: Main content container (margin-left: 280px)                           █
+█  • .section: Individual content sections with alternating backgrounds                   █
+█  • .timeline: Version history vertical timeline with center line                        █
+█  • .timeline-item: Individual version entry in timeline                                 █
+█  • .timeline-marker: Circular badge on timeline (v1, v2, etc.)                          █
+█  • .version-tabs: Horizontal tab selector for Odoo versions                             █
+█  • .version-content: Container for version-specific timeline                            █
+█  • .feature-card: Individual feature display card                                       █
+█  • .pricing-card: Centered pricing display with border                                  █
+█                                                                                          █
+█  RESPONSIVE BREAKPOINTS:                                                                █
+█  • Desktop: Full layout with side menu (> 1024px)                                       █
+█  • Tablet: Side menu collapses, hamburger menu appears (≤ 1024px)                       █
+█  • Mobile: Single column layout, smaller text (≤ 768px)                                 █
+█                                                                                          █
+█  NAMING CONVENTIONS:                                                                    █
+█  • Sections use lowercase with hyphens: #version-history, #how-it-works                 █
+█  • CSS classes use kebab-case: .timeline-item, .feature-card                            █
+█  • Version numbers follow Odoo convention: XX.0.X.0.0 (e.g., 19.0.1.0.0)               █
+█  • Timeline markers use simple version labels: v1, v2, v3, etc.                         █
+█                                                                                          █
+█  INTERACTIVE ELEMENTS:                                                                  █
+█  • Version tabs: Click to switch between Odoo 19/18/17 timelines                        █
+█  • Side menu links: Smooth scroll to sections with active highlighting                  █
+█  • Mobile menu: Toggle button shows/hides navigation on small screens                   █
+█  • Hover effects: Cards lift up, links change color on mouse hover                      █
+█                                                                                          █
+████████████████████████████████████████████████████████████████████████████████████████████
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VPA Effective Date Change - Professional Transfer Date Management for Odoo. Change stock transfer effective dates with automatic accounting synchronization. Available for Odoo 17, 18, and 19.">
+    <meta name="keywords" content="Odoo, Stock Transfer, Effective Date, Inventory, Accounting, Backdating, Odoo 19, Odoo 18, Odoo 17">
+    <title>VPA Effective Date Change - Professional Transfer Date Management for Odoo</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2C3E50 0%, #1a252f 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 2000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .side-menu-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            text-align: center;
+            border-bottom: 3px solid rgba(255,255,255,0.2);
+        }
+
+        .side-menu-header h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .side-menu-header p {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .side-menu-nav {
+            padding: 20px 0;
+        }
+
+        .side-menu-nav ul {
+            list-style: none;
+        }
+
+        .side-menu-nav li {
+            margin: 0;
+        }
+
+        .side-menu-nav a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: rgba(255,255,255,0.85);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            gap: 15px;
+        }
+
+        .side-menu-nav a:hover {
+            background: rgba(220, 20, 60, 0.2);
+            color: white;
+            border-left-color: #DC143C;
+        }
+
+        .side-menu-nav a.active {
+            background: rgba(220, 20, 60, 0.3);
+            color: white;
+            border-left-color: #DC143C;
+            font-weight: 600;
+        }
+
+        .side-menu-footer {
+            padding: 30px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .side-menu-footer p {
+            margin: 8px 0;
+        }
+
+        .side-menu-footer strong {
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2001;
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            font-size: 1.2em;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Content Wrapper */
+        .page-wrapper {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin: 5px;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Sections */
+        .section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.8em;
+            color: #DC143C;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25em;
+            color: #666;
+            margin-bottom: 50px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Version Timeline */
+        .timeline {
+            max-width: 1000px;
+            margin: 50px auto;
+            position: relative;
+            padding: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #DC143C 0%, #875A7B 100%);
+            top: 0;
+        }
+
+        .timeline-item {
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            text-align: right;
+            padding-right: calc(50% + 50px);
+        }
+
+        .timeline-item:nth-child(even) {
+            text-align: left;
+            padding-left: calc(50% + 50px);
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            z-index: 10;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #DC143C;
+        }
+
+        .timeline-content h3 {
+            color: #DC143C;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .timeline-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-date {
+            justify-content: flex-end;
+        }
+
+        .odoo-version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #875A7B, #6B4868);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .timeline-changes {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .timeline-changes li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .timeline-changes li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* Version Selector Tabs */
+        .version-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .version-tab {
+            padding: 15px 35px;
+            background: white;
+            border: 3px solid #DC143C;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #DC143C;
+            font-size: 1.1em;
+        }
+
+        .version-tab:hover {
+            background: #DC143C;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(220, 20, 60, 0.3);
+        }
+
+        .version-tab.active {
+            background: #DC143C;
+            color: white;
+        }
+
+        .version-content {
+            display: none;
+        }
+
+        .version-content.active {
+            display: block;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid #DC143C;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 40px rgba(220, 20, 60, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #DC143C;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        .feature-card p {
+            line-height: 1.7;
+            color: #555;
+        }
+
+        /* Color Swatches */
+        .color-swatches {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            flex-wrap: wrap;
+            margin: 50px 0;
+        }
+
+        .color-swatch {
+            text-align: center;
+        }
+
+        .swatch-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .swatch-circle:hover {
+            transform: scale(1.15);
+        }
+
+        .color-swatch h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+
+        .color-swatch p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        /* Benefits List */
+        .benefits-list {
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+            border-left: 5px solid #28a745;
+        }
+
+        .benefit-icon {
+            font-size: 2.2em;
+            color: #28a745;
+            margin-right: 25px;
+            min-width: 40px;
+        }
+
+        .benefit-text {
+            flex: 1;
+            line-height: 1.7;
+        }
+
+        .benefit-text strong {
+            color: #DC143C;
+            font-size: 1.1em;
+        }
+
+        /* Steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 45px;
+            margin-top: 50px;
+        }
+
+        .step {
+            position: relative;
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-top: 5px solid #DC143C;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -30px;
+            left: 35px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .step h3 {
+            color: #DC143C;
+            margin: 25px 0 15px;
+            font-size: 1.6em;
+        }
+
+        .step p {
+            line-height: 1.8;
+            margin: 10px 0;
+            color: #555;
+        }
+
+        .step strong {
+            color: #333;
+        }
+
+        /* Technical Specs Table */
+        .specs-table {
+            max-width: 1000px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .specs-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .specs-table th,
+        .specs-table td {
+            padding: 22px 30px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .specs-table th {
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .specs-table td:first-child {
+            font-weight: 600;
+            color: #DC143C;
+            width: 40%;
+        }
+
+        .specs-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        /* Security Section */
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+
+        .security-card {
+            background: white;
+            padding: 45px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            border-left: 6px solid #875A7B;
+        }
+
+        .security-card h3 {
+            color: #875A7B;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .security-card ul {
+            list-style: none;
+        }
+
+        .security-card li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            line-height: 1.7;
+        }
+
+        .security-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+
+        /* Use Cases */
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 35px;
+            margin-top: 50px;
+        }
+
+        .use-case {
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 6px solid;
+            transition: transform 0.3s;
+        }
+
+        .use-case:hover {
+            transform: translateY(-8px);
+        }
+
+        .use-case:nth-child(1) { border-top-color: #DC143C; }
+        .use-case:nth-child(2) { border-top-color: #875A7B; }
+        .use-case:nth-child(3) { border-top-color: #1E40AF; }
+
+        .use-case-icon {
+            font-size: 4.5em;
+            margin-bottom: 25px;
+        }
+
+        .use-case h3 {
+            margin-bottom: 15px;
+            font-size: 1.6em;
+            color: #333;
+        }
+
+        .use-case p {
+            line-height: 1.7;
+            color: #555;
+        }
+
+        /* Pricing */
+        .pricing-card {
+            max-width: 650px;
+            margin: 50px auto;
+            background: white;
+            padding: 65px 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            text-align: center;
+            border: 4px solid #DC143C;
+        }
+
+        .pricing-card h3 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 5em;
+            color: #DC143C;
+            font-weight: bold;
+            margin: 35px 0;
+        }
+
+        .price-period {
+            font-size: 0.28em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .pricing-features {
+            text-align: left;
+            margin: 35px 0;
+            list-style: none;
+        }
+
+        .pricing-features li {
+            padding: 12px 0;
+            font-size: 1.15em;
+            line-height: 1.6;
+        }
+
+        .pricing-features li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            padding: 22px 60px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.4em;
+            font-weight: bold;
+            box-shadow: 0 8px 30px rgba(220, 20, 60, 0.4);
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(220, 20, 60, 0.5);
+        }
+
+        /* Contact Section */
+        .contact-box {
+            max-width: 900px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #ffe5e5 0%, #f8e7f7 100%);
+            padding: 55px;
+            border-radius: 20px;
+            border: 3px solid #DC143C;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            font-size: 1.25em;
+        }
+
+        .contact-icon {
+            font-size: 1.8em;
+            color: #DC143C;
+            margin-right: 25px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .contact-item a {
+            color: #DC143C;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background: #2C3E50;
+            color: white;
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #DC143C;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #d1ecf1;
+            border-left: 8px solid #0c5460;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 50px auto;
+            max-width: 1000px;
+        }
+
+        .info-box h3 {
+            color: #0c5460;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .info-box ul {
+            column-count: 2;
+            column-gap: 50px;
+            list-style: none;
+        }
+
+        .info-box li {
+            padding: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .side-menu {
+                transform: translateX(-280px);
+            }
+
+            .side-menu.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .page-wrapper {
+                margin-left: 0;
+            }
+
+            .container {
+                padding: 0 25px;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                padding-left: 60px !important;
+                padding-right: 0 !important;
+                text-align: left !important;
+            }
+
+            .timeline-marker {
+                left: 20px;
+                transform: translateX(0);
+            }
+
+            .timeline-date {
+                justify-content: flex-start !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .features-grid,
+            .steps,
+            .use-cases,
+            .security-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-box ul {
+                column-count: 1;
+            }
+
+            .swatch-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .pricing-card {
+                padding: 40px 30px;
+            }
+
+            .price {
+                font-size: 3.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </button>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2>VPA Effective Date Change</h2>
+            <p>Professional Transfer Date Management</p>
+        </div>
+
+        <nav class="side-menu-nav">
+            <ul>
+                <li><a href="#overview" class="menu-link">Overview</a></li>
+                <li><a href="#version-history" class="menu-link">Version History</a></li>
+                <li><a href="#features" class="menu-link">Key Features</a></li>
+                <li><a href="#themes" class="menu-link">Themes</a></li>
+                <li><a href="#benefits" class="menu-link">Benefits</a></li>
+                <li><a href="#how-it-works" class="menu-link">How It Works</a></li>
+                <li><a href="#use-cases" class="menu-link">Use Cases</a></li>
+                <li><a href="#security" class="menu-link">Security</a></li>
+                <li><a href="#technical" class="menu-link">Technical</a></li>
+                <li><a href="#included" class="menu-link">What's Included</a></li>
+                <li><a href="#pricing" class="menu-link">Pricing</a></li>
+                <li><a href="#contact" class="menu-link">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="side-menu-footer">
+            <!--
+            ============================================
+            UPDATE INSTRUCTION #1: LATEST VERSION NUMBER
+            ============================================
+            When releasing a new version, update this version number below:
+            Example: If releasing v19.0.2.0.0, change 19.0.1.0.0 to 19.0.2.0.0
+            -->
+            <p><strong>Latest Version:</strong> 19.0.1.0.0</p>
+            <p><strong>License:</strong> OPL-1</p>
+            <p><strong>Author:</strong> VPA Solutions Limited</p>
+            <p style="margin-top: 15px; opacity: 0.5; font-size: 0.8em;">© 2025 VPA Solutions Limited</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="container">
+                <h1>VPA Effective Date Change</h1>
+                <!--
+                ============================================
+                UPDATE INSTRUCTION #2: HEADER VERSION BADGE
+                ============================================
+                Update the version number in the badge below when releasing a new version
+                -->
+                <div style="background: rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; display: inline-block; margin-top: 10px;">
+                    <strong>Latest: v19.0.1.0.0</strong>
+                </div>
+                <p>Professional Transfer Date Management for Odoo</p>
+                <p>Change stock transfer effective dates with automatic accounting synchronization - No coding required!</p>
+                <div>
+                    <span class="badge">Date Management</span>
+                    <span class="badge">Auto Sync</span>
+                    <span class="badge">Multi-Currency</span>
+                    <span class="badge">Audit Trail</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <div class="container">
+                <h2 class="section-title">Overview</h2>
+                <p class="section-subtitle">
+                    <strong>VPA Effective Date Change</strong> is a professional solution that allows you to modify effective dates
+                    of validated stock transfers with automatic synchronization of all related accounting and inventory records.
+                    Handle backdated transactions, multi-currency purchases, and maintain audit compliance. Available for multiple Odoo versions.
+                </p>
+            </div>
+        </section>
+
+        <!-- Version History Timeline Section -->
+        <section id="version-history" class="section">
+            <div class="container">
+                <h2 class="section-title">Version History & Changelog</h2>
+                <p class="section-subtitle">Complete version history across all Odoo releases</p>
+
+                <!-- Version Selector Tabs -->
+                <div class="version-tabs">
+                    <div class="version-tab active" onclick="showVersion('odoo19')">Odoo 19</div>
+                    <div class="version-tab" onclick="showVersion('odoo18')">Odoo 18</div>
+                    <div class="version-tab" onclick="showVersion('odoo17')">Odoo 17</div>
+                </div>
+
+                <!-- Odoo 19 Timeline -->
+                <div id="odoo19" class="version-content active">
+                    <div class="timeline">
+                        <!--
+                        ████████████████████████████████████████████████████████████████████████████████
+                        █                                                                              █
+                        █  UPDATE INSTRUCTION #3: ADD NEW VERSION TO TIMELINE                         █
+                        █                                                                              █
+                        █  HOW TO ADD A NEW VERSION:                                                   █
+                        █  ═══════════════════════                                                     █
+                        █                                                                              █
+                        █  1. Copy the entire block below (from "Version 19.0.1.0.0" to </div>)       █
+                        █  2. Paste it RIGHT HERE (ABOVE the existing versions)                       █
+                        █  3. Update the following in your new copy:                                  █
+                        █     - Timeline marker: Change "v1" to "v2" (or v3, v4, etc.)               █
+                        █     - Version number: Change "19.0.1.0.0" to your new version              █
+                        █     - Release date: Update to actual release date                          █
+                        █     - Description: Update the italic description text                       █
+                        █     - Add your new features under appropriate categories:                   █
+                        █       • Core Features (for major new features)                             █
+                        █       • Improvements (for enhancements)                                     █
+                        █       • Bug Fixes (for fixes)                                              █
+                        █       • Customization Options (for new customization features)             █
+                        █                                                                              █
+                        █  EXAMPLE STRUCTURE:                                                          █
+                        █  ═════════════════                                                           █
+                        █                                                                              █
+                        █  <div class="timeline-item">                                                █
+                        █      <div class="timeline-marker">v2</div>                                  █
+                        █      <div class="timeline-content">                                         █
+                        █          <h3>Version 19.0.2.0.0</h3>                                        █
+                        █          <div class="timeline-date">                                        █
+                        █              Released: December 15, 2025                                    █
+                        █              <span class="odoo-version-badge">Odoo 19</span>               █
+                        █          </div>                                                             █
+                        █          <p style="color: #666; margin-bottom: 15px; font-style: italic;">  █
+                        █              Feature enhancement release                                    █
+                        █          </p>                                                               █
+                        █                                                                              █
+                        █          <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">█
+                        █              New Features</h4>                                              █
+                        █          <ul class="timeline-changes">                                      █
+                        █              <li>Background image support for login page</li>              █
+                        █              <li>Custom CSS injection field for advanced users</li>        █
+                        █          </ul>                                                              █
+                        █                                                                              █
+                        █          <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">█
+                        █              Improvements</h4>                                              █
+                        █          <ul class="timeline-changes">                                      █
+                        █              <li>Improved color picker with palette suggestions</li>       █
+                        █              <li>Performance optimization for CSS generation</li>          █
+                        █          </ul>                                                              █
+                        █                                                                              █
+                        █          <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">█
+                        █              Bug Fixes</h4>                                                 █
+                        █          <ul class="timeline-changes">                                      █
+                        █              <li>Fixed favicon not displaying in some browsers</li>        █
+                        █              <li>Fixed logo alignment issue in dark mode</li>              █
+                        █          </ul>                                                              █
+                        █      </div>                                                                 █
+                        █  </div>                                                                     █
+                        █                                                                              █
+                        █  IMPORTANT NOTES:                                                            █
+                        █  • Always add NEW versions ABOVE (not below) existing versions              █
+                        █  • Newest versions should appear first in the timeline                      █
+                        █  • Keep the same HTML structure and styling                                 █
+                        █  • Use category headers that match your changes (Core Features,             █
+                        █    Improvements, Bug Fixes, etc.)                                           █
+                        █                                                                              █
+                        ████████████████████████████████████████████████████████████████████████████████
+                        -->
+
+                        <!-- Version 19.0.1.0.0 -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker">v1</div>
+                            <div class="timeline-content">
+                                <h3>Version 19.0.1.0.0</h3>
+                                <div class="timeline-date">
+                                    Released: November 27, 2024
+                                    <span class="odoo-version-badge">Odoo 19</span>
+                                </div>
+                                <p style="color: #666; margin-bottom: 15px; font-style: italic;">Initial release with comprehensive transfer date management features</p>
+
+                                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">Core Features</h4>
+                                <ul class="timeline-changes">
+                                    <li>Change effective dates for validated stock transfers (Deliveries, Receipts, Internal Transfers)</li>
+                                    <li>Pre-validation dating: Set custom effective date before validation</li>
+                                    <li>Smart wizard interface for changing dates after validation</li>
+                                    <li>Automatic synchronization of stock moves and move lines</li>
+                                    <li>Automatic journal entry (account move) date updates</li>
+                                    <li>Stock valuation layer synchronization</li>
+                                </ul>
+
+                                <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">Multi-Currency Support</h4>
+                                <ul class="timeline-changes">
+                                    <li>Recalculates foreign currency purchase valuations with correct exchange rates</li>
+                                    <li>Currency rate validation ensures rates exist for selected dates</li>
+                                    <li>Automatic rate application for multi-currency transactions</li>
+                                    <li>FIFO & Average cost method recalculation</li>
+                                </ul>
+
+                                <h4 style="color: #0c5460; margin-top: 20px; margin-bottom: 10px;">Security & Access Control</h4>
+                                <ul class="timeline-changes">
+                                    <li>Role-based permissions for authorized users only</li>
+                                    <li>User group management via Settings → Users</li>
+                                    <li>Audit trail for all date changes</li>
+                                    <li>Safe database updates with existence checks</li>
+                                </ul>
+
+                                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">Technical Highlights</h4>
+                                <ul class="timeline-changes">
+                                    <li>Full Odoo 19 Enterprise compatibility</li>
+                                    <li>Comprehensive date synchronization across all related tables</li>
+                                    <li>Seamless integration with stock, accounting, and purchase modules</li>
+                                    <li>Clean architecture following Odoo best practices</li>
+                                    <li>OPL-1 license</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Odoo 18 Timeline -->
+                <div id="odoo18" class="version-content">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Soon</div>
+                            <div class="timeline-content">
+                                <h3>Odoo 18 Version</h3>
+                                <div class="timeline-date">
+                                    Coming Soon
+                                    <span class="odoo-version-badge" style="background: linear-gradient(135deg, #1E40AF, #1E3A8A);">Odoo 18</span>
+                                </div>
+                                <p style="color: #666; margin-top: 15px;">
+                                    VPA Effective Date Change for Odoo 18 is currently in development. This version will include all the features from the Odoo 19 release,
+                                    optimized and tested specifically for Odoo 18 compatibility.
+                                </p>
+                                <p style="color: #DC143C; font-weight: 600; margin-top: 15px;">
+                                    Expected Release: Q1 2026
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Odoo 17 Timeline -->
+                <div id="odoo17" class="version-content">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Soon</div>
+                            <div class="timeline-content">
+                                <h3>Odoo 17 Version</h3>
+                                <div class="timeline-date">
+                                    Coming Soon
+                                    <span class="odoo-version-badge" style="background: linear-gradient(135deg, #059669, #047857);">Odoo 17</span>
+                                </div>
+                                <p style="color: #666; margin-top: 15px;">
+                                    VPA Effective Date Change for Odoo 17 is planned for development. As Odoo 17 has the largest market share,
+                                    this version is a high priority and will receive the full feature set adapted for Odoo 17.
+                                </p>
+                                <p style="color: #DC143C; font-weight: 600; margin-top: 15px;">
+                                    Expected Release: Q1 2026
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>Change Transfer Dates</h3>
+                        <p>Modify effective dates for validated deliveries, receipts, and internal transfers. Support for backdated transactions!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Smart Wizard</h3>
+                        <p>Intuitive interface for changing dates after validation. Set custom dates before or after validation!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Auto Synchronization</h3>
+                        <p>Automatically updates stock moves, journal entries, and valuation layers. All related records synchronized!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Multi-Currency</h3>
+                        <p>Recalculates foreign currency purchases with correct exchange rates. Currency rate validation included!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>FIFO & Average Cost</h3>
+                        <p>Automatic product cost recalculation for both FIFO and Average costing methods. Accurate valuations!</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3>Access Control</h3>
+                        <p>Role-based permissions ensure only authorized users can change dates. Enterprise-grade security!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases Section -->
+        <section id="themes" class="section">
+            <div class="container">
+                <h2 class="section-title">Common Use Cases</h2>
+                <p class="section-subtitle">Solve real-world inventory and accounting challenges with accurate date management!</p>
+
+                <div class="color-swatches">
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #DC143C;"></div>
+                        <h4>Late Validations</h4>
+                        <p>Backdate Transfers</p>
+                    </div>
+
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #1E40AF;"></div>
+                        <h4>Period Closing</h4>
+                        <p>Correct Reporting</p>
+                    </div>
+
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #059669;"></div>
+                        <h4>Multi-Currency</h4>
+                        <p>Accurate Rates</p>
+                    </div>
+
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #7C3AED;"></div>
+                        <h4>Audit Compliance</h4>
+                        <p>Proper Dates</p>
+                    </div>
+
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #EA580C;"></div>
+                        <h4>Valuation Fixes</h4>
+                        <p>FIFO/Average Cost</p>
+                    </div>
+
+                    <div class="color-swatch">
+                        <div class="swatch-circle" style="background: #1F2937;"></div>
+                        <h4>Journal Entries</h4>
+                        <p>Auto Sync</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section id="benefits" class="section">
+            <div class="container">
+                <h2 class="section-title">Business Benefits</h2>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Accurate Financial Reporting:</strong> Ensure stock transfers are recorded on the correct dates for period-end financial statements
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Audit Compliance:</strong> Maintain proper audit trails with backdated transactions documented correctly
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Save Time & Effort:</strong> No manual journal corrections needed - all accounting entries synchronized automatically
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Multi-Currency Accuracy:</strong> Correct exchange rates applied automatically when changing dates on foreign currency purchases
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Inventory Valuation Integrity:</strong> FIFO and Average cost calculations updated to reflect the correct dates
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-icon">✓</div>
+                        <div class="benefit-text">
+                            <strong>Enterprise Security:</strong> Role-based access control ensures only authorized users can modify transfer dates
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in 3 simple steps</p>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Install</h3>
+                        <p><strong>Search:</strong> Find "VPA Effective Date Change" in Apps menu</p>
+                        <p><strong>Click Install:</strong> Module installs in seconds</p>
+                        <p><strong>Ready:</strong> Navigate to Inventory → Operations → Transfers</p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Change Date</h3>
+                        <p><strong>Open Transfer:</strong> Select validated stock transfer</p>
+                        <p><strong>Click Button:</strong> "Change Effective Date" button appears</p>
+                        <p><strong>Select Date:</strong> Choose new effective date in wizard</p>
+                        <p><strong>Validate:</strong> System checks currency rates (if applicable)</p>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Synchronized!</h3>
+                        <p><strong>Auto Sync:</strong> All records updated instantly</p>
+                        <p><strong>No Restart:</strong> Changes apply immediately</p>
+                        <p><strong>View Result:</strong> Check stock moves, journal entries, and valuations!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases Section -->
+        <section id="use-cases" class="section">
+            <div class="container">
+                <h2 class="section-title">Perfect For</h2>
+                <div class="use-cases">
+                    <div class="use-case">
+                        <h3>Late Validations</h3>
+                        <p>Received goods on Monday but only validated on Friday? Backdate the transfer to the correct receipt date.</p>
+                    </div>
+
+                    <div class="use-case">
+                        <h3>Period-End Corrections</h3>
+                        <p>Ensure transfers are recorded in the correct financial period for accurate month-end and year-end reporting.</p>
+                    </div>
+
+                    <div class="use-case">
+                        <h3>Multi-Currency Purchases</h3>
+                        <p>Apply the correct exchange rates for foreign currency purchases based on the actual transaction date.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="section">
+            <div class="container">
+                <h2 class="section-title">Enterprise-Grade Security</h2>
+                <p class="section-subtitle">Role-based access control included</p>
+
+                <div class="security-grid">
+                    <div class="security-card">
+                        <h3>Access Control</h3>
+                        <ul>
+                            <li><strong>System Administrators:</strong> Full access by default</li>
+                            <li><strong>Date Change Manager:</strong> Custom role for date modification</li>
+                            <li><strong>Regular Users:</strong> No access (protected)</li>
+                            <li><strong>Audit Trail:</strong> All changes are logged</li>
+                        </ul>
+                    </div>
+
+                    <div class="security-card">
+                        <h3>Permission Management</h3>
+                        <ul>
+                            <li><strong>Easy Assignment:</strong> Grant access via Settings → Users</li>
+                            <li><strong>Standard Workflow:</strong> Works like Accounting/Sales permissions</li>
+                            <li><strong>Flexible Control:</strong> Assign to specific users or groups</li>
+                            <li><strong>Professional:</strong> Enterprise-grade security model</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Specifications Section -->
+        <section id="technical" class="section">
+            <div class="container">
+                <h2 class="section-title">Technical Specifications</h2>
+                <div class="specs-table">
+                    <table>
+                        <tr>
+                            <th colspan="2">Module Information</th>
+                        </tr>
+                        <tr>
+                            <td>Module Name</td>
+                            <td>VPA Effective Date Change</td>
+                        </tr>
+                        <tr>
+                            <td>Technical Name</td>
+                            <td>vpa_effective_date_change</td>
+                        </tr>
+                        <tr>
+                            <td>Latest Version</td>
+                            <td>19.0.1.0.0</td>
+                        </tr>
+                        <tr>
+                            <td>License</td>
+                            <td>OPL-1 (Odoo Proprietary License)</td>
+                        </tr>
+                        <tr>
+                            <td>Author</td>
+                            <td>VPA Solutions Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Category</td>
+                            <td>Inventory/Inventory</td>
+                        </tr>
+                        <tr>
+                            <td>Odoo Versions</td>
+                            <td>19.0 Enterprise<br>18.0 (Coming Soon)<br>17.0 (Coming Soon)</td>
+                        </tr>
+                        <tr>
+                            <td>Dependencies</td>
+                            <td>account_accountant, stock, sale_management, purchase</td>
+                        </tr>
+                        <tr>
+                            <td>Compatibility</td>
+                            <td>Odoo 19 Enterprise</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- What's Included Section -->
+        <section id="included" class="section">
+            <div class="container">
+                <h2 class="section-title">What's Included</h2>
+                <div class="info-box">
+                    <h3>✓ Complete Package</h3>
+                    <ul>
+                        <li>✓ Change Effective Dates for Stock Transfers</li>
+                        <li>✓ Pre-Validation and Post-Validation Dating</li>
+                        <li>✓ Smart Wizard Interface</li>
+                        <li>✓ Automatic Stock Move Synchronization</li>
+                        <li>✓ Journal Entry Date Updates</li>
+                        <li>✓ Stock Valuation Layer Sync</li>
+                        <li>✓ Multi-Currency Support</li>
+                        <li>✓ Currency Rate Validation</li>
+                        <li>✓ FIFO & Average Cost Recalculation</li>
+                        <li>✓ Role-Based Access Control</li>
+                        <li>✓ No Coding Required</li>
+                        <li>✓ Instant Apply (No Server Restart)</li>
+                        <li>✓ Comprehensive Documentation</li>
+                        <li>✓ Free Lifetime Updates</li>
+                        <li>✓ Professional Support Included</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section">
+            <div class="container">
+                <h2 class="section-title">Pricing</h2>
+                <div class="pricing-card">
+                    <h3>Professional Edition</h3>
+                    <div class="price">
+                        $79<span class="price-period">USD</span>
+                    </div>
+                    <p style="color: #28a745; font-size: 1.2em; font-weight: 600; margin-bottom: 20px;">One-Time Purchase!</p>
+                    <ul class="pricing-features">
+                        <li>One-time purchase per Odoo version</li>
+                        <li>Lifetime updates for purchased version</li>
+                        <li>Professional support included</li>
+                        <li>Email support (24h response)</li>
+                        <li>Comprehensive documentation</li>
+                        <li>No monthly fees</li>
+                        <li>No user limits</li>
+                        <li>All features included</li>
+                        <li>Multi-currency support</li>
+                        <li>Automatic synchronization</li>
+                        <li>FIFO & Average cost calculation</li>
+                        <li>Currency rate validation</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">Get Started Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="container">
+                <h2 class="section-title">Support & Contact</h2>
+                <p class="section-subtitle">We're here to help you succeed with VPA Effective Date Change</p>
+
+                <div class="contact-box">
+                    <div class="contact-item">
+                        <div>
+                            <strong>Email:</strong>
+                            <a href="mailto:info@vpa.co.tz">info@vpa.co.tz</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Website:</strong>
+                            <a href="https://www.vpa.co.tz" target="_blank">www.vpa.co.tz</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Response Time:</strong> Within 24 hours on business days
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div>
+                            <strong>Documentation:</strong> Comprehensive user guide and tutorials included
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p style="font-size: 1.3em; margin-bottom: 15px;">
+                    <strong>VPA Effective Date Change</strong> - Professional Transfer Date Management
+                </p>
+                <p style="margin: 12px 0;">
+                    Copyright &copy; 2025 <a href="https://www.vpa.co.tz">VPA Solutions Limited</a>. All rights reserved.
+                </p>
+                <p style="margin: 12px 0; color: #aaa;">
+                    Developed with ❤️ for the Odoo community
+                </p>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
+                    Odoo is a trademark of Odoo S.A. This module is not affiliated with Odoo S.A.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Version tab switcher
+        function showVersion(version) {
+            // Hide all version content
+            document.querySelectorAll('.version-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.version-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected version content
+            document.getElementById(version).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Active section highlighting on scroll
+        const menuLinks = document.querySelectorAll('.menu-link');
+        const sections = document.querySelectorAll('.section, .header');
+
+        function setActiveLink() {
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', setActiveLink);
+        window.addEventListener('load', setActiveLink);
+
+        // Close mobile menu when clicking a link
+        menuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('sideMenu').classList.remove('active');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('sideMenu');
+            const toggle = document.querySelector('.menu-toggle');
+
+            if (window.innerWidth <= 1024 &&
+                !menu.contains(e.target) &&
+                !toggle.contains(e.target) &&
+                menu.classList.contains('active')) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

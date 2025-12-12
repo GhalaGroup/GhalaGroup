@@ -56,19 +56,19 @@ When you change an effective date, the module automatically synchronizes:
 - **Technical Name**: vpa_effective_date_change
 - **Version**: 19.0.1.0.0
 - **License**: OPL-1 (Odoo Proprietary License)
-- **Author**: VPA Software Limited
+- **Author**: VPA Solutions Limited
 - **Category**: Inventory/Inventory
 - **Depends**: account_accountant, stock, sale_management, purchase
 
 ## Support
 
-- **Email**: support@vpasoftware.com
-- **Website**: https://www.vpasoftware.com
+- **Email**: info@vpa.co.tz
+- **Website**: https://www.vpa.co.tz
 - **Response Time**: Within 24 hours on business days
 
 ## Copyright
 
-Copyright © 2025 VPA Software Limited. All rights reserved.
+Copyright © 2025 VPA Solutions Limited. All rights reserved.
 
 This software is licensed under the Odoo Proprietary License v1.0.
 See the LICENSE file for full copyright and licensing details.

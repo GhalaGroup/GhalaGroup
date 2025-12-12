@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
     <data>
         <record model="ir.ui.view" id="effective_date_change_privilege">
@@ -6,11 +8,9 @@
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="effective_date_change"/>
             <field name="arch" type="xml">
-
                 <button name="action_cancel" position="after">
-                    <button name="wiz_open" groups="effective_date_change.effective_date_change_group" type="object" string="Change Effective Date" invisible="state != 'done'"/>
+                    <button name="wiz_open" groups="vpa_effective_date_change.vpa_effective_date_change_group" type="object" string="Change Effective Date" invisible="state != 'done'"/>
                 </button>
-
             </field>
         </record>
     </data>
