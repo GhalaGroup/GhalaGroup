@@ -59,8 +59,8 @@ Support: info@vpa.co.tz
         'wizard/transfer_wizard_views.xml',
         'views/internal_transfer_views.xml',
         'views/approval_threshold_views.xml',
-        'views/res_config_settings_views.xml',
         'views/backup_views.xml',
+        'views/res_config_settings_views.xml',
         'views/menu_views.xml',
     ],
     'images': [
