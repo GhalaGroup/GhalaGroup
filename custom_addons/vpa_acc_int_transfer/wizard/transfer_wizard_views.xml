@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Reject Transfer Wizard Form -->
+    <record id="internal_transfer_reject_wizard_form" model="ir.ui.view">
+        <field name="name">internal.transfer.reject.wizard.form</field>
+        <field name="model">internal.transfer.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Transfer">
+                <group>
+                    <group>
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="transfer_amount"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="rejection_reason" placeholder="Please provide a detailed reason for rejecting this transfer..."/>
+                </group>
+                <footer>
+                    <button name="action_reject" string="Reject Transfer" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Cancel Transfer Wizard Form -->
+    <record id="internal_transfer_cancel_wizard_form" model="ir.ui.view">
+        <field name="name">internal.transfer.cancel.wizard.form</field>
+        <field name="model">internal.transfer.cancel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cancel Transfer">
+                <group>
+                    <group>
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_state" invisible="1"/>
+                        <field name="has_journal_entries" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="transfer_amount"/>
+                    </group>
+                    <group>
+                        <field name="create_reversal"
+                               invisible="not has_journal_entries"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="cancellation_reason" placeholder="Please provide a detailed reason for cancelling this transfer..."/>
+                </group>
+                <div class="alert alert-warning" role="alert"
+                     invisible="not has_journal_entries or not create_reversal">
+                    <strong>Note:</strong> Reversal journal entries will be created to undo the original transaction.
+                </div>
+                <footer>
+                    <button name="action_cancel" string="Cancel Transfer" type="object" class="btn-danger"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

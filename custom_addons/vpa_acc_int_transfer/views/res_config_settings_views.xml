@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <record id="res_config_settings_view_form_inherit_internal_transfer" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.internal.transfer</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='account']" position="inside">
+                <block title="VPA Internal Transfer" name="vpa_internal_transfer_settings">
+                    <setting string="Memo Template" help="Template for auto-generated memo on internal transfers">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="internal_transfer_memo_template" class="col-lg-3 o_light_label"/>
+                                <field name="internal_transfer_memo_template" class="col-lg-9"/>
+                            </div>
+                            <div class="text-muted mt8">
+                                Use placeholders: {source}, {destination}, {user}, {amount}, {date}
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Approval Thresholds" help="Configure amount-based approval routing">
+                        <div class="content-group">
+                            <div class="mt8">
+                                <button name="%(approval_threshold_action)d"
+                                        string="Configure Thresholds"
+                                        type="action"
+                                        class="btn-link"
+                                        icon="fa-arrow-right"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Transfer Permissions" help="Configure who can manage transfers">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="transfer_manager_ids" string="Transfer Managers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_manager_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Full control: approve, reject, cancel, reset, lock, unlock
+                            </div>
+                            <div class="row mt16">
+                                <label for="transfer_approver_ids" string="Transfer Approvers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_approver_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Can approve and reject transfers
+                            </div>
+                            <div class="row mt16">
+                                <label for="transfer_canceller_ids" string="Transfer Cancellers" class="col-lg-3 o_light_label"/>
+                                <field name="transfer_canceller_ids"
+                                       widget="many2many_tags"
+                                       class="col-lg-9"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <div class="text-muted ms-3" style="font-size: 0.85em;">
+                                Can cancel and reset transfers to draft
+                            </div>
+                            <div class="text-muted mt16" style="font-size: 0.85em; font-style: italic;">
+                                Note: If no users are configured, Account Managers can perform all actions.
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Backup &amp; Restore" help="Manage transfer data backups">
+                        <div class="content-group">
+                            <div class="mt8">
+                                <button name="%(internal_transfer_backup_action)d"
+                                        string="View Backups"
+                                        type="action"
+                                        class="btn-link"
+                                        icon="fa-arrow-right"/>
+                            </div>
+                            <div class="text-muted mt8" style="font-size: 0.85em;">
+                                Backups are created automatically before module uninstall
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

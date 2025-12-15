@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Backup List View -->
+    <record id="internal_transfer_backup_view_list" model="ir.ui.view">
+        <field name="name">internal.transfer.backup.view.list</field>
+        <field name="model">internal.transfer.backup</field>
+        <field name="arch" type="xml">
+            <list string="Transfer Backups" create="0">
+                <field name="name"/>
+                <field name="backup_date"/>
+                <field name="transfer_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="is_restored"/>
+                <field name="restored_date"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Backup Form View -->
+    <record id="internal_transfer_backup_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.backup.view.form</field>
+        <field name="model">internal.transfer.backup</field>
+        <field name="arch" type="xml">
+            <form string="Transfer Backup" create="0">
+                <header>
+                    <button name="action_restore" string="Restore Transfers"
+                            type="object" class="btn-primary"
+                            invisible="is_restored"
+                            confirm="This will restore all transfers from this backup. Existing transfers with the same name will be skipped. Continue?"/>
+                    <button name="action_download" string="Download Backup"
+                            type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <widget name="web_ribbon" title="Restored"
+                            bg_color="text-bg-success"
+                            invisible="not is_restored"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="backup_date"/>
+                            <field name="transfer_count"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="is_restored"/>
+                            <field name="restored_date" invisible="not is_restored"/>
+                            <field name="restored_by_id" invisible="not is_restored"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Backup Action -->
+    <record id="internal_transfer_backup_action" model="ir.actions.act_window">
+        <field name="name">Transfer Backups</field>
+        <field name="res_model">internal.transfer.backup</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No backups found
+            </p>
+            <p>
+                Backups are created automatically before module uninstall, or you can create manual backups from the Internal Transfers menu.
+            </p>
+        </field>
+    </record>
+
+    <!-- Restore Wizard View -->
+    <record id="restore_backup_wizard_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.restore.wizard.view.form</field>
+        <field name="model">internal.transfer.restore.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Restore Backup">
+                <group>
+                    <field name="backup_source" widget="radio"/>
+                </group>
+                <group invisible="backup_source != 'attachment'">
+                    <field name="attachment_id" options="{'no_create': True}"/>
+                </group>
+                <group invisible="backup_source != 'file'">
+                    <field name="upload_file" filename="upload_filename"/>
+                    <field name="upload_filename" invisible="1"/>
+                </group>
+                <group>
+                    <field name="preview_info" widget="text" readonly="1" nolabel="1"
+                           invisible="not preview_info"/>
+                </group>
+                <footer>
+                    <button name="action_restore" string="Restore" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Restore Wizard Action -->
+    <record id="restore_backup_wizard_action" model="ir.actions.act_window">
+        <field name="name">Restore from Backup</field>
+        <field name="res_model">internal.transfer.restore.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Create Backup Server Action -->
+    <record id="action_create_backup" model="ir.actions.server">
+        <field name="name">Create Backup</field>
+        <field name="model_id" ref="model_internal_transfer"/>
+        <field name="binding_model_id" ref="model_internal_transfer"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+backup = env['internal.transfer.backup'].create_backup('Manual Backup')
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'Backup Created',
+        'message': 'Successfully backed up %d transfers.' % backup.transfer_count,
+        'type': 'success',
+        'sticky': False,
+    }
+}
+        </field>
+    </record>
+</odoo>

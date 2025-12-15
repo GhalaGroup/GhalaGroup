@@ -2,4 +2,6 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
-from . import update_effective
+from . import models
+from . import wizard
+from .hooks import pre_uninstall_hook, post_init_hook

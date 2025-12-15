@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Report Action -->
+    <record id="action_report_internal_transfer" model="ir.actions.report">
+        <field name="name">Internal Transfer Voucher</field>
+        <field name="model">internal.transfer</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_acc_int_transfer.report_internal_transfer</field>
+        <field name="report_file">vpa_acc_int_transfer.report_internal_transfer</field>
+        <field name="print_report_name">'Internal Transfer - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_internal_transfer"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <template id="report_internal_transfer">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-size: 11px;">
+                        <!-- Header -->
+                        <div class="row">
+                            <div class="col-8">
+                                <h4 style="color: #DC143C; margin-bottom: 5px;">
+                                    <strong>INTERNAL TRANSFER VOUCHER</strong>
+                                </h4>
+                                <h5 style="margin: 0;"><strong t-field="doc.name"/></h5>
+                            </div>
+                            <div class="col-4 text-end">
+                                <span t-if="doc.state == 'draft'" class="badge text-bg-info">Draft</span>
+                                <span t-if="doc.state == 'submitted'" class="badge text-bg-warning">Pending</span>
+                                <span t-if="doc.state == 'approved'" class="badge text-bg-success">Approved</span>
+                                <span t-if="doc.state == 'rejected'" class="badge text-bg-danger">Rejected</span>
+                                <span t-if="doc.state == 'cancelled'" class="badge text-bg-secondary">Cancelled</span>
+                                <div style="font-size: 10px; margin-top: 3px;">
+                                    <span t-field="doc.date"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transfer Details - Compact 2-column layout -->
+                        <table class="table table-sm table-bordered mt-2" style="margin-bottom: 8px;">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" class="text-center" style="background-color: #DC143C; color: white; padding: 4px;">
+                                        Transfer Details
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="width: 15%; background-color: #f8f9fa;"><strong>From:</strong></td>
+                                    <td style="width: 35%;">
+                                        <span t-field="doc.source_journal_id.name"/>
+                                        <div style="font-size: 9px; color: #666;">
+                                            <span t-field="doc.source_account_id.code"/> - <span t-field="doc.source_account_id.name"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 15%; background-color: #f8f9fa;"><strong>To:</strong></td>
+                                    <td style="width: 35%;">
+                                        <span t-field="doc.destination_journal_id.name"/>
+                                        <div style="font-size: 9px; color: #666;">
+                                            <span t-field="doc.destination_account_id.code"/> - <span t-field="doc.destination_account_id.name"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #f8f9fa;"><strong>Transfer A/C:</strong></td>
+                                    <td colspan="3">
+                                        <span t-field="doc.transfer_account_id.code"/> - <span t-field="doc.transfer_account_id.name"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Amount Section - Compact -->
+                        <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" class="text-center" style="background-color: #DC143C; color: white; padding: 4px;">
+                                        Amount
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="width: 25%; background-color: #f8f9fa;"><strong>Amount:</strong></td>
+                                    <td style="width: 25%; font-size: 14px;">
+                                        <strong>
+                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </strong>
+                                    </td>
+                                    <t t-if="doc.is_multi_currency">
+                                        <td style="width: 25%; background-color: #f8f9fa;"><strong>Rate:</strong></td>
+                                        <td style="width: 25%;"><span t-field="doc.exchange_rate" t-options='{"precision": 4}'/></td>
+                                    </t>
+                                    <t t-else="">
+                                        <td style="width: 25%; background-color: #f8f9fa;"><strong>Company:</strong></td>
+                                        <td style="width: 25%;"><span t-field="doc.company_id.name"/></td>
+                                    </t>
+                                </tr>
+                                <t t-if="doc.is_multi_currency">
+                                    <tr>
+                                        <td style="background-color: #f8f9fa;"><strong>Dest. Amount:</strong></td>
+                                        <td style="font-size: 14px;">
+                                            <strong>
+                                                <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                            </strong>
+                                        </td>
+                                        <td style="background-color: #f8f9fa;"><strong>Company:</strong></td>
+                                        <td><span t-field="doc.company_id.name"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Memo/Notes - Only if present, compact -->
+                        <t t-if="doc.memo or doc.notes">
+                            <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                                <tbody>
+                                    <t t-if="doc.memo">
+                                        <tr>
+                                            <td style="width: 15%; background-color: #f8f9fa;"><strong>Memo:</strong></td>
+                                            <td><span t-field="doc.memo"/></td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="doc.notes">
+                                        <tr>
+                                            <td style="background-color: #f8f9fa;"><strong>Notes:</strong></td>
+                                            <td><span t-field="doc.notes"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Approval Trail - Compact horizontal layout -->
+                        <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                            <thead>
+                                <tr>
+                                    <th colspan="6" class="text-center" style="background-color: #DC143C; color: white; padding: 4px;">
+                                        Approval Trail
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #f8f9fa; font-size: 10px;">
+                                    <th style="width: 16%;">Created</th>
+                                    <th style="width: 17%;">Submitted</th>
+                                    <th style="width: 17%;">Approved</th>
+                                    <th style="width: 17%;">Rejected</th>
+                                    <th style="width: 17%;">Cancelled</th>
+                                    <th style="width: 16%;">Approver</th>
+                                </tr>
+                                <tr style="font-size: 10px;">
+                                    <td>
+                                        <span t-field="doc.create_uid.name"/><br/>
+                                        <span t-field="doc.create_date" t-options='{"format": "dd/MM/yy"}'/>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.submitted_by_id">
+                                            <span t-field="doc.submitted_by_id.name"/><br/>
+                                            <span t-field="doc.submit_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approved_by_id">
+                                            <span t-field="doc.approved_by_id.name"/><br/>
+                                            <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.rejected_by_id">
+                                            <span t-field="doc.rejected_by_id.name"/><br/>
+                                            <span t-field="doc.rejection_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.cancelled_by_id">
+                                            <span t-field="doc.cancelled_by_id.name"/><br/>
+                                            <span t-field="doc.cancellation_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approver_id">
+                                            <span t-field="doc.approver_id.name"/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                </tr>
+                                <t t-if="doc.rejection_reason">
+                                    <tr style="background-color: #f8d7da;">
+                                        <td colspan="6" style="font-size: 10px;">
+                                            <strong>Rejection:</strong> <span t-field="doc.rejection_reason"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="doc.cancellation_reason">
+                                    <tr style="background-color: #e2e3e5;">
+                                        <td colspan="6" style="font-size: 10px;">
+                                            <strong>Cancellation:</strong> <span t-field="doc.cancellation_reason"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Journal Entries Reference - Only if exists -->
+                        <t t-if="doc.source_move_id or doc.destination_move_id">
+                            <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" class="text-center" style="background-color: #28a745; color: white; padding: 4px;">
+                                            Journal Entries
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 50%;">
+                                            <strong>Source:</strong>
+                                            <t t-if="doc.source_move_id">
+                                                <span t-field="doc.source_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                        <td style="width: 50%;">
+                                            <strong>Destination:</strong>
+                                            <t t-if="doc.destination_move_id">
+                                                <span t-field="doc.destination_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Signature Section - Compact -->
+                        <div class="row mt-3">
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                                    <strong style="font-size: 10px;">Prepared By</strong>
+                                </div>
+                                <div style="height: 35px;"></div>
+                                <div style="font-size: 9px;">Name: ________________</div>
+                                <div style="font-size: 9px;">Date: ________________</div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                                    <strong style="font-size: 10px;">Approved By</strong>
+                                </div>
+                                <div style="height: 35px;"></div>
+                                <div style="font-size: 9px;">Name: ________________</div>
+                                <div style="font-size: 9px;">Date: ________________</div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                                    <strong style="font-size: 10px;">Received By</strong>
+                                </div>
+                                <div style="height: 35px;"></div>
+                                <div style="font-size: 9px;">Name: ________________</div>
+                                <div style="font-size: 9px;">Date: ________________</div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Note -->
+                        <div class="row mt-2">
+                            <div class="col-12 text-center">
+                                <p style="font-size: 8px; color: #888; margin: 0;">
+                                    Computer generated document. Printed: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

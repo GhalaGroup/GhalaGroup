@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_internal_transfer_account_user,internal.transfer.account.user,model_internal_transfer,account.group_account_user,1,1,1,0
+access_internal_transfer_account_manager,internal.transfer.account.manager,model_internal_transfer,account.group_account_manager,1,1,1,1
+access_internal_transfer_threshold_account_user,internal.transfer.threshold.account.user,model_internal_transfer_threshold,account.group_account_user,1,0,0,0
+access_internal_transfer_threshold_account_manager,internal.transfer.threshold.account.manager,model_internal_transfer_threshold,account.group_account_manager,1,1,1,1
+access_internal_transfer_reject_wizard,internal.transfer.reject.wizard,model_internal_transfer_reject_wizard,account.group_account_user,1,1,1,1
+access_internal_transfer_cancel_wizard,internal.transfer.cancel.wizard,model_internal_transfer_cancel_wizard,account.group_account_user,1,1,1,1
+access_internal_transfer_backup_account_manager,internal.transfer.backup.account.manager,model_internal_transfer_backup,account.group_account_manager,1,1,1,1
+access_internal_transfer_restore_wizard,internal.transfer.restore.wizard,model_internal_transfer_restore_wizard,account.group_account_manager,1,1,1,1

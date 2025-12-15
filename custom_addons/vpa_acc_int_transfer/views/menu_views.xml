@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Internal Transfers Menu under Accounting > Accounting > Transactions -->
+    <!-- In Odoo 19: menu_finance_entries contains account_transactions_menu -->
+    <menuitem id="menu_internal_transfer_main"
+              name="Internal Transfers"
+              action="internal_transfer_action"
+              parent="account.account_transactions_menu"
+              sequence="50"/>
+</odoo>

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2025 VPA Software Limited
+# Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Effective Date Change',
-    'author': 'VPA Software Limited',
+    'author': 'VPA Solutions Limited',
     'version': '19.0.1.0.0',
     'summary': 'Change stock transfer effective dates with automatic accounting synchronization',
     'license': 'OPL-1',
@@ -44,12 +44,12 @@ Technical Features
 * Comprehensive date synchronization
 * User permission management
 
-Developed by VPA Software Limited
-Support: support@vpasoftware.com
+Developed by VPA Solutions Limited
+Support: info@vpa.co.tz
     """,
     'category': 'Inventory/Inventory',
-    'website': 'https://www.vpasoftware.com',
-    'support': 'support@vpasoftware.com',
+    'website': 'https://www.vpa.co.tz',
+    'support': 'info@vpa.co.tz',
     'price': 79.00,
     'currency': 'USD',
     'depends': [
@@ -67,7 +67,6 @@ Support: support@vpasoftware.com
     ],
     'images': [
         'static/description/icon.png',
-        'static/description/banner.png',
     ],
     'demo': [],
     'installable': True,
