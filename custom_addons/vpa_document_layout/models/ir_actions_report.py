@@ -256,19 +256,32 @@ class IrActionsReport(models.Model):
                 footer_url = f"{base_url}/vpa/footer/{footer_config_id}"
                 _logger.info(f"✅ Using VPA footer config: {footer_url}")
 
-            if footer_url:
+            # Get header URL if footer_config has header enabled
+            header_url = None
+            header_height = '0'
+            if footer_config_id:
+                footer_config = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
+                if footer_config.exists() and footer_config.show_header:
+                    header_url = f"{base_url}/vpa/header/{footer_config_id}"
+                    header_height = footer_config.header_height or '25mm'
+                    _logger.info(f"✅ Using VPA header config: {header_url}, height: {header_height}")
+
+            if footer_url or header_url:
                 command_args.extend([
                     '--enable-local-file-access',
-                    '--margin-top', '0',
-                    '--margin-bottom', '30mm',  # Reserve space for footer
+                    '--margin-top', header_height if header_url else '0',
+                    '--margin-bottom', '30mm' if footer_url else '0',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
                     '--header-spacing', '0',
                     '--footer-spacing', '0',
-                    '--footer-html', footer_url,
                 ])
+                if header_url:
+                    command_args.extend(['--header-html', header_url])
+                if footer_url:
+                    command_args.extend(['--footer-html', footer_url])
             else:
-                # No footer
+                # No header or footer
                 command_args.extend([
                     '--margin-top', '0',
                     '--margin-bottom', '0',

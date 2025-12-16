@@ -5,10 +5,10 @@ from markupsafe import Markup
 
 class VPAFooterConfig(models.Model):
     _name = 'vpa.footer.config'
-    _description = 'VPA Footer Configuration'
+    _description = 'VPA Header & Footer Configuration'
     _order = 'sequence, name'
 
-    name = fields.Char(string='Footer Name', required=True)
+    name = fields.Char(string='Configuration Name', required=True)
     company_id = fields.Many2one(
         'res.company', string='Company',
         required=True, default=lambda self: self.env.company,
@@ -27,13 +27,54 @@ class VPAFooterConfig(models.Model):
     # Set as Default
     is_default_customer = fields.Boolean(
         string='Default for Customer Documents',
-        help='Use this footer as default for customer-facing documents (Quotes, Invoices, etc.)'
+        help='Use this config as default for customer-facing documents (Quotes, Invoices, etc.)'
     )
     is_default_internal = fields.Boolean(
         string='Default for Internal Documents',
-        help='Use this footer as default for internal documents (Manufacturing, Picking, etc.)'
+        help='Use this config as default for internal documents (Manufacturing, Picking, etc.)'
     )
 
+    # ==================== HEADER SECTION ====================
+    show_header = fields.Boolean(string='Enable Header', default=True)
+    header_show_logo = fields.Boolean(string='Show Company Logo', default=True)
+    header_show_company_name = fields.Boolean(string='Show Company Name', default=True)
+    header_show_company_details = fields.Boolean(
+        string='Show Company Details',
+        default=False,
+        help='Show company address, phone, email in header'
+    )
+    header_show_document_title = fields.Boolean(
+        string='Show Document Title',
+        default=True,
+        help='Show document type (e.g., "Production Order", "Invoice")'
+    )
+    header_custom_title = fields.Char(
+        string='Custom Title',
+        help='Override the default document title'
+    )
+    header_show_date = fields.Boolean(string='Show Date', default=True)
+    header_date_format = fields.Selection([
+        ('short', 'Short (12/16/2025)'),
+        ('medium', 'Medium (Dec 16, 2025)'),
+        ('long', 'Long (December 16, 2025)'),
+    ], string='Date Format', default='medium')
+    header_layout = fields.Selection([
+        ('standard', 'Standard (Logo left, details right)'),
+        ('centered', 'Centered (Logo and company name centered)'),
+        ('minimal', 'Minimal (Company name only)'),
+        ('custom_html', 'Custom HTML'),
+    ], string='Header Layout', default='standard')
+    header_custom_html = fields.Html(
+        string='Custom Header HTML',
+        help='Use placeholders: {{company_name}}, {{company_logo}}, {{document_title}}, {{date}}'
+    )
+    header_background_color = fields.Char(string='Header Background', default='#ffffff')
+    header_text_color = fields.Char(string='Header Text Color', default='#333333')
+    header_border_bottom = fields.Boolean(string='Show Bottom Border', default=True)
+    header_border_color = fields.Char(string='Header Border Color', default='#dee2e6')
+    header_height = fields.Char(string='Header Height', default='25mm', help='Height reserved for header (e.g., 25mm, 1in)')
+
+    # ==================== FOOTER SECTION ====================
     # Footer Layout
     footer_layout = fields.Selection([
         ('single', 'Single Column (Centered)'),

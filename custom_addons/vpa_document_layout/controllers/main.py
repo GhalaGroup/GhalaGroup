@@ -355,3 +355,236 @@ class VPATemplatePreview(http.Controller):
             Page <span class="page"></span> of <span class="topage"></span>
         </div>
         '''
+
+    @http.route('/vpa/header/<int:footer_config_id>', type='http', auth='public')
+    def get_header_config_html(self, footer_config_id, **kwargs):
+        """Return header HTML from vpa.footer.config for wkhtmltopdf --header-html
+
+        This allows VPA headers to work on ANY Odoo report without needing
+        a VPA Document Template - just configure a header in Header & Footer Settings.
+        """
+        # Use sudo() since this is called by wkhtmltopdf without authentication
+        footer_config = request.env['vpa.footer.config'].sudo().browse(footer_config_id)
+
+        if not footer_config.exists():
+            return request.not_found()
+
+        # If header is disabled, return empty
+        if not footer_config.show_header:
+            return request.make_response(
+                '<!DOCTYPE html><html><head></head><body></body></html>',
+                headers=[('Content-Type', 'text/html; charset=utf-8')]
+            )
+
+        _logger.info(f"Rendering header HTML from footer config: {footer_config.name}")
+
+        company = footer_config.company_id
+
+        try:
+            header_content = self._render_header_content(footer_config, company)
+
+            # Wrap in complete HTML document for wkhtmltopdf
+            html_str = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            color: {footer_config.header_text_color or '#333333'};
+            width: 100%;
+            background: {footer_config.header_background_color or '#ffffff'};
+        }}
+        .vpa-header {{
+            padding: 10px 15px;
+            {f'border-bottom: 1px solid {footer_config.header_border_color};' if footer_config.header_border_bottom else ''}
+            position: relative;
+            min-height: 20mm;
+        }}
+        .header-standard {{
+            display: table;
+            width: 100%;
+        }}
+        .header-left {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 50%;
+        }}
+        .header-right {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 50%;
+            text-align: right;
+        }}
+        .header-centered {{
+            text-align: center;
+        }}
+        .header-minimal {{
+            text-align: left;
+        }}
+        .company-logo {{
+            max-height: 50px;
+            max-width: 150px;
+        }}
+        .company-name {{
+            font-size: 14pt;
+            font-weight: bold;
+            color: {footer_config.header_text_color or '#333333'};
+        }}
+        .company-details {{
+            font-size: 8pt;
+            color: {footer_config.header_text_color or '#666666'};
+            margin-top: 5px;
+        }}
+        .document-title {{
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 5px;
+        }}
+        .header-date {{
+            font-size: 9pt;
+            color: {footer_config.header_text_color or '#666666'};
+        }}
+    </style>
+</head>
+<body>
+    <div class="vpa-header">
+        {header_content}
+    </div>
+</body>
+</html>'''
+
+            return request.make_response(
+                html_str,
+                headers=[('Content-Type', 'text/html; charset=utf-8')]
+            )
+        except Exception as e:
+            _logger.error(f"Header config HTML generation error: {str(e)}", exc_info=True)
+            return request.make_response(
+                f'<div>Header Error: {str(e)}</div>',
+                headers=[('Content-Type', 'text/html')]
+            )
+
+    def _render_header_content(self, footer_config, company):
+        """Render header content based on layout type"""
+        from datetime import date
+
+        # Get company logo as data URI if available
+        logo_html = ''
+        if footer_config.header_show_logo and company.logo:
+            logo_data = image_data_uri(company.logo)
+            logo_html = f'<img src="{logo_data}" class="company-logo" alt="{company.name}"/>'
+
+        # Company name
+        company_name_html = ''
+        if footer_config.header_show_company_name:
+            company_name_html = f'<div class="company-name">{company.name}</div>'
+
+        # Company details (address, phone, email)
+        company_details_html = ''
+        if footer_config.header_show_company_details:
+            details = []
+            if company.street:
+                details.append(company.street)
+            if company.city:
+                city_line = company.city
+                if company.state_id:
+                    city_line += f', {company.state_id.name}'
+                if company.zip:
+                    city_line += f' {company.zip}'
+                details.append(city_line)
+            if company.phone:
+                details.append(f'Phone: {company.phone}')
+            if company.email:
+                details.append(f'Email: {company.email}')
+            if details:
+                company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
+
+        # Document title
+        title_html = ''
+        if footer_config.header_show_document_title:
+            title_text = footer_config.header_custom_title or 'Document'
+            title_html = f'<div class="document-title">{title_text}</div>'
+
+        # Date
+        date_html = ''
+        if footer_config.header_show_date:
+            today = date.today()
+            if footer_config.header_date_format == 'short':
+                date_str = today.strftime('%m/%d/%Y')
+            elif footer_config.header_date_format == 'long':
+                date_str = today.strftime('%B %d, %Y')
+            else:  # medium (default)
+                date_str = today.strftime('%b %d, %Y')
+            date_html = f'<div class="header-date">{date_str}</div>'
+
+        # Layout-specific rendering
+        if footer_config.header_layout == 'custom_html' and footer_config.header_custom_html:
+            return self._render_custom_header_html(footer_config, company)
+        elif footer_config.header_layout == 'centered':
+            return f'''
+            <div class="header-centered">
+                {logo_html}
+                {company_name_html}
+                {company_details_html}
+                {title_html}
+                {date_html}
+            </div>
+            '''
+        elif footer_config.header_layout == 'minimal':
+            return f'''
+            <div class="header-minimal">
+                {company_name_html}
+                {date_html}
+            </div>
+            '''
+        else:  # standard (default)
+            return f'''
+            <div class="header-standard">
+                <div class="header-left">
+                    {logo_html}
+                    {company_name_html}
+                    {company_details_html}
+                </div>
+                <div class="header-right">
+                    {title_html}
+                    {date_html}
+                </div>
+            </div>
+            '''
+
+    def _render_custom_header_html(self, footer_config, company):
+        """Render custom header HTML with placeholder substitution"""
+        from datetime import date
+
+        html = footer_config.header_custom_html or ''
+
+        # Get company logo as data URI
+        logo_html = ''
+        if company.logo:
+            logo_data = image_data_uri(company.logo)
+            logo_html = f'<img src="{logo_data}" style="max-height:50px;" alt="{company.name}"/>'
+
+        # Date formatting
+        today = date.today()
+        if footer_config.header_date_format == 'short':
+            date_str = today.strftime('%m/%d/%Y')
+        elif footer_config.header_date_format == 'long':
+            date_str = today.strftime('%B %d, %Y')
+        else:
+            date_str = today.strftime('%b %d, %Y')
+
+        # Replace placeholders
+        replacements = {
+            '{{company_name}}': company.name or '',
+            '{{company_logo}}': logo_html,
+            '{{document_title}}': footer_config.header_custom_title or 'Document',
+            '{{date}}': date_str,
+        }
+
+        for placeholder, value in replacements.items():
+            html = html.replace(placeholder, str(value))
+
+        return html

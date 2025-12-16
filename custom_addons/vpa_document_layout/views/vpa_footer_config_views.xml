@@ -33,8 +33,48 @@
                     </group>
 
                     <notebook>
-                        <!-- Layout Tab -->
-                        <page string="Layout &amp; Content" name="layout">
+                        <!-- Header Tab -->
+                        <page string="Header" name="header">
+                            <group>
+                                <group string="Header Options">
+                                    <field name="show_header"/>
+                                    <field name="header_layout" invisible="not show_header"/>
+                                    <field name="header_height" invisible="not show_header"/>
+                                </group>
+                                <group string="Content">
+                                    <field name="header_show_logo" invisible="not show_header"/>
+                                    <field name="header_show_company_name" invisible="not show_header"/>
+                                    <field name="header_show_company_details" invisible="not show_header"/>
+                                    <field name="header_show_document_title" invisible="not show_header"/>
+                                    <field name="header_custom_title" invisible="not show_header or not header_show_document_title"/>
+                                </group>
+                            </group>
+                            <group invisible="not show_header">
+                                <group string="Date Options">
+                                    <field name="header_show_date"/>
+                                    <field name="header_date_format" invisible="not header_show_date"/>
+                                </group>
+                                <group string="Header Styling">
+                                    <field name="header_background_color" widget="color"/>
+                                    <field name="header_text_color" widget="color"/>
+                                    <field name="header_border_bottom"/>
+                                    <field name="header_border_color" widget="color" invisible="not header_border_bottom"/>
+                                </group>
+                            </group>
+
+                            <!-- Custom Header HTML -->
+                            <group string="Custom Header HTML" invisible="header_layout != 'custom_html' or not show_header">
+                                <div class="alert alert-info mb-3" role="alert">
+                                    <strong>Available placeholders:</strong><br/>
+                                    <code>{{company_name}}</code>, <code>{{company_logo}}</code>,
+                                    <code>{{document_title}}</code>, <code>{{date}}</code>
+                                </div>
+                                <field name="header_custom_html" widget="html" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+
+                        <!-- Footer Layout Tab -->
+                        <page string="Footer" name="layout">
                             <group>
                                 <group string="Footer Layout">
                                     <field name="footer_layout"/>
