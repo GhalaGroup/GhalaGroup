@@ -59,4 +59,66 @@ else:
         <field name="action" ref="action_cleanup_orphan_vpa_reports"/>
         <field name="sequence">99</field>
     </record>
+
+    <!-- Server action to regenerate ALL production templates (fixes QWeb errors) -->
+    <record id="action_regenerate_all_production_templates" model="ir.actions.server">
+        <field name="name">VPA - Regenerate Production Templates</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="binding_model_id" eval="False"/>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+# Regenerate all sale_production templates to fix QWeb syntax errors
+VPATemplate = env['vpa.document.template']
+
+production_templates = VPATemplate.search([
+    ('document_type', '=', 'sale_production')
+])
+
+regenerated = 0
+for template in production_templates:
+    # Delete existing QWeb views
+    existing_views = env['ir.ui.view'].search([
+        '|', '|',
+        ('key', 'like', f'%template_{template.id}%'),
+        ('key', 'like', f'%inherit_{template.id}%'),
+        ('name', 'like', f'%{template.id}')
+    ])
+    existing_views.unlink()
+
+    # Recreate template
+    template._create_qweb_template()
+    regenerated += 1
+
+if regenerated:
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'Templates Regenerated',
+            'message': f'Successfully regenerated {regenerated} production template(s). Print errors should be fixed now.',
+            'type': 'success',
+            'sticky': False,
+        }
+    }
+else:
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'No Templates Found',
+            'message': 'No production templates found to regenerate.',
+            'type': 'info',
+            'sticky': False,
+        }
+    }
+]]></field>
+    </record>
+
+    <!-- Menu item to regenerate production templates -->
+    <record id="menu_regenerate_production_templates" model="ir.ui.menu">
+        <field name="name">Regenerate Production Templates</field>
+        <field name="parent_id" ref="vpa_document_layout.menu_vpa_doc_layout_root"/>
+        <field name="action" ref="action_regenerate_all_production_templates"/>
+        <field name="sequence">98</field>
+    </record>
 </odoo>
