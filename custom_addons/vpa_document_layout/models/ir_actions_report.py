@@ -273,13 +273,19 @@ class IrActionsReport(models.Model):
                     '--margin-bottom', '30mm' if footer_url else '0',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
-                    '--header-spacing', '0',
-                    '--footer-spacing', '0',
                 ])
+                # IMPORTANT: header-html and footer-html must come with their spacing args
+                # wkhtmltopdf processes these in order
                 if header_url:
-                    command_args.extend(['--header-html', header_url])
+                    command_args.extend([
+                        '--header-spacing', '0',
+                        '--header-html', header_url
+                    ])
                 if footer_url:
-                    command_args.extend(['--footer-html', footer_url])
+                    command_args.extend([
+                        '--footer-spacing', '0',
+                        '--footer-html', footer_url
+                    ])
             else:
                 # No header or footer
                 command_args.extend([

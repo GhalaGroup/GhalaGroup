@@ -363,20 +363,24 @@ class VPATemplatePreview(http.Controller):
         This allows VPA headers to work on ANY Odoo report without needing
         a VPA Document Template - just configure a header in Header & Footer Settings.
         """
+        _logger.info(f"📄 VPA Header route called for config ID: {footer_config_id}, kwargs: {kwargs}")
+
         # Use sudo() since this is called by wkhtmltopdf without authentication
         footer_config = request.env['vpa.footer.config'].sudo().browse(footer_config_id)
 
         if not footer_config.exists():
+            _logger.warning(f"❌ VPA Header config {footer_config_id} not found!")
             return request.not_found()
 
         # If header is disabled, return empty
         if not footer_config.show_header:
+            _logger.info(f"⚠️ VPA Header disabled for config {footer_config_id}")
             return request.make_response(
                 '<!DOCTYPE html><html><head></head><body></body></html>',
                 headers=[('Content-Type', 'text/html; charset=utf-8')]
             )
 
-        _logger.info(f"Rendering header HTML from footer config: {footer_config.name}")
+        _logger.info(f"✅ Rendering header HTML from footer config: {footer_config.name}")
 
         company = footer_config.company_id
 
