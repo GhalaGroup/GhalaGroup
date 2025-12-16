@@ -51,6 +51,7 @@
             'vpa_document_layout/static/src/xml/vpa_preview_widget.xml',
         ],
     },
+    'post_init_hook': '_create_default_footers',
     'installable': True,
     'application': False,
     'auto_install': False,

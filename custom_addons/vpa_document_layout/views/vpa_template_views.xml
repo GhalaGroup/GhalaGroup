@@ -172,32 +172,41 @@
                                         </group>
                                     </group>
 
-                                    <div class="alert alert-info" role="alert">
-                                        <strong>Unified Footer System</strong><br/>
-                                        Select a footer configuration from the dropdown below. Manage footers in
-                                        <strong>VPA Layout → Footer Settings</strong> menu.
-                                    </div>
-
-                                    <group string="Footer Configuration">
+                                    <!-- Legacy Footer Settings (Original System) -->
+                                    <separator string="Footer Layout"/>
+                                    <group>
                                         <group>
-                                            <field name="footer_config_id" options="{'no_create': True}"/>
+                                            <field name="footer_layout" widget="radio"/>
                                         </group>
-                                    </group>
-
-                                    <div class="alert alert-secondary mt-3" role="alert">
-                                        <i class="fa fa-info-circle"/>
-                                        <strong>How it works:</strong><br/>
-                                        • If no footer is selected, the default footer for the document type (Customer/Internal) is used<br/>
-                                        • Customer documents (Quotes, Invoices) use the "Default Customer" footer<br/>
-                                        • Internal documents (MFG, Picking) use the "Default Internal" footer<br/>
-                                        • You can override by selecting a specific footer here
-                                    </div>
-
-                                    <group string="Legacy Footer Shape (for backward compatibility)" invisible="footer_config_id">
                                         <group>
                                             <field name="footer_show_shape"/>
                                             <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
+                                            <field name="footer_bank_details_show"/>
                                         </group>
+                                    </group>
+
+                                    <!-- Column 1 -->
+                                    <group string="Column 1" invisible="footer_layout == 'single'">
+                                        <field name="footer_column_1_title" placeholder="e.g., Payment Terms"/>
+                                        <field name="footer_column_1_content" widget="html" nolabel="1"/>
+                                    </group>
+
+                                    <!-- Column 2 -->
+                                    <group string="Column 2" invisible="footer_layout == 'single'">
+                                        <field name="footer_column_2_title" placeholder="e.g., Delivery"/>
+                                        <field name="footer_column_2_content" widget="html" nolabel="1"/>
+                                    </group>
+
+                                    <!-- Column 3 -->
+                                    <group string="Column 3" invisible="footer_layout != 'three_col'">
+                                        <field name="footer_column_3_title" placeholder="e.g., Contact"/>
+                                        <field name="footer_column_3_content" widget="html" nolabel="1"/>
+                                    </group>
+
+                                    <!-- Single Column Content -->
+                                    <group string="Footer Content" invisible="footer_layout != 'single'">
+                                        <field name="footer_column_1_title" placeholder="Title (optional)"/>
+                                        <field name="footer_column_1_content" widget="html" nolabel="1"/>
                                     </group>
                                 </page>
 

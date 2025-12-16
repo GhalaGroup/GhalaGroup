@@ -287,3 +287,55 @@ class VPAFooterConfig(models.Model):
             ])
             if others:
                 others.write({'is_default_internal': False})
+
+    @api.model
+    def create_default_footers_for_company(self, company):
+        """Create default footer configs for a company if they don't exist"""
+        # Check if company already has footers
+        existing = self.search([('company_id', '=', company.id)], limit=1)
+        if existing:
+            return existing
+
+        # Create Customer Footer
+        customer_footer = self.create({
+            'name': 'Customer Documents Footer',
+            'company_id': company.id,
+            'footer_type': 'customer',
+            'is_default_customer': True,
+            'footer_layout': 'single',
+            'show_bank_details': True,
+            'show_page_numbers': True,
+            'show_company_footer': True,
+            'show_border': True,
+            'border_color': '#dee2e6',
+            'text_color': '#666666',
+            'font_size': '8pt',
+            'sequence': 10,
+        })
+
+        # Create Internal Footer
+        internal_footer = self.create({
+            'name': 'Internal Documents Footer',
+            'company_id': company.id,
+            'footer_type': 'internal',
+            'is_default_internal': True,
+            'footer_layout': 'single',
+            'show_bank_details': False,
+            'show_page_numbers': True,
+            'show_company_footer': False,
+            'computer_generated_note': 'This is a computer generated document',
+            'show_border': True,
+            'border_color': '#dee2e6',
+            'text_color': '#888888',
+            'font_size': '8pt',
+            'sequence': 20,
+        })
+
+        return customer_footer | internal_footer
+
+    @api.model
+    def init_default_footers_all_companies(self):
+        """Create default footers for all companies that don't have them"""
+        companies = self.env['res.company'].search([])
+        for company in companies:
+            self.create_default_footers_for_company(company)
