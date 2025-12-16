@@ -55,7 +55,7 @@ class VPADocumentTemplate(models.Model):
             else:
                 record.print_name_preview = ''
 
-    print_name_preview = fields.Char(string='Preview', compute='_compute_print_name_preview', store=False)
+    print_name_preview = fields.Char(string='Filename Preview', compute='_compute_print_name_preview', store=False)
 
     def _get_print_name_expression(self):
         """Get the actual Python expression based on pattern selection
