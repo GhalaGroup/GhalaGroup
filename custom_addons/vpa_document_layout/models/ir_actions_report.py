@@ -36,6 +36,8 @@ class IrActionsReport(models.Model):
             'account.account_invoices': ('account.move', 'invoice'),
             'purchase.action_report_purchase_order': ('purchase.order', 'purchase_order'),
             'stock.action_report_delivery': ('stock.picking', 'delivery'),
+            'mrp.report_mrporder': ('mrp.production', 'manufacturing_order'),
+            'mrp.action_report_production_order': ('mrp.production', 'manufacturing_order'),
         }
 
         # Check if this is a standard report that might have a VPA default

@@ -761,6 +761,123 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
+        elif self.document_type == 'manufacturing_order':
+            # Manufacturing Order template - wraps standard MRP report
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="address">
+                <strong t-if="doc.partner_id"><span t-field="doc.partner_id.name"/></strong>
+                <div t-if="doc.partner_id" t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+            </t>
+            <t t-set="information_block">
+                <div t-if="doc.date_start">
+                    <strong>Scheduled Date:</strong>
+                    <span t-field="doc.date_start" t-options='{{"widget": "date"}}'/>
+                </div>
+                <div t-if="doc.user_id.name" class="mt-2">
+                    <strong>Responsible:</strong>
+                    <span t-field="doc.user_id"/>
+                </div>
+                <div t-if="doc.origin" class="mt-2">
+                    <strong>Source:</strong>
+                    <span t-field="doc.origin"/>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                Manufacturing Order # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Product Information -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <strong>Product:</strong> <span t-field="doc.product_id"/>
+                    </div>
+                    <div class="col-3">
+                        <strong>Quantity:</strong> <span t-field="doc.product_qty"/> <span t-field="doc.product_uom_id"/>
+                    </div>
+                    <div class="col-3">
+                        <strong>State:</strong> <span t-field="doc.state"/>
+                    </div>
+                </div>
+
+                <!-- Components Table -->
+                <h4 class="mt-4">Components to Consume</h4>
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Product</th>
+                            <th class="text-end">To Consume</th>
+                            <th class="text-end">Consumed</th>
+                            <th class="text-center">UoM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.move_raw_ids" t-as="move">
+                            <tr>
+                                <td><span t-field="move.product_id"/></td>
+                                <td class="text-end"><span t-field="move.product_uom_qty"/></td>
+                                <td class="text-end"><span t-field="move.quantity"/></td>
+                                <td class="text-center"><span t-field="move.product_uom"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Work Orders (if any) -->
+                <t t-if="doc.workorder_ids">
+                    <h4 class="mt-4">Work Orders</h4>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Operation</th>
+                                <th class="text-start">Work Center</th>
+                                <th class="text-end">Expected Duration</th>
+                                <th class="text-center">State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.workorder_ids" t-as="wo">
+                                <tr>
+                                    <td><span t-field="wo.name"/></td>
+                                    <td><span t-field="wo.workcenter_id"/></td>
+                                    <td class="text-end"><span t-field="wo.duration_expected"/> min</td>
+                                    <td class="text-center"><span t-field="wo.state"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+
+                <!-- Finished Products -->
+                <t t-if="doc.move_finished_ids">
+                    <h4 class="mt-4">Finished Products</h4>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Product</th>
+                                <th class="text-end">To Produce</th>
+                                <th class="text-end">Produced</th>
+                                <th class="text-center">UoM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.move_finished_ids" t-as="move">
+                                <tr>
+                                    <td><span t-field="move.product_id"/></td>
+                                    <td class="text-end"><span t-field="move.product_uom_qty"/></td>
+                                    <td class="text-end"><span t-field="move.quantity"/></td>
+                                    <td class="text-center"><span t-field="move.product_uom"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
         else:
             # For other document types, create a simpler template
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
