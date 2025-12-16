@@ -296,7 +296,7 @@ class VPAFooterConfig(models.Model):
         if existing:
             return existing
 
-        # Create Customer Footer
+        # Create Customer Footer (Single Column)
         customer_footer = self.create({
             'name': 'Customer Documents Footer',
             'company_id': company.id,
@@ -331,7 +331,32 @@ class VPAFooterConfig(models.Model):
             'sequence': 20,
         })
 
-        return customer_footer | internal_footer
+        # Create 3-Column Customer Footer
+        three_col_footer = self.create({
+            'name': 'Customer Footer - 3 Column',
+            'company_id': company.id,
+            'footer_type': 'customer',
+            'is_default_customer': False,
+            'footer_layout': 'three_col',
+            'show_bank_details': False,
+            'show_page_numbers': True,
+            'show_company_footer': False,
+            'show_shape': True,
+            'shape_color': '#21b799',
+            'shape_opacity': 0.1,
+            'show_border': False,
+            'text_color': '#666666',
+            'font_size': '8pt',
+            'sequence': 15,
+            'column_1_title': 'Company Information',
+            'column_1_content': '<p style="margin: 0; line-height: 1.6;"><strong>Your Company</strong><br/>Address<br/>TIN: XXX<br/>VAT: XXX</p>',
+            'column_2_title': 'Contact',
+            'column_2_content': '<p style="margin: 0; line-height: 1.6;">Phone: +XXX<br/>Email: info@company.com<br/>Website: www.company.com</p>',
+            'column_3_title': 'Bank Information',
+            'column_3_content': '<p style="margin: 0; line-height: 1.6;">Bank: Your Bank<br/>Account: XXXX<br/>SWIFT: XXXX</p>',
+        })
+
+        return customer_footer | internal_footer | three_col_footer
 
     @api.model
     def init_default_footers_all_companies(self):
