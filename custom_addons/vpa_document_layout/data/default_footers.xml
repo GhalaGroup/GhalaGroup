@@ -41,5 +41,56 @@
             <field name="sequence">20</field>
         </record>
 
+        <!-- 3-Column Customer Footer (Company Info, Contact, Bank) -->
+        <record id="default_footer_3col_customer" model="vpa.footer.config">
+            <field name="name">Customer Footer - 3 Column</field>
+            <field name="footer_type">customer</field>
+            <field name="is_default_customer" eval="False"/>
+            <field name="footer_layout">three_col</field>
+            <field name="show_bank_details" eval="False"/>
+            <field name="show_page_numbers" eval="True"/>
+            <field name="show_company_footer" eval="False"/>
+            <field name="show_shape" eval="True"/>
+            <field name="shape_color">#21b799</field>
+            <field name="shape_opacity">0.1</field>
+            <field name="show_border" eval="False"/>
+            <field name="text_color">#666666</field>
+            <field name="font_size">8pt</field>
+            <field name="sequence">15</field>
+
+            <!-- Column 1: Company Information -->
+            <field name="column_1_title">Company Information</field>
+            <field name="column_1_content"><![CDATA[
+<p style="margin: 0; line-height: 1.6;">
+<strong>UDesign Limited</strong><br/>
+Dar Es Salaam, Tanzania<br/>
+TIN: 142-674-998<br/>
+VAT: 40-03977-L
+</p>
+]]></field>
+
+            <!-- Column 2: Contact -->
+            <field name="column_2_title">Contact</field>
+            <field name="column_2_content"><![CDATA[
+<p style="margin: 0; line-height: 1.6;">
+Phone: +255 743 777333<br/>
+Email: info@udesign.co.tz<br/>
+Website: www.udesign.co.tz
+</p>
+]]></field>
+
+            <!-- Column 3: Bank Information -->
+            <field name="column_3_title">Bank Information</field>
+            <field name="column_3_content"><![CDATA[
+<p style="margin: 0; line-height: 1.6;">
+Bank: CRDB Bank Plc<br/>
+Branch: Kijitonyama<br/>
+<strong>TZS</strong> Account No: 0150548871900<br/>
+<strong>USD</strong> Account No: 0250548871900<br/>
+SWIFT: CORUTZTZ
+</p>
+]]></field>
+        </record>
+
     </data>
 </odoo>
