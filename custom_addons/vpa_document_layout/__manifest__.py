@@ -29,6 +29,7 @@
         'views/vpa_template_views.xml',   # 2. Load template views (defines action_vpa_document_template)
         'views/vpa_config_views.xml',     # 3. Load config views (references action_vpa_document_template)
         'views/vpa_footer_config_views.xml',  # 4. Footer config views and menu
+        'views/vpa_backup_views.xml',         # 5. Backup/restore views and menu
         'views/report_templates.xml',
         'views/preview_template.xml',
         'views/template_preview.xml',     # Template preview
@@ -52,6 +53,7 @@
         ],
     },
     'post_init_hook': '_post_init_hook',
+    'uninstall_hook': '_uninstall_hook',
     'installable': True,
     'application': False,
     'auto_install': False,
