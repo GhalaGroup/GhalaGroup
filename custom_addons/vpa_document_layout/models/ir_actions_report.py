@@ -262,9 +262,15 @@ class IrActionsReport(models.Model):
             if footer_config_id:
                 footer_config = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
                 if footer_config.exists() and footer_config.show_header:
-                    header_url = f"{base_url}/vpa/header/{footer_config_id}"
+                    # Write header HTML to temp file for wkhtmltopdf (avoids HTTPS issues)
+                    header_html = self._generate_header_html(footer_config)
+                    import tempfile
+                    header_file = tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8')
+                    header_file.write(header_html)
+                    header_file.close()
+                    header_url = header_file.name  # Use file path directly
                     header_height = footer_config.header_height or '25mm'
-                    _logger.info(f"✅ Using VPA header config: {header_url}, height: {header_height}")
+                    _logger.info(f"✅ Using VPA header file: {header_url}, height: {header_height}")
 
             if footer_url or header_url:
                 command_args.extend([
@@ -302,6 +308,164 @@ class IrActionsReport(models.Model):
             _logger.info("❌ No vpa_force_zero_margins context flag - using default margins")
 
         return command_args
+
+    def _generate_header_html(self, footer_config):
+        """Generate header HTML for wkhtmltopdf --header-html"""
+        from datetime import date
+        from odoo.tools.image import image_data_uri
+
+        company = footer_config.company_id
+
+        # Get company logo as data URI if available
+        logo_html = ''
+        if footer_config.header_show_logo and company.logo:
+            logo_data = image_data_uri(company.logo)
+            logo_html = f'<img src="{logo_data}" class="company-logo" alt="{company.name}"/>'
+
+        # Company name
+        company_name_html = ''
+        if footer_config.header_show_company_name:
+            company_name_html = f'<div class="company-name">{company.name}</div>'
+
+        # Company details (address, phone, email)
+        company_details_html = ''
+        if footer_config.header_show_company_details:
+            details = []
+            if company.street:
+                details.append(company.street)
+            if company.city:
+                city_line = company.city
+                if company.state_id:
+                    city_line += f', {company.state_id.name}'
+                if company.zip:
+                    city_line += f' {company.zip}'
+                details.append(city_line)
+            if company.phone:
+                details.append(f'Phone: {company.phone}')
+            if company.email:
+                details.append(f'Email: {company.email}')
+            if details:
+                company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
+
+        # Document title
+        title_html = ''
+        if footer_config.header_show_document_title:
+            title_text = footer_config.header_custom_title or 'Document'
+            title_html = f'<div class="document-title">{title_text}</div>'
+
+        # Date
+        date_html = ''
+        if footer_config.header_show_date:
+            today = date.today()
+            if footer_config.header_date_format == 'short':
+                date_str = today.strftime('%m/%d/%Y')
+            elif footer_config.header_date_format == 'long':
+                date_str = today.strftime('%B %d, %Y')
+            else:  # medium (default)
+                date_str = today.strftime('%b %d, %Y')
+            date_html = f'<div class="header-date">{date_str}</div>'
+
+        # Layout-specific content
+        if footer_config.header_layout == 'centered':
+            header_content = f'''
+            <div class="header-centered">
+                {logo_html}
+                {company_name_html}
+                {company_details_html}
+                {title_html}
+                {date_html}
+            </div>
+            '''
+        elif footer_config.header_layout == 'minimal':
+            header_content = f'''
+            <div class="header-minimal">
+                {company_name_html}
+                {date_html}
+            </div>
+            '''
+        else:  # standard (default)
+            header_content = f'''
+            <div class="header-standard">
+                <div class="header-left">
+                    {logo_html}
+                    {company_name_html}
+                    {company_details_html}
+                </div>
+                <div class="header-right">
+                    {title_html}
+                    {date_html}
+                </div>
+            </div>
+            '''
+
+        # Full HTML document
+        return f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            color: {footer_config.header_text_color or '#333333'};
+            width: 100%;
+            background: {footer_config.header_background_color or '#ffffff'};
+        }}
+        .vpa-header {{
+            padding: 10px 15px;
+            {f'border-bottom: 1px solid {footer_config.header_border_color};' if footer_config.header_border_bottom else ''}
+            position: relative;
+        }}
+        .header-standard {{
+            display: table;
+            width: 100%;
+        }}
+        .header-left {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 50%;
+        }}
+        .header-right {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 50%;
+            text-align: right;
+        }}
+        .header-centered {{
+            text-align: center;
+        }}
+        .header-minimal {{
+            text-align: left;
+        }}
+        .company-logo {{
+            max-height: 50px;
+            max-width: 150px;
+        }}
+        .company-name {{
+            font-size: 14pt;
+            font-weight: bold;
+        }}
+        .company-details {{
+            font-size: 8pt;
+            margin-top: 5px;
+        }}
+        .document-title {{
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 5px;
+        }}
+        .header-date {{
+            font-size: 9pt;
+        }}
+    </style>
+</head>
+<body>
+    <div class="vpa-header">
+        {header_content}
+    </div>
+</body>
+</html>'''
 
     def _is_vpa_layout_report(self, res_ids):
         """Check if report should use VPA layout"""
