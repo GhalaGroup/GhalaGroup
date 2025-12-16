@@ -15,23 +15,39 @@
     </template>
 
     <!--
-        Override MRP Production Order Report Layout
-        Remove the default header/footer so VPA footer config can be used
+        VPA Internal Layout - removes header for internal reports
+        This layout removes Odoo's default header (date, company, page number)
+        so that VPA Footer Config can provide the footer via wkhtmltopdf.
     -->
-    <template id="report_mrporder_vpa" inherit_id="mrp.report_mrporder">
-        <!-- MRP uses web.internal_layout, replace with minimal layout -->
-        <xpath expr="//t[@t-call='web.internal_layout']" position="replace">
-            <t t-call="vpa_document_layout.external_layout_minimal">
-                <t t-out="0"/>
-            </t>
-        </xpath>
-    </template>
+    <template id="vpa_internal_layout" name="VPA Internal Layout (No Header)">
+        <t t-if="not o" t-set="o" t-value="doc"/>
 
-    <!-- Minimal External Layout for VPA Footer Config (footer via wkhtmltopdf) -->
-    <template id="external_layout_minimal" name="VPA Minimal External Layout">
-        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+        <t t-if="not company">
+            <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+        </t>
+
+        <!-- NO HEADER - VPA Footer Config handles footer via wkhtmltopdf -->
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <t t-out="0"/>
         </div>
+    </template>
+
+    <!--
+        Override MRP Production Order report to use VPA internal layout
+        This replaces web.internal_layout with vpa_internal_layout
+    -->
+    <template id="report_mrporder_vpa" inherit_id="mrp.report_mrporder" priority="99">
+        <xpath expr="//t[@t-call='web.internal_layout']" position="attributes">
+            <attribute name="t-call">vpa_document_layout.vpa_internal_layout</attribute>
+        </xpath>
     </template>
 
 </odoo>
