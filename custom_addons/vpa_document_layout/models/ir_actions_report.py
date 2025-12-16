@@ -80,14 +80,32 @@ class IrActionsReport(models.Model):
             landscape=False,
             specific_paperformat_args=None,
             set_viewport_size=False):
-        """Override to log footer parameter and see if it conflicts with --footer-html"""
-        _logger.info(f"🔍 _run_wkhtmltopdf called with footer parameter: {footer is not None}, vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}")
+        """Override to inject VPA header/footer for VPA templates"""
+        footer_config_id = self.env.context.get('vpa_footer_config_id')
+        _logger.info(f"🔍 _run_wkhtmltopdf called - header param: {type(header).__name__ if header else None}, footer param: {type(footer).__name__ if footer else None}, vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}, vpa_footer_config_id: {footer_config_id}")
 
-        # For VPA templates, we use --footer-html instead of footer parameter
-        # So we need to clear the footer parameter to avoid conflicts
-        if self.env.context.get('vpa_force_zero_margins') and footer is not None:
-            _logger.info(f"⚠️  VPA template has footer parameter - clearing it to use --footer-html instead")
-            footer = None
+        # For VPA templates, replace header with VPA header HTML (using same mechanism as Odoo)
+        if self.env.context.get('vpa_force_zero_margins'):
+            # Clear Odoo's default footer - we use --footer-html URL instead
+            if footer is not None:
+                _logger.info(f"⚠️  VPA template has footer parameter - clearing it to use --footer-html URL instead")
+                footer = None
+
+            # Generate VPA header HTML and pass as header parameter (Odoo will write to temp file)
+            if footer_config_id:
+                footer_config = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
+                if footer_config.exists() and footer_config.show_header:
+                    # Generate header HTML - this will be written to temp file by parent method
+                    header = self._generate_header_html(footer_config)
+                    _logger.info(f"✅ Generated VPA header HTML ({len(header)} chars) for footer_config_id={footer_config_id}")
+                else:
+                    _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")
+                    header = None
+            else:
+                # Also clear header if no footer_config
+                if header is not None:
+                    _logger.info(f"⚠️  VPA template has header parameter but no footer_config - clearing it")
+                    header = None
 
         return super()._run_wkhtmltopdf(
             bodies,
@@ -256,36 +274,33 @@ class IrActionsReport(models.Model):
                 footer_url = f"{base_url}/vpa/footer/{footer_config_id}"
                 _logger.info(f"✅ Using VPA footer config: {footer_url}")
 
-            # Get header URL if footer_config has header enabled
-            header_url = None
+            # Get header height if footer_config has header enabled
+            # Note: Header HTML is passed via header parameter in _run_wkhtmltopdf, not --header-html URL
             header_height = '0'
+            has_header = False
             if footer_config_id:
                 footer_config = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
+                _logger.info(f"🔍 Header check: footer_config_id={footer_config_id}, exists={footer_config.exists()}, show_header={footer_config.show_header if footer_config.exists() else 'N/A'}")
                 if footer_config.exists() and footer_config.show_header:
-                    # Write header HTML to temp file for wkhtmltopdf (avoids HTTPS issues)
-                    header_html = self._generate_header_html(footer_config)
-                    import tempfile
-                    header_file = tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8')
-                    header_file.write(header_html)
-                    header_file.close()
-                    header_url = header_file.name  # Use file path directly
+                    has_header = True
                     header_height = footer_config.header_height or '25mm'
-                    _logger.info(f"✅ Using VPA header file: {header_url}, height: {header_height}")
+                    _logger.info(f"✅ VPA header enabled, height: {header_height}")
+                else:
+                    _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")
 
-            if footer_url or header_url:
+            if footer_url or has_header:
                 command_args.extend([
                     '--enable-local-file-access',
-                    '--margin-top', header_height if header_url else '0',
+                    '--margin-top', header_height if has_header else '0',
                     '--margin-bottom', '30mm' if footer_url else '0',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
                 ])
-                # IMPORTANT: header-html and footer-html must come with their spacing args
-                # wkhtmltopdf processes these in order
-                if header_url:
+                # Header is handled via header parameter -> temp file in _run_wkhtmltopdf
+                # Footer uses --footer-html URL
+                if has_header:
                     command_args.extend([
                         '--header-spacing', '0',
-                        '--header-html', header_url
                     ])
                 if footer_url:
                     command_args.extend([
