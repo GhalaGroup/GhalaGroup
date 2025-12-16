@@ -133,28 +133,38 @@ class IrActionsReport(models.Model):
         if res_ids and self.model:
             try:
                 docs = self.env[self.model].browse(res_ids[:1])
-                if docs and hasattr(docs[0], 'company_id'):
-                    company = docs[0].company_id
-                else:
+                _logger.info(f"🔍 VPA Footer Check - model: {self.model}, res_ids: {res_ids[:3]}, docs exists: {bool(docs)}")
+
+                # Safely get company from document
+                company = None
+                if docs and docs.exists():
+                    if hasattr(docs, 'company_id') and docs.company_id:
+                        company = docs.company_id
+                        _logger.info(f"🔍 Got company from doc: {company.name} (ID: {company.id})")
+
+                if not company:
                     company = self.env.company
+                    _logger.info(f"🔍 Using current company: {company.name} (ID: {company.id})")
 
                 # Get the appropriate footer config for this report
                 report_name = self.report_name or ''
+                _logger.info(f"🔍 Looking for footer config for company_id={company.id}, report={report_name}")
+
                 footer_config = self.env['vpa.footer.config'].get_footer_for_report(
                     company.id,
                     report_name
                 )
 
                 if footer_config:
-                    _logger.info(f"✅ Found VPA footer config '{footer_config.name}' for report {report_name}")
+                    _logger.info(f"✅ Found VPA footer config '{footer_config.name}' (ID: {footer_config.id}) for report {report_name}")
                     return self.with_context(
                         vpa_force_zero_margins=True,
                         vpa_footer_config_id=footer_config.id
                     )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
                 else:
-                    _logger.info(f"ℹ️  No VPA footer config found for company {company.name}")
+                    _logger.info(f"ℹ️  No VPA footer config found for company {company.name} (ID: {company.id})")
             except Exception as e:
-                _logger.warning(f"Could not check VPA footer config: {e}")
+                _logger.warning(f"Could not check VPA footer config: {e}", exc_info=True)
 
         # Fall back to default wkhtmltopdf for all reports
         return super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
