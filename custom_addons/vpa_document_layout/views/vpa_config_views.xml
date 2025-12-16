@@ -255,9 +255,9 @@
         </field>
     </record>
 
-    <!-- Legacy Config Menu (root menu defined in vpa_menu_root.xml) -->
+    <!-- Global Layout Settings Menu (root menu defined in vpa_menu_root.xml) -->
     <menuitem id="menu_vpa_document_config"
-              name="Old Layout Settings (Legacy)"
+              name="Global Layout Settings"
               parent="menu_vpa_document_layout_root"
               action="action_vpa_document_config"
               sequence="20"/>

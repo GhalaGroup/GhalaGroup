@@ -28,14 +28,18 @@
         'views/vpa_menu_root.xml',        # 1. Load root menu first
         'views/vpa_template_views.xml',   # 2. Load template views (defines action_vpa_document_template)
         'views/vpa_config_views.xml',     # 3. Load config views (references action_vpa_document_template)
+        'views/vpa_footer_config_views.xml',  # 4. Footer config views and menu
         'views/report_templates.xml',
         'views/preview_template.xml',
         'views/template_preview.xml',     # Template preview
         'views/template_preview_fullpage.xml',  # Full page preview
         'views/vpa_footer_only.xml',      # Footer-only template for wkhtmltopdf --footer-html
         'views/vpa_footer_preview.xml',   # Footer preview page
+        'views/vpa_footer_unified.xml',   # Unified footer templates
+        'views/vpa_footer_override.xml',  # Override Odoo standard layouts
         'data/report_layout.xml',
         'data/default_templates.xml',     # Default templates
+        'data/default_footers.xml',       # Default footer configs
         'views/sale_order_report_inherit.xml',
         'views/account_invoice_report_inherit.xml',
         'views/res_config_settings_views.xml',

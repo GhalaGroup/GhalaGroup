@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        VPA Footer Override Templates
+        ==============================
+        Override Odoo's 7 standard external layouts to use VPA unified footer.
+
+        This ensures ALL Odoo printouts (not just VPA templates) get professional
+        footers based on the document type (customer vs internal).
+
+        Layouts overridden:
+        1. Standard
+        2. Boxed
+        3. Bold
+        4. Striped
+        5. Bubble
+        6. Wave
+        7. Folder
+    -->
+
+    <!-- Helper to get report XML ID from context -->
+    <template id="vpa_footer_with_context" name="VPA Footer With Context">
+        <t t-set="report_xml_id" t-value="docs.env.context.get('report_xml_id', '')"/>
+        <t t-call="vpa_document_layout.vpa_unified_footer"/>
+    </template>
+
+    <!-- ==================== STANDARD LAYOUT ==================== -->
+    <template id="external_layout_standard_footer_override"
+              inherit_id="web.external_layout_standard"
+              name="VPA Standard Layout Footer Override">
+        <!-- Replace the footer content -->
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_standard_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== BOXED LAYOUT ==================== -->
+    <template id="external_layout_boxed_footer_override"
+              inherit_id="web.external_layout_boxed"
+              name="VPA Boxed Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_boxed_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== BOLD LAYOUT ==================== -->
+    <template id="external_layout_bold_footer_override"
+              inherit_id="web.external_layout_bold"
+              name="VPA Bold Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_bold_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== STRIPED LAYOUT ==================== -->
+    <template id="external_layout_striped_footer_override"
+              inherit_id="web.external_layout_striped"
+              name="VPA Striped Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_striped_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== BUBBLE LAYOUT ==================== -->
+    <template id="external_layout_bubble_footer_override"
+              inherit_id="web.external_layout_bubble"
+              name="VPA Bubble Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_bubble_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== WAVE LAYOUT ==================== -->
+    <template id="external_layout_wave_footer_override"
+              inherit_id="web.external_layout_wave"
+              name="VPA Wave Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_wave_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ==================== FOLDER LAYOUT ==================== -->
+    <template id="external_layout_folder_footer_override"
+              inherit_id="web.external_layout_folder"
+              name="VPA Folder Layout Footer Override">
+        <xpath expr="//div[hasclass('footer')]" position="replace">
+            <div class="footer o_folder_footer" t-att-style="report_footer_style">
+                <div class="text-center" style="font-size: 10px;">
+                    <t t-call="vpa_document_layout.vpa_footer_with_context"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!--
+        Report-Specific Footer Selection
+        =================================
+        These templates pass the report XML ID to the unified footer system
+        so it can auto-select the appropriate footer type.
+    -->
+
+    <!-- Sale Order Report - Customer Footer -->
+    <template id="report_saleorder_footer_context"
+              inherit_id="sale.report_saleorder_document"
+              name="Sale Order Footer Context">
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">web.external_layout</attribute>
+        </xpath>
+    </template>
+
+    <!-- Invoice Report - Customer Footer -->
+    <template id="report_invoice_footer_context"
+              inherit_id="account.report_invoice_document"
+              name="Invoice Footer Context">
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">web.external_layout</attribute>
+        </xpath>
+    </template>
+
+</odoo>

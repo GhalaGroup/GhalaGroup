@@ -166,7 +166,15 @@ class VPADocumentTemplate(models.Model):
         ('landscape', 'Landscape'),
     ], string='Orientation', default='portrait', required=True)
 
-    # Footer Settings
+    # Footer Settings - Now uses unified footer config
+    footer_config_id = fields.Many2one(
+        'vpa.footer.config',
+        string='Footer Configuration',
+        domain="[('company_id', '=', company_id), ('active', '=', True)]",
+        help='Select a footer configuration. If not set, the default footer for the document type will be used.'
+    )
+
+    # Legacy footer settings (kept for backwards compatibility)
     footer_show_shape = fields.Boolean(string='Show Footer Wave Shape', default=True)
     footer_shape_opacity = fields.Float(string='Footer Shape Opacity', default=0.1)
     footer_layout = fields.Selection([

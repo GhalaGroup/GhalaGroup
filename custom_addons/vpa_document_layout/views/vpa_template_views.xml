@@ -172,95 +172,38 @@
                                         </group>
                                     </group>
 
-                                    <group string="Footer Shape">
+                                    <div class="alert alert-info" role="alert">
+                                        <strong>Unified Footer System</strong><br/>
+                                        Select a footer configuration from the dropdown below. Manage footers in
+                                        <strong>VPA Layout → Footer Settings</strong> menu.
+                                    </div>
+
+                                    <group string="Footer Configuration">
+                                        <group>
+                                            <field name="footer_config_id" options="{'no_create': True}"/>
+                                        </group>
+                                        <group>
+                                            <button name="%(action_vpa_footer_config)d" type="action"
+                                                    string="Manage Footer Configs"
+                                                    class="btn-link" icon="fa-external-link"/>
+                                        </group>
+                                    </group>
+
+                                    <div class="alert alert-secondary mt-3" role="alert">
+                                        <i class="fa fa-info-circle"/>
+                                        <strong>How it works:</strong><br/>
+                                        • If no footer is selected, the default footer for the document type (Customer/Internal) is used<br/>
+                                        • Customer documents (Quotes, Invoices) use the "Default Customer" footer<br/>
+                                        • Internal documents (MFG, Picking) use the "Default Internal" footer<br/>
+                                        • You can override by selecting a specific footer here
+                                    </div>
+
+                                    <group string="Legacy Footer Shape (for backward compatibility)" invisible="footer_config_id">
                                         <group>
                                             <field name="footer_show_shape"/>
                                             <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
                                         </group>
                                     </group>
-
-                                    <notebook>
-                                        <page string="Footer Layout" name="footer_layout_page">
-                                            <group>
-                                                <group string="Choose Footer Layout">
-                                                    <field name="footer_layout" widget="radio"/>
-                                                </group>
-                                                <group string="Options">
-                                                    <field name="footer_bank_details_show"/>
-                                                </group>
-                                            </group>
-
-                                            <div class="alert alert-info mt-3" role="alert">
-                                                <i class="fa fa-info-circle"/>
-                                                <strong>How it works:</strong><br/>
-                                                • Choose the number of columns you want in your footer<br/>
-                                                • Fill in the title and content for each column<br/>
-                                                • Bank details can auto-fill in empty columns if enabled<br/>
-                                                • Each column will appear side-by-side in your documents
-                                            </div>
-                                        </page>
-
-                                        <page string="📝 Column 1" name="footer_col1">
-                                            <group>
-                                                <group string="Column 1 Settings">
-                                                    <label for="footer_column_1_title" string="Column Title"/>
-                                                    <field name="footer_column_1_title" placeholder="e.g., Payment Terms" nolabel="1"/>
-                                                </group>
-                                            </group>
-
-                                            <separator string="Column 1 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Example:</strong> Add payment terms, terms &amp; conditions, or any important notes
-                                            </div>
-                                            <field name="footer_column_1_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Payment Terms:&lt;/strong&gt; Net 30 Days&lt;/p&gt;&#10;&lt;p&gt;Payment is due within 30 days of invoice date&lt;/p&gt;"/>
-                                        </page>
-
-                                        <page string="📝 Column 2" name="footer_col2" invisible="footer_layout == 'single'">
-                                            <group>
-                                                <group string="Column 2 Settings">
-                                                    <label for="footer_column_2_title" string="Column Title"/>
-                                                    <field name="footer_column_2_title" placeholder="e.g., Bank Details" nolabel="1"/>
-                                                </group>
-                                            </group>
-
-                                            <separator string="Column 2 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Tip:</strong> Leave empty to auto-fill with bank account details (if "Show Bank Details" is enabled)<br/>
-                                                <strong>Example:</strong> Add contact information, company registration details, or website
-                                            </div>
-                                            <field name="footer_column_2_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Contact Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;Email: info@company.com&lt;/p&gt;&#10;&lt;p&gt;Phone: +1 555-0123&lt;/p&gt;"/>
-                                        </page>
-
-                                        <page string="📝 Column 3" name="footer_col3" invisible="footer_layout != 'three_col'">
-                                            <group>
-                                                <group string="Column 3 Settings">
-                                                    <label for="footer_column_3_title" string="Column Title"/>
-                                                    <field name="footer_column_3_title" placeholder="e.g., Contact Information" nolabel="1"/>
-                                                </group>
-                                            </group>
-
-                                            <separator string="Column 3 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Example:</strong> Add social media links, additional contact details, or certifications
-                                            </div>
-                                            <field name="footer_column_3_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Follow Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;🌐 www.company.com&lt;/p&gt;&#10;&lt;p&gt;📧 support@company.com&lt;/p&gt;"/>
-                                        </page>
-
-                                        <page string="⚙️ Advanced" name="footer_advanced">
-                                            <div class="alert alert-warning" role="alert">
-                                                <i class="fa fa-exclamation-triangle"/>
-                                                <strong>Advanced Users Only:</strong><br/>
-                                                Use this field to completely override the footer with custom HTML.<br/>
-                                                This will ignore all column settings above.
-                                            </div>
-                                            <separator string="Custom Footer HTML (Overrides Everything Above)"/>
-                                            <field name="footer_custom_html" widget="html" nolabel="1"
-                                                   placeholder="Enter custom HTML here to completely replace the footer layout..."/>
-                                        </page>
-                                    </notebook>
                                 </page>
 
                                 <!-- Preview Tab -->

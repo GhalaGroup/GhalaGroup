@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            Default Footer Configurations
+            ==============================
+            These are created on module install to provide working defaults.
+            Users can modify or create additional footer configs.
+        -->
+
+        <!-- Default Customer Footer (for Quotes, Invoices, PO, Delivery) -->
+        <record id="default_footer_customer" model="vpa.footer.config">
+            <field name="name">Customer Documents Footer</field>
+            <field name="footer_type">customer</field>
+            <field name="is_default_customer" eval="True"/>
+            <field name="footer_layout">single</field>
+            <field name="show_bank_details" eval="True"/>
+            <field name="show_page_numbers" eval="True"/>
+            <field name="show_company_footer" eval="True"/>
+            <field name="show_border" eval="True"/>
+            <field name="border_color">#dee2e6</field>
+            <field name="text_color">#666666</field>
+            <field name="font_size">8pt</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Default Internal Footer (for MFG, Picking, Work Orders) -->
+        <record id="default_footer_internal" model="vpa.footer.config">
+            <field name="name">Internal Documents Footer</field>
+            <field name="footer_type">internal</field>
+            <field name="is_default_internal" eval="True"/>
+            <field name="footer_layout">single</field>
+            <field name="show_bank_details" eval="False"/>
+            <field name="show_page_numbers" eval="True"/>
+            <field name="show_company_footer" eval="False"/>
+            <field name="computer_generated_note">This is a computer generated document</field>
+            <field name="show_border" eval="True"/>
+            <field name="border_color">#dee2e6</field>
+            <field name="text_color">#888888</field>
+            <field name="font_size">8pt</field>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>

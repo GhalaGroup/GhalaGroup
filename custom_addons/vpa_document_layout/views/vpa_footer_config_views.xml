@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA Footer Configuration Form View -->
+    <record id="view_vpa_footer_config_form" model="ir.ui.view">
+        <field name="name">vpa.footer.config.form</field>
+        <field name="model">vpa.footer.config</field>
+        <field name="arch" type="xml">
+            <form string="Footer Configuration">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Default Customer" bg_color="text-bg-success"
+                            invisible="not is_default_customer"/>
+                    <widget name="web_ribbon" title="Default Internal" bg_color="text-bg-info"
+                            invisible="not is_default_internal"/>
+
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g., Customer Footer, Internal Footer"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="footer_type"/>
+                            <field name="is_default_customer" invisible="footer_type == 'internal'"/>
+                            <field name="is_default_internal" invisible="footer_type == 'customer'"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Layout Tab -->
+                        <page string="Layout &amp; Content" name="layout">
+                            <group>
+                                <group string="Footer Layout">
+                                    <field name="footer_layout"/>
+                                </group>
+                                <group string="Content Options">
+                                    <field name="show_bank_details"/>
+                                    <field name="show_page_numbers"/>
+                                    <field name="show_company_footer"/>
+                                </group>
+                            </group>
+
+                            <!-- Computer Generated Note (for internal) -->
+                            <group string="Internal Document Note" invisible="footer_type != 'internal'">
+                                <field name="computer_generated_note" placeholder="This is a computer generated document"/>
+                            </group>
+
+                            <!-- Single Column Content -->
+                            <group string="Footer Content" invisible="footer_layout != 'single'">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fa fa-info-circle"/> Single column layout centers all content.
+                                    Enable options above to show bank details, page numbers, and company footer text.
+                                </div>
+                            </group>
+
+                            <!-- Two/Three Column Content -->
+                            <group invisible="footer_layout not in ('two_col', 'three_col')">
+                                <group string="Column 1">
+                                    <field name="column_1_title" placeholder="e.g., Bank Details"/>
+                                    <field name="column_1_content" widget="html" nolabel="1"/>
+                                </group>
+                                <group string="Column 2">
+                                    <field name="column_2_title" placeholder="e.g., Contact"/>
+                                    <field name="column_2_content" widget="html" nolabel="1"/>
+                                </group>
+                            </group>
+                            <group invisible="footer_layout != 'three_col'">
+                                <group string="Column 3">
+                                    <field name="column_3_title" placeholder="e.g., Legal"/>
+                                    <field name="column_3_content" widget="html" nolabel="1"/>
+                                </group>
+                            </group>
+
+                            <!-- Custom HTML -->
+                            <group string="Custom HTML Footer" invisible="footer_layout != 'custom_html'">
+                                <div class="alert alert-info mb-3" role="alert">
+                                    <strong>Available placeholders:</strong><br/>
+                                    <code>{{company_name}}</code>, <code>{{company_footer}}</code>,
+                                    <code>{{bank_name}}</code>, <code>{{bank_account}}</code>, <code>{{bank_bic}}</code>
+                                </div>
+                                <field name="custom_html" widget="html" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+
+                        <!-- Styling Tab -->
+                        <page string="Styling" name="styling">
+                            <group>
+                                <group string="Border">
+                                    <field name="show_border"/>
+                                    <field name="border_color" widget="color" invisible="not show_border"/>
+                                </group>
+                                <group string="Decorative Shape">
+                                    <field name="show_shape"/>
+                                    <field name="shape_color" widget="color" invisible="not show_shape"/>
+                                    <field name="shape_opacity" invisible="not show_shape"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Text">
+                                    <field name="text_color" widget="color"/>
+                                    <field name="font_size"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Preview Tab -->
+                        <page string="Preview" name="preview">
+                            <group>
+                                <field name="preview" widget="html" nolabel="1" readonly="1" colspan="2"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- VPA Footer Configuration List View -->
+    <record id="view_vpa_footer_config_tree" model="ir.ui.view">
+        <field name="name">vpa.footer.config.list</field>
+        <field name="model">vpa.footer.config</field>
+        <field name="arch" type="xml">
+            <list string="Footer Configurations" default_order="sequence, name">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="footer_type" decoration-success="footer_type == 'customer'"
+                       decoration-info="footer_type == 'internal'" decoration-muted="footer_type == 'custom'"/>
+                <field name="footer_layout"/>
+                <field name="is_default_customer" string="Default Customer" widget="boolean_toggle"/>
+                <field name="is_default_internal" string="Default Internal" widget="boolean_toggle"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- VPA Footer Configuration Action -->
+    <record id="action_vpa_footer_config" model="ir.actions.act_window">
+        <field name="name">Footer Settings</field>
+        <field name="res_model">vpa.footer.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_company_id': allowed_company_ids[0]}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Your First Footer Configuration
+            </p>
+            <p>
+                Configure professional footers for your documents.<br/>
+                <strong>Customer Footers:</strong> For Quotes, Invoices, Sales Orders - with bank details<br/>
+                <strong>Internal Footers:</strong> For Manufacturing, Picking - with "Computer Generated" note
+            </p>
+        </field>
+    </record>
+
+    <!-- Footer Settings Menu (main new menu) -->
+    <menuitem id="menu_vpa_footer_config"
+              name="Footer Settings"
+              parent="menu_vpa_document_layout_root"
+              action="action_vpa_footer_config"
+              sequence="15"/>
+</odoo>
