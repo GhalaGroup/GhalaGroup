@@ -182,11 +182,6 @@
                                         <group>
                                             <field name="footer_config_id" options="{'no_create': True}"/>
                                         </group>
-                                        <group>
-                                            <button name="%(action_vpa_footer_config)d" type="action"
-                                                    string="Manage Footer Configs"
-                                                    class="btn-link" icon="fa-external-link"/>
-                                        </group>
                                     </group>
 
                                     <div class="alert alert-secondary mt-3" role="alert">
