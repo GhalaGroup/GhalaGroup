@@ -19,8 +19,8 @@
         Remove the default header/footer so VPA footer config can be used
     -->
     <template id="report_mrporder_vpa" inherit_id="mrp.report_mrporder">
-        <!-- Remove the default external layout and use minimal layout -->
-        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+        <!-- MRP uses web.internal_layout, replace with minimal layout -->
+        <xpath expr="//t[@t-call='web.internal_layout']" position="replace">
             <t t-call="vpa_document_layout.external_layout_minimal">
                 <t t-out="0"/>
             </t>
