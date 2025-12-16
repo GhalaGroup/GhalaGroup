@@ -210,6 +210,13 @@ class VPADocumentTemplate(models.Model):
     # Preview field (like the old VPA config)
     preview = fields.Html(compute='_compute_preview', sanitize=False)
 
+    # SQL Constraints to prevent duplicate templates
+    _sql_constraints = [
+        ('unique_name_company_doctype',
+         'UNIQUE(name, company_id, document_type)',
+         'A template with this name already exists for this company and document type. Please choose a different name.')
+    ]
+
     @api.depends('name', 'primary_accent_color', 'secondary_accent_color',
                  'header_logo_alignment', 'header_logo_width', 'header_logo_height', 'header_logo_aspect_ratio',
                  'header_company_info_alignment', 'header_company_details_html', 'header_company_info_color',
@@ -393,6 +400,43 @@ class VPADocumentTemplate(models.Model):
             if template.report_action_id:
                 template.report_action_id.unlink()
         return super(VPADocumentTemplate, self).unlink()
+
+    @api.model
+    def action_cleanup_orphan_reports(self):
+        """
+        Cleanup orphan VPA report actions that don't have a corresponding template.
+        This can happen if templates were deleted directly from the database.
+        Call this method to fix duplicate entries in Print menu.
+        """
+        # Find all VPA report actions (they have report_name starting with 'vpa_document_layout.report_template_')
+        orphan_reports = self.env['ir.actions.report'].search([
+            ('report_name', 'like', 'vpa_document_layout.report_template_%')
+        ])
+
+        # Get all template IDs that have report actions
+        template_report_ids = self.search([]).mapped('report_action_id').ids
+
+        # Find orphan reports (not linked to any template)
+        orphan_count = 0
+        for report in orphan_reports:
+            if report.id not in template_report_ids:
+                _logger.info(f"Deleting orphan VPA report action: {report.name} (ID: {report.id})")
+                report.unlink()
+                orphan_count += 1
+
+        if orphan_count:
+            _logger.info(f"Cleaned up {orphan_count} orphan VPA report action(s)")
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Cleanup Complete'),
+                'message': _('Removed %s orphan report action(s) from the print menu.') % orphan_count,
+                'type': 'success' if orphan_count else 'info',
+                'sticky': False,
+            }
+        }
 
     def _create_report_action(self):
         """Create a new report action for this template"""
