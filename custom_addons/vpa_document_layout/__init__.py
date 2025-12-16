@@ -43,6 +43,29 @@ def _post_init_hook(env):
     # Step 3: Create default footers for companies that still don't have any
     env['vpa.footer.config'].init_default_footers_all_companies()
 
+    # Step 4: Regenerate all sale_production templates to fix QWeb syntax
+    # This is needed because old templates have broken format string syntax
+    _logger.info("VPA Document Layout: Regenerating sale_production templates...")
+    try:
+        production_templates = env['vpa.document.template'].search([
+            ('document_type', '=', 'sale_production')
+        ])
+        for template in production_templates:
+            _logger.info(f"Regenerating template: {template.name} (ID: {template.id})")
+            # Delete existing QWeb views for this template
+            existing_views = env['ir.ui.view'].search([
+                '|', '|',
+                ('key', 'like', f'%template_{template.id}%'),
+                ('key', 'like', f'%inherit_{template.id}%'),
+                ('name', 'like', f'%{template.id}')
+            ])
+            existing_views.unlink()
+            # Recreate the QWeb template
+            template._create_qweb_template()
+        _logger.info(f"VPA Document Layout: Regenerated {len(production_templates)} sale_production template(s)")
+    except Exception as e:
+        _logger.warning(f"VPA Document Layout: Could not regenerate templates: {e}")
+
 
 def _uninstall_hook(env):
     """
