@@ -316,6 +316,10 @@ class VPADocumentTemplate(models.Model):
 
         result = super(VPADocumentTemplate, self).write(vals)
 
+        # Skip template regeneration during module install/upgrade to avoid locks
+        if self.env.context.get('install_mode') or self.env.context.get('module'):
+            return result
+
         # Fields that require template regeneration
         template_fields = [
             'header_logo_alignment', 'header_logo_width', 'header_logo_height',
