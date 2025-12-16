@@ -27,10 +27,7 @@
         </xpath>
     </template>
 
-    <!--
-        Minimal External Layout for VPA Footer Config
-        No header/footer - those are handled by wkhtmltopdf --footer-html
-    -->
+    <!-- Minimal External Layout for VPA Footer Config (footer via wkhtmltopdf) -->
     <template id="external_layout_minimal" name="VPA Minimal External Layout">
         <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
             <t t-out="0"/>
