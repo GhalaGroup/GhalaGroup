@@ -101,7 +101,12 @@ class IrActionsReport(models.Model):
 
     def _render_qweb_pdf_prepare_streams(self, report_ref, data, res_ids=None):
         """Override to use custom PDF generation for VPA layout reports"""
-        _logger.info(f"🔍 PDF Generation - report_ref: {report_ref}, report_name: {self.report_name}, context.vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}")
+        # Get the actual report record to access report_name and model
+        report = self._get_report(report_ref)
+        report_name = report.report_name if report else (self.report_name or '')
+        model_name = report.model if report else (self.model or '')
+
+        _logger.info(f"🔍 PDF Generation - report_ref: {report_ref}, report_name: {report_name}, model: {model_name}, context.vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}")
 
         # Skip if already processed
         if self.env.context.get('vpa_force_zero_margins'):
@@ -109,16 +114,16 @@ class IrActionsReport(models.Model):
             return super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
 
         # Check if this is a VPA template report by checking the report_name
-        is_vpa_template = 'vpa_document_layout.report_template_' in (self.report_name or '')
-        _logger.info(f"🔍 is_vpa_template={is_vpa_template}, checking if '{self.report_name}' contains 'vpa_document_layout.report_template_'")
+        is_vpa_template = 'vpa_document_layout.report_template_' in (report_name or '')
+        _logger.info(f"🔍 is_vpa_template={is_vpa_template}, checking if '{report_name}' contains 'vpa_document_layout.report_template_'")
 
         if is_vpa_template:
             # Extract template ID from report_name (format: vpa_document_layout.report_template_3)
             try:
-                template_id = int(self.report_name.split('_')[-1])
+                template_id = int(report_name.split('_')[-1])
                 _logger.info(f"Extracted template ID: {template_id}")
             except (ValueError, IndexError):
-                _logger.warning(f"Could not extract template ID from report_name: {self.report_name}")
+                _logger.warning(f"Could not extract template ID from report_name: {report_name}")
                 template_id = None
 
             _logger.info("VPA template detected - setting vpa_force_zero_margins context flag")
@@ -130,10 +135,10 @@ class IrActionsReport(models.Model):
 
         # NEW: Check if company has a VPA footer config for ALL reports
         # This applies VPA footers globally without needing a VPA template
-        if res_ids and self.model:
+        if res_ids and model_name:
             try:
-                docs = self.env[self.model].browse(res_ids[:1])
-                _logger.info(f"🔍 VPA Footer Check - model: {self.model}, res_ids: {res_ids[:3]}, docs exists: {bool(docs)}")
+                docs = self.env[model_name].browse(res_ids[:1])
+                _logger.info(f"🔍 VPA Footer Check - model: {model_name}, res_ids: {res_ids[:3]}, docs exists: {bool(docs)}")
 
                 # Safely get company from document
                 company = None
@@ -147,7 +152,6 @@ class IrActionsReport(models.Model):
                     _logger.info(f"🔍 Using current company: {company.name} (ID: {company.id})")
 
                 # Get the appropriate footer config for this report
-                report_name = self.report_name or ''
                 _logger.info(f"🔍 Looking for footer config for company_id={company.id}, report={report_name}")
 
                 footer_config = self.env['vpa.footer.config'].get_footer_for_report(
@@ -165,6 +169,8 @@ class IrActionsReport(models.Model):
                     _logger.info(f"ℹ️  No VPA footer config found for company {company.name} (ID: {company.id})")
             except Exception as e:
                 _logger.warning(f"Could not check VPA footer config: {e}", exc_info=True)
+        else:
+            _logger.info(f"⚠️  Skipping VPA footer check - res_ids: {res_ids}, model_name: {model_name}")
 
         # Fall back to default wkhtmltopdf for all reports
         return super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
