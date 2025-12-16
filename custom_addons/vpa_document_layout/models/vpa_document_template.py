@@ -1574,3 +1574,56 @@ class VPADocumentTemplate(models.Model):
             'url': f'/vpa/template/preview/pdf/{self.id}',
             'target': 'self',
         }
+
+    @api.model
+    def _cleanup_and_regenerate_templates(self):
+        """
+        Called from data/regenerate_templates.xml on EVERY module upgrade.
+        1. Cleanup orphan report actions (fixes duplicate Print menu items)
+        2. Regenerate sale_production templates (fixes QWeb syntax issues)
+        """
+        _logger.info("VPA Document Layout: Running upgrade cleanup and regeneration...")
+
+        # STEP 1: Cleanup orphan report actions that cause duplicate Print menu items
+        try:
+            orphan_reports = self.env['ir.actions.report'].search([
+                ('report_name', 'like', 'vpa_document_layout.report_template_%')
+            ])
+            template_report_ids = self.search([]).mapped('report_action_id').ids
+
+            orphan_count = 0
+            for report in orphan_reports:
+                if report.id not in template_report_ids:
+                    _logger.info(f"Deleting orphan report: {report.name} (ID: {report.id})")
+                    report.unlink()
+                    orphan_count += 1
+
+            if orphan_count:
+                _logger.info(f"VPA Document Layout: Removed {orphan_count} orphan report action(s)")
+        except Exception as e:
+            _logger.warning(f"VPA Document Layout: Could not cleanup orphan reports: {e}")
+
+        # STEP 2: Regenerate sale_production templates to fix QWeb syntax issues
+        try:
+            production_templates = self.search([
+                ('document_type', '=', 'sale_production')
+            ])
+            for template in production_templates:
+                _logger.info(f"Regenerating template: {template.name} (ID: {template.id})")
+                # Delete existing QWeb views for this template
+                existing_views = self.env['ir.ui.view'].search([
+                    '|', '|',
+                    ('key', 'like', f'%template_{template.id}%'),
+                    ('key', 'like', f'%inherit_{template.id}%'),
+                    ('name', 'like', f'%{template.id}')
+                ])
+                if existing_views:
+                    _logger.info(f"Deleting {len(existing_views)} existing views for template {template.id}")
+                    existing_views.unlink()
+                # Recreate the QWeb template with fixed syntax
+                template._create_qweb_template()
+            _logger.info(f"VPA Document Layout: Regenerated {len(production_templates)} sale_production template(s)")
+        except Exception as e:
+            _logger.warning(f"VPA Document Layout: Could not regenerate templates: {e}")
+
+        return True
