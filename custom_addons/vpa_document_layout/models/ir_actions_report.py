@@ -103,6 +103,11 @@ class IrActionsReport(models.Model):
         """Override to use custom PDF generation for VPA layout reports"""
         _logger.info(f"🔍 PDF Generation - report_ref: {report_ref}, report_name: {self.report_name}, context.vpa_force_zero_margins: {self.env.context.get('vpa_force_zero_margins')}")
 
+        # Skip if already processed
+        if self.env.context.get('vpa_force_zero_margins'):
+            _logger.info("VPA context flag already set - proceeding to super()")
+            return super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
+
         # Check if this is a VPA template report by checking the report_name
         is_vpa_template = 'vpa_document_layout.report_template_' in (self.report_name or '')
         _logger.info(f"🔍 is_vpa_template={is_vpa_template}, checking if '{self.report_name}' contains 'vpa_document_layout.report_template_'")
@@ -116,15 +121,40 @@ class IrActionsReport(models.Model):
                 _logger.warning(f"Could not extract template ID from report_name: {self.report_name}")
                 template_id = None
 
-            if not self.env.context.get('vpa_force_zero_margins'):
-                _logger.info("VPA template detected - setting vpa_force_zero_margins context flag")
-                # Set context flags so _build_wkhtmltopdf_args knows to use footer-html
-                return self.with_context(
-                    vpa_force_zero_margins=True,
-                    vpa_template_id=template_id
-                )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
-            else:
-                _logger.info("VPA template with context flag already set - proceeding to super()")
+            _logger.info("VPA template detected - setting vpa_force_zero_margins context flag")
+            # Set context flags so _build_wkhtmltopdf_args knows to use footer-html
+            return self.with_context(
+                vpa_force_zero_margins=True,
+                vpa_template_id=template_id
+            )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
+
+        # NEW: Check if company has a VPA footer config for ALL reports
+        # This applies VPA footers globally without needing a VPA template
+        if res_ids and self.model:
+            try:
+                docs = self.env[self.model].browse(res_ids[:1])
+                if docs and hasattr(docs[0], 'company_id'):
+                    company = docs[0].company_id
+                else:
+                    company = self.env.company
+
+                # Get the appropriate footer config for this report
+                report_name = self.report_name or ''
+                footer_config = self.env['vpa.footer.config'].get_footer_for_report(
+                    company.id,
+                    report_name
+                )
+
+                if footer_config:
+                    _logger.info(f"✅ Found VPA footer config '{footer_config.name}' for report {report_name}")
+                    return self.with_context(
+                        vpa_force_zero_margins=True,
+                        vpa_footer_config_id=footer_config.id
+                    )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
+                else:
+                    _logger.info(f"ℹ️  No VPA footer config found for company {company.name}")
+            except Exception as e:
+                _logger.warning(f"Could not check VPA footer config: {e}")
 
         # Fall back to default wkhtmltopdf for all reports
         return super()._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
@@ -188,9 +218,6 @@ class IrActionsReport(models.Model):
 
             command_args = new_args
 
-            # Get template ID from context for footer URL
-            template_id = self.env.context.get('vpa_template_id')
-
             # Add consistent DPI and zoom for all VPA templates
             # This ensures Preview and Real Print render identically
             command_args.extend([
@@ -198,15 +225,22 @@ class IrActionsReport(models.Model):
                 '--zoom', '1.0',  # No zoom scaling
             ])
 
-            # Get template ID for footer
+            # Get template ID or footer config ID for footer
             template_id = self.env.context.get('vpa_template_id')
+            footer_config_id = self.env.context.get('vpa_footer_config_id')
+            base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
+            footer_url = None
             if template_id:
-                # Use footer-html for all environments
-                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                # Use VPA document template footer
                 footer_url = f"{base_url}/vpa/template/footer/{template_id}"
-                _logger.info(f"✅ Using footer-html: {footer_url}")
+                _logger.info(f"✅ Using VPA template footer: {footer_url}")
+            elif footer_config_id:
+                # Use VPA footer config (global footer for all reports)
+                footer_url = f"{base_url}/vpa/footer/{footer_config_id}"
+                _logger.info(f"✅ Using VPA footer config: {footer_url}")
 
+            if footer_url:
                 command_args.extend([
                     '--enable-local-file-access',
                     '--margin-top', '0',

@@ -196,3 +196,162 @@ class VPATemplatePreview(http.Controller):
         return request.render('vpa_document_layout.footer_preview_page', {
             'template': template,
         })
+
+    @http.route('/vpa/footer/<int:footer_config_id>', type='http', auth='public')
+    def get_footer_config_html(self, footer_config_id, **kwargs):
+        """Return footer HTML from vpa.footer.config for wkhtmltopdf --footer-html
+
+        This allows VPA footers to work on ANY Odoo report without needing
+        a VPA Document Template - just configure a footer in Footer Settings.
+        """
+        # Use sudo() since this is called by wkhtmltopdf without authentication
+        footer_config = request.env['vpa.footer.config'].sudo().browse(footer_config_id)
+
+        if not footer_config.exists():
+            return request.not_found()
+
+        _logger.info(f"Rendering footer HTML from footer config: {footer_config.name}")
+
+        company = footer_config.company_id
+
+        # Build footer HTML based on layout type
+        try:
+            if footer_config.footer_layout == 'custom_html' and footer_config.custom_html:
+                footer_content = footer_config._render_custom_html(company)
+            elif footer_config.footer_layout == 'three_col':
+                footer_content = self._render_three_col_footer(footer_config, company)
+            elif footer_config.footer_layout == 'two_col':
+                footer_content = self._render_two_col_footer(footer_config, company)
+            else:
+                footer_content = self._render_single_col_footer(footer_config, company)
+
+            # Wrap in complete HTML document for wkhtmltopdf
+            html_str = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
+            font-size: {footer_config.font_size or '8pt'};
+            color: {footer_config.text_color or '#666666'};
+            width: 100%;
+        }}
+        .vpa-footer {{
+            padding: 8px 15px;
+            {f'border-top: 1px solid {footer_config.border_color};' if footer_config.show_border else ''}
+            position: relative;
+        }}
+        .footer-shape {{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 80px;
+            background: {footer_config.shape_color or '#21b799'};
+            opacity: {footer_config.shape_opacity or 0.1};
+            clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        }}
+        .footer-columns {{
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }}
+        .footer-column {{
+            display: table-cell;
+            vertical-align: top;
+            padding: 0 10px;
+        }}
+        .footer-column:first-child {{ padding-left: 0; }}
+        .footer-column:last-child {{ padding-right: 0; }}
+        .footer-title {{
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: {footer_config.text_color or '#666666'};
+        }}
+        .page-number {{
+            text-align: center;
+            margin-top: 5px;
+            font-size: 7pt;
+        }}
+    </style>
+</head>
+<body>
+    <div class="vpa-footer">
+        {f'<div class="footer-shape"></div>' if footer_config.show_shape else ''}
+        {footer_content}
+        {self._render_page_numbers() if footer_config.show_page_numbers else ''}
+    </div>
+</body>
+</html>'''
+
+            return request.make_response(
+                html_str,
+                headers=[('Content-Type', 'text/html; charset=utf-8')]
+            )
+        except Exception as e:
+            _logger.error(f"Footer config HTML generation error: {str(e)}", exc_info=True)
+            return request.make_response(
+                f'<div>Footer Error: {str(e)}</div>',
+                headers=[('Content-Type', 'text/html')]
+            )
+
+    def _render_three_col_footer(self, footer_config, company):
+        """Render 3-column footer layout"""
+        return f'''
+        <div class="footer-columns">
+            <div class="footer-column">
+                {f'<div class="footer-title">{footer_config.column_1_title}</div>' if footer_config.column_1_title else ''}
+                <div>{footer_config.column_1_content or ''}</div>
+            </div>
+            <div class="footer-column">
+                {f'<div class="footer-title">{footer_config.column_2_title}</div>' if footer_config.column_2_title else ''}
+                <div>{footer_config.column_2_content or ''}</div>
+            </div>
+            <div class="footer-column">
+                {f'<div class="footer-title">{footer_config.column_3_title}</div>' if footer_config.column_3_title else ''}
+                <div>{footer_config.column_3_content or ''}</div>
+            </div>
+        </div>
+        '''
+
+    def _render_two_col_footer(self, footer_config, company):
+        """Render 2-column footer layout"""
+        return f'''
+        <div class="footer-columns">
+            <div class="footer-column">
+                {f'<div class="footer-title">{footer_config.column_1_title}</div>' if footer_config.column_1_title else ''}
+                <div>{footer_config.column_1_content or ''}</div>
+            </div>
+            <div class="footer-column">
+                {f'<div class="footer-title">{footer_config.column_2_title}</div>' if footer_config.column_2_title else ''}
+                <div>{footer_config.column_2_content or ''}</div>
+            </div>
+        </div>
+        '''
+
+    def _render_single_col_footer(self, footer_config, company):
+        """Render single column centered footer"""
+        content_parts = []
+
+        if footer_config.footer_type == 'internal' and footer_config.computer_generated_note:
+            content_parts.append(f'<div style="font-style: italic;">{footer_config.computer_generated_note}</div>')
+
+        if footer_config.show_bank_details and company.partner_id.bank_ids:
+            bank = company.partner_id.bank_ids[0]
+            bank_name = bank.bank_id.name if bank.bank_id else 'Bank'
+            content_parts.append(f'<div><strong>Bank:</strong> {bank_name} | Account: {bank.acc_number or "N/A"}</div>')
+
+        if footer_config.show_company_footer and company.report_footer:
+            content_parts.append(f'<div>{company.report_footer}</div>')
+
+        return f'<div style="text-align: center;">{"".join(content_parts)}</div>'
+
+    def _render_page_numbers(self):
+        """Render page numbers using wkhtmltopdf variables"""
+        return '''
+        <div class="page-number">
+            Page <span class="page"></span> of <span class="topage"></span>
+        </div>
+        '''
