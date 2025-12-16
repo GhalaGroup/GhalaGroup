@@ -27,7 +27,6 @@
                 <header>
                     <button name="action_preview_template" string="Download PDF Preview" type="object" class="btn-primary" icon="fa-download"/>
                     <button name="action_preview_footer" string="Preview Footer" type="object" class="btn-secondary" icon="fa-eye" help="Preview how footer will appear on PDF pages"/>
-                    <button name="action_regenerate_templates" string="Regenerate Template" type="object" class="btn-secondary" icon="fa-refresh" help="Regenerate QWeb template from current settings"/>
                 </header>
                 <sheet>
                     <field name="active" invisible="1"/>
