@@ -1143,7 +1143,7 @@ class VPADocumentTemplate(models.Model):
                                     </td>
                                     <td style="text-align: center;">
                                         <span class="vpa-qty-badge">
-                                            <t t-esc="'{:.4f}'.format(line.product_uom_qty)"/>
+                                            <t t-esc="'{{:.4f}}'.format(line.product_uom_qty)"/>
                                         </span>
                                     </td>
                                     <td style="text-align: center;">
@@ -1169,7 +1169,7 @@ class VPADocumentTemplate(models.Model):
                     <!-- Total Box -->
                     <div class="vpa-total-box">
                         <span class="vpa-total-label">Total Production Quantity:</span>
-                        <span class="vpa-total-value"><t t-esc="'{:.2f}'.format(total_qty)"/></span>
+                        <span class="vpa-total-value"><t t-esc="'{{:.2f}}'.format(total_qty)"/></span>
                     </div>
 
                     <!-- Production Notes -->
