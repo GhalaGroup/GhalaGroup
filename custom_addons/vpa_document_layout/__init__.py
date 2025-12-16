@@ -3,6 +3,84 @@ from . import controllers
 from . import models
 
 
+def _post_load():
+    """
+    Post-load hook - runs EVERY time the module is loaded (server start/restart).
+    This ensures template regeneration happens after upgrades.
+    """
+    import logging
+    import threading
+    _logger = logging.getLogger(__name__)
+
+    _logger.info("VPA Document Layout: post_load hook triggered - scheduling template regeneration")
+
+    def delayed_regeneration():
+        import time
+        time.sleep(15)  # Wait for server to fully initialize and registry to be ready
+        try:
+            from odoo import api, SUPERUSER_ID
+            from odoo.modules.registry import Registry
+
+            # Get the database name from environment or registry
+            import odoo
+            db_name = None
+
+            # Try to get db from existing registries
+            if hasattr(odoo.modules.registry, 'Registry') and hasattr(Registry, 'registries'):
+                for name in Registry.registries.keys():
+                    db_name = name
+                    break
+
+            if not db_name:
+                _logger.warning("VPA Document Layout: No database found for template regeneration")
+                return
+
+            _logger.info(f"VPA Document Layout: Starting delayed regeneration for database {db_name}")
+            registry = Registry(db_name)
+            with registry.cursor() as cr:
+                env = api.Environment(cr, SUPERUSER_ID, {})
+
+                # Regenerate sale_production templates
+                production_templates = env['vpa.document.template'].search([
+                    ('document_type', '=', 'sale_production')
+                ])
+                _logger.info(f"VPA Document Layout: Found {len(production_templates)} sale_production templates")
+
+                for template in production_templates:
+                    _logger.info(f"VPA Document Layout: Regenerating template: {template.name} (ID: {template.id})")
+                    # Delete existing QWeb views
+                    existing_views = env['ir.ui.view'].search([
+                        '|', '|',
+                        ('key', 'like', f'%template_{template.id}%'),
+                        ('key', 'like', f'%inherit_{template.id}%'),
+                        ('name', 'like', f'%{template.id}')
+                    ])
+                    if existing_views:
+                        _logger.info(f"VPA Document Layout: Deleting {len(existing_views)} existing views")
+                        existing_views.unlink()
+                    # Recreate template
+                    template._create_qweb_template()
+
+                cr.commit()
+                _logger.info(f"VPA Document Layout: Successfully regenerated {len(production_templates)} templates")
+
+        except Exception as e:
+            _logger.error(f"VPA Document Layout: Delayed regeneration failed: {e}")
+            import traceback
+            _logger.error(traceback.format_exc())
+
+    # Only spawn thread if not already running
+    thread_name = "vpa_post_load_regeneration"
+    for thread in threading.enumerate():
+        if thread.name == thread_name:
+            _logger.info("VPA Document Layout: Regeneration thread already running, skipping")
+            return
+
+    t = threading.Thread(target=delayed_regeneration, name=thread_name, daemon=True)
+    t.start()
+    _logger.info("VPA Document Layout: Scheduled delayed template regeneration (15 seconds)")
+
+
 def _post_init_hook(env):
     """
     Post-install/upgrade hook - runs on BOTH install AND upgrade in Odoo 14+

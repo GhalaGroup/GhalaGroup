@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'VPA Document Layout',
-    'version': '19.0.1.0.6',
+    'version': '19.0.1.0.7',
     'category': 'Reporting',
     'summary': 'Custom VPA document layout for reports',
     'description': """
@@ -53,6 +53,7 @@
             'vpa_document_layout/static/src/xml/vpa_preview_widget.xml',
         ],
     },
+    'post_load': '_post_load',
     'post_init_hook': '_post_init_hook',
     'uninstall_hook': '_uninstall_hook',
     'installable': True,
