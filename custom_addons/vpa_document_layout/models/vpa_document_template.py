@@ -99,6 +99,7 @@ class VPADocumentTemplate(models.Model):
     document_type = fields.Selection([
         ('quotation', 'Quotation'),
         ('sale_order', 'Sales Order'),
+        ('sale_production', 'Sales Production Order'),
         ('invoice', 'Invoice'),
         ('bill', 'Vendor Bill'),
         ('purchase_order', 'Purchase Order'),
@@ -401,6 +402,7 @@ class VPADocumentTemplate(models.Model):
         model_map = {
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
+            'sale_production': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
@@ -878,6 +880,289 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
+        elif self.document_type == 'sale_production':
+            # Sales Production Order template - Sale Order with Production Details for factory
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="address">
+                <strong><span t-field="doc.partner_id.name"/></strong><br/>
+                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+            </t>
+            <t t-set="information_block">
+                <div t-if="doc.date_order">
+                    <strong>Order Date:</strong>
+                    <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                </div>
+                <div t-if="doc.commitment_date" class="mt-2">
+                    <strong>Expected Delivery:</strong>
+                    <span t-field="doc.commitment_date" t-options='{{"widget": "date"}}'/>
+                </div>
+                <div t-if="doc.client_order_ref" class="mt-2">
+                    <strong>Customer Reference:</strong>
+                    <span t-field="doc.client_order_ref"/>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                Production Order # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Sale Production specific elements -->
+                <style>
+                    .vpa-sale-production {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 10pt;
+                        color: #333;
+                    }}
+                    .vpa-section-title {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 14pt;
+                        font-weight: bold;
+                        margin: 15px 0 10px 0;
+                        padding-bottom: 5px;
+                        border-bottom: 2px solid #eee;
+                    }}
+                    .vpa-info-row {{
+                        display: flex;
+                        gap: 20px;
+                        margin-bottom: 15px;
+                    }}
+                    .vpa-info-box {{
+                        flex: 1;
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 12px;
+                    }}
+                    .vpa-info-box-title {{
+                        color: <t t-out="primary_color"/>;
+                        font-weight: bold;
+                        font-size: 8pt;
+                        text-transform: uppercase;
+                        margin-bottom: 6px;
+                        letter-spacing: 0.5px;
+                    }}
+                    .vpa-info-box p {{
+                        margin: 2px 0;
+                        font-size: 9pt;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 3px;
+                        font-weight: bold;
+                        font-size: 9pt;
+                    }}
+                    .vpa-mo-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        font-size: 8pt;
+                        margin: 1px;
+                    }}
+                    .vpa-mo-pending {{
+                        background: #999;
+                    }}
+                    .vpa-section-row td {{
+                        background: #fafafa;
+                        font-weight: bold;
+                        color: #555;
+                        padding: 6px 8px;
+                    }}
+                    .vpa-product-details {{
+                        font-size: 8pt;
+                        color: #666;
+                        margin-top: 4px;
+                        line-height: 1.4;
+                    }}
+                    .vpa-total-box {{
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 15px;
+                        margin-top: 15px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }}
+                    .vpa-total-label {{
+                        font-weight: bold;
+                        color: #333;
+                    }}
+                    .vpa-total-value {{
+                        font-size: 16pt;
+                        font-weight: bold;
+                        color: <t t-out="primary_color"/>;
+                    }}
+                    .vpa-notes-section {{
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 12px;
+                        margin-top: 12px;
+                    }}
+                    .vpa-notes-title {{
+                        color: <t t-out="primary_color"/>;
+                        font-weight: bold;
+                        font-size: 8pt;
+                        text-transform: uppercase;
+                        margin-bottom: 6px;
+                    }}
+                    .vpa-notes-section ul {{
+                        margin: 0;
+                        padding-left: 18px;
+                    }}
+                    .vpa-notes-section li {{
+                        margin: 4px 0;
+                        font-size: 9pt;
+                    }}
+                </style>
+
+                <div class="vpa-sale-production">
+                    <!-- Customer Details / Delivery Info Boxes -->
+                    <table style="width: 100%%; margin-bottom: 15px; border-collapse: separate; border-spacing: 15px 0;">
+                        <tr>
+                            <td style="width: 50%%; vertical-align: top;">
+                                <div class="vpa-info-box">
+                                    <div class="vpa-info-box-title">Customer Details</div>
+                                    <p><strong>Client:</strong> <t t-out="doc.partner_id.name"/></p>
+                                    <p><strong>Order Date:</strong> <t t-out="doc.date_order" t-options='{{"widget": "date"}}'/></p>
+                                    <p t-if="doc.client_order_ref"><strong>Reference:</strong> <t t-out="doc.client_order_ref"/></p>
+                                </div>
+                            </td>
+                            <td style="width: 50%%; vertical-align: top;">
+                                <div class="vpa-info-box">
+                                    <div class="vpa-info-box-title">Delivery Info</div>
+                                    <p><strong>Expected:</strong>
+                                        <t t-if="doc.commitment_date">
+                                            <t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/>
+                                        </t>
+                                        <t t-else="">Not Set</t>
+                                    </p>
+                                    <p><strong>Status:</strong> <t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Items Summary Title -->
+                    <div class="vpa-info-box-title" style="margin-top: 15px; margin-bottom: 8px;">
+                        Items Summary Details
+                    </div>
+
+                    <!-- Items Table -->
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%%;">No.</th>
+                                <th style="width: 45%%;">Product Description</th>
+                                <th style="width: 15%%; text-align: center;">Quantity</th>
+                                <th style="width: 10%%; text-align: center;">Unit</th>
+                                <th style="width: 25%%; text-align: center;">MO Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="line_num" t-value="0"/>
+                            <t t-set="total_qty" t-value="0"/>
+                            <t t-set="current_section" t-value="''"/>
+
+                            <t t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
+                                <!-- Section header by product category -->
+                                <t t-set="section_name" t-value="line.product_id.categ_id.name or 'Products'"/>
+                                <t t-if="section_name != current_section">
+                                    <t t-set="current_section" t-value="section_name"/>
+                                    <tr class="vpa-section-row">
+                                        <td colspan="5"><t t-out="section_name"/></td>
+                                    </tr>
+                                </t>
+
+                                <t t-set="line_num" t-value="line_num + 1"/>
+                                <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
+
+                                <tr>
+                                    <td><t t-out="line_num"/></td>
+                                    <td>
+                                        <strong>[<t t-out="line.product_id.default_code or 'N/A'"/>]</strong>
+                                        <t t-out="line.product_id.name"/>
+                                        <t t-if="line.name and line.name != line.product_id.name">
+                                            <div class="vpa-product-details">
+                                                <t t-out="line.name"/>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-qty-badge">
+                                            <t t-out="'%%.4f' %% line.product_uom_qty"/>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <t t-out="line.product_uom.name"/>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <!-- Find related manufacturing orders -->
+                                        <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if hasattr(line, 'move_ids') and line.move_ids else []"/>
+                                        <t t-if="mos">
+                                            <t t-foreach="mos" t-as="mo">
+                                                <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Total Box -->
+                    <div class="vpa-total-box">
+                        <span class="vpa-total-label">Total Production Quantity:</span>
+                        <span class="vpa-total-value"><t t-out="'%%.2f' %% total_qty"/></span>
+                    </div>
+
+                    <!-- Production Notes -->
+                    <t t-set="all_mos" t-value="doc.order_line.mapped('move_ids').mapped('created_production_id')"/>
+                    <t t-if="all_mos">
+                        <div class="vpa-notes-section">
+                            <div class="vpa-notes-title">Production Notes:</div>
+                            <p style="margin: 4px 0; font-size: 9pt;"><strong>Manufacturing Orders:</strong></p>
+                            <ul>
+                                <t t-foreach="all_mos" t-as="mo">
+                                    <li>
+                                        <strong><t t-out="mo.name"/></strong> -
+                                        <t t-out="mo.product_id.name"/>
+                                        (<t t-out="mo.product_qty"/> <t t-out="mo.product_uom_id.name"/>)
+                                        <t t-if="doc.client_order_ref">
+                                            | <t t-out="doc.client_order_ref"/>
+                                        </t>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </t>
+
+                    <!-- Additional Notes from Sale Order -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section" style="margin-top: 10px;">
+                            <div class="vpa-notes-title">Order Notes:</div>
+                            <div style="font-size: 9pt;">
+                                <t t-out="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
         else:
             # For other document types, create a simpler template
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
@@ -1171,6 +1456,7 @@ class VPADocumentTemplate(models.Model):
         model_map = {
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
+            'sale_production': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
