@@ -4,19 +4,37 @@
         VPA Footer Override Templates
         ==============================
 
-        NOTE: These overrides are DISABLED for now.
-        The footer override feature requires careful XPath matching for each
-        Odoo layout variant. Will be enabled in a future update after testing.
-
-        For now, VPA unified footers work with:
-        - VPA Document Templates (via footer_config_id)
-        - Direct template calls to vpa_unified_footer
+        These overrides remove Odoo's default header/footer from reports
+        so that VPA Footer Config can handle the footer via wkhtmltopdf.
     -->
 
     <!-- Helper to get report XML ID from context - used by VPA templates -->
     <template id="vpa_footer_with_context" name="VPA Footer With Context">
         <t t-set="report_xml_id" t-value="docs.env.context.get('report_xml_id', '') if docs else ''"/>
         <t t-call="vpa_document_layout.vpa_unified_footer"/>
+    </template>
+
+    <!--
+        Override MRP Production Order Report Layout
+        Remove the default header/footer so VPA footer config can be used
+    -->
+    <template id="report_mrporder_vpa" inherit_id="mrp.report_mrporder">
+        <!-- Remove the default external layout and use minimal layout -->
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+            <t t-call="vpa_document_layout.external_layout_minimal">
+                <t t-out="0"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!--
+        Minimal External Layout for VPA Footer Config
+        No header/footer - those are handled by wkhtmltopdf --footer-html
+    -->
+    <template id="external_layout_minimal" name="VPA Minimal External Layout">
+        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+            <t t-out="0"/>
+        </div>
     </template>
 
 </odoo>
