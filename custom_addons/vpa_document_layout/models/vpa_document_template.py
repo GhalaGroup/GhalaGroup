@@ -1627,3 +1627,42 @@ class VPADocumentTemplate(models.Model):
             _logger.warning(f"VPA Document Layout: Could not regenerate templates: {e}")
 
         return True
+
+    @classmethod
+    def _register_hook(cls):
+        """
+        Called on every server start/restart after module loading.
+        This ensures template regeneration happens after every upgrade.
+        """
+        super()._register_hook()
+
+        # Use a thread to regenerate templates after server fully starts
+        # This avoids blocking the server startup
+        import threading
+
+        def delayed_regeneration():
+            import time
+            time.sleep(10)  # Wait for server to fully initialize
+            try:
+                from odoo import api, SUPERUSER_ID
+                from odoo.modules.registry import Registry
+                db_name = cls.pool.db_name
+                registry = Registry(db_name)
+                with registry.cursor() as cr:
+                    env = api.Environment(cr, SUPERUSER_ID, {})
+                    _logger.info("VPA Document Layout: Running delayed template regeneration...")
+                    env['vpa.document.template']._cleanup_and_regenerate_templates()
+                    cr.commit()
+                    _logger.info("VPA Document Layout: Delayed regeneration completed successfully")
+            except Exception as e:
+                _logger.warning(f"VPA Document Layout: Delayed regeneration failed: {e}")
+
+        # Only spawn thread if not already running
+        thread_name = "vpa_template_regeneration"
+        for thread in threading.enumerate():
+            if thread.name == thread_name:
+                return  # Already running
+
+        t = threading.Thread(target=delayed_regeneration, name=thread_name, daemon=True)
+        t.start()
+        _logger.info("VPA Document Layout: Scheduled delayed template regeneration")

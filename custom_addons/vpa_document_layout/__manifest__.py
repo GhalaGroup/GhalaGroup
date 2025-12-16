@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'VPA Document Layout',
-    'version': '19.0.1.0.5',
+    'version': '19.0.1.0.6',
     'category': 'Reporting',
     'summary': 'Custom VPA document layout for reports',
     'description': """
@@ -42,7 +42,6 @@
         'data/default_templates.xml',     # Default templates
         'data/default_footers.xml',       # Default footer configs
         'data/cleanup_actions.xml',       # Cleanup orphan reports menu
-        'data/regenerate_templates.xml',  # Regenerate templates on every upgrade
         'views/sale_order_report_inherit.xml',
         'views/account_invoice_report_inherit.xml',
         'views/res_config_settings_views.xml',
