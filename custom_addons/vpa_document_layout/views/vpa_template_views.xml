@@ -185,29 +185,39 @@
                                         </group>
                                     </group>
 
-                                    <!-- Multi-Column Layout -->
-                                    <group invisible="footer_layout == 'single'" col="3">
-                                        <!-- Column 1 -->
-                                        <group string="Column 1">
+                                    <!-- Column 1 (width ~33% to match actual footer) -->
+                                    <separator string="Column 1" invisible="footer_layout == 'single'"/>
+                                    <group invisible="footer_layout == 'single'" col="4">
+                                        <group colspan="1">
                                             <field name="footer_column_1_title" placeholder="e.g., Company Info"/>
-                                            <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
+                                            <field name="footer_column_1_content" widget="html" nolabel="1"/>
                                         </group>
-
-                                        <!-- Column 2 -->
-                                        <group string="Column 2">
-                                            <field name="footer_column_2_title" placeholder="e.g., Contact"/>
-                                            <field name="footer_column_2_content" widget="html" nolabel="1" colspan="2"/>
-                                        </group>
-
-                                        <!-- Column 3 -->
-                                        <group string="Column 3" invisible="footer_layout != 'three_col'">
-                                            <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
-                                            <field name="footer_column_3_content" widget="html" nolabel="1" colspan="2"/>
-                                        </group>
+                                        <group colspan="3"/>
                                     </group>
 
-                                    <!-- Single Column Content -->
-                                    <group string="Footer Content" invisible="footer_layout != 'single'" col="1">
+                                    <!-- Column 2 (width ~33% to match actual footer) -->
+                                    <separator string="Column 2" invisible="footer_layout == 'single'"/>
+                                    <group invisible="footer_layout == 'single'" col="4">
+                                        <group colspan="1">
+                                            <field name="footer_column_2_title" placeholder="e.g., Contact"/>
+                                            <field name="footer_column_2_content" widget="html" nolabel="1"/>
+                                        </group>
+                                        <group colspan="3"/>
+                                    </group>
+
+                                    <!-- Column 3 (width ~33% to match actual footer) -->
+                                    <separator string="Column 3" invisible="footer_layout != 'three_col'"/>
+                                    <group invisible="footer_layout != 'three_col'" col="4">
+                                        <group colspan="1">
+                                            <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
+                                            <field name="footer_column_3_content" widget="html" nolabel="1"/>
+                                        </group>
+                                        <group colspan="3"/>
+                                    </group>
+
+                                    <!-- Single Column Content (full width) -->
+                                    <separator string="Footer Content" invisible="footer_layout != 'single'"/>
+                                    <group invisible="footer_layout != 'single'">
                                         <field name="footer_column_1_title" placeholder="Title (optional)"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1"/>
                                     </group>
