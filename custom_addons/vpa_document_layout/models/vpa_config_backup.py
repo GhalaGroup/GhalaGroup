@@ -327,8 +327,11 @@ class VPAConfigBackup(models.Model):
         if not self.backup_data:
             raise UserError(_("No backup data found"))
 
-        # Create attachment for download
-        filename = f"vpa_backup_{self.backup_date.strftime('%Y%m%d_%H%M%S')}.json"
+        # Create filename: VPA Document Backup - Company Name or All Companies (Date)
+        company_part = self.company_id.name if self.company_id else "All Companies"
+        date_part = self.backup_date.strftime('%Y-%m-%d')
+        filename = f"VPA Document Backup - {company_part} ({date_part}).json"
+
         attachment = self.env['ir.attachment'].create({
             'name': filename,
             'type': 'binary',
