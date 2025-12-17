@@ -1488,7 +1488,7 @@ class VPADocumentTemplate(models.Model):
                         <t t-out="address"/>
                     </td>
                     <td t-if="information_block" style="width: 50%%; vertical-align: bottom; text-align: right; padding-left: 20px;">
-                        <h2 t-if="layout_document_title" t-attf-style="font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
+                        <h2 t-if="layout_document_title" t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
                         <div style="margin-top: 15px; font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
