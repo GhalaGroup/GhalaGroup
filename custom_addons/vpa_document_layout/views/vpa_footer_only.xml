@@ -66,22 +66,49 @@
                         font-size: 7.5pt;
                     }
                     .footer-message {
-                        font-family: 'Courier New', Courier, 'Lucida Console', monospace;
-                        font-size: 7pt;
-                        color: #888;
+                        font-family: 'Consolas', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace;
+                        font-size: 8pt;
+                        color: #777;
                         text-align: center;
-                        letter-spacing: 0.5px;
-                        margin-bottom: 8px;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                        margin-top: 15px;
+                        padding-top: 8px;
                     }
                     .footer-page-number {
-                        font-size: 7.5pt;
-                        color: #666;
-                        text-align: center;
-                        margin-top: 5px;
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 8pt;
+                        color: #555;
+                        text-align: right;
+                        margin-top: 8px;
+                        padding-right: 10px;
+                        font-weight: 500;
                     }
                 </style>
+                <script>
+                    // wkhtmltopdf page number substitution
+                    function substitutePdfVariables() {
+                        var vars = {};
+                        var query_strings_from_url = document.location.search.substring(1).split('&amp;');
+                        for (var query_string in query_strings_from_url) {
+                            if (query_strings_from_url.hasOwnProperty(query_string)) {
+                                var temp_var = query_strings_from_url[query_string].split('=', 2);
+                                vars[temp_var[0]] = decodeURI(temp_var[1]);
+                            }
+                        }
+                        var css_selector_classes = ['page', 'topage'];
+                        for (var css_class in css_selector_classes) {
+                            if (css_selector_classes.hasOwnProperty(css_class)) {
+                                var element = document.getElementsByClassName(css_selector_classes[css_class]);
+                                for (var j = 0; j &lt; element.length; ++j) {
+                                    element[j].textContent = vars[css_selector_classes[css_class]];
+                                }
+                            }
+                        }
+                    }
+                </script>
             </head>
-            <body>
+            <body onload="substitutePdfVariables()">
                 <!-- Check if footer is disabled at template level -->
                 <t t-if="template.footer_enabled == False">
                     <!-- Empty body when footer is disabled -->
