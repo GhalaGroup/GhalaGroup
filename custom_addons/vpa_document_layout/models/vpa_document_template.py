@@ -204,6 +204,11 @@ class VPADocumentTemplate(models.Model):
         default=True,
         help='Enable or disable the footer on this template'
     )
+    footer_show_content = fields.Boolean(
+        string='Show Footer Content',
+        default=True,
+        help='Show the column content in footer. Disable to show only wave shape, message and page numbers.'
+    )
     footer_show_page_number = fields.Boolean(
         string='Show Page Number',
         default=True,

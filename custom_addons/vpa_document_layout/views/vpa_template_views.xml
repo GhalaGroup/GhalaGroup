@@ -180,35 +180,36 @@
                                     <separator string="Footer Layout" invisible="not footer_enabled"/>
                                     <group invisible="not footer_enabled">
                                         <group>
-                                            <field name="footer_layout" widget="radio"/>
+                                            <field name="footer_show_content" string="Show Footer Content"/>
+                                            <field name="footer_layout" widget="radio" invisible="not footer_show_content"/>
                                         </group>
                                         <group>
                                             <field name="footer_show_shape"/>
                                             <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
-                                            <field name="footer_bank_details_show"/>
+                                            <field name="footer_bank_details_show" invisible="not footer_show_content"/>
                                         </group>
                                     </group>
 
                                     <!-- Column 1 -->
-                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled">
+                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
                                         <field name="footer_column_1_title" placeholder="e.g., Company Info"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 2 -->
-                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled">
+                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
                                         <field name="footer_column_2_title" placeholder="e.g., Contact"/>
                                         <field name="footer_column_2_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 3 -->
-                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled">
+                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled or not footer_show_content">
                                         <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
                                         <field name="footer_column_3_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Single Column Content (full width) -->
-                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled">
+                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled or not footer_show_content">
                                         <field name="footer_column_1_title" placeholder="Title (optional)"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>

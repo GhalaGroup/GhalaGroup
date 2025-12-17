@@ -235,6 +235,8 @@
 
                     <!-- Footer Content -->
                     <div class="footer-content">
+                        <!-- Column content only if footer_show_content is True -->
+                        <t t-if="template.footer_show_content">
                         <!-- Single Column Layout -->
                         <t t-if="template.footer_layout == 'single'">
                             <div style="text-align: center;">
@@ -335,6 +337,7 @@
                                 </tr>
                             </table>
                         </t>
+                        </t><!-- Close footer_show_content -->
 
                         <!-- Template-level Footer Message (typewriter font) -->
                         <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
