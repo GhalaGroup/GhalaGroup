@@ -1531,7 +1531,7 @@ class VPADocumentTemplate(models.Model):
             <tbody>
                 <tr>
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
-                        <div style="font-size: 9pt; line-height: 1.8; color: #555;">
+                        <div style="font-size: 10pt; line-height: 1.8; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
