@@ -707,23 +707,28 @@ class VPADocumentTemplate(models.Model):
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
             <t t-set="address">
-                <strong><span t-field="doc.partner_id.name"/></strong><br/>
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
+                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
             </t>
             <t t-set="information_block">
-                <div t-if="doc.date_order">
-                    <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
-                    <strong t-else="">Order Date:</strong>
-                    <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" class="mt-2">
-                    <strong>Expiration:</strong>
-                    <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.user_id.name" class="mt-2">
-                    <strong>Salesperson:</strong>
-                    <span t-field="doc.user_id"/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
+                        <strong t-else="">Order Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" style="margin-top: 4px;">
+                        <strong>Expiration:</strong>
+                        <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                        <strong>Salesperson:</strong>
+                        <span t-field="doc.user_id"/>
+                    </div>
                 </div>
             </t>
             <t t-set="layout_document_title">
@@ -818,22 +823,29 @@ class VPADocumentTemplate(models.Model):
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
             <t t-set="address">
-                <strong t-if="doc.partner_id"><span t-field="doc.partner_id.name"/></strong>
-                <div t-if="doc.partner_id" t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                <t t-if="doc.partner_id">
+                    <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                    <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                </t>
             </t>
             <t t-set="information_block">
-                <div t-if="doc.date_start">
-                    <strong>Scheduled Date:</strong>
-                    <span t-field="doc.date_start" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.user_id.name" class="mt-2">
-                    <strong>Responsible:</strong>
-                    <span t-field="doc.user_id"/>
-                </div>
-                <div t-if="doc.origin" class="mt-2">
-                    <strong>Source:</strong>
-                    <span t-field="doc.origin"/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_start">
+                        <strong>Scheduled Date:</strong>
+                        <span t-field="doc.date_start" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                        <strong>Responsible:</strong>
+                        <span t-field="doc.user_id"/>
+                    </div>
+                    <div t-if="doc.origin" style="margin-top: 4px;">
+                        <strong>Source:</strong>
+                        <span t-field="doc.origin"/>
+                    </div>
                 </div>
             </t>
             <t t-set="layout_document_title">
@@ -1271,18 +1283,38 @@ class VPADocumentTemplate(models.Model):
     </t>
 </t>'''.format(template_id=self.id)
         else:
-            # For other document types, create a simpler template
+            # For other document types, create a template with standard VPA styling
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="address">
+                <t t-if="doc.partner_id">
+                    <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                    <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                </t>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">DOCUMENT INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.name">
+                        <strong>Reference:</strong>
+                        <span t-field="doc.name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                {doc_type_title} # <span t-field="doc.name"/>
+            </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
-                <div class="page">
-                    <p>VPA Template for {doc_type} (Document structure pending)</p>
+                <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <p>VPA Template for {doc_type} (Document content pending)</p>
                 </div>
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id, doc_type=self.document_type)  # Format with template ID
+</t>'''.format(template_id=self.id, doc_type=self.document_type, doc_type_title=self.document_type.replace('_', ' ').title())
 
         # Create the main report template
         _logger.info(f"Creating main template view for template {self.id}")
@@ -1308,7 +1340,7 @@ class VPADocumentTemplate(models.Model):
     <t t-set="primary_color" t-value="'%s'"/>
     <t t-set="secondary_color" t-value="'%s'"/>
 
-    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;">
+    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
         <style type="text/css">
             /* Force zero margins on all PDF page elements */
