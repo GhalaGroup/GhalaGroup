@@ -1166,7 +1166,7 @@ class VPADocumentTemplate(models.Model):
                                     <h5>DELIVERY INFO</h5>
                                     <p><strong>Expected:</strong>
                                         <t t-if="doc.commitment_date">
-                                            <span style="color: {primary_color}; font-weight: 600;"><t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/></span>
+                                            <span t-attf-style="color: {{primary_color}}; font-weight: 600;"><t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/></span>
                                         </t>
                                         <t t-else=""><span style="color: #999;">Not Set</span></t>
                                     </p>
