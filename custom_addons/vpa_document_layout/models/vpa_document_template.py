@@ -1512,16 +1512,21 @@ class VPADocumentTemplate(models.Model):
             </div>
         </div>
 
-        <!-- Customer Address and Document Info (Two columns like standard Odoo) -->
+        <!-- Document Title - Full Width Left Aligned -->
+        <div t-if="layout_document_title" style="margin-bottom: 0;">
+            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0 0 10px 0; text-align: left;" t-out="layout_document_title"/>
+            <div t-attf-style="border-bottom: 3px solid %s; margin-bottom: 20px;"></div>
+        </div>
+
+        <!-- Customer Details and Order Info (Two columns below title) -->
         <table t-if="address or information_block" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
             <tbody>
                 <tr>
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
                         <t t-out="address"/>
                     </td>
-                    <td t-if="information_block" style="width: 50%%; vertical-align: bottom; text-align: right; padding-left: 20px;">
-                        <h2 t-if="layout_document_title" t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
-                        <div style="margin-top: 15px; font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                    <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
+                        <div style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
                     </td>
@@ -1544,7 +1549,7 @@ class VPADocumentTemplate(models.Model):
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (30 total)
+        # Finalize arch_content with all parameters (31 total)
         arch_content = arch_content % (
             self.id,
             self.id,
@@ -1576,6 +1581,7 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
+            self.primary_accent_color,  # Document title separator line color
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
