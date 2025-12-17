@@ -773,11 +773,13 @@ class VPADocumentTemplate(models.Model):
         if self.document_type in ['quotation', 'sale_order']:
             if self.hide_odoo_header:
                 # Custom header: Set address and information_block for VPA external layout
+                # Styled to match Production Summary template
                 main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
             <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
             <t t-set="address">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
@@ -797,6 +799,10 @@ class VPADocumentTemplate(models.Model):
                         <strong>Expiration:</strong>
                         <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
                     </div>
+                    <div t-if="doc.client_order_ref" style="margin-top: 4px;">
+                        <strong>Customer Reference:</strong>
+                        <span t-field="doc.client_order_ref"/>
+                    </div>
                     <div t-if="doc.user_id.name" style="margin-top: 4px;">
                         <strong>Salesperson:</strong>
                         <span t-field="doc.user_id"/>
@@ -810,73 +816,284 @@ class VPADocumentTemplate(models.Model):
                 <span t-field="doc.name"/>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
-                <!-- Order Lines Table -->
-                <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
-                <t t-set="display_taxes" t-value="True"/>
-                <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+                <!-- Inline Styles matching Production Summary -->
+                <style>
+                    .vpa-quote-order {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    /* Section Header in Table */
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    /* Section Row (category divider) */
+                    .vpa-section-row td {{
+                        background: #f0f0f0;
+                        font-weight: 700;
+                        padding: 6px 4px;
+                        color: #666;
+                        font-size: 12px;
+                        border-bottom: 1px solid #ddd !important;
+                    }}
+                    /* Note Row */
+                    .vpa-note-row td {{
+                        padding: 4px 12px;
+                        font-style: italic;
+                        color: #555;
+                        font-size: 11px;
+                        background: #fafafa;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                    }}
+                    /* Badges */
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-amount-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                    }}
+                    /* Product Details */
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    /* Total Card */
+                    .vpa-total-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 10px;
+                        border-radius: 5px;
+                        margin: 10px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-total-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                    }}
+                    .vpa-total-card td {{
+                        padding: 6px 8px;
+                        font-size: 11px;
+                        border: none !important;
+                    }}
+                    .vpa-total-card tr.vpa-total-row td {{
+                        border-top: 2px solid <t t-out="primary_color"/> !important;
+                        padding-top: 10px;
+                    }}
+                    .vpa-total-label {{
+                        font-size: 11px;
+                        color: #666;
+                    }}
+                    .vpa-total-value {{
+                        font-size: 11px;
+                        color: #333;
+                        font-weight: 500;
+                    }}
+                    .vpa-grand-total-label {{
+                        font-size: 14px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    .vpa-grand-total-value {{
+                        font-size: 18px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    /* Notes Section */
+                    .vpa-notes-section {{
+                        background: #f9f9f9;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 10px;
+                        margin: 10px 0;
+                        page-break-inside: avoid;
+                    }}
+                    .vpa-notes-title {{
+                        color: <t t-out="primary_color"/>;
+                        margin: 0 0 6px 0;
+                        font-size: 11px;
+                        font-weight: 600;
+                    }}
+                </style>
 
-                <table class="table table-sm o_main_table">
-                    <thead>
-                        <tr>
-                            <th name="th_description" class="text-start">Description</th>
-                            <th name="th_quantity" class="text-end">Quantity</th>
-                            <th name="th_priceunit" class="text-end">Unit Price</th>
-                            <th name="th_discount" t-if="display_discount" class="text-end">Disc.%</th>
-                            <th name="th_taxes" t-if="display_taxes" class="text-end">Taxes</th>
-                            <th name="th_subtotal" class="text-end">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="lines_to_report" t-as="line">
-                            <tr t-if="line.display_type == \'line_section\'" class="fw-bold o_line_section">
-                                <td colspan="99"><span t-field="line.name"/></td>
-                            </tr>
-                            <tr t-elif="line.display_type == \'line_note\'" class="fst-italic o_line_note">
-                                <td colspan="99"><span t-field="line.name"/></td>
-                            </tr>
-                            <tr t-else="">
-                                <td><span t-field="line.name"/></td>
-                                <td class="text-end"><span t-field="line.product_uom_qty"/></td>
-                                <td class="text-end"><span t-field="line.price_unit"/></td>
-                                <td t-if="display_discount" class="text-end"><span t-field="line.discount"/></td>
-                                <td t-if="display_taxes" class="text-end">
-                                    <span t-out="\', \'.join(map(lambda x: x.description or x.name, line.tax_ids))"/>
-                                </td>
-                                <td class="text-end"><span t-field="line.price_subtotal"/></td>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
+                <div class="vpa-quote-order">
+                    <!-- Order Lines Table -->
+                    <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                    <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
 
-                <!-- Totals -->
-                <div class="clearfix" style="clear: both; overflow: auto;">
-                    <div id="total" style="float: right; width: 50%%; max-width: 500px; min-width: 300px;">
-                        <table class="table table-sm o_total_table">
-                            <tr>
-                                <td>Untaxed Amount</td>
-                                <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
-                            </tr>
-                            <tr>
-                                <td>Taxes</td>
-                                <td class="text-end"><span t-field="doc.amount_tax"/></td>
-                            </tr>
-                            <tr class="border-black">
-                                <td><strong>Total</strong></td>
-                                <td class="text-end o_price_total"><span t-field="doc.amount_total"/></td>
-                            </tr>
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ORDER DETAILS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 40%%;">DESCRIPTION</th>
+                                    <th style="width: 10%%; text-align: center;">QTY</th>
+                                    <th style="width: 8%%; text-align: center;">UNIT</th>
+                                    <th style="width: 12%%; text-align: right;">UNIT PRICE</th>
+                                    <th t-if="display_discount" style="width: 8%%; text-align: center;">DISC.%%</th>
+                                    <th style="width: 17%%; text-align: right;">AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="lines_to_report" t-as="line">
+                                    <!-- Section Headers -->
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <tr class="vpa-section-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Note Lines -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr class="vpa-note-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Regular Product Lines -->
+                                    <t t-else="">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <tr>
+                                            <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
+                                            <td>
+                                                <div style="font-weight: 500; color: #333; font-size: 10px;">
+                                                    <t t-if="line.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <span t-field="line.name"/>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <span class="vpa-qty-badge"><span t-field="line.product_uom_qty"/></span>
+                                            </td>
+                                            <td style="text-align: center; color: #666; font-size: 9px;">
+                                                <span t-field="line.product_uom"/>
+                                            </td>
+                                            <td style="text-align: right; font-size: 10px;">
+                                                <span t-field="line.price_unit"/>
+                                            </td>
+                                            <td t-if="display_discount" style="text-align: center; font-size: 10px;">
+                                                <span t-field="line.discount"/>%%
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
                         </table>
                     </div>
-                </div>
 
-                <!-- Terms and conditions -->
-                <div t-if="doc.note" class="mt-4">
-                    <p><strong>Terms and Conditions:</strong></p>
-                    <p t-field="doc.note"/>
+                    <!-- Totals Card -->
+                    <div style="display: flex; justify-content: flex-end;">
+                        <div class="vpa-total-card" style="width: 350px;">
+                            <table>
+                                <tr>
+                                    <td style="text-align: right; width: 60%%;">
+                                        <span class="vpa-total-label">Subtotal:</span>
+                                    </td>
+                                    <td style="text-align: right; width: 40%%;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_untaxed"/></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-label">Taxes:</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_tax"/></span>
+                                    </td>
+                                </tr>
+                                <tr class="vpa-total-row">
+                                    <td style="text-align: right;">
+                                        <span class="vpa-grand-total-label">Total:</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-grand-total-value"><span t-field="doc.amount_total"/></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section">
+                            <div class="vpa-notes-title">TERMS AND CONDITIONS:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <span t-field="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
                 </div>
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id, hide_footer=str(self.hide_odoo_footer).lower())
+</t>'''.format(template_id=self.id)
             else:
                 # Use Odoo's standard header: Just call the full document
                 main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
