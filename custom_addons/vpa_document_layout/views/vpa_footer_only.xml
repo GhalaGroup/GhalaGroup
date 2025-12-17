@@ -65,15 +65,20 @@
                         line-height: 1.6;
                         font-size: 7.5pt;
                     }
+                    /* Dot Matrix style using Share Tech Mono or similar */
+                    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&amp;display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=VT323&amp;display=swap');
+
                     .footer-message {
-                        font-family: 'Dot Matrix', 'DOTMATRI', 'Fake Receipt', 'Receipt', 'Courier Prime', 'Courier New', monospace;
-                        font-size: 9pt;
-                        color: #666;
+                        font-family: 'VT323', 'Share Tech Mono', 'Lucida Console', 'Courier New', monospace;
+                        font-size: 13pt;
+                        color: #444;
                         text-align: center;
                         letter-spacing: 2px;
                         text-transform: uppercase;
                         margin-top: 25px;
                         padding-top: 10px;
+                        font-weight: normal;
                     }
                     .footer-page-number {
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
