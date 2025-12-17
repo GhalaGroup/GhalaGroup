@@ -21,107 +21,15 @@
             <field name="primary_accent_color">#875a7b</field>
             <field name="secondary_accent_color">#21b799</field>
 
-            <!-- Footer Settings - 3 Column Layout -->
+            <!-- Footer Settings - Single Column Layout (uses company data) -->
             <field name="footer_show_shape" eval="True"/>
             <field name="footer_shape_opacity">0.1</field>
-            <field name="footer_layout">three_col</field>
+            <field name="footer_layout">single</field>
             <field name="footer_bank_details_show" eval="True"/>
 
-            <!-- Column 1: Company Information -->
-            <field name="footer_column_1_title">Company Information</field>
-            <field name="footer_column_1_content"><![CDATA[
-<p style="margin: 0; line-height: 1.6;">
-<strong>UDesign Limited</strong><br/>
-Dar Es Salaam, Tanzania<br/>
-TIN: 142-674-998<br/>
-VAT: 40-03977-L
-</p>
-]]></field>
-
-            <!-- Column 2: Contact -->
-            <field name="footer_column_2_title">Contact</field>
-            <field name="footer_column_2_content"><![CDATA[
-<p style="margin: 0; line-height: 1.6;">
-Phone: +255 743 777333<br/>
-Email: info@udesign.co.tz<br/>
-Website: www.udesign.co.tz
-</p>
-]]></field>
-
-            <!-- Column 3: Bank Information -->
-            <field name="footer_column_3_title">Bank Information</field>
-            <field name="footer_column_3_content"><![CDATA[
-<p style="margin: 0; line-height: 1.6;">
-Bank: CRDB Bank Plc<br/>
-Branch: Kijitonyama<br/>
-<strong>TZS</strong> Account No: 0150548871900<br/>
-<strong>USD</strong> Account No: 0250548871900<br/>
-SWIFT: CORUTZTZ
-</p>
-]]></field>
-        </record>
-
-        <!-- Default Sales Production Order Template -->
-        <record id="default_sale_production_template" model="vpa.document.template">
-            <field name="name">VPA - Production Order Template</field>
-            <field name="active" eval="True"/>
-            <field name="sequence">15</field>
-            <field name="company_id" ref="base.main_company"/>
-            <field name="target_app">sale</field>
-            <field name="document_type">sale_production</field>
-
-            <!-- PDF Filename Pattern -->
-            <field name="print_name_pattern">doc_customer_ref</field>
-
-            <!-- Header Settings -->
-            <field name="header_logo_alignment">right</field>
-            <field name="header_logo_width">250</field>
-            <field name="header_logo_height">100</field>
-            <field name="header_logo_aspect_ratio">auto</field>
-            <field name="header_show_circle" eval="True"/>
-            <field name="header_circle_size">300</field>
-            <field name="header_circle_opacity">0.25</field>
-            <field name="header_company_info_alignment">right</field>
-
-            <!-- Colors - VPA Red Theme -->
-            <field name="primary_accent_color">#DC143C</field>
-            <field name="secondary_accent_color">#21b799</field>
-
-            <!-- Table Style -->
-            <field name="table_style">modern_light</field>
-            <field name="table_header_bg_color">#f5f5f5</field>
-            <field name="table_header_text_color">#333333</field>
-            <field name="table_border_color">#e0e0e0</field>
-            <field name="table_row_alt_bg">#fafafa</field>
-
-            <!-- Paper Settings -->
-            <field name="paper_size">a4</field>
-            <field name="paper_orientation">portrait</field>
-
-            <!-- Footer Settings - Using Internal Footer -->
-            <field name="footer_show_shape" eval="True"/>
-            <field name="footer_shape_opacity">0.1</field>
-            <field name="footer_layout">two_col</field>
-            <field name="footer_bank_details_show" eval="False"/>
-
-            <!-- Column 1: Company Information -->
-            <field name="footer_column_1_title">Company Information</field>
-            <field name="footer_column_1_content"><![CDATA[
-<p style="margin: 0; line-height: 1.6;">
-<strong>UDesign Limited</strong><br/>
-Dar Es Salaam, Tanzania<br/>
-Phone: +255 743 777333
-</p>
-]]></field>
-
-            <!-- Column 2: Document Notice -->
-            <field name="footer_column_2_title">Notice</field>
-            <field name="footer_column_2_content"><![CDATA[
-<p style="margin: 0; line-height: 1.6;">
-This is an internal production document.<br/>
-For factory reference only.
-</p>
-]]></field>
+            <!-- Column 1: Empty - will use company report footer -->
+            <field name="footer_column_1_title"></field>
+            <field name="footer_column_1_content"></field>
         </record>
     </data>
 </odoo>
