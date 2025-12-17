@@ -117,6 +117,11 @@ class VPAConfigBackup(models.Model):
                 'footer_column_3_title': tmpl.footer_column_3_title,
                 'footer_column_3_content': tmpl.footer_column_3_content,
                 'footer_custom_html': tmpl.footer_custom_html,
+                'footer_enabled': tmpl.footer_enabled,
+                'footer_show_page_number': tmpl.footer_show_page_number,
+                'footer_page_number_format': tmpl.footer_page_number_format,
+                'footer_message_type': tmpl.footer_message_type,
+                'footer_custom_message': tmpl.footer_custom_message,
                 'is_default_print': tmpl.is_default_print,
                 'is_default_email': tmpl.is_default_email,
             })
@@ -285,6 +290,11 @@ class VPAConfigBackup(models.Model):
             'footer_column_3_title': data.get('footer_column_3_title'),
             'footer_column_3_content': data.get('footer_column_3_content'),
             'footer_custom_html': data.get('footer_custom_html'),
+            'footer_enabled': data.get('footer_enabled', True),
+            'footer_show_page_number': data.get('footer_show_page_number', True),
+            'footer_page_number_format': data.get('footer_page_number_format', 'page_of'),
+            'footer_message_type': data.get('footer_message_type', 'none'),
+            'footer_custom_message': data.get('footer_custom_message'),
             'is_default_print': data.get('is_default_print', False),
             'is_default_email': data.get('is_default_email', False),
         }

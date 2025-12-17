@@ -65,9 +65,28 @@
                         line-height: 1.6;
                         font-size: 7.5pt;
                     }
+                    .footer-message {
+                        font-family: 'Courier New', Courier, 'Lucida Console', monospace;
+                        font-size: 7pt;
+                        color: #888;
+                        text-align: center;
+                        letter-spacing: 0.5px;
+                        margin-bottom: 8px;
+                    }
+                    .footer-page-number {
+                        font-size: 7.5pt;
+                        color: #666;
+                        text-align: center;
+                        margin-top: 5px;
+                    }
                 </style>
             </head>
             <body>
+                <!-- Check if footer is disabled at template level -->
+                <t t-if="template.footer_enabled == False">
+                    <!-- Empty body when footer is disabled -->
+                </t>
+                <t t-else="">
                 <!-- Check if template has footer_config_id (new unified footer system) -->
                 <t t-if="template.footer_config_id">
                     <t t-set="config" t-value="template.footer_config_id"/>
@@ -176,6 +195,28 @@
                             <div t-out="config._render_custom_html(company)"/>
                             <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
                                 Page <span class="page"/> of <span class="topage"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Footer Message (typewriter font) - also for footer_config -->
+                        <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Page Numbers - also for footer_config (overrides config.show_page_numbers) -->
+                        <t t-if="template.footer_show_page_number and not config.show_page_numbers">
+                            <div class="footer-page-number">
+                                <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
                             </div>
                         </t>
                     </div>
@@ -294,8 +335,31 @@
                                 </tr>
                             </table>
                         </t>
+
+                        <!-- Template-level Footer Message (typewriter font) -->
+                        <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Page Numbers -->
+                        <t t-if="template.footer_show_page_number">
+                            <div class="footer-page-number">
+                                <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                            </div>
+                        </t>
                     </div>
                 </t>
+                </t><!-- Close footer_enabled else -->
             </body>
         </html>
     </template>

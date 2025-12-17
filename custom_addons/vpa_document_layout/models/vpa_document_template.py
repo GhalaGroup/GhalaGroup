@@ -198,6 +198,38 @@ class VPADocumentTemplate(models.Model):
     footer_column_3_content = fields.Html(string='Column 3 Content')
     footer_custom_html = fields.Html(string='Custom Footer HTML')
 
+    # Template-level Footer Customization (Quick Settings)
+    footer_enabled = fields.Boolean(
+        string='Show Footer',
+        default=True,
+        help='Enable or disable the footer on this template'
+    )
+    footer_show_page_number = fields.Boolean(
+        string='Show Page Number',
+        default=True,
+        help='Display page number in the footer (e.g., "Page 1 of 3")'
+    )
+    footer_page_number_format = fields.Selection([
+        ('page_of', 'Page X of Y'),
+        ('page_only', 'Page X'),
+        ('dash', '- X -'),
+        ('brackets', '[X/Y]'),
+    ], string='Page Number Format', default='page_of')
+    footer_message_type = fields.Selection([
+        ('none', 'No Message'),
+        ('auto_generated', 'This document was automatically generated'),
+        ('internal', 'Internal Document - Confidential'),
+        ('draft', 'DRAFT - Not for Distribution'),
+        ('quote_validity', 'This quotation is valid for 30 days'),
+        ('thank_you', 'Thank you for your business'),
+        ('custom', 'Custom Message'),
+    ], string='Footer Message', default='none',
+       help='Predefined message to display in footer with typewriter font')
+    footer_custom_message = fields.Char(
+        string='Custom Footer Message',
+        help='Your custom message (displayed when "Custom Message" is selected)'
+    )
+
     # Report Action Reference (auto-created)
     report_action_id = fields.Many2one('ir.actions.report', string='Report Action', readonly=True, ondelete='cascade')
 
@@ -227,6 +259,8 @@ class VPADocumentTemplate(models.Model):
                  'header_company_info_alignment', 'header_company_details_html', 'header_company_info_color',
                  'header_show_circle', 'header_circle_size', 'header_circle_opacity',
                  'table_style', 'table_header_bg_color', 'table_header_text_color', 'table_border_color', 'table_row_alt_bg',
+                 'footer_enabled', 'footer_show_page_number', 'footer_page_number_format',
+                 'footer_message_type', 'footer_custom_message',
                  'footer_show_shape', 'footer_shape_opacity', 'footer_layout', 'footer_bank_details_show',
                  'footer_column_1_title', 'footer_column_1_content',
                  'footer_column_2_title', 'footer_column_2_content',

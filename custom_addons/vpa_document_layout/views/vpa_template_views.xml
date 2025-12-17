@@ -173,9 +173,26 @@
                                         </group>
                                     </group>
 
-                                    <!-- Legacy Footer Settings (Original System) -->
-                                    <separator string="Footer Layout"/>
+                                    <!-- Quick Footer Settings -->
+                                    <separator string="Quick Footer Settings"/>
                                     <group>
+                                        <group>
+                                            <field name="footer_enabled" string="Show Footer"/>
+                                            <field name="footer_show_page_number" string="Show Page Numbers" invisible="not footer_enabled"/>
+                                            <field name="footer_page_number_format" invisible="not footer_enabled or not footer_show_page_number"/>
+                                        </group>
+                                        <group>
+                                            <field name="footer_message_type" string="Footer Message" invisible="not footer_enabled"/>
+                                            <field name="footer_custom_message" placeholder="Enter your custom message..." invisible="footer_message_type != 'custom' or not footer_enabled"/>
+                                        </group>
+                                    </group>
+                                    <div class="alert alert-info" role="alert" invisible="not footer_enabled">
+                                        <strong>Typewriter Style:</strong> Footer messages appear in a typewriter/monospace font for a professional automated document look.
+                                    </div>
+
+                                    <!-- Legacy Footer Settings (Original System) -->
+                                    <separator string="Footer Layout" invisible="not footer_enabled"/>
+                                    <group invisible="not footer_enabled">
                                         <group>
                                             <field name="footer_layout" widget="radio"/>
                                         </group>
@@ -187,25 +204,25 @@
                                     </group>
 
                                     <!-- Column 1 -->
-                                    <group string="Column 1" invisible="footer_layout == 'single'">
+                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled">
                                         <field name="footer_column_1_title" placeholder="e.g., Company Info"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 2 -->
-                                    <group string="Column 2" invisible="footer_layout == 'single'">
+                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled">
                                         <field name="footer_column_2_title" placeholder="e.g., Contact"/>
                                         <field name="footer_column_2_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 3 -->
-                                    <group string="Column 3" invisible="footer_layout != 'three_col'">
+                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled">
                                         <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
                                         <field name="footer_column_3_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Single Column Content (full width) -->
-                                    <group string="Footer Content" invisible="footer_layout != 'single'">
+                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled">
                                         <field name="footer_column_1_title" placeholder="Title (optional)"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
