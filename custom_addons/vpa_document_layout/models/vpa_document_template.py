@@ -1147,7 +1147,7 @@ class VPADocumentTemplate(models.Model):
                                         </span>
                                     </td>
                                     <td style="text-align: center;">
-                                        <t t-out="line.product_uom.name"/>
+                                        <t t-out="line.product_uom_id.name"/>
                                     </td>
                                     <td style="text-align: center;">
                                         <!-- Find related manufacturing orders -->
