@@ -108,6 +108,12 @@ class VPADocumentTemplate(models.Model):
         ('manufacturing_order', 'Manufacturing Order'),
     ], string='Document Type', required=True, help='Which document type this template applies to')
 
+    # Report Title Configuration
+    report_title = fields.Char(
+        string='Report Title',
+        help='Custom title shown on the report header (e.g., "Production Order", "Sales Quote"). Leave empty for default.'
+    )
+
     # Odoo Header/Footer Control
     hide_odoo_header = fields.Boolean(string='Hide Standard Odoo Header', default=True)
     hide_odoo_footer = fields.Boolean(string='Hide Standard Odoo Footer', default=True)
@@ -931,6 +937,7 @@ class VPADocumentTemplate(models.Model):
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
             <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
             <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Production Order'"/>
             <t t-set="address">
                 <strong><span t-field="doc.partner_id.name"/></strong><br/>
                 <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
@@ -950,14 +957,14 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                Production Order # <span t-field="doc.name"/>
+                <t t-out="report_title"/> # <span t-field="doc.name"/>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <!-- Inline Styles for Sale Production specific elements -->
                 <style>
                     .vpa-sale-production {{
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                        font-size: 11px;
+                        font-size: 12px;
                         color: #333;
                     }}
                     /* Info Cards */
@@ -972,18 +979,18 @@ class VPADocumentTemplate(models.Model):
                     .vpa-info-card h5 {{
                         color: <t t-out="primary_color"/>;
                         margin: 0 0 6px 0;
-                        font-size: 10px;
+                        font-size: 11px;
                         text-transform: uppercase;
                         letter-spacing: 0.5px;
                         font-weight: 600;
                     }}
                     .vpa-info-card p {{
                         margin: 1px 0;
-                        font-size: 11px;
+                        font-size: 12px;
                     }}
                     .vpa-info-card p strong {{
                         color: #666;
-                        font-size: 10px;
+                        font-size: 11px;
                     }}
                     /* Table Card Container */
                     .vpa-table-card {{
@@ -1004,8 +1011,8 @@ class VPADocumentTemplate(models.Model):
                         color: <t t-out="primary_color"/>;
                         font-weight: 600;
                         text-transform: uppercase;
-                        font-size: 9px;
-                        padding: 4px 3px;
+                        font-size: 10px;
+                        padding: 5px 4px;
                         border: none !important;
                         border-bottom: 1px solid #f0f0f0 !important;
                         border-right: 1px solid #f0f0f0 !important;
@@ -1015,13 +1022,13 @@ class VPADocumentTemplate(models.Model):
                         border-right: none !important;
                     }}
                     .vpa-table-card td {{
-                        padding: 2px 3px;
-                        font-size: 10px;
+                        padding: 4px 4px;
+                        font-size: 11px;
                         color: #333;
                         border: none !important;
                         border-bottom: 1px solid #f8f8f8 !important;
                         border-right: 1px solid #f8f8f8 !important;
-                        line-height: 1.2;
+                        line-height: 1.3;
                     }}
                     .vpa-table-card td:last-child {{
                         border-right: none !important;
@@ -1032,7 +1039,7 @@ class VPADocumentTemplate(models.Model):
                     /* Section Header in Table */
                     .vpa-section-header {{
                         color: <t t-out="primary_color"/>;
-                        font-size: 10px;
+                        font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
                         letter-spacing: 0.4px;
@@ -1046,7 +1053,7 @@ class VPADocumentTemplate(models.Model):
                         font-weight: 700;
                         padding: 6px 4px;
                         color: #666;
-                        font-size: 11px;
+                        font-size: 12px;
                         border-bottom: 1px solid #ddd !important;
                     }}
                     /* Note Row */
@@ -1054,7 +1061,7 @@ class VPADocumentTemplate(models.Model):
                         padding: 4px 12px;
                         font-style: italic;
                         color: #555;
-                        font-size: 10px;
+                        font-size: 11px;
                         background: #fafafa;
                         border-bottom: 1px solid #f0f0f0 !important;
                     }}
@@ -1063,19 +1070,19 @@ class VPADocumentTemplate(models.Model):
                         display: inline-block;
                         background: white;
                         color: <t t-out="primary_color"/>;
-                        padding: 1px 5px;
+                        padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
-                        font-size: 10px;
+                        font-size: 11px;
                         border: 1px solid <t t-out="primary_color"/>;
                     }}
                     .vpa-mo-badge {{
                         display: inline-block;
                         background: <t t-out="primary_color"/>;
                         color: white;
-                        padding: 1px 5px;
+                        padding: 2px 6px;
                         border-radius: 6px;
-                        font-size: 8px;
+                        font-size: 9px;
                         font-weight: 500;
                         margin: 1px;
                     }}
@@ -1083,34 +1090,34 @@ class VPADocumentTemplate(models.Model):
                         background: transparent;
                         color: #bbb;
                         border: none;
-                        font-size: 9px;
+                        font-size: 10px;
                     }}
                     /* Product Details */
                     .vpa-product-details {{
-                        font-size: 8pt;
+                        font-size: 10px;
                         color: #666;
                         margin-top: 2px;
                         line-height: 1.3;
                     }}
                     .vpa-product-code {{
                         color: #777;
-                        font-size: 9px;
+                        font-size: 10px;
                     }}
                     /* Total Card */
                     .vpa-total-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
                         border-left: 3px solid <t t-out="primary_color"/>;
-                        padding: 8px;
+                        padding: 10px;
                         border-radius: 5px;
-                        margin: 8px 0;
+                        margin: 10px 0;
                         box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-total-label {{
-                        font-size: 12px;
+                        font-size: 13px;
                         color: #666;
                     }}
                     .vpa-total-value {{
-                        font-size: 16px;
+                        font-size: 18px;
                         color: <t t-out="primary_color"/>;
                         font-weight: 600;
                     }}
@@ -1119,14 +1126,14 @@ class VPADocumentTemplate(models.Model):
                         background: #f9f9f9;
                         border: 1px solid #e0e0e0;
                         border-radius: 5px;
-                        padding: 8px;
+                        padding: 10px;
                         margin: 10px 0;
                         page-break-inside: avoid;
                     }}
                     .vpa-notes-title {{
                         color: <t t-out="primary_color"/>;
                         margin: 0 0 6px 0;
-                        font-size: 10px;
+                        font-size: 11px;
                         font-weight: 600;
                     }}
                     .vpa-notes-content {{
@@ -1134,13 +1141,13 @@ class VPADocumentTemplate(models.Model):
                         background: white;
                         border: 1px solid #e0e0e0;
                         border-radius: 3px;
-                        padding: 6px;
+                        padding: 8px;
                     }}
                     .vpa-notes-content div {{
                         margin-left: 10px;
                         margin-top: 2px;
                         padding-bottom: 2px;
-                        font-size: 8px;
+                        font-size: 10px;
                         color: #666;
                     }}
                     .vpa-mo-name {{

@@ -44,6 +44,7 @@
                                     <field name="name" placeholder="e.g., Modern Sales Quote" colspan="2"/>
                                     <field name="target_app"/>
                                     <field name="document_type"/>
+                                    <field name="report_title" placeholder="e.g., Production Order" invisible="document_type != 'sale_production'"/>
                                 </group>
                                 <group>
                                     <field name="company_id" groups="base.group_multi_company"/>
