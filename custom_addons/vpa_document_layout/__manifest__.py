@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'VPA Document Layout',
-    'version': '19.0.1.1.2',
+    'version': '19.0.1.1.3',
     'category': 'Reporting',
     'summary': 'Custom VPA document layout for reports',
     'description': """

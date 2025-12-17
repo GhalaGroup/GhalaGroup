@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import models, fields, api, _, Constraint
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -210,12 +210,11 @@ class VPADocumentTemplate(models.Model):
     # Preview field (like the old VPA config)
     preview = fields.Html(compute='_compute_preview', sanitize=False)
 
-    # Constraint to prevent duplicate templates (Odoo 19 syntax)
-    _constraints = [
-        Constraint(
-            'UNIQUE(name, company_id, document_type)',
-            'A template with this name already exists for this company and document type. Please choose a different name.',
-        )
+    # SQL Constraint to prevent duplicate templates
+    _sql_constraints = [
+        ('name_company_doctype_uniq',
+         'UNIQUE(name, company_id, document_type)',
+         'A template with this name already exists for this company and document type. Please choose a different name.')
     ]
 
     @api.depends('name', 'primary_accent_color', 'secondary_accent_color',
