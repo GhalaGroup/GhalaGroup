@@ -210,12 +210,11 @@ class VPADocumentTemplate(models.Model):
     # Preview field (like the old VPA config)
     preview = fields.Html(compute='_compute_preview', sanitize=False)
 
-    # SQL Constraint to prevent duplicate templates
-    _sql_constraints = [
-        ('name_company_doctype_uniq',
-         'UNIQUE(name, company_id, document_type)',
-         'A template with this name already exists for this company and document type. Please choose a different name.')
-    ]
+    # Odoo 19 Constraint syntax (nested class)
+    class Constraint(models.Constraint):
+        _constraint_name = 'name_company_doctype_uniq'
+        _definition = 'UNIQUE(name, company_id, document_type)'
+        _message = 'A template with this name already exists for this company and document type. Please choose a different name.'
 
     @api.depends('name', 'primary_accent_color', 'secondary_accent_color',
                  'header_logo_alignment', 'header_logo_width', 'header_logo_height', 'header_logo_aspect_ratio',
