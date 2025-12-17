@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Manufacturing',
     'summary': 'Advanced Manufacturing Order management with flexible workflows and manual linking',
     'price': 199.00,
@@ -27,14 +27,14 @@ Workflows Supported:
 * Standard: Product with route → Confirm SO → MO in DRAFT → Review → Confirm
 * No BOM: Product without BOM → Confirm SO → MO in DRAFT → Set BOM → Confirm
 * Manual: Create MO → Set Source field → Create SO → MO appears in smart button
-* Link Action: Create MO → Create SO → Click "MO - Link" → Link established
+* Link Action: Create MO → Create SO → Click "MO - Link/Unlink" → Toggle link
 
 Technical Details:
 ------------------
 * Overrides stock_rule._should_auto_confirm_procurement_mo() to return False
 * Overrides stock_rule._prepare_mo_vals() to handle missing BOMs
 * Extends sale_mrp._compute_mrp_production_ids() to include origin-based MOs
-* MO - Link/Unlink actions manage origin field for manual linking
+* Single MO - Link/Unlink toggle action manages origin field for manual linking
 * Compatible with procurement_group_id automations
 * Creates Production route automatically on installation
 

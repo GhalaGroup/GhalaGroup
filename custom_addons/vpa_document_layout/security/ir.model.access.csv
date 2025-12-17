@@ -1,3 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_vpa_document_config_user,vpa.document.config.user,model_vpa_document_config,base.group_user,1,1,1,1
 access_vpa_document_template_user,vpa.document.template.user,model_vpa_document_template,base.group_system,1,1,1,1
+access_vpa_footer_config_user,vpa.footer.config.user,model_vpa_footer_config,base.group_user,1,0,0,0
+access_vpa_footer_config_admin,vpa.footer.config.admin,model_vpa_footer_config,base.group_system,1,1,1,1
+access_vpa_config_backup_user,vpa.config.backup.user,model_vpa_config_backup,base.group_user,1,0,0,0
+access_vpa_config_backup_admin,vpa.config.backup.admin,model_vpa_config_backup,base.group_system,1,1,1,1
+access_vpa_config_backup_wizard_admin,vpa.config.backup.wizard.admin,model_vpa_config_backup_wizard,base.group_system,1,1,1,1

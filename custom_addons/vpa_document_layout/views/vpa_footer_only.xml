@@ -6,6 +6,7 @@
             <head>
                 <meta charset="utf-8"/>
                 <style type="text/css">
+                    /* Dot Matrix Style - Pure CSS approach for wkhtmltopdf */
                     * {
                         box-sizing: border-box;
                         margin: 0;
@@ -65,121 +66,334 @@
                         line-height: 1.6;
                         font-size: 7.5pt;
                     }
+                    .footer-message {
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 8pt;
+                        color: #888;
+                        text-align: center;
+                        font-style: italic;
+                        margin-top: 10px;
+                    }
+                    .footer-page-number {
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 8pt;
+                        text-align: right;
+                        margin-top: 10px;
+                        padding: 4px 12px;
+                        display: inline-block;
+                        float: right;
+                        border-radius: 3px;
+                    }
                 </style>
+                <script>
+                    // wkhtmltopdf page number substitution
+                    function substitutePdfVariables() {
+                        var vars = {};
+                        var query_strings_from_url = document.location.search.substring(1).split('&amp;');
+                        for (var query_string in query_strings_from_url) {
+                            if (query_strings_from_url.hasOwnProperty(query_string)) {
+                                var temp_var = query_strings_from_url[query_string].split('=', 2);
+                                vars[temp_var[0]] = decodeURI(temp_var[1]);
+                            }
+                        }
+                        var css_selector_classes = ['page', 'topage'];
+                        for (var css_class in css_selector_classes) {
+                            if (css_selector_classes.hasOwnProperty(css_class)) {
+                                var element = document.getElementsByClassName(css_selector_classes[css_class]);
+                                for (var j = 0; j &lt; element.length; ++j) {
+                                    element[j].textContent = vars[css_selector_classes[css_class]];
+                                }
+                            }
+                        }
+                    }
+                </script>
             </head>
-            <body>
-                <!-- Footer Wave Shape -->
-                <t t-if="template.footer_show_shape">
-                    <svg class="footer-wave" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
-                              t-attf-fill="{{template.secondary_accent_color}}"
-                              t-attf-fill-opacity="{{template.footer_shape_opacity}}"/>
-                    </svg>
+            <body onload="substitutePdfVariables()">
+                <!-- Check if footer is disabled at template level -->
+                <t t-if="template.footer_enabled == False">
+                    <!-- Empty body when footer is disabled -->
+                </t>
+                <t t-else="">
+                <!-- Check if template has footer_config_id (new unified footer system) -->
+                <t t-if="template.footer_config_id">
+                    <t t-set="config" t-value="template.footer_config_id"/>
+
+                    <!-- Footer Shape from config -->
+                    <t t-if="config.show_shape">
+                        <svg class="footer-wave" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                                  t-attf-fill="{{config.shape_color or '#21b799'}}"
+                                  t-attf-fill-opacity="{{config.shape_opacity or 0.1}}"/>
+                        </svg>
+                    </t>
+
+                    <!-- Footer Content from config -->
+                    <div class="footer-content" t-attf-style="color: {{config.text_color or '#666666'}}; font-size: {{config.font_size or '8pt'}};">
+                        <!-- Border -->
+                        <div t-if="config.show_border" t-attf-style="border-top: 1px solid {{config.border_color or '#dee2e6'}}; margin-bottom: 8px;"/>
+
+                        <!-- Single Column Layout -->
+                        <t t-if="config.footer_layout == 'single'">
+                            <div style="text-align: center;">
+                                <!-- Internal Document Note -->
+                                <div t-if="config.footer_type == 'internal' and config.computer_generated_note"
+                                     style="font-style: italic; margin-bottom: 5px; color: #888;">
+                                    <t t-esc="config.computer_generated_note"/>
+                                </div>
+
+                                <!-- Bank Details -->
+                                <t t-if="config.show_bank_details and company.partner_id.bank_ids">
+                                    <div style="margin-bottom: 5px;">
+                                        <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                            <strong>Bank:</strong> <t t-esc="bank.bank_id.name if bank.bank_id else 'Bank'"/>
+                                            | <strong>Account:</strong> <t t-esc="bank.acc_number or 'N/A'"/>
+                                            <t t-if="bank.bank_bic">
+                                                | <strong>BIC:</strong> <t t-esc="bank.bank_bic"/>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </t>
+
+                                <!-- Company Footer Text -->
+                                <div t-if="config.show_company_footer and company.report_footer"
+                                     t-field="company.report_footer" style="margin-bottom: 5px;"/>
+
+                                <!-- Page Numbers -->
+                                <div t-if="config.show_page_numbers" style="margin-top: 5px;">
+                                    Page <span class="page"/> of <span class="topage"/>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Two Column Layout -->
+                        <t t-if="config.footer_layout == 'two_col'">
+                            <table class="footer-table">
+                                <tr>
+                                    <td style="width: 50%;">
+                                        <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_1_title"/>
+                                        </div>
+                                        <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                                    </td>
+                                    <td style="width: 50%;">
+                                        <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_2_title"/>
+                                        </div>
+                                        <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page <span class="page"/> of <span class="topage"/>
+                            </div>
+                        </t>
+
+                        <!-- Three Column Layout -->
+                        <t t-if="config.footer_layout == 'three_col'">
+                            <table class="footer-table">
+                                <tr>
+                                    <td style="width: 33.33%;">
+                                        <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_1_title"/>
+                                        </div>
+                                        <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                                    </td>
+                                    <td style="width: 33.33%; text-align: center;">
+                                        <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_2_title"/>
+                                        </div>
+                                        <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                                    </td>
+                                    <td style="width: 33.33%; text-align: right;">
+                                        <div t-if="config.column_3_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_3_title"/>
+                                        </div>
+                                        <div t-if="config.column_3_content" t-out="config.column_3_content"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page <span class="page"/> of <span class="topage"/>
+                            </div>
+                        </t>
+
+                        <!-- Custom HTML Layout -->
+                        <t t-if="config.footer_layout == 'custom_html'">
+                            <div t-out="config._render_custom_html(company)"/>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page <span class="page"/> of <span class="topage"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Footer Message -->
+                        <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Page Numbers - also for footer_config (overrides config.show_page_numbers) -->
+                        <t t-if="template.footer_show_page_number and not config.show_page_numbers">
+                            <div style="text-align: right; margin-top: 12px; clear: both;">
+                                <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
                 </t>
 
-                <!-- Footer Content -->
-                <div class="footer-content">
-                    <!-- Single Column Layout -->
-                    <t t-if="template.footer_layout == 'single'">
-                        <div style="text-align: center;">
-                            <t t-if="template.footer_column_1_title or template.footer_column_1_content">
-                                <span t-if="template.footer_column_1_title"
-                                      class="footer-column-title"
-                                      t-attf-style="color: {{template.primary_accent_color}};"
-                                      t-esc="template.footer_column_1_title"/>
-                                <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
-                            </t>
-                            <!-- Bank Details -->
-                            <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids">
-                                <div style="margin-top: 8px; color: #666;">
-                                    <span style="display: block; margin-bottom: 3px; font-size: 8pt; font-weight: bold;">Bank Details:</span>
-                                    <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                                        <span t-field="bank.bank_id.name"/> - <span t-field="bank.acc_number"/>
-                                    </t>
-                                </div>
-                            </t>
-                        </div>
+                <!-- Legacy footer (original column-based system) -->
+                <t t-else="">
+                    <!-- Footer Wave Shape -->
+                    <t t-if="template.footer_show_shape">
+                        <svg class="footer-wave" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                                  t-attf-fill="{{template.secondary_accent_color}}"
+                                  t-attf-fill-opacity="{{template.footer_shape_opacity}}"/>
+                        </svg>
                     </t>
 
-                    <!-- Two Column Layout -->
-                    <t t-if="template.footer_layout == 'two_col'">
-                        <table class="footer-table">
-                            <tr>
-                                <td style="width: 50%;">
-                                    <t t-if="template.footer_column_1_title or template.footer_column_1_content">
-                                        <span t-if="template.footer_column_1_title"
-                                              class="footer-column-title"
-                                              t-attf-style="color: {{template.primary_accent_color}};"
-                                              t-esc="template.footer_column_1_title"/>
-                                        <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
-                                    </t>
-                                </td>
-                                <td style="width: 50%;">
-                                    <t t-if="template.footer_column_2_title or template.footer_column_2_content">
-                                        <span t-if="template.footer_column_2_title"
-                                              class="footer-column-title"
-                                              t-attf-style="color: {{template.primary_accent_color}};"
-                                              t-esc="template.footer_column_2_title"/>
-                                        <div t-if="template.footer_column_2_content" class="footer-column-content" t-raw="template.footer_column_2_content"/>
-                                    </t>
-                                    <!-- Bank Details (if no column 2 content) -->
-                                    <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
-                                        <div style="color: #666;">
-                                            <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                                                <span t-field="bank.bank_id.name"/><br/>
-                                                <span t-field="bank.acc_number"/>
-                                            </t>
-                                        </div>
-                                    </t>
-                                </td>
-                            </tr>
-                        </table>
-                    </t>
+                    <!-- Footer Content -->
+                    <div class="footer-content">
+                        <!-- Column content only if footer_show_content is True -->
+                        <t t-if="template.footer_show_content">
+                        <!-- Single Column Layout -->
+                        <t t-if="template.footer_layout == 'single'">
+                            <div style="text-align: center;">
+                                <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                    <span t-if="template.footer_column_1_title"
+                                          class="footer-column-title"
+                                          t-attf-style="color: {{template.primary_accent_color}};"
+                                          t-esc="template.footer_column_1_title"/>
+                                    <div t-if="template.footer_column_1_content" class="footer-column-content" t-out="template.footer_column_1_content"/>
+                                </t>
+                                <!-- Bank Details -->
+                                <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids">
+                                    <div style="margin-top: 8px; color: #666;">
+                                        <span style="display: block; margin-bottom: 3px; font-size: 8pt; font-weight: bold;">Bank Details:</span>
+                                        <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                            <span t-field="bank.bank_id.name"/> - <span t-field="bank.acc_number"/>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
 
-                    <!-- Three Column Layout -->
-                    <t t-if="template.footer_layout == 'three_col'">
-                        <table class="footer-table">
-                            <tr>
-                                <td style="width: 33.33%;">
-                                    <t t-if="template.footer_column_1_title or template.footer_column_1_content">
-                                        <span t-if="template.footer_column_1_title"
-                                              class="footer-column-title"
-                                              t-attf-style="color: {{template.primary_accent_color}};"
-                                              t-esc="template.footer_column_1_title"/>
-                                        <div t-if="template.footer_column_1_content" class="footer-column-content" t-raw="template.footer_column_1_content"/>
-                                    </t>
-                                </td>
-                                <td style="width: 33.33%;">
-                                    <t t-if="template.footer_column_2_title or template.footer_column_2_content">
-                                        <span t-if="template.footer_column_2_title"
-                                              class="footer-column-title"
-                                              t-attf-style="color: {{template.primary_accent_color}};"
-                                              t-esc="template.footer_column_2_title"/>
-                                        <div t-if="template.footer_column_2_content" class="footer-column-content" t-raw="template.footer_column_2_content"/>
-                                    </t>
-                                    <!-- Bank Details (if no column 2 content) -->
-                                    <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
-                                        <div style="color: #666; font-size: 7.5pt;">
-                                            <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
-                                                <span t-field="bank.bank_id.name"/><br/>
-                                                <span t-field="bank.acc_number"/>
-                                            </t>
-                                        </div>
-                                    </t>
-                                </td>
-                                <td style="width: 33.33%;">
-                                    <t t-if="template.footer_column_3_title or template.footer_column_3_content">
-                                        <span t-if="template.footer_column_3_title"
-                                              class="footer-column-title"
-                                              t-attf-style="color: {{template.primary_accent_color}};"
-                                              t-esc="template.footer_column_3_title"/>
-                                        <div t-if="template.footer_column_3_content" class="footer-column-content" t-raw="template.footer_column_3_content"/>
-                                    </t>
-                                </td>
-                            </tr>
-                        </table>
-                    </t>
-                </div>
+                        <!-- Two Column Layout -->
+                        <t t-if="template.footer_layout == 'two_col'">
+                            <table class="footer-table">
+                                <tr>
+                                    <td style="width: 50%;">
+                                        <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                            <span t-if="template.footer_column_1_title"
+                                                  class="footer-column-title"
+                                                  t-attf-style="color: {{template.primary_accent_color}};"
+                                                  t-esc="template.footer_column_1_title"/>
+                                            <div t-if="template.footer_column_1_content" class="footer-column-content" t-out="template.footer_column_1_content"/>
+                                        </t>
+                                    </td>
+                                    <td style="width: 50%;">
+                                        <t t-if="template.footer_column_2_title or template.footer_column_2_content">
+                                            <span t-if="template.footer_column_2_title"
+                                                  class="footer-column-title"
+                                                  t-attf-style="color: {{template.primary_accent_color}};"
+                                                  t-esc="template.footer_column_2_title"/>
+                                            <div t-if="template.footer_column_2_content" class="footer-column-content" t-out="template.footer_column_2_content"/>
+                                        </t>
+                                        <!-- Bank Details (if no column 2 content) -->
+                                        <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
+                                            <div style="color: #666;">
+                                                <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                                    <span t-field="bank.bank_id.name"/><br/>
+                                                    <span t-field="bank.acc_number"/>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Three Column Layout -->
+                        <t t-if="template.footer_layout == 'three_col'">
+                            <table class="footer-table">
+                                <tr>
+                                    <td style="width: 33.33%;">
+                                        <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                            <span t-if="template.footer_column_1_title"
+                                                  class="footer-column-title"
+                                                  t-attf-style="color: {{template.primary_accent_color}};"
+                                                  t-esc="template.footer_column_1_title"/>
+                                            <div t-if="template.footer_column_1_content" class="footer-column-content" t-out="template.footer_column_1_content"/>
+                                        </t>
+                                    </td>
+                                    <td style="width: 33.33%;">
+                                        <t t-if="template.footer_column_2_title or template.footer_column_2_content">
+                                            <span t-if="template.footer_column_2_title"
+                                                  class="footer-column-title"
+                                                  t-attf-style="color: {{template.primary_accent_color}};"
+                                                  t-esc="template.footer_column_2_title"/>
+                                            <div t-if="template.footer_column_2_content" class="footer-column-content" t-out="template.footer_column_2_content"/>
+                                        </t>
+                                        <!-- Bank Details (if no column 2 content) -->
+                                        <t t-if="template.footer_bank_details_show and company.partner_id.bank_ids and not template.footer_column_2_content">
+                                            <div style="color: #666; font-size: 7.5pt;">
+                                                <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                                    <span t-field="bank.bank_id.name"/><br/>
+                                                    <span t-field="bank.acc_number"/>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="width: 33.33%;">
+                                        <t t-if="template.footer_column_3_title or template.footer_column_3_content">
+                                            <span t-if="template.footer_column_3_title"
+                                                  class="footer-column-title"
+                                                  t-attf-style="color: {{template.primary_accent_color}};"
+                                                  t-esc="template.footer_column_3_title"/>
+                                            <div t-if="template.footer_column_3_content" class="footer-column-content" t-out="template.footer_column_3_content"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                        </t><!-- Close footer_show_content -->
+
+                        <!-- Template-level Footer Message -->
+                        <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
+                            </div>
+                        </t>
+
+                        <!-- Template-level Page Numbers -->
+                        <t t-if="template.footer_show_page_number">
+                            <div style="text-align: right; margin-top: 12px; clear: both;">
+                                <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                </t><!-- Close footer_enabled else -->
             </body>
         </html>
     </template>

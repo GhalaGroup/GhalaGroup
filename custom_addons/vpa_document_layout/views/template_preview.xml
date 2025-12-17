@@ -30,89 +30,290 @@
         <t t-set="o" t-value="template.company_id"/>
         <t t-set="display_name_in_footer" t-value="True"/>
         <t t-set="report_type" t-value="'html'"/>
-        <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
-        <t t-set="address">
-            <strong>Deco Addict</strong><br/>
-            77 Santa Barbara Rd<br/>
-            Pleasant Hill CA 94523<br/>
-            United States
+        <t t-set="primary_color" t-value="template.primary_accent_color or '#DC143C'"/>
+
+        <!-- Set document title and blocks based on document type -->
+        <t t-if="template.document_type == 'sale_production'">
+            <t t-set="layout_document_title" t-value="'Production Order #S00123'"/>
+            <t t-set="address">
+                <strong>EAR Construction LTD</strong><br/>
+                Plot 45, Industrial Area<br/>
+                Dar es Salaam<br/>
+                Tanzania
+            </t>
+            <t t-set="information_block">
+                <div><strong>Order Date:</strong> 12/16/2025</div>
+                <div><strong>Expected Delivery:</strong> 01/15/2026</div>
+                <div><strong>Customer Reference:</strong> PO-2025-001</div>
+            </t>
         </t>
-        <t t-set="information_block">
-            <div><strong>Quotation Date:</strong> 11/18/2025</div>
-            <div><strong>Expiration:</strong> 12/18/2025</div>
-            <div><strong>Salesperson:</strong> Demo User</div>
+        <t t-else="">
+            <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
+            <t t-set="address">
+                <strong>Deco Addict</strong><br/>
+                77 Santa Barbara Rd<br/>
+                Pleasant Hill CA 94523<br/>
+                United States
+            </t>
+            <t t-set="information_block">
+                <div><strong>Quotation Date:</strong> 11/18/2025</div>
+                <div><strong>Expiration:</strong> 12/18/2025</div>
+                <div><strong>Salesperson:</strong> Demo User</div>
+            </t>
         </t>
 
         <!-- Call the dynamically generated VPA layout template -->
         <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
-            <!-- Sample quotation body content -->
-            <div style="font-size: 10pt;">
-                <!-- Product Table -->
-                <table class="table table-sm o_main_table" style="margin-top: 1rem;">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th class="text-end">Quantity</th>
-                            <th class="text-end">Unit Price</th>
-                            <th class="text-end">Taxes</th>
-                            <th class="text-end">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <strong>[FURN_8999] Three-Seat Sofa</strong><br/>
-                                <small class="text-muted">Three Seater Sofa with Lounger in Steel Grey Color</small>
-                            </td>
-                            <td class="text-end">5.00</td>
-                            <td class="text-end">$1,500.00</td>
-                            <td class="text-end">15%</td>
-                            <td class="text-end">$7,500.00</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <strong>[FURN_8220] Four Person Desk</strong><br/>
-                                <small class="text-muted">Four person modern office workstation</small>
-                            </td>
-                            <td class="text-end">5.00</td>
-                            <td class="text-end">$2,350.00</td>
-                            <td class="text-end">15%</td>
-                            <td class="text-end">$11,750.00</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Sale Production Preview Content -->
+            <t t-if="template.document_type == 'sale_production'">
+                <style>
+                    .vpa-sale-production {
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 10pt;
+                        color: #333;
+                    }
+                    .vpa-info-box {
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 12px;
+                    }
+                    .vpa-info-box-title {
+                        color: <t t-out="primary_color"/>;
+                        font-weight: bold;
+                        font-size: 8pt;
+                        text-transform: uppercase;
+                        margin-bottom: 6px;
+                        letter-spacing: 0.5px;
+                    }
+                    .vpa-info-box p {
+                        margin: 2px 0;
+                        font-size: 9pt;
+                    }
+                    .vpa-qty-badge {
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 3px;
+                        font-weight: bold;
+                        font-size: 9pt;
+                    }
+                    .vpa-mo-badge {
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        font-size: 8pt;
+                        margin: 1px;
+                    }
+                    .vpa-mo-pending {
+                        background: #999;
+                    }
+                    .vpa-section-row td {
+                        background: #fafafa;
+                        font-weight: bold;
+                        color: #555;
+                        padding: 6px 8px;
+                    }
+                    .vpa-total-box {
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 15px;
+                        margin-top: 15px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    .vpa-total-label {
+                        font-weight: bold;
+                        color: #333;
+                    }
+                    .vpa-total-value {
+                        font-size: 16pt;
+                        font-weight: bold;
+                        color: <t t-out="primary_color"/>;
+                    }
+                    .vpa-notes-section {
+                        background: #f9f9f9;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        padding: 10px 12px;
+                        margin-top: 12px;
+                    }
+                    .vpa-notes-title {
+                        color: <t t-out="primary_color"/>;
+                        font-weight: bold;
+                        font-size: 8pt;
+                        text-transform: uppercase;
+                        margin-bottom: 6px;
+                    }
+                </style>
 
-                <!-- Totals Table -->
-                <div id="total" class="row justify-content-end mt-4">
-                    <div class="col-4">
-                        <table class="table o_total_table table-sm" style="page-break-inside: avoid;">
+                <div class="vpa-sale-production">
+                    <!-- Customer Details / Delivery Info Boxes -->
+                    <table style="width: 100%; margin-bottom: 15px; border-collapse: separate; border-spacing: 15px 0;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top;">
+                                <div class="vpa-info-box">
+                                    <div class="vpa-info-box-title">Customer Details</div>
+                                    <p><strong>Client:</strong> EAR Construction LTD</p>
+                                    <p><strong>Order Date:</strong> 12/16/2025</p>
+                                    <p><strong>Reference:</strong> PO-2025-001</p>
+                                </div>
+                            </td>
+                            <td style="width: 50%; vertical-align: top;">
+                                <div class="vpa-info-box">
+                                    <div class="vpa-info-box-title">Delivery Info</div>
+                                    <p><strong>Expected:</strong> 01/15/2026</p>
+                                    <p><strong>Status:</strong> Sales Order</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Items Summary Title -->
+                    <div class="vpa-info-box-title" style="margin-top: 15px; margin-bottom: 8px;">
+                        Items Summary Details
+                    </div>
+
+                    <!-- Items Table -->
+                    <table class="table table-sm o_main_table">
+                        <thead>
                             <tr>
-                                <td><strong>Untaxed Amount</strong></td>
-                                <td class="text-end">$19,250.00</td>
+                                <th style="width: 5%;">No.</th>
+                                <th style="width: 45%;">Product Description</th>
+                                <th style="width: 15%; text-align: center;">Quantity</th>
+                                <th style="width: 10%; text-align: center;">Unit</th>
+                                <th style="width: 25%; text-align: center;">MO Reference</th>
                             </tr>
-                            <tr class="o_taxes">
-                                <td>Tax 15%</td>
-                                <td class="text-end">$2,887.50</td>
+                        </thead>
+                        <tbody>
+                            <tr class="vpa-section-row">
+                                <td colspan="5">Furniture</td>
                             </tr>
-                            <tr style="border-top: 2px solid #000;">
-                                <td><strong>Total</strong></td>
-                                <td class="text-end o_price_total"><strong>$22,137.50</strong></td>
+                            <tr>
+                                <td>1</td>
+                                <td>
+                                    <strong>[FURN_8999]</strong> Three-Seat Sofa
+                                    <div style="font-size: 8pt; color: #666;">Three Seater Sofa with Lounger</div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class="vpa-qty-badge">5.0000</span>
+                                </td>
+                                <td style="text-align: center;">Units</td>
+                                <td style="text-align: center;">
+                                    <span class="vpa-mo-badge">MO/00045</span>
+                                </td>
                             </tr>
-                        </table>
+                            <tr>
+                                <td>2</td>
+                                <td>
+                                    <strong>[FURN_8220]</strong> Four Person Desk
+                                    <div style="font-size: 8pt; color: #666;">Modern office workstation</div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class="vpa-qty-badge">3.0000</span>
+                                </td>
+                                <td style="text-align: center;">Units</td>
+                                <td style="text-align: center;">
+                                    <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Total Box -->
+                    <div class="vpa-total-box">
+                        <span class="vpa-total-label">Total Production Quantity:</span>
+                        <span class="vpa-total-value">8.00</span>
+                    </div>
+
+                    <!-- Production Notes -->
+                    <div class="vpa-notes-section">
+                        <div class="vpa-notes-title">Production Notes:</div>
+                        <p style="margin: 4px 0; font-size: 9pt;"><strong>Manufacturing Orders:</strong></p>
+                        <ul style="margin: 0; padding-left: 18px;">
+                            <li style="margin: 4px 0; font-size: 9pt;">
+                                <strong>MO/00045</strong> - Three-Seat Sofa (5.0 Units) | PO-2025-001
+                            </li>
+                        </ul>
                     </div>
                 </div>
+            </t>
 
-                <div style="margin-top: 2rem;">
-                    <p><strong>Payment terms:</strong> 30 Days</p>
-                    <p style="margin-top: 1rem;">
-                        <strong>Terms and conditions:</strong><br/>
-                        <small class="text-muted">
-                            Please send payment within 30 days of receiving this invoice.<br/>
-                            There will be a 10% interest charge per month on late invoices.
-                        </small>
-                    </p>
+            <!-- Standard Quotation/Sales Order Preview Content -->
+            <t t-else="">
+                <div style="font-size: 10pt;">
+                    <!-- Product Table -->
+                    <table class="table table-sm o_main_table" style="margin-top: 1rem;">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-end">Quantity</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Taxes</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>[FURN_8999] Three-Seat Sofa</strong><br/>
+                                    <small class="text-muted">Three Seater Sofa with Lounger in Steel Grey Color</small>
+                                </td>
+                                <td class="text-end">5.00</td>
+                                <td class="text-end">$1,500.00</td>
+                                <td class="text-end">15%</td>
+                                <td class="text-end">$7,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>[FURN_8220] Four Person Desk</strong><br/>
+                                    <small class="text-muted">Four person modern office workstation</small>
+                                </td>
+                                <td class="text-end">5.00</td>
+                                <td class="text-end">$2,350.00</td>
+                                <td class="text-end">15%</td>
+                                <td class="text-end">$11,750.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Totals Table -->
+                    <div id="total" class="row justify-content-end mt-4">
+                        <div class="col-4">
+                            <table class="table o_total_table table-sm" style="page-break-inside: avoid;">
+                                <tr>
+                                    <td><strong>Untaxed Amount</strong></td>
+                                    <td class="text-end">$19,250.00</td>
+                                </tr>
+                                <tr class="o_taxes">
+                                    <td>Tax 15%</td>
+                                    <td class="text-end">$2,887.50</td>
+                                </tr>
+                                <tr style="border-top: 2px solid #000;">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-end o_price_total"><strong>$22,137.50</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <p><strong>Payment terms:</strong> 30 Days</p>
+                        <p style="margin-top: 1rem;">
+                            <strong>Terms and conditions:</strong><br/>
+                            <small class="text-muted">
+                                Please send payment within 30 days of receiving this invoice.<br/>
+                                There will be a 10% interest charge per month on late invoices.
+                            </small>
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </t>
         </t>
     </template>
 </odoo>

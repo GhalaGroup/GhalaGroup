@@ -255,10 +255,10 @@
         </field>
     </record>
 
-    <!-- Legacy Config Menu (root menu defined in vpa_menu_root.xml) -->
-    <menuitem id="menu_vpa_document_config"
-              name="Old Layout Settings (Legacy)"
+    <!-- Global Layout Settings Menu - HIDDEN (legacy, replaced by Document Templates) -->
+    <!-- <menuitem id="menu_vpa_document_config"
+              name="Global Layout Settings"
               parent="menu_vpa_document_layout_root"
               action="action_vpa_document_config"
-              sequence="20"/>
+              sequence="20"/> -->
 </odoo>

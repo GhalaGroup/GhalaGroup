@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        VPA Unified Footer Templates
+        ============================
+        This template provides professional footers that work for:
+        - VPA custom document templates
+        - Standard Odoo report layouts (when overridden)
+
+        Footer types:
+        - Customer: Full footer with bank details (Quotes, Invoices, PO, Delivery)
+        - Internal: Simple footer with "Computer Generated" note (MFG, Picking)
+    -->
+
+    <!-- Main Unified Footer Template -->
+    <template id="vpa_unified_footer" name="VPA Unified Footer">
+        <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().get_footer_for_report(company.id, report_xml_id or '')"/>
+
+        <t t-if="footer_config">
+            <t t-call="vpa_document_layout.vpa_footer_render">
+                <t t-set="config" t-value="footer_config"/>
+            </t>
+        </t>
+        <t t-else="">
+            <!-- Fallback to basic professional footer if no config exists -->
+            <t t-call="vpa_document_layout.vpa_footer_fallback"/>
+        </t>
+    </template>
+
+    <!-- Footer Rendering Template -->
+    <template id="vpa_footer_render" name="VPA Footer Render">
+        <div t-attf-class="vpa-footer o_company_#{company.id}_footer"
+             t-attf-style="font-family: Arial, sans-serif; font-size: {{ config.font_size or '8pt' }}; color: {{ config.text_color or '#666666' }}; padding: 10px 0; position: relative;">
+
+            <!-- Decorative Shape -->
+            <svg t-if="config.show_shape"
+                 style="position: absolute; left: 0; bottom: 0; z-index: 0;"
+                 width="400" height="180" viewBox="0 0 400 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M400 180H0V5.2C21.1 1.78 42.7 0 64.7 0C205.2 0 328.8 72.6 400 180Z"
+                      t-attf-fill="{{ config.shape_color or '#21b799' }}"
+                      t-attf-fill-opacity="{{ config.shape_opacity or 0.1 }}"/>
+            </svg>
+
+            <!-- Border -->
+            <div t-if="config.show_border"
+                 t-attf-style="border-top: 1px solid {{ config.border_color or '#dee2e6' }}; margin-bottom: 8px;"/>
+
+            <!-- Footer Content -->
+            <div style="position: relative; z-index: 1;">
+
+                <!-- Single Column Layout -->
+                <t t-if="config.footer_layout == 'single'">
+                    <div style="text-align: center;">
+                        <!-- Internal Document Note -->
+                        <div t-if="config.footer_type == 'internal' and config.computer_generated_note"
+                             style="font-style: italic; margin-bottom: 5px; color: #888;">
+                            <t t-esc="config.computer_generated_note"/>
+                        </div>
+
+                        <!-- Bank Details -->
+                        <t t-if="config.show_bank_details and company.partner_id.bank_ids">
+                            <div style="margin-bottom: 5px;">
+                                <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                                    <strong>Bank:</strong> <t t-esc="bank.bank_id.name if bank.bank_id else 'Bank'"/>
+                                    | <strong>Account:</strong> <t t-esc="bank.acc_number or 'N/A'"/>
+                                    <t t-if="bank.bank_bic">
+                                        | <strong>BIC:</strong> <t t-esc="bank.bank_bic"/>
+                                    </t>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- Company Footer Text -->
+                        <div t-if="config.show_company_footer and company.report_footer"
+                             t-field="company.report_footer" style="margin-bottom: 5px;"/>
+
+                        <!-- Page Numbers -->
+                        <div t-if="config.show_page_numbers" style="margin-top: 5px;">
+                            Page <span class="page"/> of <span class="topage"/>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- Two Column Layout -->
+                <t t-if="config.footer_layout == 'two_col'">
+                    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: top; width: 50%; padding-right: 15px;">
+                                <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                    <t t-esc="config.column_1_title"/>
+                                </div>
+                                <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                            </td>
+                            <td style="vertical-align: top; width: 50%; padding-left: 15px;">
+                                <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                    <t t-esc="config.column_2_title"/>
+                                </div>
+                                <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                        Page <span class="page"/> of <span class="topage"/>
+                    </div>
+                </t>
+
+                <!-- Three Column Layout -->
+                <t t-if="config.footer_layout == 'three_col'">
+                    <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: top; width: 33%; padding-right: 10px;">
+                                <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                    <t t-esc="config.column_1_title"/>
+                                </div>
+                                <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                            </td>
+                            <td style="vertical-align: top; width: 34%; padding: 0 10px; text-align: center;">
+                                <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                    <t t-esc="config.column_2_title"/>
+                                </div>
+                                <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                            </td>
+                            <td style="vertical-align: top; width: 33%; padding-left: 10px; text-align: right;">
+                                <div t-if="config.column_3_title" style="font-weight: bold; margin-bottom: 3px;">
+                                    <t t-esc="config.column_3_title"/>
+                                </div>
+                                <div t-if="config.column_3_content" t-out="config.column_3_content"/>
+                            </td>
+                        </tr>
+                    </table>
+                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                        Page <span class="page"/> of <span class="topage"/>
+                    </div>
+                </t>
+
+                <!-- Custom HTML Layout -->
+                <t t-if="config.footer_layout == 'custom_html'">
+                    <div t-out="config._render_custom_html(company)"/>
+                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                        Page <span class="page"/> of <span class="topage"/>
+                    </div>
+                </t>
+
+            </div>
+        </div>
+    </template>
+
+    <!-- Fallback Footer (when no footer config exists) -->
+    <template id="vpa_footer_fallback" name="VPA Footer Fallback">
+        <div style="font-family: Arial, sans-serif; font-size: 8pt; color: #666; text-align: center;
+                    border-top: 1px solid #dee2e6; padding: 10px 0;">
+            <!-- Company Footer -->
+            <div t-if="company.report_footer" t-field="company.report_footer" style="margin-bottom: 5px;"/>
+
+            <!-- Bank Details -->
+            <t t-if="company.partner_id.bank_ids">
+                <div style="margin-bottom: 5px;">
+                    <t t-foreach="company.partner_id.bank_ids[:1]" t-as="bank">
+                        <strong>Bank:</strong> <t t-esc="bank.bank_id.name if bank.bank_id else 'Bank'"/>
+                        | <strong>Account:</strong> <t t-esc="bank.acc_number or 'N/A'"/>
+                        <t t-if="bank.bank_bic">
+                            | <strong>BIC:</strong> <t t-esc="bank.bank_bic"/>
+                        </t>
+                    </t>
+                </div>
+            </t>
+
+            <!-- Page Numbers -->
+            <div style="margin-top: 5px;">
+                Page <span class="page"/> of <span class="topage"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- Internal Document Footer (for MFG, Picking, etc.) -->
+    <template id="vpa_footer_internal" name="VPA Internal Footer">
+        <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().search([
+            ('company_id', '=', company.id),
+            ('is_default_internal', '=', True),
+            ('active', '=', True)
+        ], limit=1)"/>
+
+        <div style="font-family: Arial, sans-serif; font-size: 8pt; color: #666; text-align: center;
+                    border-top: 1px solid #dee2e6; padding: 10px 0;">
+            <!-- Computer Generated Note -->
+            <div style="font-style: italic; color: #888; margin-bottom: 5px;">
+                <t t-if="footer_config and footer_config.computer_generated_note">
+                    <t t-esc="footer_config.computer_generated_note"/>
+                </t>
+                <t t-else="">
+                    This is a computer generated document
+                </t>
+            </div>
+
+            <!-- Page Numbers -->
+            <div style="margin-top: 5px;">
+                Page <span class="page"/> of <span class="topage"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- Customer Document Footer (for Quotes, Invoices, etc.) -->
+    <template id="vpa_footer_customer" name="VPA Customer Footer">
+        <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().search([
+            ('company_id', '=', company.id),
+            ('is_default_customer', '=', True),
+            ('active', '=', True)
+        ], limit=1)"/>
+
+        <t t-if="footer_config">
+            <t t-call="vpa_document_layout.vpa_footer_render">
+                <t t-set="config" t-value="footer_config"/>
+            </t>
+        </t>
+        <t t-else="">
+            <t t-call="vpa_document_layout.vpa_footer_fallback"/>
+        </t>
+    </template>
+</odoo>

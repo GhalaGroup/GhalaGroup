@@ -27,7 +27,7 @@
                 <header>
                     <button name="action_preview_template" string="Download PDF Preview" type="object" class="btn-primary" icon="fa-download"/>
                     <button name="action_preview_footer" string="Preview Footer" type="object" class="btn-secondary" icon="fa-eye" help="Preview how footer will appear on PDF pages"/>
-                    <button name="action_regenerate_templates" string="Regenerate Template" type="object" class="btn-secondary" icon="fa-refresh" help="Regenerate QWeb template from current settings"/>
+                    <button name="action_regenerate_templates" string="Regenerate Template" type="object" class="btn-warning" icon="fa-refresh" help="Recreate QWeb template (use after making changes or to fix errors)"/>
                 </header>
                 <sheet>
                     <field name="active" invisible="1"/>
@@ -44,6 +44,7 @@
                                     <field name="name" placeholder="e.g., Modern Sales Quote" colspan="2"/>
                                     <field name="target_app"/>
                                     <field name="document_type"/>
+                                    <field name="report_title" placeholder="e.g., Production Order" invisible="document_type != 'sale_production'"/>
                                 </group>
                                 <group>
                                     <field name="company_id" groups="base.group_multi_company"/>
@@ -170,97 +171,61 @@
                                         <group string="Odoo Standard Footer">
                                             <field name="hide_odoo_footer"/>
                                         </group>
-                                    </group>
-
-                                    <group string="Footer Shape">
-                                        <group>
-                                            <field name="footer_show_shape"/>
-                                            <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
+                                        <group string="VPA Footer">
+                                            <field name="footer_enabled" string="Show Footer"/>
                                         </group>
                                     </group>
 
-                                    <notebook>
-                                        <page string="Footer Layout" name="footer_layout_page">
-                                            <group>
-                                                <group string="Choose Footer Layout">
-                                                    <field name="footer_layout" widget="radio"/>
-                                                </group>
-                                                <group string="Options">
-                                                    <field name="footer_bank_details_show"/>
-                                                </group>
-                                            </group>
+                                    <!-- Footer Layout (only when footer enabled) -->
+                                    <separator string="Footer Layout" invisible="not footer_enabled"/>
+                                    <group invisible="not footer_enabled">
+                                        <group>
+                                            <field name="footer_show_content" string="Show Footer Content"/>
+                                            <field name="footer_layout" widget="radio" invisible="not footer_show_content"/>
+                                        </group>
+                                        <group>
+                                            <field name="footer_show_shape"/>
+                                            <field name="footer_shape_opacity" invisible="not footer_show_shape"/>
+                                            <field name="footer_bank_details_show" invisible="not footer_show_content"/>
+                                        </group>
+                                    </group>
 
-                                            <div class="alert alert-info mt-3" role="alert">
-                                                <i class="fa fa-info-circle"/>
-                                                <strong>How it works:</strong><br/>
-                                                • Choose the number of columns you want in your footer<br/>
-                                                • Fill in the title and content for each column<br/>
-                                                • Bank details can auto-fill in empty columns if enabled<br/>
-                                                • Each column will appear side-by-side in your documents
-                                            </div>
-                                        </page>
+                                    <!-- Column 1 -->
+                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
+                                        <field name="footer_column_1_title" placeholder="e.g., Company Info"/>
+                                        <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
+                                    </group>
 
-                                        <page string="📝 Column 1" name="footer_col1">
-                                            <group>
-                                                <group string="Column 1 Settings">
-                                                    <label for="footer_column_1_title" string="Column Title"/>
-                                                    <field name="footer_column_1_title" placeholder="e.g., Payment Terms" nolabel="1"/>
-                                                </group>
-                                            </group>
+                                    <!-- Column 2 -->
+                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
+                                        <field name="footer_column_2_title" placeholder="e.g., Contact"/>
+                                        <field name="footer_column_2_content" widget="html" nolabel="1" colspan="2"/>
+                                    </group>
 
-                                            <separator string="Column 1 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Example:</strong> Add payment terms, terms &amp; conditions, or any important notes
-                                            </div>
-                                            <field name="footer_column_1_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Payment Terms:&lt;/strong&gt; Net 30 Days&lt;/p&gt;&#10;&lt;p&gt;Payment is due within 30 days of invoice date&lt;/p&gt;"/>
-                                        </page>
+                                    <!-- Column 3 -->
+                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled or not footer_show_content">
+                                        <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
+                                        <field name="footer_column_3_content" widget="html" nolabel="1" colspan="2"/>
+                                    </group>
 
-                                        <page string="📝 Column 2" name="footer_col2" invisible="footer_layout == 'single'">
-                                            <group>
-                                                <group string="Column 2 Settings">
-                                                    <label for="footer_column_2_title" string="Column Title"/>
-                                                    <field name="footer_column_2_title" placeholder="e.g., Bank Details" nolabel="1"/>
-                                                </group>
-                                            </group>
+                                    <!-- Single Column Content (full width) -->
+                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled or not footer_show_content">
+                                        <field name="footer_column_1_title" placeholder="Title (optional)"/>
+                                        <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
+                                    </group>
 
-                                            <separator string="Column 2 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Tip:</strong> Leave empty to auto-fill with bank account details (if "Show Bank Details" is enabled)<br/>
-                                                <strong>Example:</strong> Add contact information, company registration details, or website
-                                            </div>
-                                            <field name="footer_column_2_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Contact Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;Email: info@company.com&lt;/p&gt;&#10;&lt;p&gt;Phone: +1 555-0123&lt;/p&gt;"/>
-                                        </page>
-
-                                        <page string="📝 Column 3" name="footer_col3" invisible="footer_layout != 'three_col'">
-                                            <group>
-                                                <group string="Column 3 Settings">
-                                                    <label for="footer_column_3_title" string="Column Title"/>
-                                                    <field name="footer_column_3_title" placeholder="e.g., Contact Information" nolabel="1"/>
-                                                </group>
-                                            </group>
-
-                                            <separator string="Column 3 Content"/>
-                                            <div class="alert alert-success" role="alert">
-                                                <strong>Example:</strong> Add social media links, additional contact details, or certifications
-                                            </div>
-                                            <field name="footer_column_3_content" widget="html" nolabel="1"
-                                                   placeholder="Example:&#10;&#10;&lt;p&gt;&lt;strong&gt;Follow Us:&lt;/strong&gt;&lt;/p&gt;&#10;&lt;p&gt;🌐 www.company.com&lt;/p&gt;&#10;&lt;p&gt;📧 support@company.com&lt;/p&gt;"/>
-                                        </page>
-
-                                        <page string="⚙️ Advanced" name="footer_advanced">
-                                            <div class="alert alert-warning" role="alert">
-                                                <i class="fa fa-exclamation-triangle"/>
-                                                <strong>Advanced Users Only:</strong><br/>
-                                                Use this field to completely override the footer with custom HTML.<br/>
-                                                This will ignore all column settings above.
-                                            </div>
-                                            <separator string="Custom Footer HTML (Overrides Everything Above)"/>
-                                            <field name="footer_custom_html" widget="html" nolabel="1"
-                                                   placeholder="Enter custom HTML here to completely replace the footer layout..."/>
-                                        </page>
-                                    </notebook>
+                                    <!-- Page Numbers & Message -->
+                                    <separator string="Page Numbers &amp; Message" invisible="not footer_enabled"/>
+                                    <group invisible="not footer_enabled">
+                                        <group>
+                                            <field name="footer_show_page_number" string="Show Page Numbers"/>
+                                            <field name="footer_page_number_format" invisible="not footer_show_page_number"/>
+                                        </group>
+                                        <group>
+                                            <field name="footer_message_type" string="Footer Message"/>
+                                            <field name="footer_custom_message" placeholder="Enter your custom message..." invisible="footer_message_type != 'custom'"/>
+                                        </group>
+                                    </group>
                                 </page>
 
                                 <!-- Preview Tab -->
@@ -291,8 +256,8 @@
         <field name="name">Document Templates</field>
         <field name="res_model">vpa.document.template</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'search_default_active': 1}</field>
-        <field name="domain">[]</field>
+        <field name="context">{'search_default_active': 1, 'default_company_id': allowed_company_ids[0]}</field>
+        <field name="domain">[('company_id', 'in', allowed_company_ids)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first document template
@@ -300,6 +265,18 @@
             <p>
                 Design custom templates for quotations, invoices, and more with your company branding.
             </p>
+        </field>
+    </record>
+
+    <!-- Server Action: Cleanup Orphan Reports -->
+    <record id="action_cleanup_orphan_reports" model="ir.actions.server">
+        <field name="name">🧹 Cleanup Duplicate Print Menu Entries</field>
+        <field name="model_id" ref="model_vpa_document_template"/>
+        <field name="binding_model_id" ref="model_vpa_document_template"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = model.action_cleanup_orphan_reports()
         </field>
     </record>
 

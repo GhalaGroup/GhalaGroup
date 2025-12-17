@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VPA Config Backup List View -->
+    <record id="view_vpa_config_backup_list" model="ir.ui.view">
+        <field name="name">vpa.config.backup.list</field>
+        <field name="model">vpa.config.backup</field>
+        <field name="arch" type="xml">
+            <list string="Configuration Backups" create="false">
+                <field name="name"/>
+                <field name="backup_date"/>
+                <field name="backup_type"/>
+                <field name="company_id"/>
+                <field name="template_count"/>
+                <field name="footer_count"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- VPA Config Backup Form View -->
+    <record id="view_vpa_config_backup_form" model="ir.ui.view">
+        <field name="name">vpa.config.backup.form</field>
+        <field name="model">vpa.config.backup</field>
+        <field name="arch" type="xml">
+            <form string="Configuration Backup" create="false">
+                <header>
+                    <button name="action_restore" string="Restore This Backup" type="object" class="btn-primary" icon="fa-undo"/>
+                    <button name="action_download_json" string="Download JSON" type="object" class="btn-secondary" icon="fa-download"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="backup_date"/>
+                            <field name="backup_type"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="template_count"/>
+                            <field name="footer_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Backup Data (JSON)">
+                            <field name="backup_data" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- VPA Config Backup Action -->
+    <record id="action_vpa_config_backup" model="ir.actions.act_window">
+        <field name="name">Configuration Backups</field>
+        <field name="res_model">vpa.config.backup</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No backups yet
+            </p>
+            <p>
+                Backups are created automatically when the module is uninstalled.<br/>
+                You can also create manual backups using the Export button.
+            </p>
+        </field>
+    </record>
+
+    <!-- VPA Backup Wizard Form View -->
+    <record id="view_vpa_config_backup_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.config.backup.wizard.form</field>
+        <field name="model">vpa.config.backup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export/Import Configurations">
+                <group>
+                    <field name="action_type" widget="radio"/>
+                </group>
+                <group invisible="action_type != 'export'">
+                    <field name="company_id" placeholder="All Companies"/>
+                </group>
+                <group invisible="action_type != 'import'">
+                    <field name="import_file" filename="import_filename"/>
+                    <field name="import_filename" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_execute" string="Execute" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- VPA Backup Wizard Action -->
+    <record id="action_vpa_config_backup_wizard" model="ir.actions.act_window">
+        <field name="name">Export/Import Configurations</field>
+        <field name="res_model">vpa.config.backup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_vpa_backup"
+              name="Backup &amp; Restore"
+              parent="menu_vpa_document_layout_root"
+              sequence="90"/>
+
+    <menuitem id="menu_vpa_backup_list"
+              name="Backup History"
+              parent="menu_vpa_backup"
+              action="action_vpa_config_backup"
+              sequence="10"/>
+
+    <menuitem id="menu_vpa_backup_export_import"
+              name="Export/Import"
+              parent="menu_vpa_backup"
+              action="action_vpa_config_backup_wizard"
+              sequence="20"/>
+</odoo>

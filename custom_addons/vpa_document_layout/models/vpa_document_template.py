@@ -55,7 +55,7 @@ class VPADocumentTemplate(models.Model):
             else:
                 record.print_name_preview = ''
 
-    print_name_preview = fields.Char(string='Preview', compute='_compute_print_name_preview', store=False)
+    print_name_preview = fields.Char(string='Filename Preview', compute='_compute_print_name_preview', store=False)
 
     def _get_print_name_expression(self):
         """Get the actual Python expression based on pattern selection
@@ -99,6 +99,7 @@ class VPADocumentTemplate(models.Model):
     document_type = fields.Selection([
         ('quotation', 'Quotation'),
         ('sale_order', 'Sales Order'),
+        ('sale_production', 'Sales Production Order'),
         ('invoice', 'Invoice'),
         ('bill', 'Vendor Bill'),
         ('purchase_order', 'Purchase Order'),
@@ -106,6 +107,12 @@ class VPADocumentTemplate(models.Model):
         ('picking', 'Picking'),
         ('manufacturing_order', 'Manufacturing Order'),
     ], string='Document Type', required=True, help='Which document type this template applies to')
+
+    # Report Title Configuration
+    report_title = fields.Char(
+        string='Report Title',
+        help='Custom title shown on the report header (e.g., "Production Order", "Sales Quote"). Leave empty for default.'
+    )
 
     # Odoo Header/Footer Control
     hide_odoo_header = fields.Boolean(string='Hide Standard Odoo Header', default=True)
@@ -166,7 +173,15 @@ class VPADocumentTemplate(models.Model):
         ('landscape', 'Landscape'),
     ], string='Orientation', default='portrait', required=True)
 
-    # Footer Settings
+    # Footer Settings - Now uses unified footer config
+    footer_config_id = fields.Many2one(
+        'vpa.footer.config',
+        string='Footer Configuration',
+        domain="[('company_id', '=', company_id), ('active', '=', True)]",
+        help='Select a footer configuration. If not set, the default footer for the document type will be used.'
+    )
+
+    # Legacy footer settings (kept for backwards compatibility)
     footer_show_shape = fields.Boolean(string='Show Footer Wave Shape', default=True)
     footer_shape_opacity = fields.Float(string='Footer Shape Opacity', default=0.1)
     footer_layout = fields.Selection([
@@ -182,6 +197,43 @@ class VPADocumentTemplate(models.Model):
     footer_column_3_title = fields.Char(string='Column 3 Title', default='Contact Info')
     footer_column_3_content = fields.Html(string='Column 3 Content')
     footer_custom_html = fields.Html(string='Custom Footer HTML')
+
+    # Template-level Footer Customization (Quick Settings)
+    footer_enabled = fields.Boolean(
+        string='Show Footer',
+        default=True,
+        help='Enable or disable the footer on this template'
+    )
+    footer_show_content = fields.Boolean(
+        string='Show Footer Content',
+        default=True,
+        help='Show the column content in footer. Disable to show only wave shape, message and page numbers.'
+    )
+    footer_show_page_number = fields.Boolean(
+        string='Show Page Number',
+        default=True,
+        help='Display page number in the footer (e.g., "Page 1 of 3")'
+    )
+    footer_page_number_format = fields.Selection([
+        ('page_of', 'Page X of Y'),
+        ('page_only', 'Page X'),
+        ('dash', '- X -'),
+        ('brackets', '[X/Y]'),
+    ], string='Page Number Format', default='page_of')
+    footer_message_type = fields.Selection([
+        ('none', 'No Message'),
+        ('auto_generated', 'This document was automatically generated'),
+        ('internal', 'Internal Document - Confidential'),
+        ('draft', 'DRAFT - Not for Distribution'),
+        ('quote_validity', 'This quotation is valid for 30 days'),
+        ('thank_you', 'Thank you for your business'),
+        ('custom', 'Custom Message'),
+    ], string='Footer Message', default='none',
+       help='Predefined message to display in footer with typewriter font')
+    footer_custom_message = fields.Char(
+        string='Custom Footer Message',
+        help='Your custom message (displayed when "Custom Message" is selected)'
+    )
 
     # Report Action Reference (auto-created)
     report_action_id = fields.Many2one('ir.actions.report', string='Report Action', readonly=True, ondelete='cascade')
@@ -201,11 +253,19 @@ class VPADocumentTemplate(models.Model):
     # Preview field (like the old VPA config)
     preview = fields.Html(compute='_compute_preview', sanitize=False)
 
+    # Odoo 19 Constraint syntax (nested class)
+    class Constraint(models.Constraint):
+        _constraint_name = 'name_company_doctype_uniq'
+        _definition = 'UNIQUE(name, company_id, document_type)'
+        _message = 'A template with this name already exists for this company and document type. Please choose a different name.'
+
     @api.depends('name', 'primary_accent_color', 'secondary_accent_color',
                  'header_logo_alignment', 'header_logo_width', 'header_logo_height', 'header_logo_aspect_ratio',
                  'header_company_info_alignment', 'header_company_details_html', 'header_company_info_color',
                  'header_show_circle', 'header_circle_size', 'header_circle_opacity',
                  'table_style', 'table_header_bg_color', 'table_header_text_color', 'table_border_color', 'table_row_alt_bg',
+                 'footer_enabled', 'footer_show_page_number', 'footer_page_number_format',
+                 'footer_message_type', 'footer_custom_message',
                  'footer_show_shape', 'footer_shape_opacity', 'footer_layout', 'footer_bank_details_show',
                  'footer_column_1_title', 'footer_column_1_content',
                  'footer_column_2_title', 'footer_column_2_content',
@@ -308,6 +368,10 @@ class VPADocumentTemplate(models.Model):
 
         result = super(VPADocumentTemplate, self).write(vals)
 
+        # Skip template regeneration during module install/upgrade to avoid locks
+        if self.env.context.get('install_mode') or self.env.context.get('module'):
+            return result
+
         # Fields that require template regeneration
         template_fields = [
             'header_logo_alignment', 'header_logo_width', 'header_logo_height',
@@ -381,6 +445,43 @@ class VPADocumentTemplate(models.Model):
                 template.report_action_id.unlink()
         return super(VPADocumentTemplate, self).unlink()
 
+    @api.model
+    def action_cleanup_orphan_reports(self):
+        """
+        Cleanup orphan VPA report actions that don't have a corresponding template.
+        This can happen if templates were deleted directly from the database.
+        Call this method to fix duplicate entries in Print menu.
+        """
+        # Find all VPA report actions (they have report_name starting with 'vpa_document_layout.report_template_')
+        orphan_reports = self.env['ir.actions.report'].search([
+            ('report_name', 'like', 'vpa_document_layout.report_template_%')
+        ])
+
+        # Get all template IDs that have report actions
+        template_report_ids = self.search([]).mapped('report_action_id').ids
+
+        # Find orphan reports (not linked to any template)
+        orphan_count = 0
+        for report in orphan_reports:
+            if report.id not in template_report_ids:
+                _logger.info(f"Deleting orphan VPA report action: {report.name} (ID: {report.id})")
+                report.unlink()
+                orphan_count += 1
+
+        if orphan_count:
+            _logger.info(f"Cleaned up {orphan_count} orphan VPA report action(s)")
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Cleanup Complete'),
+                'message': _('Removed %s orphan report action(s) from the print menu.') % orphan_count,
+                'type': 'success' if orphan_count else 'info',
+                'sticky': False,
+            }
+        }
+
     def _create_report_action(self):
         """Create a new report action for this template"""
         self.ensure_one()
@@ -389,6 +490,7 @@ class VPADocumentTemplate(models.Model):
         model_map = {
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
+            'sale_production': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
@@ -644,23 +746,30 @@ class VPADocumentTemplate(models.Model):
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
             <t t-set="address">
-                <strong><span t-field="doc.partner_id.name"/></strong><br/>
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
             </t>
             <t t-set="information_block">
-                <div t-if="doc.date_order">
-                    <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
-                    <strong t-else="">Order Date:</strong>
-                    <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" class="mt-2">
-                    <strong>Expiration:</strong>
-                    <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.user_id.name" class="mt-2">
-                    <strong>Salesperson:</strong>
-                    <span t-field="doc.user_id"/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
+                        <strong t-else="">Order Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" style="margin-top: 4px;">
+                        <strong>Expiration:</strong>
+                        <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                        <strong>Salesperson:</strong>
+                        <span t-field="doc.user_id"/>
+                    </div>
                 </div>
             </t>
             <t t-set="layout_document_title">
@@ -749,19 +858,510 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
-        else:
-            # For other document types, create a simpler template
+        elif self.document_type == 'manufacturing_order':
+            # Manufacturing Order template - wraps standard MRP report
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="address">
+                <t t-if="doc.partner_id">
+                    <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                    </div>
+                </t>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_start">
+                        <strong>Scheduled Date:</strong>
+                        <span t-field="doc.date_start" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                        <strong>Responsible:</strong>
+                        <span t-field="doc.user_id"/>
+                    </div>
+                    <div t-if="doc.origin" style="margin-top: 4px;">
+                        <strong>Source:</strong>
+                        <span t-field="doc.origin"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                Manufacturing Order # <span t-field="doc.name"/>
+            </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
-                <div class="page">
-                    <p>VPA Template for {doc_type} (Document structure pending)</p>
+                <!-- Product Information -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <strong>Product:</strong> <span t-field="doc.product_id"/>
+                    </div>
+                    <div class="col-3">
+                        <strong>Quantity:</strong> <span t-field="doc.product_qty"/> <span t-field="doc.product_uom_id"/>
+                    </div>
+                    <div class="col-3">
+                        <strong>State:</strong> <span t-field="doc.state"/>
+                    </div>
+                </div>
+
+                <!-- Components Table -->
+                <h4 class="mt-4">Components to Consume</h4>
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Product</th>
+                            <th class="text-end">To Consume</th>
+                            <th class="text-end">Consumed</th>
+                            <th class="text-center">UoM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.move_raw_ids" t-as="move">
+                            <tr>
+                                <td><span t-field="move.product_id"/></td>
+                                <td class="text-end"><span t-field="move.product_uom_qty"/></td>
+                                <td class="text-end"><span t-field="move.quantity"/></td>
+                                <td class="text-center"><span t-field="move.product_uom"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Work Orders (if any) -->
+                <t t-if="doc.workorder_ids">
+                    <h4 class="mt-4">Work Orders</h4>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Operation</th>
+                                <th class="text-start">Work Center</th>
+                                <th class="text-end">Expected Duration</th>
+                                <th class="text-center">State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.workorder_ids" t-as="wo">
+                                <tr>
+                                    <td><span t-field="wo.name"/></td>
+                                    <td><span t-field="wo.workcenter_id"/></td>
+                                    <td class="text-end"><span t-field="wo.duration_expected"/> min</td>
+                                    <td class="text-center"><span t-field="wo.state"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+
+                <!-- Finished Products -->
+                <t t-if="doc.move_finished_ids">
+                    <h4 class="mt-4">Finished Products</h4>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Product</th>
+                                <th class="text-end">To Produce</th>
+                                <th class="text-end">Produced</th>
+                                <th class="text-center">UoM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="doc.move_finished_ids" t-as="move">
+                                <tr>
+                                    <td><span t-field="move.product_id"/></td>
+                                    <td class="text-end"><span t-field="move.product_uom_qty"/></td>
+                                    <td class="text-end"><span t-field="move.quantity"/></td>
+                                    <td class="text-center"><span t-field="move.product_uom"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
+        elif self.document_type == 'sale_production':
+            # Sales Production Order template - Sale Order with Production Details for factory
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Production Order'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong>Order Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.commitment_date" style="margin-top: 4px;">
+                        <strong>Expected Delivery:</strong>
+                        <span t-field="doc.commitment_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.client_order_ref" style="margin-top: 4px;">
+                        <strong>Customer Reference:</strong>
+                        <span t-field="doc.client_order_ref"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>Status:</strong>
+                        <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
+                        <t t-elif="doc.state == 'sent'"><span style="color: #17a2b8;">Sent</span></t>
+                        <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
+                        <t t-elif="doc.state == 'done'"><span style="color: #28a745;">Done</span></t>
+                        <t t-elif="doc.state == 'cancel'"><span style="color: #dc3545;">Cancelled</span></t>
+                        <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Sale Production specific elements -->
+                <style>
+                    .vpa-sale-production {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    /* Section Header in Table */
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    /* Section Row (category divider) */
+                    .vpa-section-row td {{
+                        background: #f0f0f0;
+                        font-weight: 700;
+                        padding: 6px 4px;
+                        color: #666;
+                        font-size: 12px;
+                        border-bottom: 1px solid #ddd !important;
+                    }}
+                    /* Note Row */
+                    .vpa-note-row td {{
+                        padding: 4px 12px;
+                        font-style: italic;
+                        color: #555;
+                        font-size: 11px;
+                        background: #fafafa;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                    }}
+                    /* Badges */
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-mo-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 6px;
+                        font-size: 9px;
+                        font-weight: 500;
+                        margin: 1px;
+                    }}
+                    .vpa-mo-pending {{
+                        background: transparent;
+                        color: #bbb;
+                        border: none;
+                        font-size: 10px;
+                    }}
+                    /* Product Details */
+                    .vpa-product-details {{
+                        font-size: 10px;
+                        color: #666;
+                        margin-top: 2px;
+                        line-height: 1.3;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    /* Total Card */
+                    .vpa-total-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 10px;
+                        border-radius: 5px;
+                        margin: 10px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-total-label {{
+                        font-size: 13px;
+                        color: #666;
+                    }}
+                    .vpa-total-value {{
+                        font-size: 18px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    /* Notes Section */
+                    .vpa-notes-section {{
+                        background: #f9f9f9;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 10px;
+                        margin: 10px 0;
+                        page-break-inside: avoid;
+                    }}
+                    .vpa-notes-title {{
+                        color: <t t-out="primary_color"/>;
+                        margin: 0 0 6px 0;
+                        font-size: 11px;
+                        font-weight: 600;
+                    }}
+                    .vpa-notes-content {{
+                        min-height: 40px;
+                        background: white;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 3px;
+                        padding: 8px;
+                    }}
+                    .vpa-notes-content div {{
+                        margin-left: 10px;
+                        margin-top: 2px;
+                        padding-bottom: 2px;
+                        font-size: 10px;
+                        color: #666;
+                    }}
+                    .vpa-mo-name {{
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                </style>
+
+                <div class="vpa-sale-production">
+                    <!-- Table Card with Items -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ITEMS SUMMARY DETAILS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 50%%;">PRODUCT DESCRIPTION</th>
+                                    <th style="width: 12%%; text-align: center;">QUANTITY</th>
+                                    <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    <th style="width: 23%%; text-align: center;">MO REFERENCE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-set="total_qty" t-value="0"/>
+
+                                <t t-foreach="doc.order_line" t-as="line">
+                                    <!-- Section Headers -->
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <tr class="vpa-section-row">
+                                            <td colspan="5"><t t-out="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Note Lines -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr class="vpa-note-row">
+                                            <td colspan="5"><t t-out="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Regular Product Lines -->
+                                    <t t-elif="line.product_uom_qty > 0">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
+                                        <tr>
+                                            <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
+                                            <td>
+                                                <div style="font-weight: 500; color: #333; font-size: 10px;">
+                                                    <t t-if="line.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <t t-out="line.name"/>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <span class="vpa-qty-badge"><t t-out="line.product_uom_qty"/></span>
+                                            </td>
+                                            <td style="text-align: center; color: #666; font-size: 9px;">
+                                                <t t-out="line.product_uom_id.name"/>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
+                                                <t t-if="mos">
+                                                    <t t-foreach="mos" t-as="mo">
+                                                        <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="vpa-mo-pending">Pending</span>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Total Card -->
+                    <div class="vpa-total-card">
+                        <table style="width: 100%%;">
+                            <tr>
+                                <td style="width: 70%%; text-align: right; padding-right: 15px;">
+                                    <span class="vpa-total-label">Total Production Quantity:</span>
+                                </td>
+                                <td style="width: 30%%; text-align: center;">
+                                    <span class="vpa-total-value"><t t-out="total_qty"/></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Terms and Conditions (if exists) -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section">
+                            <div class="vpa-notes-title">TERMS AND CONDITIONS:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <t t-out="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Production Notes -->
+                    <div class="vpa-notes-section">
+                        <div class="vpa-notes-title">PRODUCTION NOTES:</div>
+                        <div class="vpa-notes-content">
+                            <t t-set="all_mos" t-value="doc.order_line.mapped('move_ids').mapped('created_production_id')"/>
+                            <t t-if="all_mos">
+                                <div style="font-size: 8px; color: #666; margin-left: 0 !important;">
+                                    <strong>Manufacturing Orders:</strong>
+                                </div>
+                                <t t-foreach="all_mos" t-as="mo">
+                                    <div>
+                                        • <span class="vpa-mo-name"><t t-out="mo.name"/></span> -
+                                        <t t-out="mo.product_id.name"/>
+                                        (<t t-out="mo.product_qty"/> <t t-out="mo.product_uom_id.name"/>)
+                                        <t t-if="doc.client_order_ref">
+                                            | <t t-out="doc.client_order_ref"/>
+                                        </t>
+                                    </div>
+                                </t>
+                                <div style="min-height: 20px; margin-top: 8px; border-top: 1px dotted #ddd; padding-top: 5px;">
+                                    <!-- Space for additional manual notes -->
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <span style="color: #bbb; font-size: 9px; font-style: italic;">No manufacturing orders created yet</span>
+                            </t>
+                        </div>
+                    </div>
                 </div>
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id, doc_type=self.document_type)  # Format with template ID
+</t>'''.format(template_id=self.id)
+        else:
+            # For other document types, create a template with standard VPA styling
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="address">
+                <t t-if="doc.partner_id">
+                    <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                    </div>
+                </t>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">DOCUMENT INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.name">
+                        <strong>Reference:</strong>
+                        <span t-field="doc.name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                {doc_type_title} # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <p>VPA Template for {doc_type} (Document content pending)</p>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id, doc_type=self.document_type, doc_type_title=self.document_type.replace('_', ' ').title())
 
         # Create the main report template
         _logger.info(f"Creating main template view for template {self.id}")
@@ -787,7 +1387,7 @@ class VPADocumentTemplate(models.Model):
     <t t-set="primary_color" t-value="'%s'"/>
     <t t-set="secondary_color" t-value="'%s'"/>
 
-    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;">
+    <div t-attf-class="article o_report_layout_vpa o_company_#{company.id}_layout" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
         <style type="text/css">
             /* Force zero margins on all PDF page elements */
@@ -959,16 +1559,23 @@ class VPADocumentTemplate(models.Model):
             </div>
         </div>
 
-        <!-- Customer Address and Document Info (Two columns like standard Odoo) -->
+        <!-- Document Title - Full Width Right Aligned -->
+        <div t-if="layout_document_title" style="margin-bottom: 0;">
+            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0 0 10px 0; text-align: right;" t-out="layout_document_title"/>
+            <div t-attf-style="border-bottom: 1px solid %s; margin-bottom: 20px;"></div>
+        </div>
+
+        <!-- Customer Details and Order Info (Two columns below title) -->
         <table t-if="address or information_block" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
             <tbody>
                 <tr>
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
-                        <t t-out="address"/>
+                        <div style="font-size: 10pt; line-height: 1.8; color: #555;">
+                            <t t-out="address"/>
+                        </div>
                     </td>
-                    <td t-if="information_block" style="width: 50%%; vertical-align: bottom; text-align: right; padding-left: 20px;">
-                        <h2 t-if="layout_document_title" t-attf-style="font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
-                        <div style="margin-top: 15px; font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                    <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
+                        <div style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
                     </td>
@@ -991,7 +1598,7 @@ class VPADocumentTemplate(models.Model):
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (30 total)
+        # Finalize arch_content with all parameters (31 total)
         arch_content = arch_content % (
             self.id,
             self.id,
@@ -1023,6 +1630,7 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
+            self.secondary_accent_color,  # Document title separator line color (secondary)
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
@@ -1042,6 +1650,7 @@ class VPADocumentTemplate(models.Model):
         model_map = {
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
+            'sale_production': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
@@ -1115,3 +1724,56 @@ class VPADocumentTemplate(models.Model):
             'url': f'/vpa/template/preview/pdf/{self.id}',
             'target': 'self',
         }
+
+    @api.model
+    def _cleanup_and_regenerate_templates(self):
+        """
+        Called from data/regenerate_templates.xml on EVERY module upgrade.
+        1. Cleanup orphan report actions (fixes duplicate Print menu items)
+        2. Regenerate sale_production templates (fixes QWeb syntax issues)
+        """
+        _logger.info("VPA Document Layout: Running upgrade cleanup and regeneration...")
+
+        # STEP 1: Cleanup orphan report actions that cause duplicate Print menu items
+        try:
+            orphan_reports = self.env['ir.actions.report'].search([
+                ('report_name', 'like', 'vpa_document_layout.report_template_%')
+            ])
+            template_report_ids = self.search([]).mapped('report_action_id').ids
+
+            orphan_count = 0
+            for report in orphan_reports:
+                if report.id not in template_report_ids:
+                    _logger.info(f"Deleting orphan report: {report.name} (ID: {report.id})")
+                    report.unlink()
+                    orphan_count += 1
+
+            if orphan_count:
+                _logger.info(f"VPA Document Layout: Removed {orphan_count} orphan report action(s)")
+        except Exception as e:
+            _logger.warning(f"VPA Document Layout: Could not cleanup orphan reports: {e}")
+
+        # STEP 2: Regenerate sale_production templates to fix QWeb syntax issues
+        try:
+            production_templates = self.search([
+                ('document_type', '=', 'sale_production')
+            ])
+            for template in production_templates:
+                _logger.info(f"Regenerating template: {template.name} (ID: {template.id})")
+                # Delete existing QWeb views for this template
+                existing_views = self.env['ir.ui.view'].search([
+                    '|', '|',
+                    ('key', 'like', f'%template_{template.id}%'),
+                    ('key', 'like', f'%inherit_{template.id}%'),
+                    ('name', 'like', f'%{template.id}')
+                ])
+                if existing_views:
+                    _logger.info(f"Deleting {len(existing_views)} existing views for template {template.id}")
+                    existing_views.unlink()
+                # Recreate the QWeb template with fixed syntax
+                template._create_qweb_template()
+            _logger.info(f"VPA Document Layout: Regenerated {len(production_templates)} sale_production template(s)")
+        except Exception as e:
+            _logger.warning(f"VPA Document Layout: Could not regenerate templates: {e}")
+
+        return True
