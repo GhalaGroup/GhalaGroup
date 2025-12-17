@@ -710,8 +710,10 @@ class VPADocumentTemplate(models.Model):
             <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
             <t t-set="address">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
-                <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
             </t>
             <t t-set="information_block">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
@@ -827,8 +829,10 @@ class VPADocumentTemplate(models.Model):
             <t t-set="address">
                 <t t-if="doc.partner_id">
                     <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
-                    <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
-                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                    </div>
                 </t>
             </t>
             <t t-set="information_block">
@@ -952,8 +956,10 @@ class VPADocumentTemplate(models.Model):
             <t t-set="report_title" t-value="vpa_template.report_title or 'Production Order'"/>
             <t t-set="address">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
-                <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
             </t>
             <t t-set="information_block">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
@@ -1291,8 +1297,10 @@ class VPADocumentTemplate(models.Model):
             <t t-set="address">
                 <t t-if="doc.partner_id">
                     <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
-                    <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
-                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
+                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                    </div>
                 </t>
             </t>
             <t t-set="information_block">
