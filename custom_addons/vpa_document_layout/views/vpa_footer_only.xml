@@ -67,26 +67,12 @@
                         font-size: 7.5pt;
                     }
                     .footer-message {
-                        font-family: 'Courier New', 'Courier', monospace;
-                        font-size: 11pt;
-                        color: #333;
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 8pt;
+                        color: #888;
                         text-align: center;
-                        letter-spacing: 3px;
-                        text-transform: uppercase;
-                        margin-top: 20px;
-                        padding: 8px 15px;
-                        font-weight: bold;
-                        background: linear-gradient(180deg, #f8f8f8 0%, #e8e8e8 100%);
-                        border: 1px solid #ccc;
-                        border-radius: 2px;
-                        display: inline-block;
-                        margin-left: auto;
-                        margin-right: auto;
-                        width: auto;
-                    }
-                    .footer-message-wrapper {
-                        text-align: center;
-                        margin-top: 15px;
+                        font-style: italic;
+                        margin-top: 10px;
                     }
                     .footer-page-number {
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -239,17 +225,15 @@
                             </div>
                         </t>
 
-                        <!-- Template-level Footer Message (dot matrix style) - also for footer_config -->
+                        <!-- Template-level Footer Message -->
                         <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
-                            <div class="footer-message-wrapper">
-                                <span class="footer-message">
-                                    <t t-if="template.footer_message_type == 'auto_generated'">*** This document was automatically generated ***</t>
-                                    <t t-if="template.footer_message_type == 'internal'">*** Internal Document - Confidential ***</t>
-                                    <t t-if="template.footer_message_type == 'draft'">*** DRAFT - Not for Distribution ***</t>
-                                    <t t-if="template.footer_message_type == 'quote_validity'">*** This quotation is valid for 30 days ***</t>
-                                    <t t-if="template.footer_message_type == 'thank_you'">*** Thank you for your business ***</t>
-                                    <t t-if="template.footer_message_type == 'custom'">*** <t t-esc="template.footer_custom_message"/> ***</t>
-                                </span>
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
                             </div>
                         </t>
 
@@ -384,17 +368,15 @@
                         </t>
                         </t><!-- Close footer_show_content -->
 
-                        <!-- Template-level Footer Message (dot matrix style) -->
+                        <!-- Template-level Footer Message -->
                         <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
-                            <div class="footer-message-wrapper">
-                                <span class="footer-message">
-                                    <t t-if="template.footer_message_type == 'auto_generated'">*** This document was automatically generated ***</t>
-                                    <t t-if="template.footer_message_type == 'internal'">*** Internal Document - Confidential ***</t>
-                                    <t t-if="template.footer_message_type == 'draft'">*** DRAFT - Not for Distribution ***</t>
-                                    <t t-if="template.footer_message_type == 'quote_validity'">*** This quotation is valid for 30 days ***</t>
-                                    <t t-if="template.footer_message_type == 'thank_you'">*** Thank you for your business ***</t>
-                                    <t t-if="template.footer_message_type == 'custom'">*** <t t-esc="template.footer_custom_message"/> ***</t>
-                                </span>
+                            <div class="footer-message">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
                             </div>
                         </t>
 
