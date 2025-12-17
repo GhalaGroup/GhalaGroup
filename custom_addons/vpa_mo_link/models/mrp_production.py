@@ -37,12 +37,14 @@ class MrpProduction(models.Model):
                 # Format: Auto-created MO P01M/MO/00511 for [Product] (Qty: 1.64) - with BOM
                 body = Markup(f"Auto-created MO {mo_link} for {product_name} (Qty: {qty}) - {bom_status}")
 
-                # Post on the Sales Order if found
+                # Post on the Sales Order if found (as OdooBot to avoid showing user name)
                 if sale_order:
+                    odoobot = self.env.ref('base.partner_root')
                     sale_order.message_post(
                         body=body,
                         message_type='notification',
-                        subtype_id=note_subtype_id
+                        subtype_id=note_subtype_id,
+                        author_id=odoobot.id
                     )
 
         return result
