@@ -39,11 +39,17 @@ class MrpProduction(models.Model):
 
                 # Post on the Sales Order if found
                 if sale_order:
+                    # Try to find OdooBot/Odoo Agent partner for author
+                    odoo_agent = self.env['res.partner'].sudo().search([
+                        ('name', 'ilike', 'odoo agent')
+                    ], limit=1)
+                    author = odoo_agent.id if odoo_agent else False
+
                     sale_order.sudo().message_post(
                         body=body,
                         message_type='notification',
                         subtype_id=note_subtype_id,
-                        author_id=False
+                        author_id=author
                     )
 
         return result
