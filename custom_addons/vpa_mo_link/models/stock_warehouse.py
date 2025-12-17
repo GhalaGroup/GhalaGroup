@@ -37,12 +37,13 @@ class StockWarehouse(models.Model):
 
             # Create manufacturing rule for this warehouse
             self.env['stock.rule'].create({
-                'name': f"{warehouse.code}: Production",
+                'name': f"{warehouse.code}: Manufacture - Draft MO",
                 'action': 'manufacture',
                 'route_id': production_route.id,
                 'picking_type_id': warehouse.manu_type_id.id,
                 'location_dest_id': warehouse.lot_stock_id.id,
-                'procure_method': 'make_to_stock',
+                'warehouse_id': warehouse.id,
+                'procure_method': 'make_to_order',
                 'company_id': warehouse.company_id.id,
                 'propagate_cancel': True,
             })
