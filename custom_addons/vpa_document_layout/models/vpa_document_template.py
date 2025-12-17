@@ -957,250 +957,349 @@ class VPADocumentTemplate(models.Model):
                 <style>
                     .vpa-sale-production {{
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                        font-size: 10pt;
+                        font-size: 11px;
                         color: #333;
                     }}
-                    .vpa-section-title {{
+                    /* Info Cards */
+                    .vpa-info-card {{
+                        background: white;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+                        border-radius: 5px;
+                        padding: 12px;
+                        margin-bottom: 10px;
+                        min-height: 70px;
+                    }}
+                    .vpa-info-card h5 {{
                         color: <t t-out="primary_color"/>;
-                        font-size: 14pt;
-                        font-weight: bold;
-                        margin: 15px 0 10px 0;
-                        padding-bottom: 5px;
-                        border-bottom: 2px solid #eee;
-                    }}
-                    .vpa-info-row {{
-                        display: flex;
-                        gap: 20px;
-                        margin-bottom: 15px;
-                    }}
-                    .vpa-info-box {{
-                        flex: 1;
-                        background: #f9f9f9;
-                        border: 1px solid #eee;
-                        border-radius: 4px;
-                        padding: 10px 12px;
-                    }}
-                    .vpa-info-box-title {{
-                        color: <t t-out="primary_color"/>;
-                        font-weight: bold;
-                        font-size: 8pt;
+                        margin: 0 0 6px 0;
+                        font-size: 10px;
                         text-transform: uppercase;
-                        margin-bottom: 6px;
                         letter-spacing: 0.5px;
+                        font-weight: 600;
                     }}
-                    .vpa-info-box p {{
-                        margin: 2px 0;
-                        font-size: 9pt;
+                    .vpa-info-card p {{
+                        margin: 1px 0;
+                        font-size: 11px;
                     }}
+                    .vpa-info-card p strong {{
+                        color: #666;
+                        font-size: 10px;
+                    }}
+                    /* Table Card Container */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 9px;
+                        padding: 4px 3px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 2px 3px;
+                        font-size: 10px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        line-height: 1.2;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    /* Section Header in Table */
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    /* Section Row (category divider) */
+                    .vpa-section-row td {{
+                        background: #f0f0f0;
+                        font-weight: 700;
+                        padding: 6px 4px;
+                        color: #666;
+                        font-size: 11px;
+                        border-bottom: 1px solid #ddd !important;
+                    }}
+                    /* Note Row */
+                    .vpa-note-row td {{
+                        padding: 4px 12px;
+                        font-style: italic;
+                        color: #555;
+                        font-size: 10px;
+                        background: #fafafa;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                    }}
+                    /* Badges */
                     .vpa-qty-badge {{
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
-                        color: white;
-                        padding: 2px 8px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                        font-size: 9pt;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 1px 5px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 10px;
+                        border: 1px solid <t t-out="primary_color"/>;
                     }}
                     .vpa-mo-badge {{
                         display: inline-block;
                         background: <t t-out="primary_color"/>;
                         color: white;
-                        padding: 2px 6px;
-                        border-radius: 3px;
-                        font-size: 8pt;
+                        padding: 1px 5px;
+                        border-radius: 6px;
+                        font-size: 8px;
+                        font-weight: 500;
                         margin: 1px;
                     }}
                     .vpa-mo-pending {{
-                        background: #999;
+                        background: transparent;
+                        color: #bbb;
+                        border: none;
+                        font-size: 9px;
                     }}
-                    .vpa-section-row td {{
-                        background: #fafafa;
-                        font-weight: bold;
-                        color: #555;
-                        padding: 6px 8px;
-                    }}
+                    /* Product Details */
                     .vpa-product-details {{
                         font-size: 8pt;
                         color: #666;
-                        margin-top: 4px;
-                        line-height: 1.4;
+                        margin-top: 2px;
+                        line-height: 1.3;
                     }}
-                    .vpa-total-box {{
-                        background: #f9f9f9;
-                        border: 1px solid #eee;
-                        border-radius: 4px;
-                        padding: 10px 15px;
-                        margin-top: 15px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 9px;
+                    }}
+                    /* Total Card */
+                    .vpa-total-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 8px;
+                        border-radius: 5px;
+                        margin: 8px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-total-label {{
-                        font-weight: bold;
-                        color: #333;
+                        font-size: 12px;
+                        color: #666;
                     }}
                     .vpa-total-value {{
-                        font-size: 16pt;
-                        font-weight: bold;
+                        font-size: 16px;
                         color: <t t-out="primary_color"/>;
+                        font-weight: 600;
                     }}
+                    /* Notes Section */
                     .vpa-notes-section {{
                         background: #f9f9f9;
-                        border: 1px solid #eee;
-                        border-radius: 4px;
-                        padding: 10px 12px;
-                        margin-top: 12px;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 8px;
+                        margin: 10px 0;
+                        page-break-inside: avoid;
                     }}
                     .vpa-notes-title {{
                         color: <t t-out="primary_color"/>;
-                        font-weight: bold;
-                        font-size: 8pt;
-                        text-transform: uppercase;
-                        margin-bottom: 6px;
+                        margin: 0 0 6px 0;
+                        font-size: 10px;
+                        font-weight: 600;
                     }}
-                    .vpa-notes-section ul {{
-                        margin: 0;
-                        padding-left: 18px;
+                    .vpa-notes-content {{
+                        min-height: 40px;
+                        background: white;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 3px;
+                        padding: 6px;
                     }}
-                    .vpa-notes-section li {{
-                        margin: 4px 0;
-                        font-size: 9pt;
+                    .vpa-notes-content div {{
+                        margin-left: 10px;
+                        margin-top: 2px;
+                        padding-bottom: 2px;
+                        font-size: 8px;
+                        color: #666;
+                    }}
+                    .vpa-mo-name {{
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
                     }}
                 </style>
 
                 <div class="vpa-sale-production">
-                    <!-- Customer Details / Delivery Info Boxes -->
-                    <table style="width: 100%%; margin-bottom: 15px; border-collapse: separate; border-spacing: 15px 0;">
+                    <!-- Customer Details / Delivery Info Cards -->
+                    <table style="width: 100%%; margin-bottom: 10px; border-collapse: separate; border-spacing: 10px 0;">
                         <tr>
                             <td style="width: 50%%; vertical-align: top;">
-                                <div class="vpa-info-box">
-                                    <div class="vpa-info-box-title">Customer Details</div>
+                                <div class="vpa-info-card">
+                                    <h5>CUSTOMER DETAILS</h5>
                                     <p><strong>Client:</strong> <t t-out="doc.partner_id.name"/></p>
                                     <p><strong>Order Date:</strong> <t t-out="doc.date_order" t-options='{{"widget": "date"}}'/></p>
                                     <p t-if="doc.client_order_ref"><strong>Reference:</strong> <t t-out="doc.client_order_ref"/></p>
                                 </div>
                             </td>
                             <td style="width: 50%%; vertical-align: top;">
-                                <div class="vpa-info-box">
-                                    <div class="vpa-info-box-title">Delivery Info</div>
+                                <div class="vpa-info-card">
+                                    <h5>DELIVERY INFO</h5>
                                     <p><strong>Expected:</strong>
                                         <t t-if="doc.commitment_date">
-                                            <t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/>
+                                            <span style="color: {primary_color}; font-weight: 600;"><t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/></span>
                                         </t>
-                                        <t t-else="">Not Set</t>
+                                        <t t-else=""><span style="color: #999;">Not Set</span></t>
                                     </p>
-                                    <p><strong>Status:</strong> <t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></p>
+                                    <p><strong>Status:</strong>
+                                        <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
+                                        <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
+                                        <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
+                                    </p>
                                 </div>
                             </td>
                         </tr>
                     </table>
 
-                    <!-- Items Summary Title -->
-                    <div class="vpa-info-box-title" style="margin-top: 15px; margin-bottom: 8px;">
-                        Items Summary Details
-                    </div>
-
-                    <!-- Items Table -->
-                    <table class="table table-sm o_main_table">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%%;">No.</th>
-                                <th style="width: 45%%;">Product Description</th>
-                                <th style="width: 15%%; text-align: center;">Quantity</th>
-                                <th style="width: 10%%; text-align: center;">Unit</th>
-                                <th style="width: 25%%; text-align: center;">MO Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-set="line_num" t-value="0"/>
-                            <t t-set="total_qty" t-value="0"/>
-                            <t t-set="current_section" t-value="''"/>
-
-                            <t t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
-                                <!-- Section header by product category -->
-                                <t t-set="section_name" t-value="line.product_id.categ_id.name or 'Products'"/>
-                                <t t-if="section_name != current_section">
-                                    <t t-set="current_section" t-value="section_name"/>
-                                    <tr class="vpa-section-row">
-                                        <td colspan="5"><t t-out="section_name"/></td>
-                                    </tr>
-                                </t>
-
-                                <t t-set="line_num" t-value="line_num + 1"/>
-                                <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
-
+                    <!-- Table Card with Items -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ITEMS SUMMARY DETAILS</div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><t t-out="line_num"/></td>
-                                    <td>
-                                        <strong>[<t t-out="line.product_id.default_code or 'N/A'"/>]</strong>
-                                        <t t-out="line.product_id.name"/>
-                                        <t t-if="line.name and line.name != line.product_id.name">
-                                            <div class="vpa-product-details">
-                                                <t t-out="line.name"/>
-                                            </div>
-                                        </t>
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <span class="vpa-qty-badge">
-                                            <t t-esc="'{{:.4f}}'.format(line.product_uom_qty)"/>
-                                        </span>
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <t t-out="line.product_uom_id.name"/>
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <!-- Find related manufacturing orders -->
-                                        <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
-                                        <t t-if="mos">
-                                            <t t-foreach="mos" t-as="mo">
-                                                <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
-                                            </t>
-                                        </t>
-                                        <t t-else="">
-                                            <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
-                                        </t>
-                                    </td>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 50%%;">PRODUCT DESCRIPTION</th>
+                                    <th style="width: 12%%; text-align: center;">QUANTITY</th>
+                                    <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    <th style="width: 23%%; text-align: center;">MO REFERENCE</th>
                                 </tr>
-                            </t>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-set="total_qty" t-value="0"/>
 
-                    <!-- Total Box -->
-                    <div class="vpa-total-box">
-                        <span class="vpa-total-label">Total Production Quantity:</span>
-                        <span class="vpa-total-value"><t t-esc="'{{:.2f}}'.format(total_qty)"/></span>
+                                <t t-foreach="doc.order_line" t-as="line">
+                                    <!-- Section Headers -->
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <tr class="vpa-section-row">
+                                            <td colspan="5"><t t-out="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Note Lines -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr class="vpa-note-row">
+                                            <td colspan="5"><t t-out="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Regular Product Lines -->
+                                    <t t-elif="line.product_uom_qty > 0">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
+                                        <tr>
+                                            <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
+                                            <td>
+                                                <div style="font-weight: 500; color: #333; font-size: 10px;">
+                                                    <t t-if="line.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <t t-out="line.name"/>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <span class="vpa-qty-badge"><t t-out="line.product_uom_qty"/></span>
+                                            </td>
+                                            <td style="text-align: center; color: #666; font-size: 9px;">
+                                                <t t-out="line.product_uom_id.name"/>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
+                                                <t t-if="mos">
+                                                    <t t-foreach="mos" t-as="mo">
+                                                        <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="vpa-mo-pending">Pending</span>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
                     </div>
+
+                    <!-- Total Card -->
+                    <div class="vpa-total-card">
+                        <table style="width: 100%%;">
+                            <tr>
+                                <td style="width: 70%%; text-align: right; padding-right: 15px;">
+                                    <span class="vpa-total-label">Total Production Quantity:</span>
+                                </td>
+                                <td style="width: 30%%; text-align: center;">
+                                    <span class="vpa-total-value"><t t-out="total_qty"/></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Terms and Conditions (if exists) -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section">
+                            <div class="vpa-notes-title">TERMS AND CONDITIONS:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <t t-out="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
 
                     <!-- Production Notes -->
-                    <t t-set="all_mos" t-value="doc.order_line.mapped('move_ids').mapped('created_production_id')"/>
-                    <t t-if="all_mos">
-                        <div class="vpa-notes-section">
-                            <div class="vpa-notes-title">Production Notes:</div>
-                            <p style="margin: 4px 0; font-size: 9pt;"><strong>Manufacturing Orders:</strong></p>
-                            <ul>
+                    <div class="vpa-notes-section">
+                        <div class="vpa-notes-title">PRODUCTION NOTES:</div>
+                        <div class="vpa-notes-content">
+                            <t t-set="all_mos" t-value="doc.order_line.mapped('move_ids').mapped('created_production_id')"/>
+                            <t t-if="all_mos">
+                                <div style="font-size: 8px; color: #666; margin-left: 0 !important;">
+                                    <strong>Manufacturing Orders:</strong>
+                                </div>
                                 <t t-foreach="all_mos" t-as="mo">
-                                    <li>
-                                        <strong><t t-out="mo.name"/></strong> -
+                                    <div>
+                                        • <span class="vpa-mo-name"><t t-out="mo.name"/></span> -
                                         <t t-out="mo.product_id.name"/>
                                         (<t t-out="mo.product_qty"/> <t t-out="mo.product_uom_id.name"/>)
                                         <t t-if="doc.client_order_ref">
                                             | <t t-out="doc.client_order_ref"/>
                                         </t>
-                                    </li>
+                                    </div>
                                 </t>
-                            </ul>
+                                <div style="min-height: 20px; margin-top: 8px; border-top: 1px dotted #ddd; padding-top: 5px;">
+                                    <!-- Space for additional manual notes -->
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <span style="color: #bbb; font-size: 9px; font-style: italic;">No manufacturing orders created yet</span>
+                            </t>
                         </div>
-                    </t>
-
-                    <!-- Additional Notes from Sale Order -->
-                    <t t-if="doc.note">
-                        <div class="vpa-notes-section" style="margin-top: 10px;">
-                            <div class="vpa-notes-title">Order Notes:</div>
-                            <div style="font-size: 9pt;">
-                                <t t-out="doc.note"/>
-                            </div>
-                        </div>
-                    </t>
+                    </div>
                 </div>
             </t>
         </t>
