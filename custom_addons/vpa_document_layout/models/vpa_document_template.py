@@ -1150,7 +1150,7 @@ class VPADocumentTemplate(models.Model):
                                     </td>
                                     <td style="text-align: center;">
                                         <!-- Find related manufacturing orders -->
-                                        <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if hasattr(line, 'move_ids') and line.move_ids else []"/>
+                                        <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
                                         <t t-if="mos">
                                             <t t-foreach="mos" t-as="mo">
                                                 <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
