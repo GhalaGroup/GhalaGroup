@@ -939,31 +939,34 @@ class VPADocumentTemplate(models.Model):
             <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
             <t t-set="report_title" t-value="vpa_template.report_title or 'Production Order'"/>
             <t t-set="address">
-                <div t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: {{primary_color}}; margin-bottom: 6px;">CUSTOMER DETAILS</div>
-                <strong><span t-field="doc.partner_id.name"/></strong><br/>
-                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <strong style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"><span t-field="doc.partner_id.name"/></strong><br/>
+                <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}' style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;"/>
             </t>
             <t t-set="information_block">
-                <div t-if="doc.date_order">
-                    <strong>Order Date:</strong>
-                    <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.commitment_date" class="mt-2">
-                    <strong>Expected Delivery:</strong>
-                    <span t-field="doc.commitment_date" t-options='{{"widget": "date"}}'/>
-                </div>
-                <div t-if="doc.client_order_ref" class="mt-2">
-                    <strong>Customer Reference:</strong>
-                    <span t-field="doc.client_order_ref"/>
-                </div>
-                <div class="mt-2">
-                    <strong>Status:</strong>
-                    <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
-                    <t t-elif="doc.state == 'sent'"><span style="color: #17a2b8;">Sent</span></t>
-                    <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
-                    <t t-elif="doc.state == 'done'"><span style="color: #28a745;">Done</span></t>
-                    <t t-elif="doc.state == 'cancel'"><span style="color: #dc3545;">Cancelled</span></t>
-                    <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong>Order Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.commitment_date" style="margin-top: 4px;">
+                        <strong>Expected Delivery:</strong>
+                        <span t-field="doc.commitment_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.client_order_ref" style="margin-top: 4px;">
+                        <strong>Customer Reference:</strong>
+                        <span t-field="doc.client_order_ref"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>Status:</strong>
+                        <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
+                        <t t-elif="doc.state == 'sent'"><span style="color: #17a2b8;">Sent</span></t>
+                        <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
+                        <t t-elif="doc.state == 'done'"><span style="color: #28a745;">Done</span></t>
+                        <t t-elif="doc.state == 'cancel'"><span style="color: #dc3545;">Cancelled</span></t>
+                        <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
+                    </div>
                 </div>
             </t>
             <t t-set="layout_document_title">
