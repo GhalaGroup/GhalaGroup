@@ -20,7 +20,7 @@ Key Features:
 2. **No-BOM Support**: MOs created even when BOM is missing (user sets later)
 3. **Manual MO Linking**: Link MOs created before Sales Orders
 4. **Unified Smart Button**: Shows both automatic and manually linked MOs
-5. **Production Route**: Dedicated route created automatically on installation
+5. **Manufacture - Draft MO Route**: Dedicated route that creates MOs in draft state
 
 Workflows Supported:
 --------------------
@@ -36,7 +36,7 @@ Technical Details:
 * Extends sale_mrp._compute_mrp_production_ids() to include origin-based MOs
 * Single MO - Link/Unlink toggle action manages origin field for manual linking
 * Compatible with procurement_group_id automations
-* Creates Production route automatically on installation
+* Creates "Manufacture - Draft MO" route automatically on installation
 
 Support:
 --------
