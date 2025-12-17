@@ -171,26 +171,12 @@
                                         <group string="Odoo Standard Footer">
                                             <field name="hide_odoo_footer"/>
                                         </group>
-                                    </group>
-
-                                    <!-- Quick Footer Settings -->
-                                    <separator string="Quick Footer Settings"/>
-                                    <group>
-                                        <group>
+                                        <group string="VPA Footer">
                                             <field name="footer_enabled" string="Show Footer"/>
-                                            <field name="footer_show_page_number" string="Show Page Numbers" invisible="not footer_enabled"/>
-                                            <field name="footer_page_number_format" invisible="not footer_enabled or not footer_show_page_number"/>
-                                        </group>
-                                        <group>
-                                            <field name="footer_message_type" string="Footer Message" invisible="not footer_enabled"/>
-                                            <field name="footer_custom_message" placeholder="Enter your custom message..." invisible="footer_message_type != 'custom' or not footer_enabled"/>
                                         </group>
                                     </group>
-                                    <div class="alert alert-info" role="alert" invisible="not footer_enabled">
-                                        <strong>Typewriter Style:</strong> Footer messages appear in a typewriter/monospace font for a professional automated document look.
-                                    </div>
 
-                                    <!-- Legacy Footer Settings (Original System) -->
+                                    <!-- Footer Layout (only when footer enabled) -->
                                     <separator string="Footer Layout" invisible="not footer_enabled"/>
                                     <group invisible="not footer_enabled">
                                         <group>
@@ -225,6 +211,19 @@
                                     <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled">
                                         <field name="footer_column_1_title" placeholder="Title (optional)"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
+                                    </group>
+
+                                    <!-- Page Numbers & Message -->
+                                    <separator string="Page Numbers &amp; Message" invisible="not footer_enabled"/>
+                                    <group invisible="not footer_enabled">
+                                        <group>
+                                            <field name="footer_show_page_number" string="Show Page Numbers"/>
+                                            <field name="footer_page_number_format" invisible="not footer_show_page_number"/>
+                                        </group>
+                                        <group>
+                                            <field name="footer_message_type" string="Footer Message"/>
+                                            <field name="footer_custom_message" placeholder="Enter your custom message..." invisible="footer_message_type != 'custom'"/>
+                                        </group>
                                     </group>
                                 </page>
 
