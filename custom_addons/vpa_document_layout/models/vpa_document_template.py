@@ -1030,7 +1030,7 @@ class VPADocumentTemplate(models.Model):
                                                 <span class="vpa-qty-badge"><span t-field="line.product_uom_qty"/></span>
                                             </td>
                                             <td style="text-align: center; color: #666; font-size: 9px;">
-                                                <span t-field="line.product_uom"/>
+                                                <span t-field="line.product_uom_id"/>
                                             </td>
                                             <td style="text-align: right; font-size: 10px;">
                                                 <span t-field="line.price_unit"/>
