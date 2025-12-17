@@ -939,6 +939,7 @@ class VPADocumentTemplate(models.Model):
             <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
             <t t-set="report_title" t-value="vpa_template.report_title or 'Production Order'"/>
             <t t-set="address">
+                <div t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: {{primary_color}}; margin-bottom: 6px;">CUSTOMER DETAILS</div>
                 <strong><span t-field="doc.partner_id.name"/></strong><br/>
                 <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
             </t>
@@ -955,6 +956,15 @@ class VPADocumentTemplate(models.Model):
                     <strong>Customer Reference:</strong>
                     <span t-field="doc.client_order_ref"/>
                 </div>
+                <div class="mt-2">
+                    <strong>Status:</strong>
+                    <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
+                    <t t-elif="doc.state == 'sent'"><span style="color: #17a2b8;">Sent</span></t>
+                    <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
+                    <t t-elif="doc.state == 'done'"><span style="color: #28a745;">Done</span></t>
+                    <t t-elif="doc.state == 'cancel'"><span style="color: #dc3545;">Cancelled</span></t>
+                    <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
+                </div>
             </t>
             <t t-set="layout_document_title">
                 <t t-out="report_title"/> # <span t-field="doc.name"/>
@@ -966,31 +976,6 @@ class VPADocumentTemplate(models.Model):
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                         font-size: 12px;
                         color: #333;
-                    }}
-                    /* Info Cards */
-                    .vpa-info-card {{
-                        background: white;
-                        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-                        border-radius: 5px;
-                        padding: 12px;
-                        margin-bottom: 10px;
-                        min-height: 70px;
-                    }}
-                    .vpa-info-card h5 {{
-                        color: <t t-out="primary_color"/>;
-                        margin: 0 0 6px 0;
-                        font-size: 11px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        font-weight: 600;
-                    }}
-                    .vpa-info-card p {{
-                        margin: 1px 0;
-                        font-size: 12px;
-                    }}
-                    .vpa-info-card p strong {{
-                        color: #666;
-                        font-size: 11px;
                     }}
                     /* Table Card Container */
                     .vpa-table-card {{
@@ -1157,36 +1142,6 @@ class VPADocumentTemplate(models.Model):
                 </style>
 
                 <div class="vpa-sale-production">
-                    <!-- Customer Details / Delivery Info Cards -->
-                    <table style="width: 100%%; margin-bottom: 10px; border-collapse: separate; border-spacing: 10px 0;">
-                        <tr>
-                            <td style="width: 50%%; vertical-align: top;">
-                                <div class="vpa-info-card">
-                                    <h5>CUSTOMER DETAILS</h5>
-                                    <p><strong>Client:</strong> <t t-out="doc.partner_id.name"/></p>
-                                    <p><strong>Order Date:</strong> <t t-out="doc.date_order" t-options='{{"widget": "date"}}'/></p>
-                                    <p t-if="doc.client_order_ref"><strong>Reference:</strong> <t t-out="doc.client_order_ref"/></p>
-                                </div>
-                            </td>
-                            <td style="width: 50%%; vertical-align: top;">
-                                <div class="vpa-info-card">
-                                    <h5>DELIVERY INFO</h5>
-                                    <p><strong>Expected:</strong>
-                                        <t t-if="doc.commitment_date">
-                                            <span t-attf-style="color: {{primary_color}}; font-weight: 600;"><t t-out="doc.commitment_date" t-options='{{"widget": "date"}}'/></span>
-                                        </t>
-                                        <t t-else=""><span style="color: #999;">Not Set</span></t>
-                                    </p>
-                                    <p><strong>Status:</strong>
-                                        <t t-if="doc.state == 'draft'"><span style="color: #6c757d;">Quotation</span></t>
-                                        <t t-elif="doc.state == 'sale'"><span style="color: #28a745;">Confirmed</span></t>
-                                        <t t-else=""><t t-out="dict(doc._fields['state'].selection).get(doc.state, doc.state)"/></t>
-                                    </p>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
                     <!-- Table Card with Items -->
                     <div class="vpa-table-card">
                         <div class="vpa-section-header">ITEMS SUMMARY DETAILS</div>
