@@ -66,23 +66,24 @@
                         font-size: 7.5pt;
                     }
                     .footer-message {
-                        font-family: 'Consolas', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace;
-                        font-size: 8pt;
-                        color: #777;
+                        font-family: 'Dot Matrix', 'DOTMATRI', 'Fake Receipt', 'Receipt', 'Courier Prime', 'Courier New', monospace;
+                        font-size: 9pt;
+                        color: #666;
                         text-align: center;
-                        letter-spacing: 1px;
+                        letter-spacing: 2px;
                         text-transform: uppercase;
-                        margin-top: 15px;
-                        padding-top: 8px;
+                        margin-top: 25px;
+                        padding-top: 10px;
                     }
                     .footer-page-number {
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
                         font-size: 8pt;
-                        color: #555;
                         text-align: right;
-                        margin-top: 8px;
-                        padding-right: 10px;
-                        font-weight: 500;
+                        margin-top: 10px;
+                        padding: 4px 12px;
+                        display: inline-block;
+                        float: right;
+                        border-radius: 3px;
                     }
                 </style>
                 <script>
@@ -239,11 +240,13 @@
 
                         <!-- Template-level Page Numbers - also for footer_config (overrides config.show_page_numbers) -->
                         <t t-if="template.footer_show_page_number and not config.show_page_numbers">
-                            <div class="footer-page-number">
-                                <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
-                                <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
-                                <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
-                                <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                            <div style="text-align: right; margin-top: 12px; clear: both;">
+                                <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                </span>
                             </div>
                         </t>
                     </div>
@@ -380,11 +383,13 @@
 
                         <!-- Template-level Page Numbers -->
                         <t t-if="template.footer_show_page_number">
-                            <div class="footer-page-number">
-                                <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
-                                <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
-                                <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
-                                <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                            <div style="text-align: right; margin-top: 12px; clear: both;">
+                                <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                </span>
                             </div>
                         </t>
                     </div>
