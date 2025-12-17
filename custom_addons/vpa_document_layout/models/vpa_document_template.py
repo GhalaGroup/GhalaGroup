@@ -436,6 +436,37 @@ class VPADocumentTemplate(models.Model):
                 if template.report_action_id:
                     template._update_report_action()
 
+        # If document_type changed, update the report binding model and regenerate template
+        if 'document_type' in vals:
+            model_map = {
+                'quotation': 'sale.order',
+                'sale_order': 'sale.order',
+                'sale_production': 'sale.order',
+                'invoice': 'account.move',
+                'bill': 'account.move',
+                'purchase_order': 'purchase.order',
+                'delivery': 'stock.picking',
+                'picking': 'stock.picking',
+                'manufacturing_order': 'mrp.production',
+            }
+            for template in self:
+                new_model = model_map.get(template.document_type, 'sale.order')
+                if template.report_action_id:
+                    # Update report action binding
+                    template.report_action_id.write({
+                        'model': new_model,
+                        'binding_model_id': self.env['ir.model']._get(new_model).id,
+                    })
+                # Delete old QWeb views and regenerate
+                existing_views = self.env['ir.ui.view'].search([
+                    '|', '|',
+                    ('key', 'like', f'%template_{template.id}%'),
+                    ('key', 'like', f'%inherit_{template.id}%'),
+                    ('name', 'like', f'%{template.id}')
+                ])
+                existing_views.unlink()
+                template._create_qweb_template()
+
         return result
 
     def unlink(self):
