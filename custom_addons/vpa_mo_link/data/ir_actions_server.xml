@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- MO - Link/Unlink Toggle: Smart action that links or unlinks MOs based on current state -->
+    <!-- MO - Link/Unlink Toggle: Smart action that links or unlinks MANUALLY created MOs -->
     <record id="action_mo_link_toggle" model="ir.actions.server">
-        <field name="name">MO - Link/Unlink</field>
+        <field name="name">MO - Link/Unlink (Manual)</field>
         <field name="model_id" ref="sale.model_sale_order"/>
         <field name="binding_model_id" ref="sale.model_sale_order"/>
         <field name="binding_view_types">form,list</field>
         <field name="state">code</field>
         <field name="code"><![CDATA[
-# MO - Link/Unlink Toggle: Smart action that detects current state and toggles link
-# If MOs are linked (origin matches SO name) -> Unlink them
-# If no MOs are linked -> Search and link MOs with matching origin
+# MO - Link/Unlink Toggle: For MANUALLY created MOs only
+# Auto-created MOs (from SO confirmation) are linked via stock_reference_ids - cannot be unlinked
+# This action only works with MOs where you manually set the Source/Origin field
 
 # Check if MRP module is installed
 try:
@@ -18,43 +18,70 @@ try:
 except KeyError:
     raise UserError("Manufacturing (MRP) module is not installed. Please install it first.")
 
+# Get MOs that are auto-created (linked via stock_reference_ids)
+auto_linked_mo_ids = set()
+if hasattr(record, 'stock_reference_ids') and record.stock_reference_ids:
+    auto_mos = record.stock_reference_ids.production_ids.filtered(
+        lambda mo: mo.state != 'cancel'
+    )
+    auto_linked_mo_ids = set(auto_mos.ids)
+
 # Find MOs where origin (Source field) matches this SO's name
-linked_mos = mrp_production.search([
+origin_mos = mrp_production.search([
     ('origin', '=', record.name),
     ('state', '!=', 'cancel')
 ])
 
-if linked_mos:
-    # === UNLINK MODE: MOs are currently linked, so unlink them ===
+# Separate manually linked MOs (origin matches but NOT in auto-linked)
+manually_linked_mos = origin_mos.filtered(lambda mo: mo.id not in auto_linked_mo_ids)
+
+# MOs that are ONLY auto-linked (no manual origin set, or origin cleared)
+auto_only_mos = mrp_production.browse(list(auto_linked_mo_ids - set(origin_mos.ids)))
+
+if manually_linked_mos:
+    # === UNLINK MODE: Clear origin for manually linked MOs ===
     mo_names = []
-    for mo in linked_mos:
+    for mo in manually_linked_mos:
         mo_names.append(mo.name)
         mo.write({'origin': False})
 
         # Add chatter message in MO
-        so_link = f"<a href='#id={record.id}&model=sale.order'>{record.name}</a>"
+        so_link = f"<a href='#id={record.id}&amp;model=sale.order'>{record.name}</a>"
         mo.message_post(body=f"Unlinked from Sales Order {so_link}")
 
-    # Trigger recomputation to update smart button
-    record._compute_mrp_production_ids()
+    # Invalidate cache to refresh computed field
+    record.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])
 
     # Log in Sales Order
-    mo_links = ', '.join([f"<a href='#id={mo.id}&model=mrp.production'>{mo.name}</a>" for mo in linked_mos])
-    record.message_post(body=f"Unlinked {len(linked_mos)} Manufacturing Order(s): {mo_links}")
+    mo_links = ', '.join([f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>" for mo in manually_linked_mos])
+    record.message_post(body=f"Unlinked {len(manually_linked_mos)} manually linked MO(s): {mo_links}")
 
     action = {
         'type': 'ir.actions.client',
         'tag': 'display_notification',
         'params': {
             'title': 'MOs Unlinked',
-            'message': f"Successfully unlinked {len(linked_mos)} Manufacturing Order(s):\n" + "\n".join(mo_names),
+            'message': f"Successfully unlinked {len(manually_linked_mos)} manually linked MO(s):\n" + "\n".join(mo_names),
             'type': 'success',
             'sticky': False,
+            'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+        }
+    }
+elif auto_linked_mo_ids:
+    # Only auto-linked MOs exist - cannot unlink these
+    auto_mo_names = ', '.join([mo.name for mo in mrp_production.browse(list(auto_linked_mo_ids))])
+    action = {
+        'type': 'ir.actions.client',
+        'tag': 'display_notification',
+        'params': {
+            'title': 'Cannot Unlink Auto-Created MOs',
+            'message': f"The following MO(s) were auto-created when confirming this SO and cannot be unlinked:\n{auto_mo_names}\n\nThis action only works with manually linked MOs.",
+            'type': 'warning',
+            'sticky': True,
         }
     }
 else:
     # === LINK MODE: No MOs linked, show instructions ===
-    # User needs to first set the Source field in MO to match SO name
     action = {
         'type': 'ir.actions.client',
         'tag': 'display_notification',
@@ -71,5 +98,72 @@ else:
     <!-- Delete old separate actions to prevent duplicates -->
     <delete model="ir.actions.server" search="[('name', '=', 'MO - Link'), ('model_id.model', '=', 'sale.order')]"/>
     <delete model="ir.actions.server" search="[('name', '=', 'MO - Unlink'), ('model_id.model', '=', 'sale.order')]"/>
+
+    <!-- Link to SO: Action on Manufacturing Order to link/unlink to a Sales Order -->
+    <record id="action_mo_link_to_so" model="ir.actions.server">
+        <field name="name">Link to Sales Order</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="state">code</field>
+        <field name="code"><![CDATA[
+# Link/Unlink MO to Sales Order
+# If origin is set and matches an SO -> Unlink (clear origin)
+# If origin is empty -> Show wizard to select SO to link
+
+for mo in records:
+    if mo.origin:
+        # Check if origin matches a Sales Order
+        sale_order = env['sale.order'].search([('name', '=', mo.origin)], limit=1)
+        if sale_order:
+            # Currently linked - unlink it
+            old_origin = mo.origin
+            mo.write({'origin': False})
+
+            # Post messages
+            so_link = f"<a href='#id={sale_order.id}&amp;model=sale.order'>{old_origin}</a>"
+            mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+
+            mo_link = f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>"
+            sale_order.message_post(body=f"Unlinked Manufacturing Order {mo_link}")
+
+            # Invalidate SO cache
+            sale_order.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])
+
+            action = {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Unlinked from SO',
+                    'message': f"MO {mo.name} unlinked from {old_origin}",
+                    'type': 'success',
+                    'sticky': False,
+                    'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+                }
+            }
+        else:
+            # Origin doesn't match any SO - just inform
+            action = {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Source Already Set',
+                    'message': f"Source field is set to '{mo.origin}' but no matching Sales Order found.\n\nTo link to a different SO, first clear the Source field manually.",
+                    'type': 'warning',
+                    'sticky': True,
+                }
+            }
+    else:
+        # No origin - open wizard to select SO
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': 'Link to Sales Order',
+            'res_model': 'vpa.mo.link.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_production_id': mo.id},
+        }
+]]></field>
+    </record>
 
 </odoo>

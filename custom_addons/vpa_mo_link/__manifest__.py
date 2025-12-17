@@ -54,6 +54,8 @@ Copyright (C) 2025 VPA Software Limited
     'images': ['static/description/icon.png'],
     'depends': ['sale_mrp', 'mrp', 'stock'],
     'data': [
+        'security/ir.model.access.csv',
+        'views/mo_link_wizard_views.xml',
         'data/stock_route_data.xml',
         'data/ir_actions_server.xml',
     ],
