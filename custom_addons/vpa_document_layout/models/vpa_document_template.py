@@ -1020,9 +1020,6 @@ class VPADocumentTemplate(models.Model):
                                             <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
                                             <td>
                                                 <div style="font-weight: 500; color: #333; font-size: 10px;">
-                                                    <t t-if="line.product_id.default_code">
-                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
-                                                    </t>
                                                     <span t-field="line.name"/>
                                                 </div>
                                             </td>
@@ -1036,7 +1033,7 @@ class VPADocumentTemplate(models.Model):
                                                 <span t-field="line.price_unit"/>
                                             </td>
                                             <td t-if="display_discount" style="text-align: center; font-size: 10px;">
-                                                <span t-field="line.discount"/>%%
+                                                <span t-field="line.discount"/><t t-out="'%'"/>
                                             </td>
                                             <td style="text-align: right;">
                                                 <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
@@ -1049,8 +1046,8 @@ class VPADocumentTemplate(models.Model):
                     </div>
 
                     <!-- Totals Card -->
-                    <div style="display: flex; justify-content: flex-end;">
-                        <div class="vpa-total-card" style="width: 350px;">
+                    <div style="overflow: hidden;">
+                        <div class="vpa-total-card" style="width: 350px; float: right;">
                             <table>
                                 <tr>
                                     <td style="text-align: right; width: 60%%;">
