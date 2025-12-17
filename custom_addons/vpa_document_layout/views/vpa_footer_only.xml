@@ -6,6 +6,13 @@
             <head>
                 <meta charset="utf-8"/>
                 <style type="text/css">
+                    /* VT323 Dot Matrix Font - embedded for wkhtmltopdf compatibility */
+                    @font-face {
+                        font-family: 'VT323';
+                        font-style: normal;
+                        font-weight: 400;
+                        src: url(data:font/woff2;base64,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) format('woff2');
+                    }
                     * {
                         box-sizing: border-box;
                         margin: 0;
@@ -66,11 +73,11 @@
                         font-size: 7.5pt;
                     }
                     .footer-message {
-                        font-family: 'Courier New', Courier, monospace;
-                        font-size: 10pt;
-                        color: #555;
+                        font-family: 'VT323', 'Courier New', monospace;
+                        font-size: 16pt;
+                        color: #444;
                         text-align: center;
-                        letter-spacing: 3px;
+                        letter-spacing: 2px;
                         text-transform: uppercase;
                         margin-top: 25px;
                         padding-top: 10px;
