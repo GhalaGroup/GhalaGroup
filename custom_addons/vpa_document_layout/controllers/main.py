@@ -241,6 +241,18 @@ class VPATemplatePreview(http.Controller):
         # Build header HTML - Logo on LEFT, Company info on RIGHT (side by side)
         company_info_color = template.header_company_info_color or '#333333'
 
+        # Decorative circle settings
+        show_circle = template.header_show_circle
+        circle_size = template.header_circle_size or 300
+        circle_opacity = template.header_circle_opacity or 0.25
+
+        # Build circle SVG if enabled
+        circle_svg = ''
+        if show_circle:
+            circle_svg = f'''<svg style="position: absolute; top: -50px; right: -50px; z-index: 0;" width="{circle_size}" height="{circle_size}" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="{circle_size/2}" cy="{circle_size/2}" r="{circle_size/2}" fill="{primary_color}" fill-opacity="{circle_opacity}"/>
+            </svg>'''
+
         html_str = f'''<!DOCTYPE html>
 <html>
 <head>
@@ -253,30 +265,40 @@ class VPATemplatePreview(http.Controller):
             width: 100%;
             margin: 0;
             padding: 0;
+            overflow: visible;
         }}
         .vpa-header {{
-            padding: 8px 18px;
+            padding: 10px 18px;
             border-bottom: 1px solid {primary_color};
             display: table;
             width: 100%;
             table-layout: fixed;
+            position: relative;
+            overflow: visible;
+            min-height: 22mm;
         }}
         .header-left {{
             display: table-cell;
             vertical-align: middle;
             width: 40%;
             text-align: left;
+            position: relative;
+            z-index: 1;
+            height: 100%;
         }}
         .header-right {{
             display: table-cell;
             vertical-align: middle;
             width: 60%;
             text-align: right;
+            position: relative;
+            z-index: 1;
         }}
         .header-left img {{
-            max-height: 22mm;
+            max-height: 20mm;
             max-width: 50mm;
-            vertical-align: middle;
+            display: block;
+            margin: auto 0;
         }}
         .company-info {{
             font-size: 8pt;
@@ -287,6 +309,7 @@ class VPATemplatePreview(http.Controller):
 </head>
 <body>
     <div class="vpa-header">
+        {circle_svg}
         <div class="header-left">
             {logo_html}
         </div>
