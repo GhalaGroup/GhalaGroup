@@ -131,13 +131,16 @@
                 table.o_main_table thead th {
                     background-color: <t t-esc='primary'/> !important;
                     color: white !important;
-                    padding: 10px !important;
+                    padding: 14px 12px !important;
                     font-weight: bold !important;
+                    font-size: 15pt !important;
                 }
 
                 table.o_main_table tbody td {
-                    padding: 8px 10px !important;
+                    padding: 12px !important;
                     border-bottom: 1px solid #e0e0e0 !important;
+                    font-size: 14pt !important;
+                    line-height: 1.5 !important;
                 }
             }
         </t>
