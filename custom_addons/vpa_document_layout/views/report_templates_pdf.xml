@@ -122,7 +122,7 @@
                         </div>
                     </td>
                     <td style="width: 30%; text-align: right; vertical-align: top;">
-                        <div>Page <span class="page"/> of <span class="topage"/></div>
+                        <div>Page <span class="page"></span> of <span class="topage"></span></div>
                     </td>
                 </tr>
             </table>

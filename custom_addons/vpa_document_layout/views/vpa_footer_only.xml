@@ -17,8 +17,8 @@
                         padding: 0;
                         font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
                         position: relative;
-                        height: 30mm;
-                        overflow: hidden;
+                        height: 35mm;
+                        overflow: visible;
                     }
                     .footer-wave {
                         position: absolute;
@@ -160,7 +160,7 @@
 
                                 <!-- Page Numbers -->
                                 <div t-if="config.show_page_numbers" style="margin-top: 5px;">
-                                    Page <span class="page"/> of <span class="topage"/>
+                                    Page <span class="page"></span> of <span class="topage"></span>
                                 </div>
                             </div>
                         </t>
@@ -184,7 +184,7 @@
                                 </tr>
                             </table>
                             <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                                Page <span class="page"/> of <span class="topage"/>
+                                Page <span class="page"></span> of <span class="topage"></span>
                             </div>
                         </t>
 
@@ -213,7 +213,7 @@
                                 </tr>
                             </table>
                             <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                                Page <span class="page"/> of <span class="topage"/>
+                                Page <span class="page"></span> of <span class="topage"></span>
                             </div>
                         </t>
 
@@ -221,7 +221,7 @@
                         <t t-if="config.footer_layout == 'custom_html'">
                             <div t-out="config._render_custom_html(company)"/>
                             <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                                Page <span class="page"/> of <span class="topage"/>
+                                Page <span class="page"></span> of <span class="topage"></span>
                             </div>
                         </t>
 
@@ -241,10 +241,10 @@
                         <t t-if="template.footer_show_page_number and not config.show_page_numbers">
                             <div style="text-align: right; margin-top: 12px; clear: both;">
                                 <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
-                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
-                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
-                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
-                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"></span> of <span class="topage"></span></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"></span></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"></span> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"></span>/<span class="topage"></span>]</t>
                                 </span>
                             </div>
                         </t>
@@ -384,10 +384,10 @@
                         <t t-if="template.footer_show_page_number">
                             <div style="text-align: right; margin-top: 12px; clear: both;">
                                 <span class="footer-page-number" t-attf-style="background-color: {{template.primary_accent_color}}; color: #fff;">
-                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"/> of <span class="topage"/></t>
-                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"/></t>
-                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"/> -</t>
-                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"/>/<span class="topage"/>]</t>
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page <span class="page"></span> of <span class="topage"></span></t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page <span class="page"></span></t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- <span class="page"></span> -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[<span class="page"></span>/<span class="topage"></span>]</t>
                                 </span>
                             </div>
                         </t>

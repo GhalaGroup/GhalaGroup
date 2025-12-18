@@ -76,7 +76,7 @@
 
                         <!-- Page Numbers -->
                         <div t-if="config.show_page_numbers" style="margin-top: 5px;">
-                            Page <span class="page"/> of <span class="topage"/>
+                            Page <span class="page"></span> of <span class="topage"></span>
                         </div>
                     </div>
                 </t>
@@ -100,7 +100,7 @@
                         </tr>
                     </table>
                     <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"/> of <span class="topage"/>
+                        Page <span class="page"></span> of <span class="topage"></span>
                     </div>
                 </t>
 
@@ -129,7 +129,7 @@
                         </tr>
                     </table>
                     <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"/> of <span class="topage"/>
+                        Page <span class="page"></span> of <span class="topage"></span>
                     </div>
                 </t>
 
@@ -137,7 +137,7 @@
                 <t t-if="config.footer_layout == 'custom_html'">
                     <div t-out="config._render_custom_html(company)"/>
                     <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"/> of <span class="topage"/>
+                        Page <span class="page"></span> of <span class="topage"></span>
                     </div>
                 </t>
 
@@ -167,7 +167,7 @@
 
             <!-- Page Numbers -->
             <div style="margin-top: 5px;">
-                Page <span class="page"/> of <span class="topage"/>
+                Page <span class="page"></span> of <span class="topage"></span>
             </div>
         </div>
     </template>
@@ -194,7 +194,7 @@
 
             <!-- Page Numbers -->
             <div style="margin-top: 5px;">
-                Page <span class="page"/> of <span class="topage"/>
+                Page <span class="page"></span> of <span class="topage"></span>
             </div>
         </div>
     </template>

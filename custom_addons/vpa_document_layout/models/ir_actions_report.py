@@ -292,7 +292,7 @@ class IrActionsReport(models.Model):
                 command_args.extend([
                     '--enable-local-file-access',
                     '--margin-top', header_height if has_header else '0',
-                    '--margin-bottom', '30mm' if footer_url else '0',  # Reserve space for footer
+                    '--margin-bottom', '35mm' if footer_url else '0',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
                 ])
