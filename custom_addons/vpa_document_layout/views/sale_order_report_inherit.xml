@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- VPA sale order inheritance disabled - will be implemented later -->
-    <!-- No modifications to standard Odoo sale order template -->
+    <!-- Inject VPA font styles into Odoo's sale order report -->
+    <template id="report_saleorder_document_vpa_styles" inherit_id="sale.report_saleorder_document" priority="99">
+        <xpath expr="//div[hasclass('page')]" position="before">
+            <style>
+                /* VPA Font Size Overrides for Sale Order */
+                table.table thead th,
+                table.o_main_table thead th,
+                .page table thead th {
+                    font-size: 15pt !important;
+                    padding: 14px 12px !important;
+                }
+                table.table tbody td,
+                table.o_main_table tbody td,
+                .page table tbody td {
+                    font-size: 14pt !important;
+                    padding: 12px !important;
+                    line-height: 1.5 !important;
+                }
+                /* Section headers like "Main Door", "Ground Floor Doors" */
+                table.table tbody tr.o_line_section td,
+                .page table tbody tr.o_line_section td {
+                    font-size: 16pt !important;
+                    font-weight: bold !important;
+                }
+                /* Totals */
+                #total td,
+                .o_total td,
+                table.o_total_table td {
+                    font-size: 14pt !important;
+                }
+                #total tr:last-child td,
+                .o_total tr:last-child td {
+                    font-size: 16pt !important;
+                    font-weight: bold !important;
+                }
+            </style>
+        </xpath>
+    </template>
 </odoo>
