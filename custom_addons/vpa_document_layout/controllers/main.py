@@ -249,7 +249,7 @@ class VPATemplatePreview(http.Controller):
         # Build circle SVG if enabled
         circle_svg = ''
         if show_circle:
-            circle_svg = f'''<svg style="position: absolute; top: -50px; right: -50px; z-index: 0;" width="{circle_size}" height="{circle_size}" xmlns="http://www.w3.org/2000/svg">
+            circle_svg = f'''<svg style="position: absolute; top: 0; right: 0; z-index: 0;" width="{circle_size}" height="{circle_size}" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="{circle_size/2}" cy="{circle_size/2}" r="{circle_size/2}" fill="{primary_color}" fill-opacity="{circle_opacity}"/>
             </svg>'''
 
