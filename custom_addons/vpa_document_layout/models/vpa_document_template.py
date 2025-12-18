@@ -34,22 +34,47 @@ class VPADocumentTemplate(models.Model):
         help='Python expression for PDF filename. Available: object (document record). Example: object.name + " - " + object.partner_id.name'
     )
 
-    @api.depends('print_name_pattern', 'print_name_expression')
+    document_abbreviation = fields.Char(
+        string='Document Abbreviation',
+        size=4,
+        help='2-4 letter abbreviation for this document type (e.g., SQ for Sales Quote, PS for Production Summary)'
+    )
+
+    @api.onchange('document_type')
+    def _onchange_document_type_abbreviation(self):
+        """Set default abbreviation based on document type"""
+        abbreviation_map = {
+            'quotation': 'SQ',
+            'sale_order': 'SO',
+            'sale_production': 'PS',
+            'invoice': 'INV',
+            'bill': 'BILL',
+            'purchase_order': 'PO',
+            'delivery': 'DO',
+            'picking': 'PICK',
+            'manufacturing_order': 'MO',
+        }
+        if self.document_type and not self.document_abbreviation:
+            self.document_abbreviation = abbreviation_map.get(self.document_type, '')
+
+    @api.depends('print_name_pattern', 'print_name_expression', 'document_abbreviation')
     def _compute_print_name_preview(self):
         """Show preview of what the filename will look like"""
         for record in self:
+            abbrev = record.document_abbreviation or 'DOC'
+            # Format: S00001-SQ - Customer Name (Ref).pdf
             if record.print_name_pattern == 'doc_name':
-                record.print_name_preview = 'S00001.pdf'
+                record.print_name_preview = f'S00001-{abbrev}.pdf'
             elif record.print_name_pattern == 'doc_customer':
-                record.print_name_preview = 'S00001 - Deco Addict.pdf'
+                record.print_name_preview = f'S00001-{abbrev} - Deco Addict.pdf'
             elif record.print_name_pattern == 'doc_customer_ref':
-                record.print_name_preview = 'S00001 - Deco Addict (REF123).pdf'
+                record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123).pdf'
             elif record.print_name_pattern == 'doc_customer_ref_date':
-                record.print_name_preview = 'S00001 - Deco Addict (REF123) - 2025-01-15.pdf'
+                record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123) - 2025-01-15.pdf'
             elif record.print_name_pattern == 'customer_doc':
-                record.print_name_preview = 'Deco Addict - S00001.pdf'
+                record.print_name_preview = f'Deco Addict - S00001-{abbrev}.pdf'
             elif record.print_name_pattern == 'doc_date':
-                record.print_name_preview = 'S00001 - 2025-01-15.pdf'
+                record.print_name_preview = f'S00001-{abbrev} - 2025-01-15.pdf'
             elif record.print_name_pattern == 'custom':
                 record.print_name_preview = 'Custom expression...'
             else:
@@ -60,27 +85,36 @@ class VPADocumentTemplate(models.Model):
     def _get_print_name_expression(self):
         """Get the actual Python expression based on pattern selection
         Note: Expressions must be compatible with safe_eval which doesn't support hasattr, time module, etc.
+        Format: S00001-SQ - Customer Name (Ref).pdf
         """
         self.ensure_one()
 
+        # Get abbreviation - will be embedded as literal string in the expression
+        abbrev = self.document_abbreviation or 'DOC'
+
         if self.print_name_pattern == 'doc_name':
-            return "object.name or 'Document'"
+            # S00001-SQ
+            return f"(object.name or 'Document') + '-{abbrev}'"
         elif self.print_name_pattern == 'doc_customer':
-            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer')"
+            # S00001-SQ - Customer Name
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer')"
         elif self.print_name_pattern == 'doc_customer_ref':
-            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
+            # S00001-SQ - Customer Name (Ref)
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
         elif self.print_name_pattern == 'doc_customer_ref_date':
-            # Simplified version without hasattr - safe_eval doesn't support it
-            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else '')) + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
+            # S00001-SQ - Customer Name (Ref) - 2025-01-15
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else '')) + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
         elif self.print_name_pattern == 'customer_doc':
-            return "(object.partner_id.name or 'Customer') + ' - ' + (object.name or 'Document')"
+            # Customer Name - S00001-SQ
+            return f"(object.partner_id.name or 'Customer') + ' - ' + (object.name or 'Document') + '-{abbrev}'"
         elif self.print_name_pattern == 'doc_date':
-            # Simplified version without hasattr
-            return "(object.name or 'Document') + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
+            # S00001-SQ - 2025-01-15
+            return f"(object.name or 'Document') + '-{abbrev}' + ((' - ' + str(object.date_order.date())) if object.date_order else '')"
         elif self.print_name_pattern == 'custom':
             return self.print_name_expression or "(object.name or 'Document')"
         else:
-            return "(object.name or 'Document') + ' - ' + (object.partner_id.name or 'Customer')"
+            # Default: S00001-SQ - Customer Name (Ref)
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
 
     # Logo - related field like base.document.layout
     logo = fields.Binary(related='company_id.logo', readonly=True, string="Company Logo")
@@ -431,7 +465,7 @@ class VPADocumentTemplate(models.Model):
                     template.report_action_id.write({'paperformat_id': paperformat.id})
 
         # Update report action name or print_report_name if changed
-        if 'name' in vals or 'print_name_pattern' in vals or 'print_name_expression' in vals:
+        if 'name' in vals or 'print_name_pattern' in vals or 'print_name_expression' in vals or 'document_abbreviation' in vals:
             for template in self:
                 if template.report_action_id:
                     template._update_report_action()
