@@ -1077,7 +1077,7 @@ class VPADocumentTemplate(models.Model):
                                                 <span t-field="line.product_uom_id"/>
                                             </td>
                                             <td style="text-align: right; font-size: 10pt;">
-                                                <span t-field="line.price_unit"/>
+                                                <span t-field="line.price_unit" t-options='{"widget": "monetary", "display_currency": doc.currency_id, "decimal_precision": 2}'/>
                                             </td>
                                             <td t-if="display_discount" style="text-align: center; font-size: 10pt;">
                                                 <span t-field="line.discount"/><t t-out="'%'"/>
