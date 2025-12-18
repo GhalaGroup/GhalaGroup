@@ -502,7 +502,7 @@
         <t t-set="secondary_color" t-value="template.secondary_accent_color or '#21b799'"/>
 
         <!-- Footer container - positioned at bottom -->
-        <div style="position: relative; height: 35mm; margin-top: auto; overflow: visible;">
+        <div style="position: relative; height: 35mm; margin-top: auto; overflow: hidden;">
             <!-- Check if footer is disabled -->
             <t t-if="template.footer_enabled != False">
                 <!-- Check for unified footer config -->
@@ -710,7 +710,7 @@
 
                         <!-- Page Numbers -->
                         <t t-if="template.footer_show_page_number">
-                            <div style="text-align: right; margin-top: 12px; margin-right: 5px; clear: both;">
+                            <div style="text-align: right; margin-top: 12px; padding-right: 10px; clear: both;">
                                 <span t-attf-style="background-color: {{primary_color}}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
                                     <t t-if="template.footer_page_number_format == 'page_of'">Page 1 of 1</t>
                                     <t t-if="template.footer_page_number_format == 'page_only'">Page 1</t>
