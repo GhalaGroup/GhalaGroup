@@ -19,15 +19,15 @@ class VPADocumentTemplate(models.Model):
 
     # PDF Filename Configuration
     print_name_pattern = fields.Selection([
-        ('doc_name', 'Document Number Only (e.g., S00001)'),
-        ('doc_customer', 'Document Number - Customer Name (e.g., S00001 - Deco Addict)'),
-        ('doc_customer_ref', 'Document Number - Customer Name (Ref) (e.g., S00001 - Deco Addict (REF123))'),
-        ('doc_customer_ref_date', 'Document Number - Customer Name (Ref) - Date (e.g., S00001 - Deco Addict (REF123) - 2025-01-15)'),
-        ('customer_doc', 'Customer Name - Document Number (e.g., Deco Addict - S00001)'),
-        ('doc_date', 'Document Number - Date (e.g., S00001 - 2025-01-15)'),
+        ('doc_name', 'Document Number-Abbrev (e.g., S00001-SQ)'),
+        ('doc_customer', 'Document-Abbrev - Customer (e.g., S00001-SQ - Deco Addict)'),
+        ('doc_customer_ref', 'Document-Abbrev - Customer (Ref) (e.g., S00001-SQ - Deco Addict (REF123))'),
+        ('doc_customer_ref_date', 'Document-Abbrev - Customer (Ref) - Date (e.g., S00001-SQ - Deco Addict (REF123) - 2025-01-15)'),
+        ('customer_doc', 'Customer - Document-Abbrev (e.g., Deco Addict - S00001-SQ)'),
+        ('doc_date', 'Document-Abbrev - Date (e.g., S00001-SQ - 2025-01-15)'),
         ('custom', 'Custom Expression'),
     ], string='PDF Filename Pattern', default='doc_customer_ref', required=True,
-       help='Choose how the PDF filename will appear when downloaded')
+       help='Choose how the PDF filename will appear when downloaded. Abbrev = your 2-4 letter abbreviation.')
 
     print_name_expression = fields.Char(
         string='Custom Filename Expression',
