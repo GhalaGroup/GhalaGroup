@@ -134,6 +134,7 @@ class VPADocumentTemplate(models.Model):
         ('quotation', 'Quotation'),
         ('sale_order', 'Sales Order'),
         ('sale_production', 'Sales Production Order'),
+        ('quotation_pictures', 'Quotation (Pictures)'),
         ('invoice', 'Invoice'),
         ('bill', 'Vendor Bill'),
         ('purchase_order', 'Purchase Order'),
@@ -1642,6 +1643,332 @@ class VPADocumentTemplate(models.Model):
                             </t>
                         </div>
                     </div>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
+        elif self.document_type == 'quotation_pictures':
+            # Quotation with Pictures - Shows product images alongside descriptions
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Quotation'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong>Quotation Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.validity_date" style="margin-top: 4px;">
+                        <strong>Expiration:</strong>
+                        <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.client_order_ref" style="margin-top: 4px;">
+                        <strong>Customer Reference:</strong>
+                        <span t-field="doc.client_order_ref"/>
+                    </div>
+                    <div t-if="doc.user_id" style="margin-top: 4px;">
+                        <strong>Salesperson:</strong>
+                        <span t-field="doc.user_id.name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Quotation Pictures -->
+                <style>
+                    .vpa-quote-pictures {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    .vpa-table-card {{
+                        background: white;
+                        border-radius: 5px;
+                        padding: 0;
+                        margin-bottom: 15px;
+                    }}
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 8px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                    }}
+                    .vpa-table-card th {{
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 8px 6px;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 10px 6px;
+                        font-size: 10pt;
+                        color: #333;
+                        border-bottom: 1px solid #e0e0e0;
+                        vertical-align: top;
+                    }}
+                    .vpa-section-row td {{
+                        background: #f5f5f5;
+                        font-weight: 700;
+                        padding: 8px 6px;
+                        color: #555;
+                        font-size: 11px;
+                    }}
+                    .vpa-note-row td {{
+                        padding: 6px 12px;
+                        font-style: italic;
+                        color: #666;
+                        font-size: 10px;
+                        background: #fafafa;
+                    }}
+                    .vpa-product-image {{
+                        width: 80px;
+                        height: 80px;
+                        object-fit: cover;
+                        border-radius: 4px;
+                        border: 1px solid #eee;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #888;
+                        font-size: 9pt;
+                    }}
+                    .vpa-product-details {{
+                        font-size: 9pt;
+                        color: #555;
+                        line-height: 1.5;
+                        margin-top: 5px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 8px;
+                        border-radius: 3px;
+                        font-weight: 600;
+                        font-size: 10pt;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-amount-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 3px 10px;
+                        border-radius: 3px;
+                        font-weight: 600;
+                        font-size: 10pt;
+                    }}
+                    .vpa-total-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 12px;
+                        border-radius: 5px;
+                        margin: 15px 0;
+                    }}
+                    .vpa-total-label {{
+                        font-size: 11px;
+                        color: #666;
+                    }}
+                    .vpa-total-value {{
+                        font-size: 13px;
+                        color: #333;
+                        font-weight: 500;
+                    }}
+                    .vpa-grand-total-label {{
+                        font-size: 14px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    .vpa-grand-total-value {{
+                        font-size: 18px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    .vpa-notes-section {{
+                        background: #f9f9f9;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 10px;
+                        margin: 10px 0;
+                        page-break-inside: avoid;
+                    }}
+                    .vpa-notes-title {{
+                        color: <t t-out="primary_color"/>;
+                        margin: 0 0 6px 0;
+                        font-size: 11px;
+                        font-weight: 600;
+                    }}
+                </style>
+
+                <div class="vpa-quote-pictures">
+                    <!-- Order Lines Table with Pictures -->
+                    <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                    <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ORDER DETAILS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 45%%;">DESCRIPTION</th>
+                                    <th style="width: 8%%; text-align: center;">QTY</th>
+                                    <th style="width: 8%%; text-align: center;">UNIT</th>
+                                    <th style="width: 14%%; text-align: right;">UNIT PRICE</th>
+                                    <th t-if="display_discount" style="width: 6%%; text-align: center;">DISC.</th>
+                                    <th style="width: 14%%; text-align: right;">AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="lines_to_report" t-as="line">
+                                    <!-- Section Headers -->
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <tr class="vpa-section-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Note Lines -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr class="vpa-note-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Regular Product Lines with Pictures -->
+                                    <t t-else="">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <t t-set="product_name_parts" t-value="(line.name or '').split('\\n', 1)"/>
+                                        <t t-set="product_title" t-value="product_name_parts[0] if product_name_parts else ''"/>
+                                        <t t-set="product_details" t-value="product_name_parts[1] if len(product_name_parts) > 1 else ''"/>
+                                        <tr>
+                                            <!-- Line Number -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <t t-out="line_num"/>
+                                            </td>
+                                            <!-- Description with Image -->
+                                            <td>
+                                                <!-- Product Title Row -->
+                                                <div class="vpa-product-title">
+                                                    <t t-if="line.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <t t-out="product_title"/>
+                                                </div>
+                                                <!-- Image + Details Row -->
+                                                <div style="display: table; width: 100%%; margin-top: 8px;">
+                                                    <div style="display: table-cell; width: 90px; vertical-align: top;">
+                                                        <t t-if="line.product_id.image_512">
+                                                            <img t-att-src="image_data_uri(line.product_id.image_512)"
+                                                                 class="vpa-product-image"
+                                                                 alt="Product"/>
+                                                        </t>
+                                                    </div>
+                                                    <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
+                                                        <t t-if="product_details">
+                                                            <div class="vpa-product-details">
+                                                                <t t-out="product_details.replace('\\n', '&lt;br/&gt;')"/>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <!-- Quantity -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
+                                            </td>
+                                            <!-- Unit -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span t-field="line.product_uom_id"/>
+                                            </td>
+                                            <!-- Unit Price -->
+                                            <td style="text-align: right; vertical-align: top; padding-top: 12px;">
+                                                <t t-out="'{{:,.2f}}'.format(line.price_unit)"/>
+                                            </td>
+                                            <!-- Discount -->
+                                            <td t-if="display_discount" style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span t-field="line.discount"/><t t-out="'%%'"/>
+                                            </td>
+                                            <!-- Amount -->
+                                            <td style="text-align: right; vertical-align: top; padding-top: 12px;">
+                                                <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals Card -->
+                    <div style="overflow: hidden;">
+                        <div class="vpa-total-card" style="width: 350px; float: right;">
+                            <table style="width: 100%%;">
+                                <tr>
+                                    <td style="text-align: right; width: 60%%;">
+                                        <span class="vpa-total-label">Subtotal:</span>
+                                    </td>
+                                    <td style="text-align: right; width: 40%%;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_untaxed"/></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-label">Taxes:</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_tax"/></span>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #ddd;">
+                                    <td style="text-align: right; padding-top: 8px;">
+                                        <span class="vpa-grand-total-label">Total:</span>
+                                    </td>
+                                    <td style="text-align: right; padding-top: 8px;">
+                                        <span class="vpa-grand-total-value"><span t-field="doc.amount_total"/></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section" style="clear: both;">
+                            <div class="vpa-notes-title">TERMS AND CONDITIONS:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <t t-out="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
                 </div>
             </t>
         </t>
