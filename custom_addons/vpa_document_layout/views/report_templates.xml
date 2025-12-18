@@ -122,12 +122,14 @@
             .o_company_<t t-esc='company.id'/>_layout {
                 /* VPA-specific styling per company */
 
-                /* Table header styling with VPA primary color */
+                /* Table header styling with VPA primary color - target both table.table and table.o_main_table */
+                table.table thead,
                 table.o_main_table thead {
                     background-color: <t t-esc='primary'/> !important;
                     color: white !important;
                 }
 
+                table.table thead th,
                 table.o_main_table thead th {
                     background-color: <t t-esc='primary'/> !important;
                     color: white !important;
@@ -136,6 +138,7 @@
                     font-size: 15pt !important;
                 }
 
+                table.table tbody td,
                 table.o_main_table tbody td {
                     padding: 12px !important;
                     border-bottom: 1px solid #e0e0e0 !important;
