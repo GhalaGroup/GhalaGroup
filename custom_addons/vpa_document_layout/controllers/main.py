@@ -246,16 +246,12 @@ class VPATemplatePreview(http.Controller):
         circle_size = template.header_circle_size or 300
         circle_opacity = template.header_circle_opacity or 0.25
 
-        # Build decorative "U" logo SVG if enabled (matches UDesign branding)
+        # Build decorative SVG if enabled
+        # TODO: Replace with actual UDesign logo SVG when provided
         circle_svg = ''
-        if show_circle:
-            # Create a red square with white "U" shape inside, like the UDesign logo
-            circle_svg = f'''<svg style="position: absolute; top: -20px; right: -20px; z-index: 0;" width="{circle_size}" height="{circle_size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <!-- Red rounded square background -->
-                <rect x="0" y="0" width="100" height="100" rx="12" ry="12" fill="{primary_color}" fill-opacity="{circle_opacity}"/>
-                <!-- White U shape -->
-                <path d="M25 20 L25 60 Q25 80 50 80 Q75 80 75 60 L75 20 L60 20 L60 58 Q60 68 50 68 Q40 68 40 58 L40 20 Z" fill="white" fill-opacity="{circle_opacity * 0.8}"/>
-            </svg>'''
+        # Disabled for now - will use actual logo SVG tomorrow
+        # if show_circle:
+        #     circle_svg = f'''...'''
 
         html_str = f'''<!DOCTYPE html>
 <html>
