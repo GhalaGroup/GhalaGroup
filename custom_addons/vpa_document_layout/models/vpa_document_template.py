@@ -1771,19 +1771,19 @@ class VPADocumentTemplate(models.Model):
             table.o_main_table thead th, .o_report_layout_vpa table.o_main_table thead th {
                 background: %s !important;
                 color: %s !important;
-                padding: 12px 10px !important;
+                padding: 14px 12px !important;
                 font-weight: bold !important;
-                font-size: 11pt !important;
+                font-size: 12pt !important;
                 border: 1px solid %s !important;
                 text-align: left !important;
                 %s
             }
             table.o_main_table tbody td, .o_report_layout_vpa table.o_main_table tbody td {
-                padding: 10px 10px !important;
+                padding: 12px 12px !important;
                 border: 1px solid %s !important;
                 vertical-align: top !important;
-                font-size: 10pt !important;
-                line-height: 1.4 !important;
+                font-size: 11pt !important;
+                line-height: 1.5 !important;
             }
             table.o_main_table tbody tr:nth-child(even), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even) {
                 background-color: %s !important;
@@ -1802,9 +1802,9 @@ class VPADocumentTemplate(models.Model):
                 border: 1px solid #dee2e6 !important;
             }
             .o_report_layout_vpa table.o_total_table td {
-                padding: 10px 12px !important;
+                padding: 12px 14px !important;
                 border: 1px solid #dee2e6 !important;
-                font-size: 11pt !important;
+                font-size: 12pt !important;
             }
             .o_report_layout_vpa table.o_total_table tr {
                 border-bottom: 1px solid #dee2e6 !important;
@@ -1813,21 +1813,22 @@ class VPADocumentTemplate(models.Model):
                 border-top: 2px solid #000 !important;
                 background-color: #f8f9fa !important;
                 font-weight: bold !important;
-                font-size: 12pt !important;
+                font-size: 14pt !important;
             }
             .o_report_layout_vpa table.o_total_table tr:last-child td {
                 font-weight: bold !important;
             }
             .o_report_layout_vpa .o_price_total {
                 font-weight: bold !important;
-                font-size: 14pt !important;
+                font-size: 16pt !important;
             }
         </style>
 
         <!-- Page Content Wrapper -->
         <div class="page">
-            <!-- Decorative circle - positioned outside page with higher z-index to appear above content -->
-            <svg t-if="%s" style="position: absolute; top: -115px; right: -115px; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
+            <!-- Decorative circle - positioned to appear in top-right corner -->
+            <!-- Uses fixed positioning to account for header margin when header_repeat_on_pages is True -->
+            <svg t-if="%s" style="position: fixed; top: 0; right: 0; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
             </svg>
 
