@@ -27,7 +27,7 @@
             </svg>
 
             <!-- Header content (logo and company info) -->
-            <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 4px solid {{primary_color}};">
+            <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid {{primary_color}};">
                 <div style="text-align: right; margin-bottom: 10px;">
                     <!-- Use logo field (works for both res.company and base.document.layout) -->
                     <img t-if="company.logo"

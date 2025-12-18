@@ -1820,7 +1820,7 @@ class VPADocumentTemplate(models.Model):
                 <tr>
                     <td class="content-cell">
             <!-- Header -->
-        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 4px solid %s;">
+        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
                 <!-- Use image_data_uri for both preview and PDF - company must have bin_size=False -->
                 <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="%s" alt="Logo"/>
