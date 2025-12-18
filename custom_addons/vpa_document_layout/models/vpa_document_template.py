@@ -1838,10 +1838,10 @@ class VPADocumentTemplate(models.Model):
             </div>
         </div>
 
-        <!-- Document Title - Full Width Right Aligned -->
-        <div t-if="layout_document_title" style="margin-bottom: 0;">
-            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0 0 10px 0; text-align: right;" t-out="layout_document_title"/>
-            <div t-attf-style="border-bottom: 1px solid %s; margin-bottom: 20px;"></div>
+        <!-- Document Title - Full Width Right Aligned, vertically centered between lines -->
+        <div t-if="layout_document_title" style="margin-bottom: 20px;">
+            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 15px 0; text-align: right;" t-out="layout_document_title"/>
+            <div t-attf-style="border-bottom: 1px solid %s;"></div>
         </div>
 
         <!-- Customer Details and Order Info (Two columns below title) -->
@@ -1909,7 +1909,7 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
-            self.secondary_accent_color,  # Document title separator line color (secondary)
+            self.primary_accent_color,  # Document title separator line color (now primary)
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
