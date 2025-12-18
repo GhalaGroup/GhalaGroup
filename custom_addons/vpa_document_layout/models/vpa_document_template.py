@@ -1058,7 +1058,7 @@ class VPADocumentTemplate(models.Model):
                                                 </div>
                                             </td>
                                             <td style="text-align: center;">
-                                                <span class="vpa-qty-badge"><span t-field="line.product_uom_qty"/></span>
+                                                <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
                                             <td style="text-align: center; color: #666; font-size: 9px;">
                                                 <span t-field="line.product_uom_id"/>
@@ -1202,8 +1202,8 @@ class VPADocumentTemplate(models.Model):
                         <t t-foreach="doc.move_raw_ids" t-as="move">
                             <tr>
                                 <td><span t-field="move.product_id"/></td>
-                                <td class="text-end"><span t-field="move.product_uom_qty"/></td>
-                                <td class="text-end"><span t-field="move.quantity"/></td>
+                                <td class="text-end"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></td>
+                                <td class="text-end"><t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/></td>
                                 <td class="text-center"><span t-field="move.product_uom"/></td>
                             </tr>
                         </t>
@@ -1251,8 +1251,8 @@ class VPADocumentTemplate(models.Model):
                             <t t-foreach="doc.move_finished_ids" t-as="move">
                                 <tr>
                                     <td><span t-field="move.product_id"/></td>
-                                    <td class="text-end"><span t-field="move.product_uom_qty"/></td>
-                                    <td class="text-end"><span t-field="move.quantity"/></td>
+                                    <td class="text-end"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></td>
+                                    <td class="text-end"><t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/></td>
                                     <td class="text-center"><span t-field="move.product_uom"/></td>
                                 </tr>
                             </t>
@@ -1526,7 +1526,7 @@ class VPADocumentTemplate(models.Model):
                                                 </div>
                                             </td>
                                             <td style="text-align: center;">
-                                                <span class="vpa-qty-badge"><t t-out="line.product_uom_qty"/></span>
+                                                <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
                                             <td style="text-align: center; color: #666; font-size: 9px;">
                                                 <t t-out="line.product_uom_id.name"/>
