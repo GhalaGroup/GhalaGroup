@@ -1064,25 +1064,25 @@ class VPADocumentTemplate(models.Model):
                                     <t t-else="">
                                         <t t-set="line_num" t-value="line_num + 1"/>
                                         <tr>
-                                            <td style="text-align: center; color: #666; font-size: 14pt;"><t t-out="line_num"/></td>
+                                            <td style="text-align: center; color: #666; font-size: 10pt;"><t t-out="line_num"/></td>
                                             <td>
-                                                <div style="font-weight: 500; color: #333; font-size: 14pt;">
+                                                <div style="font-weight: 500; color: #333; font-size: 10pt;">
                                                     <span t-field="line.name"/>
                                                 </div>
                                             </td>
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; font-size: 10pt;">
                                                 <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
-                                            <td style="text-align: center; color: #666; font-size: 14pt;">
+                                            <td style="text-align: center; color: #666; font-size: 10pt;">
                                                 <span t-field="line.product_uom_id"/>
                                             </td>
-                                            <td style="text-align: right; font-size: 14pt;">
+                                            <td style="text-align: right; font-size: 10pt;">
                                                 <span t-field="line.price_unit"/>
                                             </td>
-                                            <td t-if="display_discount" style="text-align: center; font-size: 14pt;">
+                                            <td t-if="display_discount" style="text-align: center; font-size: 10pt;">
                                                 <span t-field="line.discount"/><t t-out="'%'"/>
                                             </td>
-                                            <td style="text-align: right;">
+                                            <td style="text-align: right; font-size: 10pt;">
                                                 <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
                                             </td>
                                         </tr>
@@ -1557,19 +1557,19 @@ class VPADocumentTemplate(models.Model):
                                         <t t-set="line_num" t-value="line_num + 1"/>
                                         <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
                                         <tr>
-                                            <td style="text-align: center; color: #666; font-size: 14pt;"><t t-out="line_num"/></td>
+                                            <td style="text-align: center; color: #666; font-size: 10pt;"><t t-out="line_num"/></td>
                                             <td>
-                                                <div style="font-weight: 500; color: #333; font-size: 14pt;">
+                                                <div style="font-weight: 500; color: #333; font-size: 10pt;">
                                                     <t t-if="line.product_id.default_code">
                                                         <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
                                                     </t>
                                                     <t t-out="line.name"/>
                                                 </div>
                                             </td>
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; font-size: 10pt;">
                                                 <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
-                                            <td style="text-align: center; color: #666; font-size: 14pt;">
+                                            <td style="text-align: center; color: #666; font-size: 10pt;">
                                                 <t t-out="line.product_uom_id.name"/>
                                             </td>
                                             <td style="text-align: center;">
