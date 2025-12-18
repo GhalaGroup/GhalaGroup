@@ -1826,11 +1826,13 @@ class VPADocumentTemplate(models.Model):
 
         <!-- Page Content Wrapper -->
         <div class="page">
-            <!-- Decorative circle - positioned to appear in top-right corner -->
-            <!-- Uses fixed positioning to account for header margin when header_repeat_on_pages is True -->
-            <svg t-if="%s" style="position: fixed; top: 0; right: 0; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
-            </svg>
+            <!-- Decorative circle - only shown in body if header_repeat_on_pages is False -->
+            <!-- When header_repeat_on_pages is True, circle comes from wkhtmltopdf header URL -->
+            <t t-if="not vpa_template.header_repeat_on_pages">
+                <svg t-if="%s" style="position: fixed; top: 0; right: 0; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
+                </svg>
+            </t>
 
             <!-- Real HTML table for reliable footer positioning in PDF -->
             <table class="page-layout-table">

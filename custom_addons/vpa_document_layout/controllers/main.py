@@ -268,7 +268,7 @@ class VPATemplatePreview(http.Controller):
             overflow: visible;
         }}
         .vpa-header {{
-            padding: 10px 18px;
+            padding: 10px 18px 20px 18px;
             border-bottom: 1px solid {primary_color};
             display: table;
             width: 100%;
@@ -276,6 +276,7 @@ class VPATemplatePreview(http.Controller):
             position: relative;
             overflow: visible;
             min-height: 22mm;
+            margin-bottom: 15px;
         }}
         .header-left {{
             display: table-cell;
