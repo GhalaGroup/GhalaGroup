@@ -1833,7 +1833,7 @@ class VPADocumentTemplate(models.Model):
                 <tr>
                     <td class="content-cell">
             <!-- Header (only shown in body if header_repeat_on_pages is False) -->
-            <!-- When header_repeat_on_pages is True, header comes from --header-html -->
+            <!-- When header_repeat_on_pages is True, header comes from wkhtmltopdf header URL -->
         <t t-if="not vpa_template.header_repeat_on_pages">
         <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
