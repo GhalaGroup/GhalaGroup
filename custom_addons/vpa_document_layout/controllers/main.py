@@ -184,6 +184,112 @@ class VPATemplatePreview(http.Controller):
                 headers=[('Content-Type', 'text/html')]
             )
 
+    @http.route('/vpa/template/header/<int:template_id>', type='http', auth='public')
+    def get_template_header_html(self, template_id, **kwargs):
+        """Return header HTML for wkhtmltopdf --header-html
+
+        This route is called by wkhtmltopdf when generating PDFs to render
+        the header at the top of every page.
+        """
+        # Use sudo() since this is called by wkhtmltopdf without authentication
+        template = request.env['vpa.document.template'].sudo().browse(template_id)
+
+        if not template.exists():
+            return request.not_found()
+
+        _logger.info(f"Rendering header HTML for template: {template.name}")
+
+        company = template.company_id
+        primary_color = template.primary_accent_color or '#875a7b'
+
+        # Get logo as data URI
+        logo_html = ''
+        if company.logo:
+            try:
+                logo_data = image_data_uri(company.logo)
+                logo_style = template._get_logo_style() if hasattr(template, '_get_logo_style') else 'max-width: 140px; max-height: 80px;'
+                logo_html = f'<img src="{logo_data}" style="{logo_style}" alt="Logo"/>'
+            except Exception as e:
+                _logger.warning(f"Could not render logo: {e}")
+
+        # Company details
+        company_details_html = ''
+        if template.header_company_details_html:
+            company_details_html = template.header_company_details_html
+        elif company.company_details:
+            company_details_html = company.company_details
+        else:
+            # Build from partner address
+            parts = []
+            if company.name:
+                parts.append(f'<strong>{company.name}</strong>')
+            if company.street:
+                parts.append(company.street)
+            if company.city:
+                city_line = company.city
+                if company.state_id:
+                    city_line += f', {company.state_id.name}'
+                if company.zip:
+                    city_line += f' {company.zip}'
+                parts.append(city_line)
+            if company.phone:
+                parts.append(f'Tel: {company.phone}')
+            if company.email:
+                parts.append(company.email)
+            company_details_html = '<br/>'.join(parts)
+
+        # Build header HTML
+        logo_alignment = template.header_logo_alignment or 'right'
+        company_info_alignment = template.header_company_info_alignment or 'right'
+        company_info_color = template.header_company_info_color or '#333333'
+
+        html_str = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 9pt;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }}
+        .vpa-header {{
+            padding: 10px 18px 15px 18px;
+            border-bottom: 1px solid {primary_color};
+            position: relative;
+        }}
+        .logo-container {{
+            text-align: {logo_alignment};
+            margin-bottom: 10px;
+        }}
+        .company-info {{
+            text-align: {company_info_alignment};
+            font-size: 9pt;
+            line-height: 1.5;
+            color: {company_info_color};
+        }}
+    </style>
+</head>
+<body>
+    <div class="vpa-header">
+        <div class="logo-container">
+            {logo_html}
+        </div>
+        <div class="company-info">
+            {company_details_html}
+        </div>
+    </div>
+</body>
+</html>'''
+
+        return request.make_response(
+            html_str,
+            headers=[('Content-Type', 'text/html; charset=utf-8')]
+        )
+
     @http.route('/vpa/template/preview_footer/<int:template_id>', type='http', auth='user')
     def preview_footer(self, template_id, **kwargs):
         """Show footer preview in styled container for user preview"""

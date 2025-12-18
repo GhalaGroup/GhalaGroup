@@ -90,6 +90,10 @@
                                         <group string="Odoo Standard Header">
                                             <field name="hide_odoo_header"/>
                                         </group>
+                                        <group string="Multi-Page Settings">
+                                            <field name="header_repeat_on_pages"/>
+                                            <field name="header_height" invisible="not header_repeat_on_pages"/>
+                                        </group>
                                     </group>
 
                                     <separator string="Logo Settings"/>

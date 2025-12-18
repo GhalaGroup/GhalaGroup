@@ -152,6 +152,19 @@ class VPADocumentTemplate(models.Model):
     hide_odoo_header = fields.Boolean(string='Hide Standard Odoo Header', default=True)
     hide_odoo_footer = fields.Boolean(string='Hide Standard Odoo Footer', default=True)
 
+    # Repeating Header (for multi-page documents)
+    header_repeat_on_pages = fields.Boolean(
+        string='Repeat Header on All Pages',
+        default=True,
+        help='When enabled, the header (logo + company info) will appear on every page of multi-page documents. '
+             'If disabled, the header only appears on the first page.'
+    )
+    header_height = fields.Char(
+        string='Header Height',
+        default='30mm',
+        help='Height reserved for the header area (e.g., 30mm, 25mm)'
+    )
+
     # Header Settings
     header_logo_alignment = fields.Selection([
         ('left', 'Left'),
@@ -1819,7 +1832,9 @@ class VPADocumentTemplate(models.Model):
             <table class="page-layout-table">
                 <tr>
                     <td class="content-cell">
-            <!-- Header -->
+            <!-- Header (only shown in body if header_repeat_on_pages is False) -->
+            <!-- When header_repeat_on_pages is True, header comes from --header-html -->
+        <t t-if="not vpa_template.header_repeat_on_pages">
         <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
                 <!-- Use image_data_uri for both preview and PDF - company must have bin_size=False -->
@@ -1837,6 +1852,7 @@ class VPADocumentTemplate(models.Model):
                 </t>
             </div>
         </div>
+        </t>
 
         <!-- Document Title - Full Width Right Aligned, vertically centered between lines -->
         <div t-if="layout_document_title" style="margin-bottom: 20px;">
