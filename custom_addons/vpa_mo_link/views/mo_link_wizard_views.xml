@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_mo_link_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.mo.link.wizard.form</field>
+        <field name="model">vpa.mo.link.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Link to Sales Order">
+                <group>
+                    <field name="production_id" readonly="1"/>
+                    <field name="sale_order_id" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_link" string="Link" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

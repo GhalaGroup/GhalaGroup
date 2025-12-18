@@ -4,14 +4,20 @@
     <template id="template_preview_fullpage">
         <t t-call="web.html_container">
             <t t-set="dims" t-value="template._get_paper_dimensions()"/>
+            <t t-set="primary_color" t-value="template.primary_accent_color or '#DC143C'"/>
             <t t-set="head">
                 <title>Preview: <t t-esc="template.name"/></title>
             <style>
+                /* Base styles matching wkhtmltopdf rendering */
                 body {
                     margin: 0;
                     padding: 40px;
                     background: #525659;
-                    font-family: 'Lato', 'Helvetica', 'Arial', sans-serif;
+                    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    font-size: 12px;
+                    color: #333;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                 }
                 .page-container {
                     width: <t t-esc="dims['width']"/>mm;
@@ -21,6 +27,198 @@
                     box-shadow: 0 0 20px rgba(0,0,0,0.5);
                     position: relative;
                     overflow: visible;
+                }
+
+                /* VPA Table Card Styles - Match PDF exactly */
+                .vpa-quote-order {
+                    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    font-size: 12px;
+                    color: #333;
+                }
+                .vpa-table-card {
+                    background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                    border-left: 3px solid <t t-esc="primary_color"/>;
+                    border-radius: 5px;
+                    padding: 6px;
+                    margin-bottom: 10px;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                }
+                .vpa-table-card table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    border: none !important;
+                }
+                .vpa-table-card th {
+                    background: transparent;
+                    color: <t t-esc="primary_color"/>;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    font-size: 10px;
+                    padding: 5px 4px;
+                    border: none !important;
+                    border-bottom: 1px solid #f0f0f0 !important;
+                    border-right: 1px solid #f0f0f0 !important;
+                    letter-spacing: 0.3px;
+                }
+                .vpa-table-card th:last-child {
+                    border-right: none !important;
+                }
+                .vpa-table-card td {
+                    padding: 4px 4px;
+                    font-size: 11px;
+                    color: #333;
+                    background-color: transparent;
+                    border: none !important;
+                    border-bottom: 1px solid #f8f8f8 !important;
+                    border-right: 1px solid #f8f8f8 !important;
+                    line-height: 1.3;
+                }
+                .vpa-table-card tbody tr {
+                    background-color: white;
+                }
+                .vpa-table-card td:last-child {
+                    border-right: none !important;
+                }
+                .vpa-table-card tbody tr:last-child td {
+                    border-bottom: none !important;
+                }
+                .vpa-section-header {
+                    color: <t t-esc="primary_color"/>;
+                    font-size: 11px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.4px;
+                    margin: 6px 6px 4px 6px;
+                    padding-bottom: 3px;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                .vpa-section-row td {
+                    background: #f0f0f0;
+                    font-weight: 700;
+                    padding: 6px 4px;
+                    color: #666;
+                    font-size: 12px;
+                    border-bottom: 1px solid #ddd !important;
+                }
+                .vpa-note-row td {
+                    padding: 4px 12px;
+                    font-style: italic;
+                    color: #555;
+                    font-size: 11px;
+                    background: #fafafa;
+                    border-bottom: 1px solid #f0f0f0 !important;
+                }
+                .vpa-qty-badge {
+                    display: inline-block;
+                    background: white;
+                    color: <t t-esc="primary_color"/>;
+                    padding: 2px 6px;
+                    border-radius: 2px;
+                    font-weight: 600;
+                    font-size: 11px;
+                    border: 1px solid <t t-esc="primary_color"/>;
+                }
+                .vpa-amount-badge {
+                    display: inline-block;
+                    background: <t t-esc="primary_color"/>;
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 2px;
+                    font-weight: 600;
+                    font-size: 11px;
+                }
+                .vpa-product-code {
+                    color: #777;
+                    font-size: 10px;
+                }
+                .vpa-total-card {
+                    background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                    border-left: 3px solid <t t-esc="primary_color"/>;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin: 10px 0;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                }
+                .vpa-total-card table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .vpa-total-card td {
+                    padding: 6px 8px;
+                    font-size: 11px;
+                    border: none !important;
+                }
+                .vpa-total-card tr.vpa-total-row td {
+                    border-top: 2px solid <t t-esc="primary_color"/> !important;
+                    padding-top: 10px;
+                }
+                .vpa-total-label {
+                    font-size: 11px;
+                    color: #666;
+                }
+                .vpa-total-value {
+                    font-size: 11px;
+                    color: #333;
+                    font-weight: 500;
+                }
+                .vpa-grand-total-label {
+                    font-size: 14px;
+                    color: <t t-esc="primary_color"/>;
+                    font-weight: 600;
+                }
+                .vpa-grand-total-value {
+                    font-size: 18px;
+                    color: <t t-esc="primary_color"/>;
+                    font-weight: 600;
+                }
+                .vpa-notes-section {
+                    background: #f9f9f9;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 5px;
+                    padding: 10px;
+                    margin: 10px 0;
+                }
+                .vpa-notes-title {
+                    color: <t t-esc="primary_color"/>;
+                    margin: 0 0 6px 0;
+                    font-size: 11px;
+                    font-weight: 600;
+                }
+
+                /* Standard table styles for compatibility */
+                table.table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                table.o_main_table thead {
+                    background-color: <t t-esc="primary_color"/>;
+                    color: white;
+                }
+                table.o_main_table thead th {
+                    background-color: <t t-esc="primary_color"/>;
+                    color: white;
+                    padding: 10px;
+                    font-weight: bold;
+                    font-size: 10px;
+                }
+                table.o_main_table tbody td {
+                    padding: 8px 10px;
+                    border-bottom: 1px solid #e0e0e0;
+                    font-size: 11px;
+                    background-color: white;
+                    color: #333;
+                }
+                table.o_main_table tbody tr {
+                    background-color: white;
+                }
+                .text-end {
+                    text-align: right;
+                }
+                .text-start {
+                    text-align: left;
+                }
+                .text-center {
+                    text-align: center;
                 }
 
                 /* Print styles - ensure proper A4 printing */
@@ -48,113 +246,124 @@
             </style>
             </t>
 
-            <div class="page-container">
-                <!-- Use real document data if available, otherwise fallback to dummy data -->
-                <t t-set="sample_doc" t-value="template._get_sample_document()"/>
-                <t t-if="sample_doc">
-                    <!-- Render with REAL document data (same as Real Print!) -->
-                    <t t-foreach="[sample_doc]" t-as="doc">
-                        <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
-                        <t t-set="address">
-                            <strong><span t-field="doc.partner_id.name"/></strong><br/>
-                            <div t-field="doc.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
-                        </t>
-                        <t t-set="information_block">
-                            <!-- Document information on the right side -->
-                            <div t-if="doc.date_order">
-                                <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
-                                <strong t-else="">Order Date:</strong>
-                                <span t-field="doc.date_order" t-options='{"widget": "date"}'/>
-                            </div>
-                            <div t-if="doc.validity_date and doc.state in ['draft', 'sent']">
-                                <strong>Expiration:</strong>
-                                <span t-field="doc.validity_date" t-options='{"widget": "date"}'/>
-                            </div>
-                            <div t-if="doc.user_id.name">
-                                <strong>Salesperson:</strong>
-                                <span t-field="doc.user_id"/>
-                            </div>
-                        </t>
-                        <t t-set="layout_document_title">
-                            <span><t t-if="doc.state in ['draft','sent']">Quotation #</t><t t-elif="doc.state in ['sale','done']">Order #</t><t t-elif="doc.state == 'cancel'">Cancelled Order #</t><t t-out="doc.name"/></span>
-                        </t>
-                        <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
-                            <!-- Optional: Your Reference field if present -->
-                            <div t-if="doc.client_order_ref" id="informations" style="margin-bottom: 20px;">
-                                <strong>Your Reference:</strong>
-                                <span t-field="doc.client_order_ref"/>
-                            </div>
-
-                            <!-- Order Lines Table -->
-                            <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
-                            <t t-set="display_taxes" t-value="True"/>
-                            <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
-
-                            <table class="table table-sm o_main_table">
-                                <thead>
-                                    <tr>
-                                        <th name="th_description" class="text-start">Description</th>
-                                        <th name="th_quantity" class="text-end">Quantity</th>
-                                        <th name="th_priceunit" class="text-end">Unit Price</th>
-                                        <th name="th_discount" t-if="display_discount" class="text-end">Disc.%</th>
-                                        <th name="th_taxes" t-if="display_taxes" class="text-end">Taxes</th>
-                                        <th name="th_subtotal" class="text-end">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <t t-foreach="lines_to_report" t-as="line">
-                                        <tr t-if="line.display_type == 'line_section'" class="fw-bold o_line_section">
-                                            <td colspan="99"><span t-field="line.name"/></td>
-                                        </tr>
-                                        <tr t-elif="line.display_type == 'line_note'" class="fst-italic o_line_note">
-                                            <td colspan="99"><span t-field="line.name"/></td>
-                                        </tr>
-                                        <tr t-else="">
-                                            <td><span t-field="line.name"/></td>
-                                            <td class="text-end"><span t-field="line.product_uom_qty"/></td>
-                                            <td class="text-end"><span t-field="line.price_unit"/></td>
-                                            <td t-if="display_discount" class="text-end"><span t-field="line.discount"/></td>
-                                            <td t-if="display_taxes" class="text-end">
-                                                <span t-out="', '.join(map(lambda x: x.description or x.name, line.tax_ids))"/>
-                                            </td>
-                                            <td class="text-end"><span t-field="line.price_subtotal"/></td>
-                                        </tr>
-                                    </t>
-                                </tbody>
-                            </table>
-
-                            <!-- Totals -->
-                            <div class="clearfix" style="clear: both; overflow: auto;">
-                                <div id="total" style="float: right; width: 50%; max-width: 500px; min-width: 300px;">
-                                    <table class="table table-sm o_total_table">
-                                        <tr>
-                                            <td>Untaxed Amount</td>
-                                            <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Taxes</td>
-                                            <td class="text-end"><span t-field="doc.amount_tax"/></td>
-                                        </tr>
-                                        <tr class="border-black">
-                                            <td><strong>Total</strong></td>
-                                            <td class="text-end o_price_total"><span t-field="doc.amount_total"/></td>
-                                        </tr>
-                                    </table>
+            <div class="page-container" style="display: flex; flex-direction: column;">
+                <!-- Main content area -->
+                <div style="flex: 1;">
+                    <!-- Use real document data if available, otherwise fallback to dummy data -->
+                    <t t-set="sample_doc" t-value="template._get_sample_document()"/>
+                    <t t-if="sample_doc">
+                        <!-- Render with REAL document data (same as Real Print!) -->
+                        <t t-foreach="[sample_doc]" t-as="doc">
+                            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+                            <t t-set="address">
+                                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">CUSTOMER DETAILS</div>
+                                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                                    <strong><span t-field="doc.partner_id.name"/></strong><br/>
+                                    <div t-field="doc.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
                                 </div>
-                            </div>
+                            </t>
+                            <t t-set="information_block">
+                                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">ORDER INFO</div>
+                                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                                    <div t-if="doc.date_order">
+                                        <strong t-if="doc.state in ['draft', 'sent']">Quotation Date:</strong>
+                                        <strong t-else="">Order Date:</strong>
+                                        <span t-field="doc.date_order" t-options='{"widget": "date"}'/>
+                                    </div>
+                                    <div t-if="doc.validity_date and doc.state in ['draft', 'sent']" style="margin-top: 4px;">
+                                        <strong>Expiration:</strong>
+                                        <span t-field="doc.validity_date" t-options='{"widget": "date"}'/>
+                                    </div>
+                                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                                        <strong>Salesperson:</strong>
+                                        <span t-field="doc.user_id"/>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-set="layout_document_title">
+                                <span><t t-if="doc.state in ['draft','sent']">Quotation #</t><t t-elif="doc.state in ['sale','done']">Order #</t><t t-elif="doc.state == 'cancel'">Cancelled Order #</t><t t-out="doc.name"/></span>
+                            </t>
+                            <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
+                                <!-- Optional: Your Reference field if present -->
+                                <div t-if="doc.client_order_ref" id="informations" style="margin-bottom: 20px;">
+                                    <strong>Your Reference:</strong>
+                                    <span t-field="doc.client_order_ref"/>
+                                </div>
 
-                            <!-- Terms and conditions -->
-                            <div t-if="doc.note" class="mt-4">
-                                <p><strong>Terms and Conditions:</strong></p>
-                                <p t-field="doc.note"/>
-                            </div>
+                                <!-- Order Lines Table -->
+                                <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                                <t t-set="display_taxes" t-value="True"/>
+                                <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+
+                                <table class="table table-sm o_main_table">
+                                    <thead>
+                                        <tr>
+                                            <th name="th_description" class="text-start">Description</th>
+                                            <th name="th_quantity" class="text-end">Quantity</th>
+                                            <th name="th_priceunit" class="text-end">Unit Price</th>
+                                            <th name="th_discount" t-if="display_discount" class="text-end">Disc.%</th>
+                                            <th name="th_taxes" t-if="display_taxes" class="text-end">Taxes</th>
+                                            <th name="th_subtotal" class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="lines_to_report" t-as="line">
+                                            <tr t-if="line.display_type == 'line_section'" class="fw-bold o_line_section">
+                                                <td colspan="99"><span t-field="line.name"/></td>
+                                            </tr>
+                                            <tr t-elif="line.display_type == 'line_note'" class="fst-italic o_line_note">
+                                                <td colspan="99"><span t-field="line.name"/></td>
+                                            </tr>
+                                            <tr t-else="">
+                                                <td><span t-field="line.name"/></td>
+                                                <td class="text-end"><span t-field="line.product_uom_qty"/></td>
+                                                <td class="text-end"><span t-field="line.price_unit"/></td>
+                                                <td t-if="display_discount" class="text-end"><span t-field="line.discount"/></td>
+                                                <td t-if="display_taxes" class="text-end">
+                                                    <span t-out="', '.join(map(lambda x: x.description or x.name, line.tax_ids))"/>
+                                                </td>
+                                                <td class="text-end"><span t-field="line.price_subtotal"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+
+                                <!-- Totals -->
+                                <div class="clearfix" style="clear: both; overflow: auto;">
+                                    <div id="total" style="float: right; width: 50%; max-width: 500px; min-width: 300px;">
+                                        <table class="table table-sm o_total_table">
+                                            <tr>
+                                                <td>Untaxed Amount</td>
+                                                <td class="text-end"><span t-field="doc.amount_untaxed"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Taxes</td>
+                                                <td class="text-end"><span t-field="doc.amount_tax"/></td>
+                                            </tr>
+                                            <tr class="border-black">
+                                                <td><strong>Total</strong></td>
+                                                <td class="text-end o_price_total"><span t-field="doc.amount_total"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and conditions -->
+                                <div t-if="doc.note" class="mt-4">
+                                    <p><strong>Terms and Conditions:</strong></p>
+                                    <p t-field="doc.note"/>
+                                </div>
+                            </t>
                         </t>
                     </t>
-                </t>
-                <t t-else="">
-                    <!-- Fallback to dummy data if no sample document found -->
-                    <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
-                </t>
+                    <t t-else="">
+                        <!-- Fallback to dummy data if no sample document found -->
+                        <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
+                    </t>
+                </div>
+
+                <!-- Footer Preview (integrated into the same page) -->
+                <t t-call="vpa_document_layout.vpa_template_preview_footer"/>
             </div>
         </t>
     </template>

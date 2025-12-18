@@ -5,6 +5,8 @@
         <t t-set="dims" t-value="template._get_paper_dimensions()"/>
         <t t-set="paper_name" t-value="'A4' if template.paper_size == 'a4' else 'Letter'"/>
         <t t-set="orientation" t-value="template.paper_orientation.capitalize()"/>
+        <t t-set="primary_color" t-value="template.primary_accent_color or '#DC143C'"/>
+        <t t-set="secondary_color" t-value="template.secondary_accent_color or '#21b799'"/>
 
         <!-- Preview info bar -->
         <div style="text-align: center; padding: 15px; background: #f8f9fa; border-bottom: 2px solid #875a7b; margin-bottom: 20px;">
@@ -15,13 +17,19 @@
         </div>
 
         <!-- Exact paper size preview - matches PDF exactly -->
-        <div t-attf-style="position: relative; width: {{dims['width']}}mm; height: {{dims['height']}}mm; margin: 0 auto 20px; padding: 0; background: white; border: 2px solid #875a7b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
-            <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
+        <div t-attf-style="position: relative; width: {{dims['width']}}mm; min-height: {{dims['height']}}mm; margin: 0 auto 20px; padding: 0; background: white; border: 2px solid #875a7b; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column;">
+            <!-- Main content area -->
+            <div style="flex: 1;">
+                <t t-call="vpa_document_layout.vpa_template_preview_layout"/>
+            </div>
+
+            <!-- Footer Preview (integrated into the same page) -->
+            <t t-call="vpa_document_layout.vpa_template_preview_footer"/>
         </div>
 
         <!-- Footer info -->
         <div style="text-align: center; padding: 10px; color: #666; font-size: 12px;">
-            ℹ️ This preview shows the <strong>exact size</strong> of the PDF that will be generated
+            This preview shows header, content, and footer as they will appear in the PDF
         </div>
     </template>
 
@@ -32,33 +40,227 @@
         <t t-set="report_type" t-value="'html'"/>
         <t t-set="primary_color" t-value="template.primary_accent_color or '#DC143C'"/>
 
-        <!-- Set document title and blocks based on document type -->
+        <!-- VPA Styles matching PDF output exactly -->
+        <style>
+            /* VPA Quote/Order Styles - Match PDF exactly */
+            .vpa-quote-order {
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 12px;
+                color: #333;
+            }
+            .vpa-table-card {
+                background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                border-left: 3px solid <t t-out="primary_color"/>;
+                border-radius: 5px;
+                padding: 6px;
+                margin-bottom: 10px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            }
+            .vpa-table-card table {
+                width: 100%;
+                border-collapse: collapse;
+                border: none !important;
+            }
+            .vpa-table-card th {
+                background: transparent;
+                color: <t t-out="primary_color"/>;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 10px;
+                padding: 5px 4px;
+                border: none !important;
+                border-bottom: 1px solid #f0f0f0 !important;
+                border-right: 1px solid #f0f0f0 !important;
+                letter-spacing: 0.3px;
+            }
+            .vpa-table-card th:last-child {
+                border-right: none !important;
+            }
+            .vpa-table-card td {
+                padding: 4px 4px;
+                font-size: 11px;
+                color: #333;
+                background-color: transparent;
+                border: none !important;
+                border-bottom: 1px solid #f8f8f8 !important;
+                border-right: 1px solid #f8f8f8 !important;
+                line-height: 1.3;
+            }
+            .vpa-table-card tbody tr {
+                background-color: white;
+            }
+            .vpa-table-card td:last-child {
+                border-right: none !important;
+            }
+            .vpa-table-card tbody tr:last-child td {
+                border-bottom: none !important;
+            }
+            .vpa-section-header {
+                color: <t t-out="primary_color"/>;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+                margin: 6px 6px 4px 6px;
+                padding-bottom: 3px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .vpa-section-row td {
+                background: #f0f0f0;
+                font-weight: 700;
+                padding: 6px 4px;
+                color: #666;
+                font-size: 12px;
+                border-bottom: 1px solid #ddd !important;
+            }
+            .vpa-note-row td {
+                padding: 4px 12px;
+                font-style: italic;
+                color: #555;
+                font-size: 11px;
+                background: #fafafa;
+                border-bottom: 1px solid #f0f0f0 !important;
+            }
+            .vpa-qty-badge {
+                display: inline-block;
+                background: white;
+                color: <t t-out="primary_color"/>;
+                padding: 2px 6px;
+                border-radius: 2px;
+                font-weight: 600;
+                font-size: 11px;
+                border: 1px solid <t t-out="primary_color"/>;
+            }
+            .vpa-amount-badge {
+                display: inline-block;
+                background: <t t-out="primary_color"/>;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 2px;
+                font-weight: 600;
+                font-size: 11px;
+            }
+            .vpa-product-code {
+                color: #777;
+                font-size: 10px;
+            }
+            .vpa-total-card {
+                background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                border-left: 3px solid <t t-out="primary_color"/>;
+                padding: 10px;
+                border-radius: 5px;
+                margin: 10px 0;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            }
+            .vpa-total-card table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .vpa-total-card td {
+                padding: 6px 8px;
+                font-size: 11px;
+                border: none !important;
+            }
+            .vpa-total-card tr.vpa-total-row td {
+                border-top: 2px solid <t t-out="primary_color"/> !important;
+                padding-top: 10px;
+            }
+            .vpa-total-label {
+                font-size: 11px;
+                color: #666;
+            }
+            .vpa-total-value {
+                font-size: 11px;
+                color: #333;
+                font-weight: 500;
+            }
+            .vpa-grand-total-label {
+                font-size: 14px;
+                color: <t t-out="primary_color"/>;
+                font-weight: 600;
+            }
+            .vpa-grand-total-value {
+                font-size: 18px;
+                color: <t t-out="primary_color"/>;
+                font-weight: 600;
+            }
+            .vpa-notes-section {
+                background: #f9f9f9;
+                border: 1px solid #e0e0e0;
+                border-radius: 5px;
+                padding: 10px;
+                margin: 10px 0;
+            }
+            .vpa-notes-title {
+                color: <t t-out="primary_color"/>;
+                margin: 0 0 6px 0;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            /* Standard table styles */
+            table.o_main_table thead {
+                background-color: <t t-out="primary_color"/>;
+                color: white;
+            }
+            table.o_main_table thead th {
+                background-color: <t t-out="primary_color"/>;
+                color: white;
+                padding: 10px;
+                font-weight: bold;
+            }
+            table.o_main_table tbody td {
+                padding: 8px 10px;
+                border-bottom: 1px solid #e0e0e0;
+                background-color: white;
+                color: #333;
+            }
+            table.o_main_table tbody tr {
+                background-color: white;
+            }
+        </style>
+
+        <!-- Set document title and blocks based on document type - Match PDF format exactly -->
         <t t-if="template.document_type == 'sale_production'">
             <t t-set="layout_document_title" t-value="'Production Order #S00123'"/>
             <t t-set="address">
-                <strong>EAR Construction LTD</strong><br/>
-                Plot 45, Industrial Area<br/>
-                Dar es Salaam<br/>
-                Tanzania
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>EAR Construction LTD</strong></div>
+                    <div>Plot 45, Industrial Area</div>
+                    <div>Dar es Salaam</div>
+                    <div>Tanzania</div>
+                </div>
             </t>
             <t t-set="information_block">
-                <div><strong>Order Date:</strong> 12/16/2025</div>
-                <div><strong>Expected Delivery:</strong> 01/15/2026</div>
-                <div><strong>Customer Reference:</strong> PO-2025-001</div>
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Order Date:</strong> 12/16/2025</div>
+                    <div style="margin-top: 4px;"><strong>Expected Delivery:</strong> 01/15/2026</div>
+                    <div style="margin-top: 4px;"><strong>Customer Reference:</strong> PO-2025-001</div>
+                    <div style="margin-top: 4px;"><strong>Status:</strong> <span style="color: #28a745;">Confirmed</span></div>
+                </div>
             </t>
         </t>
         <t t-else="">
             <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
             <t t-set="address">
-                <strong>Deco Addict</strong><br/>
-                77 Santa Barbara Rd<br/>
-                Pleasant Hill CA 94523<br/>
-                United States
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Deco Addict</strong></div>
+                    <div>77 Santa Barbara Rd</div>
+                    <div>Pleasant Hill CA 94523</div>
+                    <div>United States</div>
+                </div>
             </t>
             <t t-set="information_block">
-                <div><strong>Quotation Date:</strong> 11/18/2025</div>
-                <div><strong>Expiration:</strong> 12/18/2025</div>
-                <div><strong>Salesperson:</strong> Demo User</div>
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Quotation Date:</strong> 11/18/2025</div>
+                    <div style="margin-top: 4px;"><strong>Expiration:</strong> 12/18/2025</div>
+                    <div style="margin-top: 4px;"><strong>Salesperson:</strong> Demo User</div>
+                </div>
             </t>
         </t>
 
@@ -112,10 +314,17 @@
                         background: #999;
                     }
                     .vpa-section-row td {
-                        background: #fafafa;
+                        background: #fafafa !important;
                         font-weight: bold;
                         color: #555;
                         padding: 6px 8px;
+                    }
+                    .vpa-sale-production table tbody tr {
+                        background-color: white;
+                    }
+                    .vpa-sale-production table tbody td {
+                        background-color: white;
+                        color: #333;
                     }
                     .vpa-total-box {
                         background: #f9f9f9;
@@ -153,77 +362,54 @@
                 </style>
 
                 <div class="vpa-sale-production">
-                    <!-- Customer Details / Delivery Info Boxes -->
-                    <table style="width: 100%; margin-bottom: 15px; border-collapse: separate; border-spacing: 15px 0;">
-                        <tr>
-                            <td style="width: 50%; vertical-align: top;">
-                                <div class="vpa-info-box">
-                                    <div class="vpa-info-box-title">Customer Details</div>
-                                    <p><strong>Client:</strong> EAR Construction LTD</p>
-                                    <p><strong>Order Date:</strong> 12/16/2025</p>
-                                    <p><strong>Reference:</strong> PO-2025-001</p>
-                                </div>
-                            </td>
-                            <td style="width: 50%; vertical-align: top;">
-                                <div class="vpa-info-box">
-                                    <div class="vpa-info-box-title">Delivery Info</div>
-                                    <p><strong>Expected:</strong> 01/15/2026</p>
-                                    <p><strong>Status:</strong> Sales Order</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <!-- Items Summary Title -->
-                    <div class="vpa-info-box-title" style="margin-top: 15px; margin-bottom: 8px;">
-                        Items Summary Details
+                    <!-- Items Table - Customer details and order info are in the header via address/information_block -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ITEMS SUMMARY</div>
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">No.</th>
+                                    <th style="width: 45%;">Product Description</th>
+                                    <th style="width: 15%; text-align: center;">Quantity</th>
+                                    <th style="width: 10%; text-align: center;">Unit</th>
+                                    <th style="width: 25%; text-align: center;">MO Reference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="vpa-section-row">
+                                    <td colspan="5">Furniture</td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>
+                                        <strong>[FURN_8999]</strong> Three-Seat Sofa
+                                        <div style="font-size: 8pt; color: #666;">Three Seater Sofa with Lounger</div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-qty-badge">5</span>
+                                    </td>
+                                    <td style="text-align: center;">Units</td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-mo-badge">MO/00045</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>
+                                        <strong>[FURN_8220]</strong> Four Person Desk
+                                        <div style="font-size: 8pt; color: #666;">Modern office workstation</div>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-qty-badge">3</span>
+                                    </td>
+                                    <td style="text-align: center;">Units</td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
-                    <!-- Items Table -->
-                    <table class="table table-sm o_main_table">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">No.</th>
-                                <th style="width: 45%;">Product Description</th>
-                                <th style="width: 15%; text-align: center;">Quantity</th>
-                                <th style="width: 10%; text-align: center;">Unit</th>
-                                <th style="width: 25%; text-align: center;">MO Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="vpa-section-row">
-                                <td colspan="5">Furniture</td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>
-                                    <strong>[FURN_8999]</strong> Three-Seat Sofa
-                                    <div style="font-size: 8pt; color: #666;">Three Seater Sofa with Lounger</div>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="vpa-qty-badge">5.0000</span>
-                                </td>
-                                <td style="text-align: center;">Units</td>
-                                <td style="text-align: center;">
-                                    <span class="vpa-mo-badge">MO/00045</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>
-                                    <strong>[FURN_8220]</strong> Four Person Desk
-                                    <div style="font-size: 8pt; color: #666;">Modern office workstation</div>
-                                </td>
-                                <td style="text-align: center;">
-                                    <span class="vpa-qty-badge">3.0000</span>
-                                </td>
-                                <td style="text-align: center;">Units</td>
-                                <td style="text-align: center;">
-                                    <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
 
                     <!-- Total Box -->
                     <div class="vpa-total-box">
@@ -246,74 +432,319 @@
 
             <!-- Standard Quotation/Sales Order Preview Content -->
             <t t-else="">
-                <div style="font-size: 10pt;">
-                    <!-- Product Table -->
-                    <table class="table table-sm o_main_table" style="margin-top: 1rem;">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th class="text-end">Quantity</th>
-                                <th class="text-end">Unit Price</th>
-                                <th class="text-end">Taxes</th>
-                                <th class="text-end">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <strong>[FURN_8999] Three-Seat Sofa</strong><br/>
-                                    <small class="text-muted">Three Seater Sofa with Lounger in Steel Grey Color</small>
-                                </td>
-                                <td class="text-end">5.00</td>
-                                <td class="text-end">$1,500.00</td>
-                                <td class="text-end">15%</td>
-                                <td class="text-end">$7,500.00</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>[FURN_8220] Four Person Desk</strong><br/>
-                                    <small class="text-muted">Four person modern office workstation</small>
-                                </td>
-                                <td class="text-end">5.00</td>
-                                <td class="text-end">$2,350.00</td>
-                                <td class="text-end">15%</td>
-                                <td class="text-end">$11,750.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Totals Table -->
-                    <div id="total" class="row justify-content-end mt-4">
-                        <div class="col-4">
-                            <table class="table o_total_table table-sm" style="page-break-inside: avoid;">
+                <div class="vpa-quote-order">
+                    <!-- Order Lines Table - VPA Style matching PDF output -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ORDER DETAILS</div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><strong>Untaxed Amount</strong></td>
-                                    <td class="text-end">$19,250.00</td>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 40%;">DESCRIPTION</th>
+                                    <th style="width: 10%; text-align: center;">QTY</th>
+                                    <th style="width: 8%; text-align: center;">UNIT</th>
+                                    <th style="width: 12%; text-align: right;">UNIT PRICE</th>
+                                    <th style="width: 8%; text-align: center;">DISC.%</th>
+                                    <th style="width: 17%; text-align: right;">AMOUNT</th>
                                 </tr>
-                                <tr class="o_taxes">
-                                    <td>Tax 15%</td>
-                                    <td class="text-end">$2,887.50</td>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center;">1</td>
+                                    <td>
+                                        <span class="vpa-product-code">[FURN_8999]</span> Three-Seat Sofa<br/>
+                                        <small style="color: #666; font-size: 10px;">Three Seater Sofa with Lounger in Steel Grey Color</small>
+                                    </td>
+                                    <td style="text-align: center;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center;">Units</td>
+                                    <td style="text-align: right;">$1,500.00</td>
+                                    <td style="text-align: center;">0%</td>
+                                    <td style="text-align: right;"><span class="vpa-amount-badge">$7,500.00</span></td>
                                 </tr>
-                                <tr style="border-top: 2px solid #000;">
-                                    <td><strong>Total</strong></td>
-                                    <td class="text-end o_price_total"><strong>$22,137.50</strong></td>
+                                <tr>
+                                    <td style="text-align: center;">2</td>
+                                    <td>
+                                        <span class="vpa-product-code">[FURN_8220]</span> Four Person Desk<br/>
+                                        <small style="color: #666; font-size: 10px;">Four person modern office workstation</small>
+                                    </td>
+                                    <td style="text-align: center;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center;">Units</td>
+                                    <td style="text-align: right;">$2,350.00</td>
+                                    <td style="text-align: center;">0%</td>
+                                    <td style="text-align: right;"><span class="vpa-amount-badge">$11,750.00</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals - VPA Style -->
+                    <div style="display: flex; justify-content: flex-end;">
+                        <div class="vpa-total-card" style="width: 300px;">
+                            <table>
+                                <tr>
+                                    <td class="vpa-total-label">Untaxed Amount</td>
+                                    <td class="vpa-total-value" style="text-align: right;">$19,250.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="vpa-total-label">Tax 15%</td>
+                                    <td class="vpa-total-value" style="text-align: right;">$2,887.50</td>
+                                </tr>
+                                <tr class="vpa-total-row">
+                                    <td class="vpa-grand-total-label">Total</td>
+                                    <td class="vpa-grand-total-value" style="text-align: right;">$22,137.50</td>
                                 </tr>
                             </table>
                         </div>
                     </div>
 
-                    <div style="margin-top: 2rem;">
-                        <p><strong>Payment terms:</strong> 30 Days</p>
-                        <p style="margin-top: 1rem;">
-                            <strong>Terms and conditions:</strong><br/>
-                            <small class="text-muted">
-                                Please send payment within 30 days of receiving this invoice.<br/>
-                                There will be a 10% interest charge per month on late invoices.
-                            </small>
+                    <!-- Notes Section - VPA Style -->
+                    <div class="vpa-notes-section" style="margin-top: 15px;">
+                        <div class="vpa-notes-title">TERMS &amp; CONDITIONS</div>
+                        <p style="margin: 4px 0; font-size: 11px;"><strong>Payment terms:</strong> 30 Days</p>
+                        <p style="margin: 4px 0; font-size: 10px; color: #666;">
+                            Please send payment within 30 days of receiving this invoice.<br/>
+                            There will be a 10% interest charge per month on late invoices.
                         </p>
                     </div>
                 </div>
             </t>
         </t>
+    </template>
+
+    <!-- Footer Preview Template (inline version for live preview) -->
+    <template id="vpa_template_preview_footer">
+        <t t-set="company" t-value="template.company_id"/>
+        <t t-set="primary_color" t-value="template.primary_accent_color or '#DC143C'"/>
+        <t t-set="secondary_color" t-value="template.secondary_accent_color or '#21b799'"/>
+
+        <!-- Footer container - positioned at bottom -->
+        <div style="position: relative; height: 35mm; margin-top: auto; overflow: hidden;">
+            <!-- Check if footer is disabled -->
+            <t t-if="template.footer_enabled != False">
+                <!-- Check for unified footer config -->
+                <t t-if="template.footer_config_id">
+                    <t t-set="config" t-value="template.footer_config_id"/>
+
+                    <!-- Footer Shape -->
+                    <t t-if="config.show_shape">
+                        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 135%; z-index: 0;" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                                  t-attf-fill="{{config.shape_color or secondary_color}}"
+                                  t-attf-fill-opacity="{{config.shape_opacity or 0.1}}"/>
+                        </svg>
+                    </t>
+
+                    <!-- Footer Content -->
+                    <div t-attf-style="position: relative; z-index: 1; padding: 15px 20px; font-size: 8pt; line-height: 1.5; color: {{config.text_color or '#666666'}};">
+                        <t t-if="config.show_border">
+                            <div t-attf-style="border-top: 1px solid {{config.border_color or '#dee2e6'}}; margin-bottom: 8px;"/>
+                        </t>
+
+                        <!-- Single Column -->
+                        <t t-if="config.footer_layout == 'single'">
+                            <div style="text-align: center;">
+                                <div t-if="config.footer_type == 'internal' and config.computer_generated_note"
+                                     style="font-style: italic; margin-bottom: 5px; color: #888;">
+                                    <t t-esc="config.computer_generated_note"/>
+                                </div>
+                                <t t-if="config.show_bank_details and company.partner_id.bank_ids">
+                                    <div style="margin-bottom: 5px;">
+                                        <strong>Bank:</strong> Sample Bank | <strong>Account:</strong> 1234567890
+                                    </div>
+                                </t>
+                                <div t-if="config.show_company_footer and company.report_footer" style="margin-bottom: 5px;">
+                                    <t t-esc="company.report_footer"/>
+                                </div>
+                                <div t-if="config.show_page_numbers" style="margin-top: 5px;">
+                                    Page 1 of 1
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Two Column -->
+                        <t t-if="config.footer_layout == 'two_col'">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_1_title"/>
+                                        </div>
+                                        <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                                    </td>
+                                    <td style="width: 50%; vertical-align: top;">
+                                        <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_2_title"/>
+                                        </div>
+                                        <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page 1 of 1
+                            </div>
+                        </t>
+
+                        <!-- Three Column -->
+                        <t t-if="config.footer_layout == 'three_col'">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="width: 33.33%; vertical-align: top;">
+                                        <div t-if="config.column_1_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_1_title"/>
+                                        </div>
+                                        <div t-if="config.column_1_content" t-out="config.column_1_content"/>
+                                    </td>
+                                    <td style="width: 33.33%; vertical-align: top; text-align: center;">
+                                        <div t-if="config.column_2_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_2_title"/>
+                                        </div>
+                                        <div t-if="config.column_2_content" t-out="config.column_2_content"/>
+                                    </td>
+                                    <td style="width: 33.33%; vertical-align: top; text-align: right;">
+                                        <div t-if="config.column_3_title" style="font-weight: bold; margin-bottom: 3px;">
+                                            <t t-esc="config.column_3_title"/>
+                                        </div>
+                                        <div t-if="config.column_3_content" t-out="config.column_3_content"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page 1 of 1
+                            </div>
+                        </t>
+
+                        <!-- Custom HTML -->
+                        <t t-if="config.footer_layout == 'custom_html'">
+                            <div t-out="config._render_custom_html(company)"/>
+                            <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
+                                Page 1 of 1
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Legacy footer (original column-based system) -->
+                <t t-else="">
+                    <!-- Footer Wave Shape -->
+                    <t t-if="template.footer_show_shape">
+                        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 135%; z-index: 0;" viewBox="0 0 500 228" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M500 228H0V6.52743C26.3323 2.23278 53.3561 0 80.9008 0C256.522 0 410.969 90.7656 500 228Z"
+                                  t-attf-fill="{{secondary_color}}"
+                                  t-attf-fill-opacity="{{template.footer_shape_opacity or 0.1}}"/>
+                        </svg>
+                    </t>
+
+                    <!-- Footer Content -->
+                    <div style="position: relative; z-index: 1; padding: 15px 20px; font-size: 8pt; line-height: 1.5;">
+                        <t t-if="template.footer_show_content">
+                            <!-- Single Column -->
+                            <t t-if="template.footer_layout == 'single'">
+                                <div style="text-align: center;">
+                                    <t t-if="template.footer_column_1_title or template.footer_column_1_content">
+                                        <span t-if="template.footer_column_1_title"
+                                              t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                              t-esc="template.footer_column_1_title"/>
+                                        <div t-if="template.footer_column_1_content" style="color: #666;" t-out="template.footer_column_1_content"/>
+                                    </t>
+                                    <t t-if="template.footer_bank_details_show">
+                                        <div style="margin-top: 8px; color: #666;">
+                                            <span style="display: block; margin-bottom: 3px; font-weight: bold;">Bank Details:</span>
+                                            Sample Bank - Account: 1234567890
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+
+                            <!-- Two Column -->
+                            <t t-if="template.footer_layout == 'two_col'">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="width: 50%; vertical-align: top;">
+                                            <span t-if="template.footer_column_1_title"
+                                                  t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                                  t-esc="template.footer_column_1_title"/>
+                                            <div t-if="template.footer_column_1_content" style="color: #666;" t-out="template.footer_column_1_content"/>
+                                        </td>
+                                        <td style="width: 50%; vertical-align: top;">
+                                            <span t-if="template.footer_column_2_title"
+                                                  t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                                  t-esc="template.footer_column_2_title"/>
+                                            <div t-if="template.footer_column_2_content" style="color: #666;" t-out="template.footer_column_2_content"/>
+                                            <t t-if="template.footer_bank_details_show and not template.footer_column_2_content">
+                                                <div style="color: #666;">
+                                                    Sample Bank<br/>1234567890
+                                                </div>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+
+                            <!-- Three Column -->
+                            <t t-if="template.footer_layout == 'three_col'">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="width: 33.33%; vertical-align: top;">
+                                            <span t-if="template.footer_column_1_title"
+                                                  t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                                  t-esc="template.footer_column_1_title"/>
+                                            <div t-if="template.footer_column_1_content" style="color: #666;" t-out="template.footer_column_1_content"/>
+                                        </td>
+                                        <td style="width: 33.33%; vertical-align: top; text-align: center;">
+                                            <span t-if="template.footer_column_2_title"
+                                                  t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                                  t-esc="template.footer_column_2_title"/>
+                                            <div t-if="template.footer_column_2_content" style="color: #666;" t-out="template.footer_column_2_content"/>
+                                            <t t-if="template.footer_bank_details_show and not template.footer_column_2_content">
+                                                <div style="color: #666;">
+                                                    Sample Bank<br/>1234567890
+                                                </div>
+                                            </t>
+                                        </td>
+                                        <td style="width: 33.33%; vertical-align: top; text-align: right;">
+                                            <span t-if="template.footer_column_3_title"
+                                                  t-attf-style="display: block; margin-bottom: 4px; font-weight: bold; color: {{primary_color}};"
+                                                  t-esc="template.footer_column_3_title"/>
+                                            <div t-if="template.footer_column_3_content" style="color: #666;" t-out="template.footer_column_3_content"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </t>
+
+                        <!-- Footer Message -->
+                        <t t-if="template.footer_message_type and template.footer_message_type != 'none'">
+                            <div style="font-style: italic; text-align: center; margin-top: 10px; color: #888; font-size: 8pt;">
+                                <t t-if="template.footer_message_type == 'auto_generated'">This document was automatically generated</t>
+                                <t t-if="template.footer_message_type == 'internal'">Internal Document - Confidential</t>
+                                <t t-if="template.footer_message_type == 'draft'">DRAFT - Not for Distribution</t>
+                                <t t-if="template.footer_message_type == 'quote_validity'">This quotation is valid for 30 days</t>
+                                <t t-if="template.footer_message_type == 'thank_you'">Thank you for your business</t>
+                                <t t-if="template.footer_message_type == 'custom'" t-esc="template.footer_custom_message"/>
+                            </div>
+                        </t>
+
+                        <!-- Page Numbers -->
+                        <t t-if="template.footer_show_page_number">
+                            <div style="text-align: right; margin-top: 12px; padding-right: 10px; clear: both;">
+                                <span t-attf-style="background-color: {{primary_color}}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                                    <t t-if="template.footer_page_number_format == 'page_of'">Page 1 of 1</t>
+                                    <t t-if="template.footer_page_number_format == 'page_only'">Page 1</t>
+                                    <t t-if="template.footer_page_number_format == 'dash'">- 1 -</t>
+                                    <t t-if="template.footer_page_number_format == 'brackets'">[1/1]</t>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+
+            <!-- Default footer if nothing configured -->
+            <t t-if="template.footer_enabled == False or (not template.footer_config_id and not template.footer_show_content and not template.footer_show_page_number)">
+                <div style="position: relative; z-index: 1; padding: 15px 20px; text-align: center; font-size: 8pt; color: #999; border-top: 1px solid #eee;">
+                    Footer (configure in Footer Settings tab)
+                </div>
+            </t>
+        </div>
     </template>
 </odoo>
