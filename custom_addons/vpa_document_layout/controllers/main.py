@@ -238,9 +238,7 @@ class VPATemplatePreview(http.Controller):
                 parts.append(company.email)
             company_details_html = '<br/>'.join(parts)
 
-        # Build header HTML
-        logo_alignment = template.header_logo_alignment or 'right'
-        company_info_alignment = template.header_company_info_alignment or 'right'
+        # Build header HTML - Logo on LEFT, Company info on RIGHT (side by side)
         company_info_color = template.header_company_info_color or '#333333'
 
         html_str = f'''<!DOCTYPE html>
@@ -257,29 +255,45 @@ class VPATemplatePreview(http.Controller):
             padding: 0;
         }}
         .vpa-header {{
-            padding: 10px 18px 15px 18px;
+            padding: 8px 18px;
             border-bottom: 1px solid {primary_color};
-            position: relative;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
         }}
-        .logo-container {{
-            text-align: {logo_alignment};
-            margin-bottom: 10px;
+        .header-left {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 40%;
+            text-align: left;
+        }}
+        .header-right {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 60%;
+            text-align: right;
+        }}
+        .header-left img {{
+            max-height: 22mm;
+            max-width: 50mm;
+            vertical-align: middle;
         }}
         .company-info {{
-            text-align: {company_info_alignment};
-            font-size: 9pt;
-            line-height: 1.5;
+            font-size: 8pt;
+            line-height: 1.4;
             color: {company_info_color};
         }}
     </style>
 </head>
 <body>
     <div class="vpa-header">
-        <div class="logo-container">
+        <div class="header-left">
             {logo_html}
         </div>
-        <div class="company-info">
-            {company_details_html}
+        <div class="header-right">
+            <div class="company-info">
+                {company_details_html}
+            </div>
         </div>
     </div>
 </body>
