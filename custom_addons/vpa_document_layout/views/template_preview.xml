@@ -80,10 +80,14 @@
                 padding: 4px 4px;
                 font-size: 11px;
                 color: #333;
+                background-color: transparent;
                 border: none !important;
                 border-bottom: 1px solid #f8f8f8 !important;
                 border-right: 1px solid #f8f8f8 !important;
                 line-height: 1.3;
+            }
+            .vpa-table-card tbody tr {
+                background-color: white;
             }
             .vpa-table-card td:last-child {
                 border-right: none !important;
@@ -209,6 +213,11 @@
             table.o_main_table tbody td {
                 padding: 8px 10px;
                 border-bottom: 1px solid #e0e0e0;
+                background-color: white;
+                color: #333;
+            }
+            table.o_main_table tbody tr {
+                background-color: white;
             }
         </style>
 
@@ -305,10 +314,17 @@
                         background: #999;
                     }
                     .vpa-section-row td {
-                        background: #fafafa;
+                        background: #fafafa !important;
                         font-weight: bold;
                         color: #555;
                         padding: 6px 8px;
+                    }
+                    .vpa-sale-production table tbody tr {
+                        background-color: white;
+                    }
+                    .vpa-sale-production table tbody td {
+                        background-color: white;
+                        color: #333;
                     }
                     .vpa-total-box {
                         background: #f9f9f9;
