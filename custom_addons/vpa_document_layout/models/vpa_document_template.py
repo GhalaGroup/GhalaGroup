@@ -1140,8 +1140,36 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(template_id=self.id)
             else:
                 # Use Odoo's standard header: Just call the full document
+                # CRITICAL: Include font-size styles INSIDE the template to override Odoo defaults
                 main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
+        <style>
+            /* VPA Font Size Overrides - MUST be inside template to work */
+            table thead th,
+            table.table thead th,
+            .page table thead th {{
+                font-size: 15pt !important;
+                padding: 14px 12px !important;
+            }}
+            table tbody td,
+            table.table tbody td,
+            .page table tbody td {{
+                font-size: 14pt !important;
+                padding: 12px !important;
+                line-height: 1.5 !important;
+            }}
+            table tbody tr.o_line_section td {{
+                font-size: 16pt !important;
+                font-weight: bold !important;
+            }}
+            #total td, .o_total td {{
+                font-size: 14pt !important;
+            }}
+            #total tr:last-child td, .o_total tr:last-child td {{
+                font-size: 16pt !important;
+                font-weight: bold !important;
+            }}
+        </style>
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
