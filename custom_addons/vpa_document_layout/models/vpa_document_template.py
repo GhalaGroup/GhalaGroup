@@ -1761,14 +1761,21 @@ class VPADocumentTemplate(models.Model):
                 border: none !important;
             }
             /* Main product table - ensure visibility in PDF */
-            table.o_main_table, .o_report_layout_vpa table.o_main_table {
+            /* Target ALL tables including Odoo's table.table class */
+            .o_report_layout_vpa table.table,
+            .o_report_layout_vpa table.o_main_table,
+            table.table,
+            table.o_main_table {
                 border-collapse: collapse !important;
                 border-spacing: 0 !important;
                 width: 100%% !important;
                 border: 2px solid %s !important;
                 margin-bottom: 20px !important;
             }
-            table.o_main_table thead th, .o_report_layout_vpa table.o_main_table thead th {
+            .o_report_layout_vpa table.table thead th,
+            .o_report_layout_vpa table.o_main_table thead th,
+            table.table thead th,
+            table.o_main_table thead th {
                 background: %s !important;
                 color: %s !important;
                 padding: 14px 12px !important;
@@ -1778,17 +1785,26 @@ class VPADocumentTemplate(models.Model):
                 text-align: left !important;
                 %s
             }
-            table.o_main_table tbody td, .o_report_layout_vpa table.o_main_table tbody td {
+            .o_report_layout_vpa table.table tbody td,
+            .o_report_layout_vpa table.o_main_table tbody td,
+            table.table tbody td,
+            table.o_main_table tbody td {
                 padding: 12px 12px !important;
                 border: 1px solid %s !important;
                 vertical-align: top !important;
                 font-size: 14pt !important;
                 line-height: 1.5 !important;
             }
-            table.o_main_table tbody tr:nth-child(even), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even) {
+            .o_report_layout_vpa table.table tbody tr:nth-child(even),
+            .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even),
+            table.table tbody tr:nth-child(even),
+            table.o_main_table tbody tr:nth-child(even) {
                 background-color: %s !important;
             }
-            table.o_main_table tbody tr:nth-child(odd), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(odd) {
+            .o_report_layout_vpa table.table tbody tr:nth-child(odd),
+            .o_report_layout_vpa table.o_main_table tbody tr:nth-child(odd),
+            table.table tbody tr:nth-child(odd),
+            table.o_main_table tbody tr:nth-child(odd) {
                 background-color: #ffffff !important;
             }
             .vpa_company_info, .vpa_company_info * {
