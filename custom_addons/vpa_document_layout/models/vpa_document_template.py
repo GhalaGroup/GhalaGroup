@@ -2285,8 +2285,8 @@ class VPADocumentTemplate(models.Model):
         </t>
 
         <!-- Document Title - Full Width, Right Aligned, Vertically Centered between header line and bottom line -->
-        <div t-if="layout_document_title" style="margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; justify-content: flex-end; min-height: 50px; padding: 15px 0;">
+        <div t-if="layout_document_title" style="margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: flex-end; padding: 8px 0;">
                 <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
             </div>
             <div t-attf-style="border-bottom: 1px solid %s;"></div>
