@@ -1768,9 +1768,11 @@ class VPADocumentTemplate(models.Model):
                         border-bottom: 1px solid #f0f0f0 !important;
                     }}
                     .vpa-product-image {{
-                        width: 80px;
-                        height: 80px;
-                        object-fit: cover;
+                        max-width: 80px;
+                        max-height: 80px;
+                        width: auto;
+                        height: auto;
+                        object-fit: contain;
                         border-radius: 4px;
                     }}
                     .vpa-product-title {{
@@ -1919,6 +1921,7 @@ class VPADocumentTemplate(models.Model):
                                                         <t t-if="line.product_id.image_512">
                                                             <img t-att-src="image_data_uri(line.product_id.image_512)"
                                                                  class="vpa-product-image"
+                                                                 style="max-width: 80px; max-height: 80px; width: auto; height: auto;"
                                                                  alt="Product"/>
                                                         </t>
                                                     </div>
