@@ -265,7 +265,7 @@
         </t>
 
         <!-- Header for preview when header_repeat_on_pages is True -->
-        <!-- (In PDF, this comes from wkhtmltopdf --header-html, but preview needs it inline) -->
+        <!-- (In PDF, this comes from wkhtmltopdf header-html param, but preview needs it inline) -->
         <t t-if="template.header_repeat_on_pages">
             <div t-attf-style="position: relative; z-index: 1; padding: 10px 18px 15px 18px; margin-bottom: 25px; border-bottom: 1px solid {{primary_color}};">
                 <!-- Logo -->
