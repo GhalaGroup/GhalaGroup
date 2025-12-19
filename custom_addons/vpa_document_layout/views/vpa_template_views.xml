@@ -206,15 +206,12 @@
                                     <!-- Import from existing template -->
                                     <group string="Import Footer Data" invisible="not footer_enabled or footer_config_id">
                                         <group>
-                                            <field name="import_footer_from_template" string="Import From Template"/>
-                                        </group>
-                                        <group>
                                             <button name="action_import_footer_data"
-                                                    string="Import Footer Data"
+                                                    string="Import Footer From Another Template"
                                                     type="object"
                                                     class="btn-secondary"
                                                     icon="fa-download"
-                                                    help="Copy footer settings from another template"/>
+                                                    help="Open wizard to select and import footer settings from another template"/>
                                         </group>
                                     </group>
 

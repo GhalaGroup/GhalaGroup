@@ -696,52 +696,16 @@ class VPADocumentTemplate(models.Model):
         }
 
     def action_import_footer_data(self):
-        """Import footer data from selected template"""
+        """Open wizard to import footer data from another template"""
         self.ensure_one()
-
-        if not self.import_footer_from_template:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('No Source Selected'),
-                    'message': _('Please select a template to import footer data from.'),
-                    'type': 'warning',
-                    'sticky': False,
-                }
-            }
-
-        source = self.import_footer_from_template
-
-        # Import footer settings from source template
-        self.write({
-            'footer_layout': source.footer_layout,
-            'footer_show_shape': source.footer_show_shape,
-            'footer_shape_opacity': source.footer_shape_opacity,
-            'footer_bank_details_show': source.footer_bank_details_show,
-            'footer_column_1_title': source.footer_column_1_title,
-            'footer_column_1_content': source.footer_column_1_content,
-            'footer_column_2_title': source.footer_column_2_title,
-            'footer_column_2_content': source.footer_column_2_content,
-            'footer_column_3_title': source.footer_column_3_title,
-            'footer_column_3_content': source.footer_column_3_content,
-            'footer_show_page_number': source.footer_show_page_number,
-            'footer_page_number_format': source.footer_page_number_format,
-            'footer_message_type': source.footer_message_type,
-            'footer_custom_message': source.footer_custom_message,
-            'footer_show_content': source.footer_show_content,
-            # Clear the import field after import
-            'import_footer_from_template': False,
-        })
-
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Footer Data Imported'),
-                'message': _('Footer data from "%s" has been imported successfully.') % source.name,
-                'type': 'success',
-                'sticky': False,
+            'name': _('Import Footer Data'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'vpa.import.footer.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_template_id': self.id,
             }
         }
 

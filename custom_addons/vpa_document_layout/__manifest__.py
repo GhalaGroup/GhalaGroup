@@ -60,6 +60,7 @@ Support: info@vpa.co.tz
         'views/vpa_footer_preview.xml',
         'views/vpa_footer_unified.xml',
         'views/vpa_footer_override.xml',
+        'wizard/import_footer_wizard_views.xml',
         'data/report_layout.xml',
         'data/default_templates.xml',
         'data/default_footers.xml',
