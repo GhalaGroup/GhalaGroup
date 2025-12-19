@@ -1949,9 +1949,7 @@ class VPADocumentTemplate(models.Model):
                                                     </div>
                                                     <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
                                                         <t t-if="product_details">
-                                                            <div class="vpa-product-details">
-                                                                <t t-raw="product_details.replace('\\n', '&lt;br/&gt;')"/>
-                                                            </div>
+                                                            <div class="vpa-product-details" t-raw="product_details"/>
                                                         </t>
                                                     </div>
                                                 </div>
