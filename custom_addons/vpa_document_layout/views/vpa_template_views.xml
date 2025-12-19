@@ -203,10 +203,10 @@
                                         Configure footer content manually for this template only, or import from an existing footer configuration.
                                     </div>
 
-                                    <!-- Import from existing footer config -->
+                                    <!-- Import from existing template -->
                                     <group string="Import Footer Data" invisible="not footer_enabled or footer_config_id">
                                         <group>
-                                            <field name="import_footer_from" string="Import From"/>
+                                            <field name="import_footer_from_template" string="Import From Template"/>
                                         </group>
                                         <group>
                                             <button name="action_import_footer_data"
@@ -214,7 +214,7 @@
                                                     type="object"
                                                     class="btn-secondary"
                                                     icon="fa-download"
-                                                    help="Copy footer settings from the selected configuration"/>
+                                                    help="Copy footer settings from another template"/>
                                         </group>
                                     </group>
 

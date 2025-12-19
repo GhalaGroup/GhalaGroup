@@ -283,13 +283,13 @@ class VPADocumentTemplate(models.Model):
         help='Your custom message (displayed when "Custom Message" is selected)'
     )
 
-    # Import footer data from existing config (non-stored helper field)
-    import_footer_from = fields.Many2one(
-        'vpa.footer.config',
-        string='Import Footer Data From',
+    # Import footer data from another template (non-stored helper field)
+    import_footer_from_template = fields.Many2one(
+        'vpa.document.template',
+        string='Import Footer From Template',
         store=False,
-        domain="[('company_id', '=', company_id), ('active', '=', True)]",
-        help='Select a footer configuration to import its data into this template'
+        domain="[('company_id', '=', company_id), ('active', '=', True), ('id', '!=', id)]",
+        help='Select another template to import its footer data into this template'
     )
 
     # Report Action Reference (auto-created)
@@ -697,38 +697,40 @@ class VPADocumentTemplate(models.Model):
         }
 
     def action_import_footer_data(self):
-        """Import footer data from selected footer configuration"""
+        """Import footer data from selected template"""
         self.ensure_one()
 
-        if not self.import_footer_from:
+        if not self.import_footer_from_template:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': _('No Source Selected'),
-                    'message': _('Please select a footer configuration to import from.'),
+                    'message': _('Please select a template to import footer data from.'),
                     'type': 'warning',
                     'sticky': False,
                 }
             }
 
-        source = self.import_footer_from
+        source = self.import_footer_from_template
 
-        # Import footer settings from source config
+        # Import footer settings from source template
         self.write({
-            'footer_layout': source.footer_layout if source.footer_layout != 'custom_html' else 'two_col',
-            'footer_show_shape': source.show_shape,
-            'footer_shape_opacity': source.shape_opacity,
-            'footer_bank_details_show': source.show_bank_details,
-            'footer_column_1_title': source.column_1_title,
-            'footer_column_1_content': source.column_1_content,
-            'footer_column_2_title': source.column_2_title,
-            'footer_column_2_content': source.column_2_content,
-            'footer_column_3_title': source.column_3_title,
-            'footer_column_3_content': source.column_3_content,
-            'footer_show_page_number': source.show_page_numbers,
-            # Clear the import field after import
-            'import_footer_from': False,
+            'footer_layout': source.footer_layout,
+            'footer_show_shape': source.footer_show_shape,
+            'footer_shape_opacity': source.footer_shape_opacity,
+            'footer_bank_details_show': source.footer_bank_details_show,
+            'footer_column_1_title': source.footer_column_1_title,
+            'footer_column_1_content': source.footer_column_1_content,
+            'footer_column_2_title': source.footer_column_2_title,
+            'footer_column_2_content': source.footer_column_2_content,
+            'footer_column_3_title': source.footer_column_3_title,
+            'footer_column_3_content': source.footer_column_3_content,
+            'footer_show_page_number': source.footer_show_page_number,
+            'footer_page_number_format': source.footer_page_number_format,
+            'footer_message_type': source.footer_message_type,
+            'footer_custom_message': source.footer_custom_message,
+            'footer_show_content': source.footer_show_content,
         })
 
         return {
