@@ -283,6 +283,33 @@
                             <t t-set="layout_document_title">
                                 <span><t t-if="doc.state in ['draft','sent']">Quotation #</t><t t-elif="doc.state in ['sale','done']">Order #</t><t t-elif="doc.state == 'cancel'">Cancelled Order #</t><t t-out="doc.name"/></span>
                             </t>
+                            <!-- Header for preview when header_repeat_on_pages is True -->
+                            <!-- (In PDF, this comes from wkhtmltopdf --header-html, but preview needs it inline) -->
+                            <t t-if="template.header_repeat_on_pages">
+                                <div t-attf-style="position: relative; z-index: 1; padding: 10px 18px 15px 18px; margin-bottom: 25px; border-bottom: 1px solid {{primary_color}};">
+                                    <div style="display: table; width: 100%;">
+                                        <div style="display: table-cell; width: 40%; vertical-align: middle;">
+                                            <img t-if="template.company_id.logo"
+                                                 t-att-src="image_data_uri(template.company_id.logo)"
+                                                 t-attf-style="max-width: {{template.header_logo_width or 250}}px; max-height: {{template.header_logo_height or 100}}px;"
+                                                 alt="Logo"/>
+                                        </div>
+                                        <div style="display: table-cell; width: 60%; vertical-align: middle; text-align: right;">
+                                            <div t-attf-style="font-size: 9pt; line-height: 1.5; color: {{template.header_company_info_color or '#555555'}};">
+                                                <t t-if="template.header_company_details_html">
+                                                    <t t-out="template.header_company_details_html"/>
+                                                </t>
+                                                <t t-elif="template.company_id.company_details">
+                                                    <span t-field="template.company_id.company_details"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="template.company_id.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
                             <t t-call="vpa_document_layout.external_layout_vpa_template_{{template.id}}">
                                 <!-- Optional: Your Reference field if present -->
                                 <div t-if="doc.client_order_ref" id="informations" style="margin-bottom: 20px;">

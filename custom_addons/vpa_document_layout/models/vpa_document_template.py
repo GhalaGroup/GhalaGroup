@@ -2323,6 +2323,7 @@ class VPADocumentTemplate(models.Model):
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
             'sale_production': 'sale.order',
+            'quotation_pictures': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',

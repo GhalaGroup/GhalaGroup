@@ -20,6 +20,7 @@ class VPATemplatePreview(http.Controller):
         # Render HTML preview with page border
         return request.render('vpa_document_layout.template_preview_fullpage', {
             'template': template,
+            'image_data_uri': image_data_uri,  # Required for logo rendering in preview
         })
 
     @http.route('/vpa/template/preview/pdf/<int:template_id>', type='http', auth='user')
