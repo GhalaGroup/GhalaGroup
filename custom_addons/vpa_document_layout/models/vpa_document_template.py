@@ -2284,10 +2284,9 @@ class VPADocumentTemplate(models.Model):
         </div>
         </t>
 
-        <!-- Document Title - Full Width, Right Aligned, Vertically Centered between lines -->
+        <!-- Document Title - Full Width, Right Aligned, Vertically Centered between header line and bottom line -->
         <div t-if="layout_document_title" style="margin-bottom: 20px;">
-            <div t-attf-style="border-top: 1px solid %s;"></div>
-            <div style="display: flex; align-items: center; justify-content: flex-end; min-height: 60px; padding: 10px 0;">
+            <div style="display: flex; align-items: center; justify-content: flex-end; min-height: 50px; padding: 15px 0;">
                 <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
             </div>
             <div t-attf-style="border-bottom: 1px solid %s;"></div>
@@ -2356,7 +2355,6 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (custom HTML)
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
-            self.primary_accent_color,  # Document title top border line color
             self.primary_accent_color,  # Document title color
             self.primary_accent_color,  # Document title bottom border line color
         )
