@@ -1949,7 +1949,7 @@ class VPADocumentTemplate(models.Model):
                                                     </div>
                                                     <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
                                                         <t t-if="product_details">
-                                                            <div class="vpa-product-details" t-raw="product_details"/>
+                                                            <div class="vpa-product-details" style="white-space: pre-line;" t-out="product_details"/>
                                                         </t>
                                                     </div>
                                                 </div>
@@ -2284,25 +2284,26 @@ class VPADocumentTemplate(models.Model):
         </div>
         </t>
 
-        <!-- Customer Details (left) and Document Title + Order Info (right) - side by side -->
-        <table t-if="address or information_block or layout_document_title" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
+        <!-- Document Title - Full Width, Right Aligned, Vertically Centered between lines -->
+        <div t-if="layout_document_title" style="margin-bottom: 20px;">
+            <div t-attf-style="border-top: 1px solid %s;"></div>
+            <div style="display: flex; align-items: center; justify-content: flex-end; min-height: 60px; padding: 10px 0;">
+                <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
+            </div>
+            <div t-attf-style="border-bottom: 1px solid %s;"></div>
+        </div>
+
+        <!-- Customer Details and Order Info (Two columns below title) -->
+        <table t-if="address or information_block" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
             <tbody>
                 <tr>
-                    <!-- Left column: Customer Details box -->
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
                         <div style="font-size: 10pt; line-height: 1.8; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <!-- Right column: Document Title + Order Info -->
-                    <td style="width: 50%%; vertical-align: middle; text-align: right; padding-left: 20px;">
-                        <!-- Document Title -->
-                        <div t-if="layout_document_title" style="margin-bottom: 15px;">
-                            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
-                        </div>
-                        <div t-attf-style="border-bottom: 1px solid %s; margin-bottom: 15px;"></div>
-                        <!-- Order Info -->
-                        <div t-if="information_block" style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                    <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
+                        <div style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
                     </td>
@@ -2355,8 +2356,9 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (custom HTML)
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
+            self.primary_accent_color,  # Document title top border line color
             self.primary_accent_color,  # Document title color
-            self.primary_accent_color,  # Document title separator line color (now primary)
+            self.primary_accent_color,  # Document title bottom border line color
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
