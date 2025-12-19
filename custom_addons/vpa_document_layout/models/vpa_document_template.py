@@ -1950,7 +1950,7 @@ class VPADocumentTemplate(models.Model):
                                                     <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
                                                         <t t-if="product_details">
                                                             <div class="vpa-product-details">
-                                                                <t t-out="product_details.replace('\\n', '&lt;br/&gt;')"/>
+                                                                <t t-raw="product_details.replace('\\n', '&lt;br/&gt;')"/>
                                                             </div>
                                                         </t>
                                                     </div>
@@ -2286,23 +2286,25 @@ class VPADocumentTemplate(models.Model):
         </div>
         </t>
 
-        <!-- Document Title - Full Width Right Aligned, vertically centered between lines -->
-        <div t-if="layout_document_title" style="margin-bottom: 20px;">
-            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 15px 0; text-align: right;" t-out="layout_document_title"/>
-            <div t-attf-style="border-bottom: 1px solid %s;"></div>
-        </div>
-
-        <!-- Customer Details and Order Info (Two columns below title) -->
-        <table t-if="address or information_block" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
+        <!-- Customer Details (left) and Document Title + Order Info (right) - side by side -->
+        <table t-if="address or information_block or layout_document_title" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
             <tbody>
                 <tr>
+                    <!-- Left column: Customer Details box -->
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
                         <div style="font-size: 10pt; line-height: 1.8; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
-                        <div style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                    <!-- Right column: Document Title + Order Info -->
+                    <td style="width: 50%%; vertical-align: middle; text-align: right; padding-left: 20px;">
+                        <!-- Document Title -->
+                        <div t-if="layout_document_title" style="margin-bottom: 15px;">
+                            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
+                        </div>
+                        <div t-attf-style="border-bottom: 1px solid %s; margin-bottom: 15px;"></div>
+                        <!-- Order Info -->
+                        <div t-if="information_block" style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
                     </td>
