@@ -289,8 +289,16 @@ class IrActionsReport(models.Model):
                     _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")
 
             if footer_url or has_header:
-                # Get footer height from config, default to 30mm
-                footer_height = footer_config.footer_height or '30mm' if footer_config else '30mm'
+                # Get footer height from config or template, default to 30mm
+                footer_height = '30mm'
+                if template_id:
+                    vpa_template = self.env['vpa.document.template'].sudo().browse(template_id)
+                    if vpa_template.exists() and vpa_template.footer_config_id:
+                        footer_height = vpa_template.footer_config_id.footer_height or '30mm'
+                elif footer_config_id:
+                    fc = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
+                    if fc.exists():
+                        footer_height = fc.footer_height or '30mm'
                 command_args.extend([
                     '--enable-local-file-access',
                     '--margin-top', header_height if has_header else '0',
