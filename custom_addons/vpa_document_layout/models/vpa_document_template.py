@@ -1772,7 +1772,6 @@ class VPADocumentTemplate(models.Model):
                         height: 80px;
                         object-fit: cover;
                         border-radius: 4px;
-                        border: 1px solid #eee;
                     }}
                     .vpa-product-title {{
                         font-weight: 600;

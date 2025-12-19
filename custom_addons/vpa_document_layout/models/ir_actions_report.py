@@ -299,7 +299,7 @@ class IrActionsReport(models.Model):
                 # Both header and footer use --header-html and --footer-html URLs
                 if has_header and header_url:
                     command_args.extend([
-                        '--header-spacing', '0',
+                        '--header-spacing', '5',
                         '--header-html', header_url
                     ])
                 if footer_url:
