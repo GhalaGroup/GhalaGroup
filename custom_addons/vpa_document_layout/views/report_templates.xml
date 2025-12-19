@@ -8,7 +8,7 @@
 
         <!-- BODY (Header moved inside body for WeasyPrint compatibility) -->
         <div t-attf-class="article o_report_layout_vpa o_report_layout_bubble o_table_boxed-rounded o_company_#{company.id}_layout"
-             style="position: relative; padding: 0; min-height: 400px;"
+             style="position: relative; padding: 0;"
              t-att-data-oe-model="o and o._name"
              t-att-data-oe-id="o and o.id"
              t-att-data-oe-lang="o and o.env.context.get('lang')">

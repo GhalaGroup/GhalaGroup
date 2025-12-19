@@ -2123,7 +2123,7 @@ class VPADocumentTemplate(models.Model):
                 position: relative;
                 z-index: 2;
                 width: 100%% !important;
-                height: %smm !important;
+                /* height removed to allow natural content flow - footer is handled by wkhtmltopdf */
                 padding: 0 !important;
                 margin: 0 !important;
                 box-sizing: border-box;
@@ -2131,13 +2131,13 @@ class VPADocumentTemplate(models.Model):
             }
             .o_report_layout_vpa .page-layout-table {
                 width: 100%%;
-                height: 100%%;
+                /* height removed to allow natural content flow */
                 border-collapse: collapse;
                 border-spacing: 0;
                 border: none !important;
             }
             .o_report_layout_vpa .page-layout-table td.content-cell {
-                height: 100%%;
+                /* height removed to allow natural content flow */
                 vertical-align: top;
                 padding: 18px;
                 border: none !important;
@@ -2300,14 +2300,13 @@ class VPADocumentTemplate(models.Model):
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (31 total)
+        # Finalize arch_content with all parameters (30 total - page_height removed)
         arch_content = arch_content % (
             self.id,
             self.id,
             self.primary_accent_color,
             self.secondary_accent_color,
             page_size_css,  # @page size
-            page_height,  # Page height for layout
             table_styles['border'],  # Table border (2px solid)
             table_styles['header_bg'],  # Table header background (thead th)
             table_styles['header_text'],  # Table header text color (thead th)

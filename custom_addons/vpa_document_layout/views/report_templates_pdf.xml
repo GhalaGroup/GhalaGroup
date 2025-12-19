@@ -46,7 +46,7 @@
         </div>
 
         <!-- BODY: Clean layout with proper spacing -->
-        <div class="article" style="padding: 25px 0; position: relative; min-height: 500px;">
+        <div class="article" style="padding: 25px 0; position: relative;">
             <!-- Background circle decoration -->
             <div style="position: absolute; top: 50px; right: -150px; width: 450px; height: 450px; border-radius: 50%; z-index: -1; opacity: 0.08;">
                 <t t-set="body_circle_bg" t-value="primary_color"/>

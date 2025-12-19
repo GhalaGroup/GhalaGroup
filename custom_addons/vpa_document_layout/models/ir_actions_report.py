@@ -289,10 +289,12 @@ class IrActionsReport(models.Model):
                     _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")
 
             if footer_url or has_header:
+                # Get footer height from config, default to 30mm
+                footer_height = footer_config.footer_height or '30mm' if footer_config else '30mm'
                 command_args.extend([
                     '--enable-local-file-access',
                     '--margin-top', header_height if has_header else '0',
-                    '--margin-bottom', '35mm' if footer_url else '0',  # Reserve space for footer
+                    '--margin-bottom', footer_height if footer_url else '0',  # Reserve space for footer
                     '--margin-left', '0',
                     '--margin-right', '0',
                 ])
