@@ -3,7 +3,7 @@
     'name': 'VPA Document Layout',
     'version': '19.0.1.2.0',
     'category': 'Reporting',
-    'summary': 'Custom VPA document layout for reports',
+    'summary': 'Custom VPA document layout for reports (v19.0.1.2.0)',
     'description': """
         VPA Document Layout
         ===================
