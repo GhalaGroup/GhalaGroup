@@ -283,11 +283,10 @@ class VPADocumentTemplate(models.Model):
         help='Your custom message (displayed when "Custom Message" is selected)'
     )
 
-    # Import footer data from another template (non-stored helper field)
+    # Import footer data from another template (stored so button action can access it)
     import_footer_from_template = fields.Many2one(
         'vpa.document.template',
         string='Import Footer From Template',
-        store=False,
         domain="[('company_id', '=', company_id), ('active', '=', True), ('id', '!=', id)]",
         help='Select another template to import its footer data into this template'
     )
@@ -731,6 +730,8 @@ class VPADocumentTemplate(models.Model):
             'footer_message_type': source.footer_message_type,
             'footer_custom_message': source.footer_custom_message,
             'footer_show_content': source.footer_show_content,
+            # Clear the import field after import
+            'import_footer_from_template': False,
         })
 
         return {
