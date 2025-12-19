@@ -1696,11 +1696,14 @@ class VPADocumentTemplate(models.Model):
                         font-size: 12px;
                         color: #333;
                     }}
+                    /* Table Card Container - Match UD Quote/Order style */
                     .vpa-table-card {{
-                        background: white;
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
                         border-radius: 5px;
-                        padding: 0;
-                        margin-bottom: 15px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-section-header {{
                         color: <t t-out="primary_color"/>;
@@ -1708,43 +1711,61 @@ class VPADocumentTemplate(models.Model):
                         font-weight: 600;
                         text-transform: uppercase;
                         letter-spacing: 0.4px;
-                        margin: 6px 6px 8px 6px;
+                        margin: 6px 6px 4px 6px;
                         padding-bottom: 3px;
                         border-bottom: 1px solid #f0f0f0;
                     }}
                     .vpa-table-card table {{
                         width: 100%%;
                         border-collapse: collapse;
+                        border: none !important;
                     }}
                     .vpa-table-card th {{
-                        background: <t t-out="primary_color"/>;
-                        color: white;
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
                         font-weight: 600;
                         text-transform: uppercase;
                         font-size: 10px;
-                        padding: 8px 6px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
                         letter-spacing: 0.3px;
                     }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
                     .vpa-table-card td {{
-                        padding: 10px 6px;
-                        font-size: 10pt;
+                        padding: 4px 4px;
+                        font-size: 11px;
                         color: #333;
-                        border-bottom: 1px solid #e0e0e0;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
                         vertical-align: top;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
                     }}
                     .vpa-section-row td {{
-                        background: #f5f5f5;
+                        background: #f0f0f0;
                         font-weight: 700;
-                        padding: 8px 6px;
-                        color: #555;
-                        font-size: 11px;
+                        padding: 6px 4px;
+                        color: #666;
+                        font-size: 12px;
+                        border-bottom: 1px solid #ddd !important;
                     }}
                     .vpa-note-row td {{
-                        padding: 6px 12px;
+                        padding: 4px 12px;
                         font-style: italic;
-                        color: #666;
-                        font-size: 10px;
+                        color: #555;
+                        font-size: 11px;
                         background: #fafafa;
+                        border-bottom: 1px solid #f0f0f0 !important;
                     }}
                     .vpa-product-image {{
                         width: 80px;
@@ -1759,8 +1780,8 @@ class VPADocumentTemplate(models.Model):
                         font-size: 10pt;
                     }}
                     .vpa-product-code {{
-                        color: #888;
-                        font-size: 9pt;
+                        color: #777;
+                        font-size: 10px;
                     }}
                     .vpa-product-details {{
                         font-size: 9pt;
@@ -1772,34 +1793,44 @@ class VPADocumentTemplate(models.Model):
                         display: inline-block;
                         background: white;
                         color: <t t-out="primary_color"/>;
-                        padding: 2px 8px;
-                        border-radius: 3px;
+                        padding: 2px 6px;
+                        border-radius: 2px;
                         font-weight: 600;
-                        font-size: 10pt;
+                        font-size: 11px;
                         border: 1px solid <t t-out="primary_color"/>;
                     }}
                     .vpa-amount-badge {{
                         display: inline-block;
                         background: <t t-out="primary_color"/>;
                         color: white;
-                        padding: 3px 10px;
-                        border-radius: 3px;
+                        padding: 2px 8px;
+                        border-radius: 2px;
                         font-weight: 600;
-                        font-size: 10pt;
+                        font-size: 11px;
                     }}
                     .vpa-total-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
                         border-left: 3px solid <t t-out="primary_color"/>;
-                        padding: 12px;
+                        padding: 10px;
                         border-radius: 5px;
-                        margin: 15px 0;
+                        margin: 10px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-total-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                    }}
+                    .vpa-total-card td {{
+                        padding: 6px 8px;
+                        font-size: 11px;
+                        border: none !important;
                     }}
                     .vpa-total-label {{
                         font-size: 11px;
                         color: #666;
                     }}
                     .vpa-total-value {{
-                        font-size: 13px;
+                        font-size: 11px;
                         color: #333;
                         font-weight: 500;
                     }}
