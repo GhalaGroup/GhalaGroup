@@ -200,8 +200,23 @@
                                     <!-- Manual Footer Settings (only shown when no footer_config_id is selected) -->
                                     <separator string="Manual Footer Settings" invisible="not footer_enabled or footer_config_id"/>
                                     <div class="alert alert-secondary" role="alert" invisible="not footer_enabled or footer_config_id">
-                                        Configure footer content manually for this template only.
+                                        Configure footer content manually for this template only, or import from an existing footer configuration.
                                     </div>
+
+                                    <!-- Import from existing footer config -->
+                                    <group string="Import Footer Data" invisible="not footer_enabled or footer_config_id">
+                                        <group>
+                                            <field name="import_footer_from" string="Import From"/>
+                                        </group>
+                                        <group>
+                                            <button name="action_import_footer_data"
+                                                    string="Import Footer Data"
+                                                    type="object"
+                                                    class="btn-secondary"
+                                                    icon="fa-download"
+                                                    help="Copy footer settings from the selected configuration"/>
+                                        </group>
+                                    </group>
 
                                     <!-- Footer Layout (only when footer enabled and no shared config) -->
                                     <group invisible="not footer_enabled or footer_config_id">

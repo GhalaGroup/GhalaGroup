@@ -283,6 +283,15 @@ class VPADocumentTemplate(models.Model):
         help='Your custom message (displayed when "Custom Message" is selected)'
     )
 
+    # Import footer data from existing config (non-stored helper field)
+    import_footer_from = fields.Many2one(
+        'vpa.footer.config',
+        string='Import Footer Data From',
+        store=False,
+        domain="[('company_id', '=', company_id), ('active', '=', True)]",
+        help='Select a footer configuration to import its data into this template'
+    )
+
     # Report Action Reference (auto-created)
     report_action_id = fields.Many2one('ir.actions.report', string='Report Action', readonly=True, ondelete='cascade')
 
@@ -685,6 +694,52 @@ class VPADocumentTemplate(models.Model):
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'current',
+        }
+
+    def action_import_footer_data(self):
+        """Import footer data from selected footer configuration"""
+        self.ensure_one()
+
+        if not self.import_footer_from:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('No Source Selected'),
+                    'message': _('Please select a footer configuration to import from.'),
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
+
+        source = self.import_footer_from
+
+        # Import footer settings from source config
+        self.write({
+            'footer_layout': source.footer_layout if source.footer_layout != 'custom_html' else 'two_col',
+            'footer_show_shape': source.show_shape,
+            'footer_shape_opacity': source.shape_opacity,
+            'footer_bank_details_show': source.show_bank_details,
+            'footer_column_1_title': source.column_1_title,
+            'footer_column_1_content': source.column_1_content,
+            'footer_column_2_title': source.column_2_title,
+            'footer_column_2_content': source.column_2_content,
+            'footer_column_3_title': source.column_3_title,
+            'footer_column_3_content': source.column_3_content,
+            'footer_show_page_number': source.show_page_numbers,
+            # Clear the import field after import
+            'import_footer_from': False,
+        })
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Footer Data Imported'),
+                'message': _('Footer data from "%s" has been imported successfully.') % source.name,
+                'type': 'success',
+                'sticky': False,
+            }
         }
 
     def _get_table_styles(self):
