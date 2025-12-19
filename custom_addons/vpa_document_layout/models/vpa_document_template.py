@@ -1932,9 +1932,6 @@ class VPADocumentTemplate(models.Model):
                                             <td>
                                                 <!-- Product Title Row -->
                                                 <div class="vpa-product-title">
-                                                    <t t-if="line.product_id.default_code">
-                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
-                                                    </t>
                                                     <t t-out="product_title"/>
                                                 </div>
                                                 <!-- Image + Details Row -->
@@ -2265,7 +2262,7 @@ class VPADocumentTemplate(models.Model):
             <!-- Header (only shown in body if header_repeat_on_pages is False) -->
             <!-- When header_repeat_on_pages is True, header comes from wkhtmltopdf header URL -->
         <t t-if="not vpa_template.header_repeat_on_pages">
-        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid %s;">
+        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
                 <!-- Use image_data_uri for both preview and PDF - company must have bin_size=False -->
                 <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="%s" alt="Logo"/>
@@ -2285,8 +2282,8 @@ class VPADocumentTemplate(models.Model):
         </t>
 
         <!-- Document Title - Full Width, Right Aligned, Vertically Centered between header line and bottom line -->
-        <div t-if="layout_document_title" style="margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; justify-content: flex-end; padding: 8px 0;">
+        <div t-if="layout_document_title" style="margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: flex-end; padding: 4px 0;">
                 <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
             </div>
             <div t-attf-style="border-bottom: 1px solid %s;"></div>
