@@ -52,6 +52,8 @@ class VPADocumentTemplate(models.Model):
             'purchase_order': 'PO',
             'delivery': 'DO',
             'picking': 'PICK',
+            'internal_transfer': 'INT',
+            'internal_transfer_pictures': 'INT',
             'manufacturing_order': 'MO',
         }
         if self.document_type and not self.document_abbreviation:
@@ -140,6 +142,8 @@ class VPADocumentTemplate(models.Model):
         ('purchase_order', 'Purchase Order'),
         ('delivery', 'Delivery Order'),
         ('picking', 'Picking'),
+        ('internal_transfer', 'Internal Transfer'),
+        ('internal_transfer_pictures', 'Internal Transfer (Pictures)'),
         ('manufacturing_order', 'Manufacturing Order'),
     ], string='Document Type', required=True, help='Which document type this template applies to')
 
@@ -498,11 +502,14 @@ class VPADocumentTemplate(models.Model):
                 'quotation': 'sale.order',
                 'sale_order': 'sale.order',
                 'sale_production': 'sale.order',
+                'quotation_pictures': 'sale.order',
                 'invoice': 'account.move',
                 'bill': 'account.move',
                 'purchase_order': 'purchase.order',
                 'delivery': 'stock.picking',
                 'picking': 'stock.picking',
+                'internal_transfer': 'stock.picking',
+                'internal_transfer_pictures': 'stock.picking',
                 'manufacturing_order': 'mrp.production',
             }
             for template in self:
@@ -578,11 +585,14 @@ class VPADocumentTemplate(models.Model):
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
             'sale_production': 'sale.order',
+            'quotation_pictures': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
             'delivery': 'stock.picking',
             'picking': 'stock.picking',
+            'internal_transfer': 'stock.picking',
+            'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
         }
 
@@ -2024,6 +2034,241 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
+        elif self.document_type in ['internal_transfer', 'internal_transfer_pictures']:
+            # Internal Transfer template - for inventory transfers (stock.picking)
+            show_pictures = self.document_type == 'internal_transfer_pictures'
+
+            # Build picture section if needed
+            if show_pictures:
+                picture_section = '''
+                                                <!-- Image + Details Row -->
+                                                <div style="display: table; width: 100%%; margin-top: 8px;">
+                                                    <div style="display: table-cell; width: 90px; vertical-align: top;">
+                                                        <t t-if="move.product_id.image_512">
+                                                            <img t-att-src="image_data_uri(move.product_id.image_512)"
+                                                                 style="max-width: 80px; max-height: 80px; width: auto; height: auto; border-radius: 4px;"
+                                                                 alt="Product"/>
+                                                        </t>
+                                                    </div>
+                                                    <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
+                                                        <t t-if="move.product_id.description_sale">
+                                                            <div style="font-size: 9pt; color: #555; line-height: 1.5; white-space: pre-line;" t-out="move.product_id.description_sale"/>
+                                                        </t>
+                                                    </div>
+                                                </div>'''
+            else:
+                picture_section = ''
+
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Internal Transfer'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">TRANSFER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.origin" style="margin-top: 4px;">
+                        <strong>Source Document:</strong>
+                        <span t-field="doc.origin"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>From:</strong>
+                        <span t-field="doc.location_id.display_name"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>To:</strong>
+                        <span t-field="doc.location_dest_id.display_name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">WAREHOUSE INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.picking_type_id.warehouse_id">
+                        <strong>Warehouse:</strong>
+                        <span t-field="doc.picking_type_id.warehouse_id.name"/>
+                    </div>
+                    <div t-if="doc.scheduled_date" style="margin-top: 4px;">
+                        <strong>Scheduled Date:</strong>
+                        <span t-field="doc.scheduled_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id" style="margin-top: 4px;">
+                        <strong>Responsible:</strong>
+                        <span t-field="doc.user_id.name"/>
+                    </div>
+                    <div t-if="doc.state" style="margin-top: 4px;">
+                        <strong>Status:</strong>
+                        <span t-field="doc.state"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Internal Transfer -->
+                <style>
+                    .vpa-transfer {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container - Match Quotation style */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        vertical-align: top;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-location {{
+                        font-size: 10px;
+                        color: #555;
+                    }}
+                </style>
+
+                <div class="vpa-transfer">
+                    <!-- Transfer Items Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">TRANSFER ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: {desc_width}%%;">PRODUCT</th>
+                                    <th style="width: 15%%; text-align: center;">FROM</th>
+                                    <th style="width: 15%%; text-align: center;">TO</th>
+                                    <th style="width: 10%%; text-align: center;">QTY</th>
+                                    <th style="width: 10%%; text-align: center;">UNIT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="doc.move_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                    <t t-set="line_num" t-value="line_num + 1"/>
+                                    <tr>
+                                        <!-- Line Number -->
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                            <t t-out="line_num"/>
+                                        </td>
+                                        <!-- Product -->
+                                        <td>
+                                            <div class="vpa-product-title">
+                                                <t t-if="move.product_id.default_code">
+                                                    <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                </t>
+                                                <t t-out="move.product_id.name"/>
+                                            </div>
+                                            {picture_section}
+                                        </td>
+                                        <!-- From Location -->
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                            <span class="vpa-location" t-field="move.location_id.name"/>
+                                        </td>
+                                        <!-- To Location -->
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                            <span class="vpa-location" t-field="move.location_dest_id.name"/>
+                                        </td>
+                                        <!-- Quantity -->
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                            <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
+                                        </td>
+                                        <!-- Unit -->
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                            <span t-field="move.product_uom"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <t t-if="doc.note">
+                        <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin: 10px 0;">
+                            <div t-att-style="'color: ' + primary_color + '; margin: 0 0 6px 0; font-size: 11px; font-weight: 600;'">NOTES:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <span t-field="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(
+                template_id=self.id,
+                picture_section=picture_section,
+                desc_width='45' if show_pictures else '45'
+            )
         else:
             # For other document types, create a template with standard VPA styling
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
@@ -2380,6 +2625,8 @@ class VPADocumentTemplate(models.Model):
             'purchase_order': 'purchase.order',
             'delivery': 'stock.picking',
             'picking': 'stock.picking',
+            'internal_transfer': 'stock.picking',
+            'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
         }
 
