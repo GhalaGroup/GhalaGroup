@@ -2739,6 +2739,10 @@ class VPADocumentTemplate(models.Model):
             ])
             existing_views.unlink()
 
+            # Update report action sequence (for Print menu ordering)
+            if template.report_action_id:
+                template.report_action_id.write({'sequence': template.sequence})
+
             # Recreate
             template._create_qweb_template()
 
