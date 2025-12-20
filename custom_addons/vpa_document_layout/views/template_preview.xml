@@ -243,6 +243,26 @@
                 </div>
             </t>
         </t>
+        <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
+            <t t-set="layout_document_title" t-value="'Internal Transfer - WH/INT/00045'"/>
+            <t t-set="address">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">TRANSFER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div style="margin-top: 4px;"><strong>Source Document:</strong> SO00456</div>
+                    <div style="margin-top: 4px;"><strong>From:</strong> WH/Stock</div>
+                    <div style="margin-top: 4px;"><strong>To:</strong> WH/Production</div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">WAREHOUSE INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Warehouse:</strong> Main Warehouse</div>
+                    <div style="margin-top: 4px;"><strong>Scheduled Date:</strong> 12/20/2025</div>
+                    <div style="margin-top: 4px;"><strong>Responsible:</strong> Demo User</div>
+                    <div style="margin-top: 4px;"><strong>Status:</strong> <span style="color: #ffc107;">Waiting</span></div>
+                </div>
+            </t>
+        </t>
         <t t-else="">
             <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
             <t t-set="address">
@@ -262,6 +282,35 @@
                     <div style="margin-top: 4px;"><strong>Salesperson:</strong> Demo User</div>
                 </div>
             </t>
+        </t>
+
+        <!-- Header for preview when header_repeat_on_pages is True -->
+        <!-- (In PDF, this comes from wkhtmltopdf header-html param, but preview needs it inline) -->
+        <t t-if="template.header_repeat_on_pages">
+            <div t-attf-style="position: relative; z-index: 1; padding: 10px 18px 15px 18px; margin-bottom: 25px; border-bottom: 1px solid {{primary_color}};">
+                <!-- Logo -->
+                <div t-attf-style="text-align: {{template.header_logo_alignment or 'left'}}; margin-bottom: 10px; display: table; width: 100%;">
+                    <div style="display: table-cell; width: 40%; vertical-align: middle;">
+                        <img t-if="template.company_id.logo"
+                             t-att-src="image_data_uri(template.company_id.logo)"
+                             t-attf-style="max-width: {{template.header_logo_width or 250}}px; max-height: {{template.header_logo_height or 100}}px;"
+                             alt="Logo"/>
+                    </div>
+                    <div style="display: table-cell; width: 60%; vertical-align: middle; text-align: right;">
+                        <div t-attf-style="font-size: 9pt; line-height: 1.5; color: {{template.header_company_info_color or '#555555'}};">
+                            <t t-if="template.header_company_details_html">
+                                <t t-out="template.header_company_details_html"/>
+                            </t>
+                            <t t-elif="template.company_id.company_details">
+                                <span t-field="template.company_id.company_details"/>
+                            </t>
+                            <t t-else="">
+                                <span t-field="template.company_id.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </t>
 
         <!-- Call the dynamically generated VPA layout template -->
@@ -426,6 +475,82 @@
                                 <strong>MO/00045</strong> - Three-Seat Sofa (5.0 Units) | PO-2025-001
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Internal Transfer Preview Content -->
+            <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
+                <div class="vpa-quote-order">
+                    <!-- Transfer Items Table - VPA Style -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">TRANSFER ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 43%;">PRODUCT</th>
+                                    <th style="width: 13%; text-align: center;">FROM</th>
+                                    <th style="width: 13%; text-align: center;">TO</th>
+                                    <th style="width: 8%; text-align: center;">QTY</th>
+                                    <th style="width: 8%; text-align: center;">UNIT</th>
+                                    <th style="width: 5%; text-align: center;">✓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">1</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FURN_8999]</span> Three-Seat Sofa
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Three Seater Sofa with Lounger</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Stock</td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Production</td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">10</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">2</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FURN_8220]</span> Four Person Desk
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Modern office workstation</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Stock</td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Production</td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">3</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[COMP_001]</span> Steel Frame Component
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Steel frame for furniture</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Stock</td>
+                                    <td style="text-align: center; vertical-align: middle;" class="vpa-location">WH/Production</td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">20</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Pcs</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </t>

@@ -20,6 +20,7 @@ class VPATemplatePreview(http.Controller):
         # Render HTML preview with page border
         return request.render('vpa_document_layout.template_preview_fullpage', {
             'template': template,
+            'image_data_uri': image_data_uri,  # Required for logo rendering in preview
         })
 
     @http.route('/vpa/template/preview/pdf/<int:template_id>', type='http', auth='user')
@@ -183,6 +184,150 @@ class VPATemplatePreview(http.Controller):
                 f'<div>Footer Error: {str(e)}</div>',
                 headers=[('Content-Type', 'text/html')]
             )
+
+    @http.route('/vpa/template/header/<int:template_id>', type='http', auth='public')
+    def get_template_header_html(self, template_id, **kwargs):
+        """Return header HTML for wkhtmltopdf --header-html
+
+        This route is called by wkhtmltopdf when generating PDFs to render
+        the header at the top of every page.
+        """
+        # Use sudo() since this is called by wkhtmltopdf without authentication
+        template = request.env['vpa.document.template'].sudo().browse(template_id)
+
+        if not template.exists():
+            return request.not_found()
+
+        _logger.info(f"Rendering header HTML for template: {template.name}")
+
+        company = template.company_id
+        primary_color = template.primary_accent_color or '#875a7b'
+
+        # Get logo as data URI
+        logo_html = ''
+        if company.logo:
+            try:
+                logo_data = image_data_uri(company.logo)
+                logo_style = template._get_logo_style() if hasattr(template, '_get_logo_style') else 'max-width: 140px; max-height: 80px;'
+                logo_html = f'<img src="{logo_data}" style="{logo_style}" alt="Logo"/>'
+            except Exception as e:
+                _logger.warning(f"Could not render logo: {e}")
+
+        # Company details
+        company_details_html = ''
+        if template.header_company_details_html:
+            company_details_html = template.header_company_details_html
+        elif company.company_details:
+            company_details_html = company.company_details
+        else:
+            # Build from partner address
+            parts = []
+            if company.name:
+                parts.append(f'<strong>{company.name}</strong>')
+            if company.street:
+                parts.append(company.street)
+            if company.city:
+                city_line = company.city
+                if company.state_id:
+                    city_line += f', {company.state_id.name}'
+                if company.zip:
+                    city_line += f' {company.zip}'
+                parts.append(city_line)
+            if company.phone:
+                parts.append(f'Tel: {company.phone}')
+            if company.email:
+                parts.append(company.email)
+            company_details_html = '<br/>'.join(parts)
+
+        # Build header HTML - Logo on LEFT, Company info on RIGHT (side by side)
+        company_info_color = template.header_company_info_color or '#333333'
+
+        # Decorative circle settings
+        show_circle = template.header_show_circle
+        circle_size = template.header_circle_size or 300
+        circle_opacity = template.header_circle_opacity or 0.25
+
+        # Build decorative SVG if enabled
+        # TODO: Replace with actual UDesign logo SVG when provided
+        circle_svg = ''
+        # Disabled for now - will use actual logo SVG tomorrow
+        # if show_circle:
+        #     circle_svg = f'''...'''
+
+        html_str = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 9pt;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: visible;
+        }}
+        .vpa-header {{
+            padding: 10px 18px 20px 18px;
+            border-bottom: 1px solid {primary_color};
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            position: relative;
+            overflow: visible;
+            min-height: 22mm;
+            margin-bottom: 15px;
+        }}
+        .header-left {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 40%;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+            height: 100%;
+        }}
+        .header-right {{
+            display: table-cell;
+            vertical-align: middle;
+            width: 60%;
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }}
+        .header-left img {{
+            max-height: 20mm;
+            max-width: 50mm;
+            display: block;
+            margin: auto 0;
+        }}
+        .company-info {{
+            font-size: 8pt;
+            line-height: 1.4;
+            color: {company_info_color};
+        }}
+    </style>
+</head>
+<body>
+    <div class="vpa-header">
+        {circle_svg}
+        <div class="header-left">
+            {logo_html}
+        </div>
+        <div class="header-right">
+            <div class="company-info">
+                {company_details_html}
+            </div>
+        </div>
+    </div>
+</body>
+</html>'''
+
+        return request.make_response(
+            html_str,
+            headers=[('Content-Type', 'text/html; charset=utf-8')]
+        )
 
     @http.route('/vpa/template/preview_footer/<int:template_id>', type='http', auth='user')
     def preview_footer(self, template_id, **kwargs):

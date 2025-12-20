@@ -90,6 +90,10 @@
                                         <group string="Odoo Standard Header">
                                             <field name="hide_odoo_header"/>
                                         </group>
+                                        <group string="Multi-Page Settings">
+                                            <field name="header_repeat_on_pages"/>
+                                            <field name="header_height" invisible="not header_repeat_on_pages"/>
+                                        </group>
                                     </group>
 
                                     <separator string="Logo Settings"/>
@@ -183,9 +187,36 @@
                                         </group>
                                     </group>
 
-                                    <!-- Footer Layout (only when footer enabled) -->
-                                    <separator string="Footer Layout" invisible="not footer_enabled"/>
+                                    <!-- Shared Footer Configuration -->
+                                    <separator string="Use Shared Footer Configuration" invisible="not footer_enabled"/>
+                                    <div class="alert alert-info" role="alert" invisible="not footer_enabled">
+                                        <strong>Tip:</strong> Select an existing Footer Configuration to share footer settings across multiple templates.
+                                        Leave empty to configure footer settings manually below.
+                                    </div>
                                     <group invisible="not footer_enabled">
+                                        <field name="footer_config_id" string="Shared Footer Config" options="{'no_create': False, 'no_open': False}"/>
+                                    </group>
+
+                                    <!-- Manual Footer Settings (only shown when no footer_config_id is selected) -->
+                                    <separator string="Manual Footer Settings" invisible="not footer_enabled or footer_config_id"/>
+                                    <div class="alert alert-secondary" role="alert" invisible="not footer_enabled or footer_config_id">
+                                        Configure footer content manually for this template only, or import from an existing footer configuration.
+                                    </div>
+
+                                    <!-- Import from existing template -->
+                                    <group string="Import Footer Data" invisible="not footer_enabled or footer_config_id">
+                                        <group>
+                                            <button name="action_import_footer_data"
+                                                    string="Import Footer From Another Template"
+                                                    type="object"
+                                                    class="btn-secondary"
+                                                    icon="fa-download"
+                                                    help="Open wizard to select and import footer settings from another template"/>
+                                        </group>
+                                    </group>
+
+                                    <!-- Footer Layout (only when footer enabled and no shared config) -->
+                                    <group invisible="not footer_enabled or footer_config_id">
                                         <group>
                                             <field name="footer_show_content" string="Show Footer Content"/>
                                             <field name="footer_layout" widget="radio" invisible="not footer_show_content"/>
@@ -198,32 +229,32 @@
                                     </group>
 
                                     <!-- Column 1 -->
-                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
+                                    <group string="Column 1" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content or footer_config_id">
                                         <field name="footer_column_1_title" placeholder="e.g., Company Info"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 2 -->
-                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content">
+                                    <group string="Column 2" invisible="footer_layout == 'single' or not footer_enabled or not footer_show_content or footer_config_id">
                                         <field name="footer_column_2_title" placeholder="e.g., Contact"/>
                                         <field name="footer_column_2_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Column 3 -->
-                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled or not footer_show_content">
+                                    <group string="Column 3" invisible="footer_layout != 'three_col' or not footer_enabled or not footer_show_content or footer_config_id">
                                         <field name="footer_column_3_title" placeholder="e.g., Bank Info"/>
                                         <field name="footer_column_3_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
                                     <!-- Single Column Content (full width) -->
-                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled or not footer_show_content">
+                                    <group string="Footer Content" invisible="footer_layout != 'single' or not footer_enabled or not footer_show_content or footer_config_id">
                                         <field name="footer_column_1_title" placeholder="Title (optional)"/>
                                         <field name="footer_column_1_content" widget="html" nolabel="1" colspan="2"/>
                                     </group>
 
-                                    <!-- Page Numbers & Message -->
-                                    <separator string="Page Numbers &amp; Message" invisible="not footer_enabled"/>
-                                    <group invisible="not footer_enabled">
+                                    <!-- Page Numbers & Message (only when no shared config) -->
+                                    <separator string="Page Numbers &amp; Message" invisible="not footer_enabled or footer_config_id"/>
+                                    <group invisible="not footer_enabled or footer_config_id">
                                         <group>
                                             <field name="footer_show_page_number" string="Show Page Numbers"/>
                                             <field name="footer_page_number_format" invisible="not footer_show_page_number"/>

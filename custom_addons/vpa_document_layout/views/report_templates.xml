@@ -8,7 +8,7 @@
 
         <!-- BODY (Header moved inside body for WeasyPrint compatibility) -->
         <div t-attf-class="article o_report_layout_vpa o_report_layout_bubble o_table_boxed-rounded o_company_#{company.id}_layout"
-             style="position: relative; padding: 0; min-height: 400px;"
+             style="position: relative; padding: 0;"
              t-att-data-oe-model="o and o._name"
              t-att-data-oe-id="o and o.id"
              t-att-data-oe-lang="o and o.env.context.get('lang')">
@@ -122,22 +122,28 @@
             .o_company_<t t-esc='company.id'/>_layout {
                 /* VPA-specific styling per company */
 
-                /* Table header styling with VPA primary color */
+                /* Table header styling with VPA primary color - target both table.table and table.o_main_table */
+                table.table thead,
                 table.o_main_table thead {
                     background-color: <t t-esc='primary'/> !important;
                     color: white !important;
                 }
 
+                table.table thead th,
                 table.o_main_table thead th {
                     background-color: <t t-esc='primary'/> !important;
                     color: white !important;
-                    padding: 10px !important;
+                    padding: 14px 12px !important;
                     font-weight: bold !important;
+                    font-size: 15pt !important;
                 }
 
+                table.table tbody td,
                 table.o_main_table tbody td {
-                    padding: 8px 10px !important;
+                    padding: 12px !important;
                     border-bottom: 1px solid #e0e0e0 !important;
+                    font-size: 14pt !important;
+                    line-height: 1.5 !important;
                 }
             }
         </t>

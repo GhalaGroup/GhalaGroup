@@ -78,6 +78,7 @@
                             <group>
                                 <group string="Footer Layout">
                                     <field name="footer_layout"/>
+                                    <field name="footer_height" help="Height reserved for footer. Reduce to minimize gap between content and footer."/>
                                 </group>
                                 <group string="Content Options">
                                     <field name="show_bank_details"/>

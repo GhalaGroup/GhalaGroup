@@ -19,15 +19,15 @@ class VPADocumentTemplate(models.Model):
 
     # PDF Filename Configuration
     print_name_pattern = fields.Selection([
-        ('doc_name', 'Document Number-Abbrev (e.g., S00001-SQ)'),
-        ('doc_customer', 'Document-Abbrev - Customer (e.g., S00001-SQ - Deco Addict)'),
-        ('doc_customer_ref', 'Document-Abbrev - Customer (Ref) (e.g., S00001-SQ - Deco Addict (REF123))'),
-        ('doc_customer_ref_date', 'Document-Abbrev - Customer (Ref) - Date (e.g., S00001-SQ - Deco Addict (REF123) - 2025-01-15)'),
-        ('customer_doc', 'Customer - Document-Abbrev (e.g., Deco Addict - S00001-SQ)'),
-        ('doc_date', 'Document-Abbrev - Date (e.g., S00001-SQ - 2025-01-15)'),
+        ('doc_name', 'Basic (Document + Abbreviation)'),
+        ('doc_customer', 'With Details (Document + Locations/Customer)'),
+        ('doc_customer_ref', 'With Reference (Document + Reference/Origin)'),
+        ('doc_customer_ref_date', 'Full (Document + Reference + Date)'),
+        ('customer_doc', 'With Date (Document + Date)'),
+        ('doc_date', 'Alternate (Number first)'),
         ('custom', 'Custom Expression'),
-    ], string='PDF Filename Pattern', default='doc_customer_ref', required=True,
-       help='Choose how the PDF filename will appear when downloaded. Abbrev = your 2-4 letter abbreviation.')
+    ], string='PDF Filename Pattern', default='doc_name', required=True,
+       help='Choose filename format. See preview below for actual result based on document type.')
 
     print_name_expression = fields.Char(
         string='Custom Filename Expression',
@@ -52,33 +52,68 @@ class VPADocumentTemplate(models.Model):
             'purchase_order': 'PO',
             'delivery': 'DO',
             'picking': 'PICK',
+            'internal_transfer': 'INT',
+            'internal_transfer_pictures': 'INT',
             'manufacturing_order': 'MO',
         }
         if self.document_type and not self.document_abbreviation:
             self.document_abbreviation = abbreviation_map.get(self.document_type, '')
 
-    @api.depends('print_name_pattern', 'print_name_expression', 'document_abbreviation')
+    @api.depends('print_name_pattern', 'print_name_expression', 'document_abbreviation', 'document_type')
     def _compute_print_name_preview(self):
         """Show preview of what the filename will look like"""
         for record in self:
             abbrev = record.document_abbreviation or 'DOC'
-            # Format: S00001-SQ - Customer Name (Ref).pdf
-            if record.print_name_pattern == 'doc_name':
-                record.print_name_preview = f'S00001-{abbrev}.pdf'
-            elif record.print_name_pattern == 'doc_customer':
-                record.print_name_preview = f'S00001-{abbrev} - Deco Addict.pdf'
-            elif record.print_name_pattern == 'doc_customer_ref':
-                record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123).pdf'
-            elif record.print_name_pattern == 'doc_customer_ref_date':
-                record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123) - 2025-01-15.pdf'
-            elif record.print_name_pattern == 'customer_doc':
-                record.print_name_preview = f'Deco Addict - S00001-{abbrev}.pdf'
-            elif record.print_name_pattern == 'doc_date':
-                record.print_name_preview = f'S00001-{abbrev} - 2025-01-15.pdf'
-            elif record.print_name_pattern == 'custom':
-                record.print_name_preview = 'Custom expression...'
+
+            # Use different preview examples based on document type
+            if record.document_type in ['internal_transfer', 'internal_transfer_pictures']:
+                # Internal Transfer filename formats
+                # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
+                src_wh = 'W03'
+                dest_wh = 'W02'
+                doc_num = '00045'
+                origin_example = 'SO00456'
+                if record.print_name_pattern == 'doc_name':
+                    # W03-INT-00045-W02 Transfer Request
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request.pdf'
+                elif record.print_name_pattern == 'doc_customer':
+                    # W03-INT-00045-W02 Transfer Request (Stock to Production)
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request (Stock to Production).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref':
+                    # W03-INT-00045-W02 Transfer Request (SO00456)
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request ({origin_example}).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref_date':
+                    # W03-INT-00045-W02 Transfer Request (SO00456) - 2025-12-20
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request ({origin_example}) - 2025-12-20.pdf'
+                elif record.print_name_pattern == 'customer_doc':
+                    # W03-INT-00045-W02 Transfer Request - 2025-12-20
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request - 2025-12-20.pdf'
+                elif record.print_name_pattern == 'doc_date':
+                    # 00045 - W03-INT-W02 Transfer Request
+                    record.print_name_preview = f'{doc_num} - {src_wh}-{abbrev}-{dest_wh} Transfer Request.pdf'
+                elif record.print_name_pattern == 'custom':
+                    record.print_name_preview = 'Custom expression...'
+                else:
+                    record.print_name_preview = ''
             else:
-                record.print_name_preview = ''
+                # Standard format for sale orders, invoices, etc.
+                # Format: S00001-SQ - Customer Name (Ref).pdf
+                if record.print_name_pattern == 'doc_name':
+                    record.print_name_preview = f'S00001-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_customer':
+                    record.print_name_preview = f'S00001-{abbrev} - Deco Addict.pdf'
+                elif record.print_name_pattern == 'doc_customer_ref':
+                    record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref_date':
+                    record.print_name_preview = f'S00001-{abbrev} - Deco Addict (REF123) - 2025-01-15.pdf'
+                elif record.print_name_pattern == 'customer_doc':
+                    record.print_name_preview = f'Deco Addict - S00001-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_date':
+                    record.print_name_preview = f'S00001-{abbrev} - 2025-01-15.pdf'
+                elif record.print_name_pattern == 'custom':
+                    record.print_name_preview = 'Custom expression...'
+                else:
+                    record.print_name_preview = ''
 
     print_name_preview = fields.Char(string='Filename Preview', compute='_compute_print_name_preview', store=False)
 
@@ -92,6 +127,41 @@ class VPADocumentTemplate(models.Model):
         # Get abbreviation - will be embedded as literal string in the expression
         abbrev = self.document_abbreviation or 'DOC'
 
+        # Internal Transfer uses different fields (stock.picking model)
+        # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
+        # Example: W03-INT-00045-W02 Transfer Request.pdf
+        # Extracts document number from name like "WH/INT/00045" -> "00045"
+        if self.document_type in ['internal_transfer', 'internal_transfer_pictures']:
+            # Helper expressions
+            src_wh = "(object.location_id.warehouse_id.code or object.location_id.name or 'SRC')"
+            dest_wh = "(object.location_dest_id.warehouse_id.code or object.location_dest_id.name or 'DST')"
+            # Extract doc number: "WH/INT/00045" -> "00045" (last part after /)
+            doc_num = "((object.name or 'DOC').split('/')[-1])"
+            if self.print_name_pattern == 'doc_name':
+                # W03-INT-00045-W02 Transfer Request
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
+            elif self.print_name_pattern == 'doc_customer':
+                # W03-INT-00045-W02 Transfer Request (Stock to Production)
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request (' + (object.location_id.name or 'Source') + ' to ' + (object.location_dest_id.name or 'Dest') + ')'"
+            elif self.print_name_pattern == 'doc_customer_ref':
+                # W03-INT-00045-W02 Transfer Request (SO00456)
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + (((' (' + object.origin + ')') if object.origin else ''))"
+            elif self.print_name_pattern == 'doc_customer_ref_date':
+                # W03-INT-00045-W02 Transfer Request (SO00456) - 2025-12-20
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'customer_doc':
+                # W03-INT-00045-W02 Transfer Request - 2025-12-20
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'doc_date':
+                # 00045 - W03-INT-W02 Transfer Request
+                return f"{doc_num} + ' - ' + {src_wh} + '-{abbrev}-' + {dest_wh} + ' Transfer Request'"
+            elif self.print_name_pattern == 'custom':
+                return self.print_name_expression or f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
+            else:
+                # Default: W03-INT-00045-W02 Transfer Request
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
+
+        # Standard expressions for sale orders, invoices, etc.
         if self.print_name_pattern == 'doc_name':
             # S00001-SQ
             return f"(object.name or 'Document') + '-{abbrev}'"
@@ -134,11 +204,14 @@ class VPADocumentTemplate(models.Model):
         ('quotation', 'Quotation'),
         ('sale_order', 'Sales Order'),
         ('sale_production', 'Sales Production Order'),
+        ('quotation_pictures', 'Quotation (Pictures)'),
         ('invoice', 'Invoice'),
         ('bill', 'Vendor Bill'),
         ('purchase_order', 'Purchase Order'),
         ('delivery', 'Delivery Order'),
         ('picking', 'Picking'),
+        ('internal_transfer', 'Internal Transfer'),
+        ('internal_transfer_pictures', 'Internal Transfer (Pictures)'),
         ('manufacturing_order', 'Manufacturing Order'),
     ], string='Document Type', required=True, help='Which document type this template applies to')
 
@@ -151,6 +224,19 @@ class VPADocumentTemplate(models.Model):
     # Odoo Header/Footer Control
     hide_odoo_header = fields.Boolean(string='Hide Standard Odoo Header', default=True)
     hide_odoo_footer = fields.Boolean(string='Hide Standard Odoo Footer', default=True)
+
+    # Repeating Header (for multi-page documents)
+    header_repeat_on_pages = fields.Boolean(
+        string='Repeat Header on All Pages',
+        default=True,
+        help='When enabled, the header (logo + company info) will appear on every page of multi-page documents. '
+             'If disabled, the header only appears on the first page.'
+    )
+    header_height = fields.Char(
+        string='Header Height',
+        default='30mm',
+        help='Height reserved for the header area (e.g., 30mm, 25mm)'
+    )
 
     # Header Settings
     header_logo_alignment = fields.Selection([
@@ -267,6 +353,14 @@ class VPADocumentTemplate(models.Model):
     footer_custom_message = fields.Char(
         string='Custom Footer Message',
         help='Your custom message (displayed when "Custom Message" is selected)'
+    )
+
+    # Import footer data from another template (stored so button action can access it)
+    import_footer_from_template = fields.Many2one(
+        'vpa.document.template',
+        string='Import Footer From Template',
+        domain="[('company_id', '=', company_id), ('active', '=', True), ('id', '!=', id)]",
+        help='Select another template to import its footer data into this template'
     )
 
     # Report Action Reference (auto-created)
@@ -476,11 +570,14 @@ class VPADocumentTemplate(models.Model):
                 'quotation': 'sale.order',
                 'sale_order': 'sale.order',
                 'sale_production': 'sale.order',
+                'quotation_pictures': 'sale.order',
                 'invoice': 'account.move',
                 'bill': 'account.move',
                 'purchase_order': 'purchase.order',
                 'delivery': 'stock.picking',
                 'picking': 'stock.picking',
+                'internal_transfer': 'stock.picking',
+                'internal_transfer_pictures': 'stock.picking',
                 'manufacturing_order': 'mrp.production',
             }
             for template in self:
@@ -556,11 +653,14 @@ class VPADocumentTemplate(models.Model):
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
             'sale_production': 'sale.order',
+            'quotation_pictures': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
             'delivery': 'stock.picking',
             'picking': 'stock.picking',
+            'internal_transfer': 'stock.picking',
+            'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
         }
 
@@ -671,6 +771,20 @@ class VPADocumentTemplate(models.Model):
             'res_id': self.id,
             'view_mode': 'form',
             'target': 'current',
+        }
+
+    def action_import_footer_data(self):
+        """Open wizard to import footer data from another template"""
+        self.ensure_one()
+        return {
+            'name': _('Import Footer Data'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'vpa.import.footer.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_template_id': self.id,
+            }
         }
 
     def _get_table_styles(self):
@@ -1051,25 +1165,25 @@ class VPADocumentTemplate(models.Model):
                                     <t t-else="">
                                         <t t-set="line_num" t-value="line_num + 1"/>
                                         <tr>
-                                            <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
+                                            <td style="text-align: center; color: #666; font-size: 10pt;"><t t-out="line_num"/></td>
                                             <td>
-                                                <div style="font-weight: 500; color: #333; font-size: 10px;">
+                                                <div style="font-weight: 500; color: #333; font-size: 10pt;">
                                                     <span t-field="line.name"/>
                                                 </div>
                                             </td>
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; font-size: 10pt;">
                                                 <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
-                                            <td style="text-align: center; color: #666; font-size: 9px;">
+                                            <td style="text-align: center; color: #666; font-size: 10pt;">
                                                 <span t-field="line.product_uom_id"/>
                                             </td>
-                                            <td style="text-align: right; font-size: 10px;">
-                                                <span t-field="line.price_unit"/>
+                                            <td style="text-align: right; font-size: 10pt;">
+                                                <t t-out="'{{:,.2f}}'.format(line.price_unit)"/>
                                             </td>
-                                            <td t-if="display_discount" style="text-align: center; font-size: 10px;">
+                                            <td t-if="display_discount" style="text-align: center; font-size: 10pt;">
                                                 <span t-field="line.discount"/><t t-out="'%'"/>
                                             </td>
-                                            <td style="text-align: right;">
+                                            <td style="text-align: right; font-size: 10pt;">
                                                 <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
                                             </td>
                                         </tr>
@@ -1127,8 +1241,36 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(template_id=self.id)
             else:
                 # Use Odoo's standard header: Just call the full document
+                # CRITICAL: Include font-size styles INSIDE the template to override Odoo defaults
                 main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
+        <style>
+            /* VPA Font Size Overrides - MUST be inside template to work */
+            table thead th,
+            table.table thead th,
+            .page table thead th {{
+                font-size: 15pt !important;
+                padding: 14px 12px !important;
+            }}
+            table tbody td,
+            table.table tbody td,
+            .page table tbody td {{
+                font-size: 14pt !important;
+                padding: 12px !important;
+                line-height: 1.5 !important;
+            }}
+            table tbody tr.o_line_section td {{
+                font-size: 16pt !important;
+                font-weight: bold !important;
+            }}
+            #total td, .o_total td {{
+                font-size: 14pt !important;
+            }}
+            #total tr:last-child td, .o_total tr:last-child td {{
+                font-size: 16pt !important;
+                font-weight: bold !important;
+            }}
+        </style>
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
@@ -1516,19 +1658,19 @@ class VPADocumentTemplate(models.Model):
                                         <t t-set="line_num" t-value="line_num + 1"/>
                                         <t t-set="total_qty" t-value="total_qty + line.product_uom_qty"/>
                                         <tr>
-                                            <td style="text-align: center; color: #666; font-size: 9px;"><t t-out="line_num"/></td>
+                                            <td style="text-align: center; color: #666; font-size: 10pt;"><t t-out="line_num"/></td>
                                             <td>
-                                                <div style="font-weight: 500; color: #333; font-size: 10px;">
+                                                <div style="font-weight: 500; color: #333; font-size: 10pt;">
                                                     <t t-if="line.product_id.default_code">
                                                         <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
                                                     </t>
                                                     <t t-out="line.name"/>
                                                 </div>
                                             </td>
-                                            <td style="text-align: center;">
+                                            <td style="text-align: center; font-size: 10pt;">
                                                 <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
                                             </td>
-                                            <td style="text-align: center; color: #666; font-size: 9px;">
+                                            <td style="text-align: center; color: #666; font-size: 10pt;">
                                                 <t t-out="line.product_uom_id.name"/>
                                             </td>
                                             <td style="text-align: center;">
@@ -1606,6 +1748,600 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
+        elif self.document_type == 'quotation_pictures':
+            # Quotation with Pictures - Shows product images alongside descriptions
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang, vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Quotation'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                    <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.date_order">
+                        <strong>Quotation Date:</strong>
+                        <span t-field="doc.date_order" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.validity_date" style="margin-top: 4px;">
+                        <strong>Expiration:</strong>
+                        <span t-field="doc.validity_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.client_order_ref" style="margin-top: 4px;">
+                        <strong>Customer Reference:</strong>
+                        <span t-field="doc.client_order_ref"/>
+                    </div>
+                    <div t-if="doc.user_id" style="margin-top: 4px;">
+                        <strong>Salesperson:</strong>
+                        <span t-field="doc.user_id.name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> # <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Quotation Pictures -->
+                <style>
+                    .vpa-quote-pictures {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container - Match UD Quote/Order style */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        vertical-align: top;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    .vpa-section-row td {{
+                        background: #f0f0f0;
+                        font-weight: 700;
+                        padding: 6px 4px;
+                        color: #666;
+                        font-size: 12px;
+                        border-bottom: 1px solid #ddd !important;
+                    }}
+                    .vpa-note-row td {{
+                        padding: 4px 12px;
+                        font-style: italic;
+                        color: #555;
+                        font-size: 11px;
+                        background: #fafafa;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                    }}
+                    .vpa-product-image {{
+                        max-width: 80px;
+                        max-height: 80px;
+                        width: auto;
+                        height: auto;
+                        object-fit: contain;
+                        border-radius: 4px;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    .vpa-product-details {{
+                        font-size: 9pt;
+                        color: #555;
+                        line-height: 1.5;
+                        margin-top: 5px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-amount-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        padding: 2px 8px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                    }}
+                    .vpa-total-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 10px;
+                        border-radius: 5px;
+                        margin: 10px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-total-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                    }}
+                    .vpa-total-card td {{
+                        padding: 6px 8px;
+                        font-size: 11px;
+                        border: none !important;
+                    }}
+                    .vpa-total-label {{
+                        font-size: 11px;
+                        color: #666;
+                    }}
+                    .vpa-total-value {{
+                        font-size: 11px;
+                        color: #333;
+                        font-weight: 500;
+                    }}
+                    .vpa-grand-total-label {{
+                        font-size: 14px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    .vpa-grand-total-value {{
+                        font-size: 18px;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                    }}
+                    .vpa-notes-section {{
+                        background: #f9f9f9;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 10px;
+                        margin: 10px 0;
+                        page-break-inside: avoid;
+                    }}
+                    .vpa-notes-title {{
+                        color: <t t-out="primary_color"/>;
+                        margin: 0 0 6px 0;
+                        font-size: 11px;
+                        font-weight: 600;
+                    }}
+                </style>
+
+                <div class="vpa-quote-pictures">
+                    <!-- Order Lines Table with Pictures -->
+                    <t t-set="display_discount" t-value="any(line.discount for line in doc.order_line)"/>
+                    <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
+
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">ORDER DETAILS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 45%%;">DESCRIPTION</th>
+                                    <th style="width: 8%%; text-align: center;">QTY</th>
+                                    <th style="width: 8%%; text-align: center;">UNIT</th>
+                                    <th style="width: 14%%; text-align: right;">UNIT PRICE</th>
+                                    <th t-if="display_discount" style="width: 6%%; text-align: center;">DISC.</th>
+                                    <th style="width: 14%%; text-align: right;">AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="lines_to_report" t-as="line">
+                                    <!-- Section Headers -->
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <tr class="vpa-section-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Note Lines -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr class="vpa-note-row">
+                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Regular Product Lines with Pictures -->
+                                    <t t-else="">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <t t-set="product_name_parts" t-value="(line.name or '').split('\\n', 1)"/>
+                                        <t t-set="product_title" t-value="product_name_parts[0] if product_name_parts else ''"/>
+                                        <t t-set="product_details" t-value="product_name_parts[1] if len(product_name_parts) > 1 else ''"/>
+                                        <tr>
+                                            <!-- Line Number -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <t t-out="line_num"/>
+                                            </td>
+                                            <!-- Description with Image -->
+                                            <td>
+                                                <!-- Product Title Row -->
+                                                <div class="vpa-product-title">
+                                                    <t t-out="product_title"/>
+                                                </div>
+                                                <!-- Image + Details Row -->
+                                                <div style="display: table; width: 100%%; margin-top: 8px;">
+                                                    <div style="display: table-cell; width: 90px; vertical-align: top;">
+                                                        <t t-if="line.product_id.image_512">
+                                                            <img t-att-src="image_data_uri(line.product_id.image_512)"
+                                                                 class="vpa-product-image"
+                                                                 style="max-width: 80px; max-height: 80px; width: auto; height: auto;"
+                                                                 alt="Product"/>
+                                                        </t>
+                                                    </div>
+                                                    <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
+                                                        <t t-if="product_details">
+                                                            <div class="vpa-product-details" style="white-space: pre-line;" t-out="product_details"/>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <!-- Quantity -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
+                                            </td>
+                                            <!-- Unit -->
+                                            <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span t-field="line.product_uom_id"/>
+                                            </td>
+                                            <!-- Unit Price -->
+                                            <td style="text-align: right; vertical-align: top; padding-top: 12px;">
+                                                <t t-out="'{{:,.2f}}'.format(line.price_unit)"/>
+                                            </td>
+                                            <!-- Discount -->
+                                            <td t-if="display_discount" style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                                <span t-field="line.discount"/><t t-out="'%%'"/>
+                                            </td>
+                                            <!-- Amount -->
+                                            <td style="text-align: right; vertical-align: top; padding-top: 12px;">
+                                                <span class="vpa-amount-badge"><span t-field="line.price_subtotal"/></span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals Card -->
+                    <div style="overflow: hidden;">
+                        <div class="vpa-total-card" style="width: 350px; float: right;">
+                            <table style="width: 100%%;">
+                                <tr>
+                                    <td style="text-align: right; width: 60%%;">
+                                        <span class="vpa-total-label">Subtotal:</span>
+                                    </td>
+                                    <td style="text-align: right; width: 40%%;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_untaxed"/></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-label">Taxes:</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span class="vpa-total-value"><span t-field="doc.amount_tax"/></span>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #ddd;">
+                                    <td style="text-align: right; padding-top: 8px;">
+                                        <span class="vpa-grand-total-label">Total:</span>
+                                    </td>
+                                    <td style="text-align: right; padding-top: 8px;">
+                                        <span class="vpa-grand-total-value"><span t-field="doc.amount_total"/></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <t t-if="doc.note">
+                        <div class="vpa-notes-section" style="clear: both;">
+                            <div class="vpa-notes-title">TERMS AND CONDITIONS:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <t t-out="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(template_id=self.id)
+        elif self.document_type in ['internal_transfer', 'internal_transfer_pictures']:
+            # Internal Transfer template - for inventory transfers (stock.picking)
+            show_pictures = self.document_type == 'internal_transfer_pictures'
+
+            # Build picture section if needed
+            if show_pictures:
+                picture_section = '''
+                                                <!-- Image + Details Row -->
+                                                <div style="display: table; width: 100%%; margin-top: 8px;">
+                                                    <div style="display: table-cell; width: 90px; vertical-align: top;">
+                                                        <t t-if="move.product_id.image_512">
+                                                            <img t-att-src="image_data_uri(move.product_id.image_512)"
+                                                                 style="max-width: 80px; max-height: 80px; width: auto; height: auto; border-radius: 4px;"
+                                                                 alt="Product"/>
+                                                        </t>
+                                                    </div>
+                                                    <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
+                                                        <t t-if="move.product_id.description_sale">
+                                                            <div style="font-size: 9pt; color: #555; line-height: 1.5; white-space: pre-line;" t-out="move.product_id.description_sale"/>
+                                                        </t>
+                                                    </div>
+                                                </div>'''
+            else:
+                picture_section = ''
+
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Internal Transfer'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">TRANSFER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.origin" style="margin-top: 4px;">
+                        <strong>Source Document:</strong>
+                        <span t-field="doc.origin"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>From:</strong>
+                        <span t-field="doc.location_id.display_name"/>
+                    </div>
+                    <div style="margin-top: 4px;">
+                        <strong>To:</strong>
+                        <span t-field="doc.location_dest_id.display_name"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">WAREHOUSE INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.picking_type_id.warehouse_id">
+                        <strong>Warehouse:</strong>
+                        <span t-field="doc.picking_type_id.warehouse_id.name"/>
+                    </div>
+                    <div t-if="doc.scheduled_date" style="margin-top: 4px;">
+                        <strong>Scheduled Date:</strong>
+                        <span t-field="doc.scheduled_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.user_id" style="margin-top: 4px;">
+                        <strong>Responsible:</strong>
+                        <span t-field="doc.user_id.name"/>
+                    </div>
+                    <div t-if="doc.state" style="margin-top: 4px;">
+                        <strong>Status:</strong>
+                        <span t-field="doc.state"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> - <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Internal Transfer -->
+                <style>
+                    .vpa-transfer {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container - Match Quotation style */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: <t t-out="primary_color"/>;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        vertical-align: top;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                    .vpa-location {{
+                        font-size: 10px;
+                        color: #555;
+                    }}
+                </style>
+
+                <div class="vpa-transfer">
+                    <!-- Transfer Items Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">TRANSFER ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: {desc_width}%%;">PRODUCT</th>
+                                    <th style="width: 13%%; text-align: center;">FROM</th>
+                                    <th style="width: 13%%; text-align: center;">TO</th>
+                                    <th style="width: 8%%; text-align: center;">QTY</th>
+                                    <th style="width: 8%%; text-align: center;">UNIT</th>
+                                    <th style="width: 5%%; text-align: center;">✓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="doc.move_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                    <t t-set="line_num" t-value="line_num + 1"/>
+                                    <tr>
+                                        <!-- Line Number -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <t t-out="line_num"/>
+                                        </td>
+                                        <!-- Product -->
+                                        <td style="text-align: left; vertical-align: middle;">
+                                            <div class="vpa-product-title">
+                                                <t t-if="move.product_id.default_code">
+                                                    <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                </t>
+                                                <t t-out="move.product_id.name"/>
+                                            </div>
+                                            {picture_section}
+                                        </td>
+                                        <!-- From Location -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span class="vpa-location" t-field="move.location_id.display_name"/>
+                                        </td>
+                                        <!-- To Location -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span class="vpa-location" t-field="move.location_dest_id.display_name"/>
+                                        </td>
+                                        <!-- Quantity -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
+                                        </td>
+                                        <!-- Unit -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span t-field="move.product_uom"/>
+                                        </td>
+                                        <!-- Checkbox for manual tick -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <t t-if="doc.note">
+                        <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin: 10px 0;">
+                            <div t-att-style="'color: ' + primary_color + '; margin: 0 0 6px 0; font-size: 11px; font-weight: 600;'">NOTES:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <span t-field="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(
+                template_id=self.id,
+                picture_section=picture_section,
+                desc_width='45' if show_pictures else '45'
+            )
         else:
             # For other document types, create a template with standard VPA styling
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
@@ -1725,7 +2461,7 @@ class VPADocumentTemplate(models.Model):
                 position: relative;
                 z-index: 2;
                 width: 100%% !important;
-                height: %smm !important;
+                /* height removed to allow natural content flow - footer is handled by wkhtmltopdf */
                 padding: 0 !important;
                 margin: 0 !important;
                 box-sizing: border-box;
@@ -1733,13 +2469,13 @@ class VPADocumentTemplate(models.Model):
             }
             .o_report_layout_vpa .page-layout-table {
                 width: 100%%;
-                height: 100%%;
+                /* height removed to allow natural content flow */
                 border-collapse: collapse;
                 border-spacing: 0;
                 border: none !important;
             }
             .o_report_layout_vpa .page-layout-table td.content-cell {
-                height: 100%%;
+                /* height removed to allow natural content flow */
                 vertical-align: top;
                 padding: 18px;
                 border: none !important;
@@ -1748,31 +2484,50 @@ class VPADocumentTemplate(models.Model):
                 border: none !important;
             }
             /* Main product table - ensure visibility in PDF */
-            table.o_main_table, .o_report_layout_vpa table.o_main_table {
+            /* Target ALL tables including Odoo's table.table class */
+            .o_report_layout_vpa table.table,
+            .o_report_layout_vpa table.o_main_table,
+            table.table,
+            table.o_main_table {
                 border-collapse: collapse !important;
                 border-spacing: 0 !important;
                 width: 100%% !important;
                 border: 2px solid %s !important;
                 margin-bottom: 20px !important;
             }
-            table.o_main_table thead th, .o_report_layout_vpa table.o_main_table thead th {
+            .o_report_layout_vpa table.table thead th,
+            .o_report_layout_vpa table.o_main_table thead th,
+            table.table thead th,
+            table.o_main_table thead th {
                 background: %s !important;
                 color: %s !important;
-                padding: 12px 8px !important;
+                padding: 14px 12px !important;
                 font-weight: bold !important;
+                font-size: 15pt !important;
                 border: 1px solid %s !important;
                 text-align: left !important;
                 %s
             }
-            table.o_main_table tbody td, .o_report_layout_vpa table.o_main_table tbody td {
-                padding: 10px 8px !important;
+            .o_report_layout_vpa table.table tbody td,
+            .o_report_layout_vpa table.o_main_table tbody td,
+            table.table tbody td,
+            table.o_main_table tbody td {
+                padding: 12px 12px !important;
                 border: 1px solid %s !important;
                 vertical-align: top !important;
+                font-size: 14pt !important;
+                line-height: 1.5 !important;
             }
-            table.o_main_table tbody tr:nth-child(even), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even) {
+            .o_report_layout_vpa table.table tbody tr:nth-child(even),
+            .o_report_layout_vpa table.o_main_table tbody tr:nth-child(even),
+            table.table tbody tr:nth-child(even),
+            table.o_main_table tbody tr:nth-child(even) {
                 background-color: %s !important;
             }
-            table.o_main_table tbody tr:nth-child(odd), .o_report_layout_vpa table.o_main_table tbody tr:nth-child(odd) {
+            .o_report_layout_vpa table.table tbody tr:nth-child(odd),
+            .o_report_layout_vpa table.o_main_table tbody tr:nth-child(odd),
+            table.table tbody tr:nth-child(odd),
+            table.o_main_table tbody tr:nth-child(odd) {
                 background-color: #ffffff !important;
             }
             .vpa_company_info, .vpa_company_info * {
@@ -1782,13 +2537,13 @@ class VPADocumentTemplate(models.Model):
             .o_report_layout_vpa table.o_total_table {
                 border-collapse: collapse !important;
                 width: 100%% !important;
-                margin-top: 20px !important;
+                margin-top: 10px !important;
                 border: 1px solid #dee2e6 !important;
             }
             .o_report_layout_vpa table.o_total_table td {
-                padding: 10px 12px !important;
+                padding: 12px 14px !important;
                 border: 1px solid #dee2e6 !important;
-                font-size: 10pt !important;
+                font-size: 14pt !important;
             }
             .o_report_layout_vpa table.o_total_table tr {
                 border-bottom: 1px solid #dee2e6 !important;
@@ -1797,30 +2552,35 @@ class VPADocumentTemplate(models.Model):
                 border-top: 2px solid #000 !important;
                 background-color: #f8f9fa !important;
                 font-weight: bold !important;
-                font-size: 11pt !important;
+                font-size: 16pt !important;
             }
             .o_report_layout_vpa table.o_total_table tr:last-child td {
                 font-weight: bold !important;
             }
             .o_report_layout_vpa .o_price_total {
                 font-weight: bold !important;
-                font-size: 12pt !important;
+                font-size: 18pt !important;
             }
         </style>
 
         <!-- Page Content Wrapper -->
         <div class="page">
-            <!-- Decorative circle - positioned outside page with higher z-index to appear above content -->
-            <svg t-if="%s" style="position: absolute; top: -115px; right: -115px; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
-            </svg>
+            <!-- Decorative circle - only shown in body if header_repeat_on_pages is False -->
+            <!-- When header_repeat_on_pages is True, circle comes from wkhtmltopdf header URL -->
+            <t t-if="not vpa_template.header_repeat_on_pages">
+                <svg t-if="%s" style="position: fixed; top: 0; right: 0; z-index: -1;" width="%s" height="%s" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="%s" cy="%s" r="%s" fill="%s" fill-opacity="%s"/>
+                </svg>
+            </t>
 
             <!-- Real HTML table for reliable footer positioning in PDF -->
             <table class="page-layout-table">
                 <tr>
                     <td class="content-cell">
-            <!-- Header -->
-        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid %s;">
+            <!-- Header (only shown in body if header_repeat_on_pages is False) -->
+            <!-- When header_repeat_on_pages is True, header comes from wkhtmltopdf header URL -->
+        <t t-if="not vpa_template.header_repeat_on_pages">
+        <div t-attf-style="position: relative; z-index: 1; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid %s;">
             <div style="text-align: %s; margin-bottom: 10px;">
                 <!-- Use image_data_uri for both preview and PDF - company must have bin_size=False -->
                 <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="%s" alt="Logo"/>
@@ -1837,24 +2597,27 @@ class VPADocumentTemplate(models.Model):
                 </t>
             </div>
         </div>
+        </t>
 
-        <!-- Document Title - Full Width Right Aligned, vertically centered between lines -->
-        <div t-if="layout_document_title" style="margin-bottom: 20px;">
-            <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 15px 0; text-align: right;" t-out="layout_document_title"/>
+        <!-- Document Title - Full Width, Right Aligned, Vertically Centered between header line and bottom line -->
+        <div t-if="layout_document_title" style="margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: flex-end; padding: 4px 0;">
+                <h2 t-attf-style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28pt; font-weight: bold; color: %s; margin: 0; text-align: right;" t-out="layout_document_title"/>
+            </div>
             <div t-attf-style="border-bottom: 1px solid %s;"></div>
         </div>
 
         <!-- Customer Details and Order Info (Two columns below title) -->
-        <table t-if="address or information_block" style="width: 100%%; margin-bottom: 25px; border-collapse: collapse;">
+        <table t-if="address or information_block" style="width: 100%%; margin-bottom: 15px; border-collapse: collapse;">
             <tbody>
                 <tr>
                     <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
-                        <div style="font-size: 10pt; line-height: 1.8; color: #555;">
+                        <div style="font-size: 10pt; line-height: 1.5; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
                     <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
-                        <div style="font-size: 9pt; line-height: 1.8; color: #555; text-align: right;">
+                        <div style="font-size: 9pt; line-height: 1.5; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
                     </td>
@@ -1877,14 +2640,13 @@ class VPADocumentTemplate(models.Model):
         # Get table styles
         table_styles = self._get_table_styles()
 
-        # Finalize arch_content with all parameters (31 total)
+        # Finalize arch_content with all parameters (30 total - page_height removed)
         arch_content = arch_content % (
             self.id,
             self.id,
             self.primary_accent_color,
             self.secondary_accent_color,
             page_size_css,  # @page size
-            page_height,  # Page height for layout
             table_styles['border'],  # Table border (2px solid)
             table_styles['header_bg'],  # Table header background (thead th)
             table_styles['header_text'],  # Table header text color (thead th)
@@ -1909,7 +2671,7 @@ class VPADocumentTemplate(models.Model):
             self.header_company_info_color,  # Company info span color (company_details)
             self.header_company_info_color,  # Company info span color (partner_id)
             self.primary_accent_color,  # Document title color
-            self.primary_accent_color,  # Document title separator line color (now primary)
+            self.primary_accent_color,  # Document title bottom border line color
         )
 
         _logger.info(f"Creating external layout view for template {self.id}")
@@ -1930,11 +2692,14 @@ class VPADocumentTemplate(models.Model):
             'quotation': 'sale.order',
             'sale_order': 'sale.order',
             'sale_production': 'sale.order',
+            'quotation_pictures': 'sale.order',
             'invoice': 'account.move',
             'bill': 'account.move',
             'purchase_order': 'purchase.order',
             'delivery': 'stock.picking',
             'picking': 'stock.picking',
+            'internal_transfer': 'stock.picking',
+            'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
         }
 

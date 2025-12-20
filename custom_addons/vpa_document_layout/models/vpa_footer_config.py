@@ -75,6 +75,7 @@ class VPAFooterConfig(models.Model):
     header_height = fields.Char(string='Header Height', default='25mm', help='Height reserved for header (e.g., 25mm, 1in)')
 
     # ==================== FOOTER SECTION ====================
+    footer_height = fields.Char(string='Footer Height', default='30mm', help='Height reserved for footer (e.g., 30mm, 1in). Reduce to minimize gap between content and footer.')
     # Footer Layout
     footer_layout = fields.Selection([
         ('single', 'Single Column (Centered)'),
