@@ -2173,7 +2173,7 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                <t t-out="report_title"/> # <span t-field="doc.name"/>
+                <t t-out="report_title"/> - <span t-field="doc.name"/>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <!-- Inline Styles for Internal Transfer -->

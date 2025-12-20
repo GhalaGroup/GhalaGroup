@@ -244,7 +244,7 @@
             </t>
         </t>
         <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
-            <t t-set="layout_document_title" t-value="'Internal Transfer #WH/INT/00045'"/>
+            <t t-set="layout_document_title" t-value="'Internal Transfer - WH/INT/00045'"/>
             <t t-set="address">
                 <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">TRANSFER INFO</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
