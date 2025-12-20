@@ -2288,7 +2288,7 @@ class VPADocumentTemplate(models.Model):
                                             <t t-out="line_num"/>
                                         </td>
                                         <!-- Product -->
-                                        <td>
+                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
                                             <div class="vpa-product-title">
                                                 <t t-if="move.product_id.default_code">
                                                     <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
@@ -2299,11 +2299,11 @@ class VPADocumentTemplate(models.Model):
                                         </td>
                                         <!-- From Location -->
                                         <td style="text-align: center; vertical-align: top; padding-top: 12px;">
-                                            <span class="vpa-location" t-field="move.location_id.name"/>
+                                            <span class="vpa-location" t-field="move.location_id.display_name"/>
                                         </td>
                                         <!-- To Location -->
                                         <td style="text-align: center; vertical-align: top; padding-top: 12px;">
-                                            <span class="vpa-location" t-field="move.location_dest_id.name"/>
+                                            <span class="vpa-location" t-field="move.location_dest_id.display_name"/>
                                         </td>
                                         <!-- Quantity -->
                                         <td style="text-align: center; vertical-align: top; padding-top: 12px;">
