@@ -558,8 +558,8 @@ class VPADocumentTemplate(models.Model):
                     # Update report action to use new paperformat
                     template.report_action_id.write({'paperformat_id': paperformat.id})
 
-        # Update report action name, print_report_name, or sequence if changed
-        if 'name' in vals or 'print_name_pattern' in vals or 'print_name_expression' in vals or 'document_abbreviation' in vals or 'sequence' in vals:
+        # Update report action name or print_report_name if changed
+        if 'name' in vals or 'print_name_pattern' in vals or 'print_name_expression' in vals or 'document_abbreviation' in vals:
             for template in self:
                 if template.report_action_id:
                     template._update_report_action()
@@ -708,7 +708,6 @@ class VPADocumentTemplate(models.Model):
             'binding_model_id': self.env['ir.model']._get(model).id,
             'binding_type': 'report',
             'paperformat_id': paperformat.id,
-            'sequence': self.sequence,  # Use template sequence for print menu order
         })
 
         self.report_action_id = report_action.id
@@ -726,7 +725,6 @@ class VPADocumentTemplate(models.Model):
             self.report_action_id.write({
                 'name': self.name,
                 'print_report_name': print_name_expr,
-                'sequence': self.sequence,  # Sync sequence for print menu order
             })
 
     def action_load_company_details(self):
@@ -2738,10 +2736,6 @@ class VPADocumentTemplate(models.Model):
                 ('name', 'like', f'%{template.id}')
             ])
             existing_views.unlink()
-
-            # Update report action sequence (for Print menu ordering)
-            if template.report_action_id:
-                template.report_action_id.write({'sequence': template.sequence})
 
             # Recreate
             template._create_qweb_template()
