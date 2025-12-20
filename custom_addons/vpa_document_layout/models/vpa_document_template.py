@@ -2272,10 +2272,11 @@ class VPADocumentTemplate(models.Model):
                                 <tr>
                                     <th style="width: 5%%; text-align: center;">NO.</th>
                                     <th style="width: {desc_width}%%;">PRODUCT</th>
-                                    <th style="width: 15%%; text-align: center;">FROM</th>
-                                    <th style="width: 15%%; text-align: center;">TO</th>
-                                    <th style="width: 10%%; text-align: center;">QTY</th>
-                                    <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    <th style="width: 13%%; text-align: center;">FROM</th>
+                                    <th style="width: 13%%; text-align: center;">TO</th>
+                                    <th style="width: 8%%; text-align: center;">QTY</th>
+                                    <th style="width: 8%%; text-align: center;">UNIT</th>
+                                    <th style="width: 5%%; text-align: center;">✓</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2284,11 +2285,11 @@ class VPADocumentTemplate(models.Model):
                                     <t t-set="line_num" t-value="line_num + 1"/>
                                     <tr>
                                         <!-- Line Number -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: center; vertical-align: middle;">
                                             <t t-out="line_num"/>
                                         </td>
                                         <!-- Product -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: left; vertical-align: middle;">
                                             <div class="vpa-product-title">
                                                 <t t-if="move.product_id.default_code">
                                                     <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
@@ -2298,20 +2299,24 @@ class VPADocumentTemplate(models.Model):
                                             {picture_section}
                                         </td>
                                         <!-- From Location -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: center; vertical-align: middle;">
                                             <span class="vpa-location" t-field="move.location_id.display_name"/>
                                         </td>
                                         <!-- To Location -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: center; vertical-align: middle;">
                                             <span class="vpa-location" t-field="move.location_dest_id.display_name"/>
                                         </td>
                                         <!-- Quantity -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: center; vertical-align: middle;">
                                             <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
                                         </td>
                                         <!-- Unit -->
-                                        <td style="text-align: center; vertical-align: top; padding-top: 12px;">
+                                        <td style="text-align: center; vertical-align: middle;">
                                             <span t-field="move.product_uom"/>
+                                        </td>
+                                        <!-- Checkbox for manual tick -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div>
                                         </td>
                                     </tr>
                                 </t>
