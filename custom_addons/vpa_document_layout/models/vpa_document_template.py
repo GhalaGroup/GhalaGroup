@@ -67,29 +67,30 @@ class VPADocumentTemplate(models.Model):
 
             # Use different preview examples based on document type
             if record.document_type in ['internal_transfer', 'internal_transfer_pictures']:
-                # Internal Transfer: SourceWH-ABBREV-DestWH - Date format
-                # Example: W04-INT-W05 - 2025-12-20.pdf (abbrev is dynamic)
-                src_wh = 'W04'  # Source warehouse code
-                dest_wh = 'W05'  # Destination warehouse code
+                # Internal Transfer filename formats
+                # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
+                src_wh = 'W03'
+                dest_wh = 'W02'
+                doc_num = '00045'
                 origin_example = 'SO00456'
                 if record.print_name_pattern == 'doc_name':
-                    # SourceWH-ABBREV-DestWH
-                    record.print_name_preview = f'{src_wh}-{abbrev}-{dest_wh}.pdf'
+                    # W03-INT-00045-W02 Transfer Request
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request.pdf'
                 elif record.print_name_pattern == 'doc_customer':
-                    # SourceWH-ABBREV-DestWH (with full location names)
-                    record.print_name_preview = f'{src_wh}-{abbrev}-{dest_wh} (Stock to Production).pdf'
+                    # W03-INT-00045-W02 Transfer Request (Stock to Production)
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request (Stock to Production).pdf'
                 elif record.print_name_pattern == 'doc_customer_ref':
-                    # SourceWH-ABBREV-DestWH (Origin)
-                    record.print_name_preview = f'{src_wh}-{abbrev}-{dest_wh} ({origin_example}).pdf'
+                    # W03-INT-00045-W02 Transfer Request (SO00456)
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request ({origin_example}).pdf'
                 elif record.print_name_pattern == 'doc_customer_ref_date':
-                    # SourceWH-ABBREV-DestWH (Origin) - Date
-                    record.print_name_preview = f'{src_wh}-{abbrev}-{dest_wh} ({origin_example}) - 2025-12-20.pdf'
+                    # W03-INT-00045-W02 Transfer Request (SO00456) - 2025-12-20
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request ({origin_example}) - 2025-12-20.pdf'
                 elif record.print_name_pattern == 'customer_doc':
-                    # DestWH-ABBREV-SourceWH (reversed)
-                    record.print_name_preview = f'{dest_wh}-{abbrev}-{src_wh}.pdf'
+                    # W03-INT-00045-W02 Transfer Request - 2025-12-20
+                    record.print_name_preview = f'{src_wh}-{abbrev}-{doc_num}-{dest_wh} Transfer Request - 2025-12-20.pdf'
                 elif record.print_name_pattern == 'doc_date':
-                    # SourceWH-ABBREV-DestWH - Date
-                    record.print_name_preview = f'{src_wh}-{abbrev}-{dest_wh} - 2025-12-20.pdf'
+                    # 00045 - W03-INT-W02 Transfer Request
+                    record.print_name_preview = f'{doc_num} - {src_wh}-{abbrev}-{dest_wh} Transfer Request.pdf'
                 elif record.print_name_pattern == 'custom':
                     record.print_name_preview = 'Custom expression...'
                 else:
@@ -127,36 +128,38 @@ class VPADocumentTemplate(models.Model):
         abbrev = self.document_abbreviation or 'DOC'
 
         # Internal Transfer uses different fields (stock.picking model)
-        # Format: SourceWarehouseCode-ABBREV-DestWarehouseCode - Date
-        # Example: W04-INT-W05 - 2025-12-20.pdf (abbrev is dynamic from document_abbreviation field)
-        # Uses warehouse codes from location_id.warehouse_id.code and location_dest_id.warehouse_id.code
+        # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
+        # Example: W03-INT-00045-W02 Transfer Request.pdf
+        # Extracts document number from name like "WH/INT/00045" -> "00045"
         if self.document_type in ['internal_transfer', 'internal_transfer_pictures']:
-            # Helper expressions to get warehouse codes (fallback to location name if no warehouse)
+            # Helper expressions
             src_wh = "(object.location_id.warehouse_id.code or object.location_id.name or 'SRC')"
             dest_wh = "(object.location_dest_id.warehouse_id.code or object.location_dest_id.name or 'DST')"
+            # Extract doc number: "WH/INT/00045" -> "00045" (last part after /)
+            doc_num = "((object.name or 'DOC').split('/')[-1])"
             if self.print_name_pattern == 'doc_name':
-                # W04-INT-W05
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh}"
+                # W03-INT-00045-W02 Transfer Request
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
             elif self.print_name_pattern == 'doc_customer':
-                # W04-INT-W05 (Stock to Production)
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh} + ' (' + (object.location_id.name or 'Source') + ' to ' + (object.location_dest_id.name or 'Dest') + ')'"
+                # W03-INT-00045-W02 Transfer Request (Stock to Production)
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request (' + (object.location_id.name or 'Source') + ' to ' + (object.location_dest_id.name or 'Dest') + ')'"
             elif self.print_name_pattern == 'doc_customer_ref':
-                # W04-INT-W05 (SO00456)
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh} + (((' (' + object.origin + ')') if object.origin else ''))"
+                # W03-INT-00045-W02 Transfer Request (SO00456)
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + (((' (' + object.origin + ')') if object.origin else ''))"
             elif self.print_name_pattern == 'doc_customer_ref_date':
-                # W04-INT-W05 (SO00456) - 2025-12-20
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh} + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+                # W03-INT-00045-W02 Transfer Request (SO00456) - 2025-12-20
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
             elif self.print_name_pattern == 'customer_doc':
-                # W05-INT-W04 (reversed: dest first)
-                return f"{dest_wh} + '-{abbrev}-' + {src_wh}"
+                # W03-INT-00045-W02 Transfer Request - 2025-12-20
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request' + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
             elif self.print_name_pattern == 'doc_date':
-                # W04-INT-W05 - 2025-12-20
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh} + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+                # 00045 - W03-INT-W02 Transfer Request
+                return f"{doc_num} + ' - ' + {src_wh} + '-{abbrev}-' + {dest_wh} + ' Transfer Request'"
             elif self.print_name_pattern == 'custom':
-                return self.print_name_expression or f"{src_wh} + '-{abbrev}-' + {dest_wh}"
+                return self.print_name_expression or f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
             else:
-                # Default for internal transfer: W04-INT-W05 (SO00456)
-                return f"{src_wh} + '-{abbrev}-' + {dest_wh} + (((' (' + object.origin + ')') if object.origin else ''))"
+                # Default: W03-INT-00045-W02 Transfer Request
+                return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
 
         # Standard expressions for sale orders, invoices, etc.
         if self.print_name_pattern == 'doc_name':
