@@ -243,6 +243,26 @@
                 </div>
             </t>
         </t>
+        <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
+            <t t-set="layout_document_title" t-value="'Internal Transfer #WH/INT/00045'"/>
+            <t t-set="address">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">TRANSFER INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div style="margin-top: 4px;"><strong>Source Document:</strong> SO00456</div>
+                    <div style="margin-top: 4px;"><strong>From:</strong> WH/Stock</div>
+                    <div style="margin-top: 4px;"><strong>To:</strong> WH/Production</div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">WAREHOUSE INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Warehouse:</strong> Main Warehouse</div>
+                    <div style="margin-top: 4px;"><strong>Scheduled Date:</strong> 12/20/2025</div>
+                    <div style="margin-top: 4px;"><strong>Responsible:</strong> Demo User</div>
+                    <div style="margin-top: 4px;"><strong>Status:</strong> <span style="color: #ffc107;">Waiting</span></div>
+                </div>
+            </t>
+        </t>
         <t t-else="">
             <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
             <t t-set="address">
@@ -455,6 +475,78 @@
                                 <strong>MO/00045</strong> - Three-Seat Sofa (5.0 Units) | PO-2025-001
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Internal Transfer Preview Content -->
+            <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
+                <div class="vpa-quote-order">
+                    <!-- Transfer Items Table - VPA Style -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">TRANSFER ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 45%;">PRODUCT</th>
+                                    <th style="width: 15%; text-align: center;">FROM</th>
+                                    <th style="width: 15%; text-align: center;">TO</th>
+                                    <th style="width: 10%; text-align: center;">QTY</th>
+                                    <th style="width: 10%; text-align: center;">UNIT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center;">1</td>
+                                    <td>
+                                        <span class="vpa-product-code">[FURN_8999]</span> Three-Seat Sofa
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Three Seater Sofa with Lounger</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center;" class="vpa-location">Stock</td>
+                                    <td style="text-align: center;" class="vpa-location">Production</td>
+                                    <td style="text-align: center;"><span class="vpa-qty-badge">10</span></td>
+                                    <td style="text-align: center;">Units</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">2</td>
+                                    <td>
+                                        <span class="vpa-product-code">[FURN_8220]</span> Four Person Desk
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Modern office workstation</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center;" class="vpa-location">Stock</td>
+                                    <td style="text-align: center;" class="vpa-location">Production</td>
+                                    <td style="text-align: center;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center;">Units</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">3</td>
+                                    <td>
+                                        <span class="vpa-product-code">[COMP_001]</span> Steel Frame Component
+                                        <t t-if="template.document_type == 'internal_transfer_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                                <small style="color: #666; font-size: 10px; display: inline-block; vertical-align: top; margin-left: 10px;">Steel frame for furniture</small>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center;" class="vpa-location">Stock</td>
+                                    <td style="text-align: center;" class="vpa-location">Production</td>
+                                    <td style="text-align: center;"><span class="vpa-qty-badge">20</span></td>
+                                    <td style="text-align: center;">Pcs</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </t>
