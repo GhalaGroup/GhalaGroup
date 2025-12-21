@@ -1383,22 +1383,16 @@ class VPADocumentTemplate(models.Model):
             # Manufacturing Order template with VPA styling
             show_pictures = self.document_type == 'manufacturing_order_pictures'
 
-            # Picture section - for the main product being manufactured (positioned between info blocks)
+            # Picture section - for the main product being manufactured (positioned in PRODUCTION STATUS)
             product_picture_section = ''
 
             if show_pictures:
                 product_picture_section = '''
-            <t t-set="middle_content">
-                <t t-if="doc.product_id.image_128">
-                    <div style="text-align: center; padding: 0 10px;">
-                        <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 140px; max-height: 140px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"/>
-                    </div>
-                </t>
-            </t>'''
-            else:
-                product_picture_section = '''
-            <t t-set="middle_content">
-            </t>'''
+                    <t t-if="doc.product_id.image_128">
+                        <div style="margin-top: 10px; text-align: center;">
+                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 180px; max-height: 180px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
+                        </div>
+                    </t>'''
 
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
@@ -1426,7 +1420,6 @@ class VPADocumentTemplate(models.Model):
                     </div>
                 </div>
             </t>
-            {product_picture_section}
             <t t-set="information_block">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
@@ -1437,6 +1430,7 @@ class VPADocumentTemplate(models.Model):
                         <span t-field="doc.date_deadline" t-options='{{"widget": "date"}}'/>
                     </div>
                 </div>
+                {product_picture_section}
             </t>
             <t t-set="layout_document_title">
                 <t t-out="report_title"/> - <span t-field="doc.name"/>
