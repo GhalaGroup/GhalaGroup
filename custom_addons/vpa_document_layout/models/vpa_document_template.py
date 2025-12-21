@@ -2857,16 +2857,19 @@ class VPADocumentTemplate(models.Model):
             <div t-attf-style="border-bottom: 1px solid %s;"></div>
         </div>
 
-        <!-- Customer Details and Order Info (Two columns below title) -->
-        <table t-if="address or information_block" style="width: 100%%; margin-bottom: 15px; border-collapse: collapse;">
+        <!-- Customer Details and Order Info (Two or Three columns below title) -->
+        <table t-if="address or information_block or middle_content" style="width: 100%%; margin-bottom: 15px; border-collapse: collapse;">
             <tbody>
                 <tr>
-                    <td t-if="address" style="width: 50%%; vertical-align: top; padding-right: 20px;">
+                    <td t-if="address" t-attf-style="width: {{middle_content and '35%%' or '50%%'}}; vertical-align: top; padding-right: 15px;">
                         <div style="font-size: 10pt; line-height: 1.5; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <td t-if="information_block" style="width: 50%%; vertical-align: top; text-align: right; padding-left: 20px;">
+                    <td t-if="middle_content" style="width: 30%%; vertical-align: top; text-align: center;">
+                        <t t-out="middle_content"/>
+                    </td>
+                    <td t-if="information_block" t-attf-style="width: {{middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
                         <div style="font-size: 9pt; line-height: 1.5; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
