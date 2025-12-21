@@ -1648,7 +1648,7 @@ class VPADocumentTemplate(models.Model):
     </t>
 </t>'''.format(
                 template_id=self.id,
-                product_picture_section=product_picture_section,
+                middle_content_section=middle_content_section,
                 desc_width='51'
             )
         elif self.document_type == 'sale_production':
