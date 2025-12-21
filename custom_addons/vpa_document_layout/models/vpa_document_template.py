@@ -18,16 +18,13 @@ class VPADocumentTemplate(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     # PDF Filename Configuration
-    print_name_pattern = fields.Selection([
-        ('doc_name', 'Basic (Document + Abbreviation)'),
-        ('doc_customer', 'With Details (Document + Locations/Customer)'),
-        ('doc_customer_ref', 'With Reference (Document + Reference/Origin)'),
-        ('doc_customer_ref_date', 'Full (Document + Reference + Date)'),
-        ('customer_doc', 'With Date (Document + Date)'),
-        ('doc_date', 'Alternate (Number first)'),
-        ('custom', 'Custom Expression'),
-    ], string='PDF Filename Pattern', default='doc_name', required=True,
-       help='Choose filename format. See preview below for actual result based on document type.')
+    print_name_pattern = fields.Selection(
+        selection='_get_print_name_pattern_selection',
+        string='Filename Format',
+        default='doc_name',
+        required=True,
+        help='Choose filename format. See preview below for actual result based on document type.'
+    )
 
     print_name_expression = fields.Char(
         string='Custom Filename Expression',
@@ -60,6 +57,48 @@ class VPADocumentTemplate(models.Model):
         if self.document_type and not self.document_abbreviation:
             self.document_abbreviation = abbreviation_map.get(self.document_type, '')
 
+    @api.model
+    def _get_print_name_pattern_selection(self):
+        """Return dynamic selection options based on document type context"""
+        # Get document_type from context if we're creating/editing a record
+        doc_type = self.env.context.get('default_document_type') or (self.document_type if self else False)
+
+        # Manufacturing Order specific labels
+        if doc_type in ['manufacturing_order', 'manufacturing_order_pictures']:
+            return [
+                ('doc_name', 'Basic (Document + Abbreviation)'),
+                ('doc_customer', 'With Product (Document + Product Name)'),
+                ('doc_customer_ref', 'With Reference (Document + Origin)'),
+                ('doc_customer_ref_date', 'Full (Document + Origin + Date)'),
+                ('customer_doc', 'Product First (Product + Document)'),
+                ('doc_date', 'With Date (Document + Date)'),
+                ('custom', 'Custom Expression'),
+            ]
+
+        # Internal Transfer specific labels
+        elif doc_type in ['internal_transfer', 'internal_transfer_pictures']:
+            return [
+                ('doc_name', 'Basic (Warehouse-Document-Warehouse)'),
+                ('doc_customer', 'With Locations (Document + Location Names)'),
+                ('doc_customer_ref', 'With Reference (Document + Origin)'),
+                ('doc_customer_ref_date', 'Full (Document + Origin + Date)'),
+                ('customer_doc', 'With Date (Document + Date)'),
+                ('doc_date', 'Alternate (Number First)'),
+                ('custom', 'Custom Expression'),
+            ]
+
+        # Standard labels for Sale/Invoice/etc
+        else:
+            return [
+                ('doc_name', 'Basic (Document + Abbreviation)'),
+                ('doc_customer', 'With Customer (Document + Customer Name)'),
+                ('doc_customer_ref', 'With Reference (Document + Customer + Ref)'),
+                ('doc_customer_ref_date', 'Full (Document + Customer + Ref + Date)'),
+                ('customer_doc', 'Customer First (Customer + Document)'),
+                ('doc_date', 'With Date (Document + Date)'),
+                ('custom', 'Custom Expression'),
+            ]
+
     @api.depends('print_name_pattern', 'print_name_expression', 'document_abbreviation', 'document_type')
     def _compute_print_name_preview(self):
         """Show preview of what the filename will look like"""
@@ -67,7 +106,36 @@ class VPADocumentTemplate(models.Model):
             abbrev = record.document_abbreviation or 'DOC'
 
             # Use different preview examples based on document type
-            if record.document_type in ['internal_transfer', 'internal_transfer_pictures']:
+            if record.document_type in ['manufacturing_order', 'manufacturing_order_pictures']:
+                # Manufacturing Order filename formats
+                # Format: MO/00123-MO - Product Name (Origin) - Date.pdf
+                mo_num = 'MO/00123'
+                product_name = 'Office Chair Premium'
+                origin_example = 'S00456'
+                date_example = '2025-12-20'
+                if record.print_name_pattern == 'doc_name':
+                    # MO/00123-MO
+                    record.print_name_preview = f'{mo_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_customer':
+                    # MO/00123-MO - Office Chair Premium
+                    record.print_name_preview = f'{mo_num}-{abbrev} - {product_name}.pdf'
+                elif record.print_name_pattern == 'doc_customer_ref':
+                    # MO/00123-MO - Office Chair Premium (S00456)
+                    record.print_name_preview = f'{mo_num}-{abbrev} - {product_name} ({origin_example}).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref_date':
+                    # MO/00123-MO - Office Chair Premium (S00456) - 2025-12-20
+                    record.print_name_preview = f'{mo_num}-{abbrev} - {product_name} ({origin_example}) - {date_example}.pdf'
+                elif record.print_name_pattern == 'customer_doc':
+                    # Office Chair Premium - MO/00123-MO
+                    record.print_name_preview = f'{product_name} - {mo_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_date':
+                    # MO/00123-MO - 2025-12-20
+                    record.print_name_preview = f'{mo_num}-{abbrev} - {date_example}.pdf'
+                elif record.print_name_pattern == 'custom':
+                    record.print_name_preview = 'Custom expression...'
+                else:
+                    record.print_name_preview = ''
+            elif record.document_type in ['internal_transfer', 'internal_transfer_pictures']:
                 # Internal Transfer filename formats
                 # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
                 src_wh = 'W03'
@@ -127,6 +195,34 @@ class VPADocumentTemplate(models.Model):
 
         # Get abbreviation - will be embedded as literal string in the expression
         abbrev = self.document_abbreviation or 'DOC'
+
+        # Manufacturing Order uses different fields (mrp.production model)
+        # Format: MO/00123-MO - Product Name (Origin) - Date.pdf
+        # Available fields: name, product_id.display_name, origin, date_start
+        if self.document_type in ['manufacturing_order', 'manufacturing_order_pictures']:
+            if self.print_name_pattern == 'doc_name':
+                # MO/00123-MO
+                return f"(object.name or 'MO') + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_customer':
+                # MO/00123-MO - Office Chair Premium
+                return f"(object.name or 'MO') + '-{abbrev} - ' + (object.product_id.display_name or 'Product')"
+            elif self.print_name_pattern == 'doc_customer_ref':
+                # MO/00123-MO - Office Chair Premium (S00456)
+                return f"(object.name or 'MO') + '-{abbrev} - ' + (object.product_id.display_name or 'Product') + (((' (' + object.origin + ')') if object.origin else ''))"
+            elif self.print_name_pattern == 'doc_customer_ref_date':
+                # MO/00123-MO - Office Chair Premium (S00456) - 2025-12-20
+                return f"(object.name or 'MO') + '-{abbrev} - ' + (object.product_id.display_name or 'Product') + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.date_start.date())) if object.date_start else '')"
+            elif self.print_name_pattern == 'customer_doc':
+                # Office Chair Premium - MO/00123-MO
+                return f"(object.product_id.display_name or 'Product') + ' - ' + (object.name or 'MO') + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_date':
+                # MO/00123-MO - 2025-12-20
+                return f"(object.name or 'MO') + '-{abbrev}' + ((' - ' + str(object.date_start.date())) if object.date_start else '')"
+            elif self.print_name_pattern == 'custom':
+                return self.print_name_expression or "(object.name or 'MO')"
+            else:
+                # Default: MO/00123-MO - Office Chair Premium
+                return f"(object.name or 'MO') + '-{abbrev} - ' + (object.product_id.display_name or 'Product')"
 
         # Internal Transfer uses different fields (stock.picking model)
         # Format: SrcWH-ABBREV-DocNum-DestWH Transfer Request
