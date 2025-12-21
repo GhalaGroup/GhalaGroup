@@ -263,6 +263,27 @@
                 </div>
             </t>
         </t>
+        <t t-elif="template.document_type in ['manufacturing_order', 'manufacturing_order_pictures']">
+            <t t-set="layout_document_title" t-value="'Manufacturing Order - MO/00123'"/>
+            <t t-set="address">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">MO INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Product:</strong> Office Chair Premium</div>
+                    <div style="margin-top: 4px;"><strong>Quantity:</strong> 50 Units</div>
+                    <div style="margin-top: 4px;"><strong>Scheduled:</strong> 12/25/2025</div>
+                    <div style="margin-top: 4px;"><strong>Responsible:</strong> John Smith</div>
+                    <div style="margin-top: 4px;"><strong>Source:</strong> SO00123</div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">PRODUCTION STATUS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>State:</strong> <span style="color: #28a745;">Confirmed</span></div>
+                    <div style="margin-top: 4px;"><strong>Priority:</strong> Normal</div>
+                    <div style="margin-top: 4px;"><strong>Deadline:</strong> 12/30/2025</div>
+                </div>
+            </t>
+        </t>
         <t t-else="">
             <t t-set="layout_document_title" t-value="'Quotation #SO001'"/>
             <t t-set="address">
@@ -548,6 +569,135 @@
                                     <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">20</span></td>
                                     <td style="text-align: center; vertical-align: middle;">Pcs</td>
                                     <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Manufacturing Order Preview Content -->
+            <t t-elif="template.document_type in ['manufacturing_order', 'manufacturing_order_pictures']">
+                <div class="vpa-quote-order">
+                    <!-- Components to Consume Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">COMPONENTS TO CONSUME</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 51%;">PRODUCT</th>
+                                    <th style="width: 12%; text-align: center;">TO CONSUME</th>
+                                    <th style="width: 12%; text-align: center;">CONSUMED</th>
+                                    <th style="width: 10%; text-align: center;">UNIT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">1</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FRAME_001]</span> Steel Frame
+                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">0</td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">2</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FABRIC_02]</span> Fabric Cover
+                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">0</td>
+                                    <td style="text-align: center; vertical-align: middle;">m²</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">3</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FOAM_PAD]</span> Foam Padding
+                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">25</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">0</td>
+                                    <td style="text-align: center; vertical-align: middle;">Kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Work Orders Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">WORK ORDERS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 40%; text-align: left;">OPERATION</th>
+                                    <th style="width: 30%; text-align: left;">WORK CENTER</th>
+                                    <th style="width: 15%; text-align: center;">DURATION</th>
+                                    <th style="width: 10%; text-align: center;">STATE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">1</td>
+                                    <td style="text-align: left; vertical-align: middle;">Assembly</td>
+                                    <td style="text-align: left; vertical-align: middle;">Assembly WC</td>
+                                    <td style="text-align: center; vertical-align: middle;">60 min</td>
+                                    <td style="text-align: center; vertical-align: middle;"><span style="color: #ffc107;">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">2</td>
+                                    <td style="text-align: left; vertical-align: middle;">Quality Check</td>
+                                    <td style="text-align: left; vertical-align: middle;">QC Station</td>
+                                    <td style="text-align: center; vertical-align: middle;">15 min</td>
+                                    <td style="text-align: center; vertical-align: middle;"><span style="color: #6c757d;">Waiting</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Finished Products Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">FINISHED PRODUCTS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 51%;">PRODUCT</th>
+                                    <th style="width: 12%; text-align: center;">TO PRODUCE</th>
+                                    <th style="width: 12%; text-align: center;">PRODUCED</th>
+                                    <th style="width: 10%; text-align: center;">UNIT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">1</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[CHAIR_001]</span> Office Chair Premium
+                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
+                                            <div style="margin-top: 8px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
+                                            </div>
+                                        </t>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">0</td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
                                 </tr>
                             </tbody>
                         </table>

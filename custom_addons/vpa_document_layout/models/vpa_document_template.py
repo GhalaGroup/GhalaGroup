@@ -55,6 +55,7 @@ class VPADocumentTemplate(models.Model):
             'internal_transfer': 'INT',
             'internal_transfer_pictures': 'INT',
             'manufacturing_order': 'MO',
+            'manufacturing_order_pictures': 'MO',
         }
         if self.document_type and not self.document_abbreviation:
             self.document_abbreviation = abbreviation_map.get(self.document_type, '')
@@ -213,6 +214,7 @@ class VPADocumentTemplate(models.Model):
         ('internal_transfer', 'Internal Transfer'),
         ('internal_transfer_pictures', 'Internal Transfer (Pictures)'),
         ('manufacturing_order', 'Manufacturing Order'),
+        ('manufacturing_order_pictures', 'Manufacturing Order (Pictures)'),
     ], string='Document Type', required=True, help='Which document type this template applies to')
 
     # Report Title Configuration
@@ -579,6 +581,7 @@ class VPADocumentTemplate(models.Model):
                 'internal_transfer': 'stock.picking',
                 'internal_transfer_pictures': 'stock.picking',
                 'manufacturing_order': 'mrp.production',
+                'manufacturing_order_pictures': 'mrp.production',
             }
             for template in self:
                 new_model = model_map.get(template.document_type, 'sale.order')
@@ -662,6 +665,7 @@ class VPADocumentTemplate(models.Model):
             'internal_transfer': 'stock.picking',
             'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
+            'manufacturing_order_pictures': 'mrp.production',
         }
 
         model = model_map.get(self.document_type, 'sale.order')
@@ -1279,30 +1283,45 @@ class VPADocumentTemplate(models.Model):
         </t>
     </t>
 </t>'''.format(template_id=self.id)
-        elif self.document_type == 'manufacturing_order':
-            # Manufacturing Order template - wraps standard MRP report
+        elif self.document_type in ['manufacturing_order', 'manufacturing_order_pictures']:
+            # Manufacturing Order template with VPA styling
+            show_pictures = self.document_type == 'manufacturing_order_pictures'
+
+            # Picture section for Components and Finished Products
+            picture_section_components = ''
+            picture_section_finished = ''
+
+            if show_pictures:
+                picture_section_components = '''
+                                            <t t-if="move.product_id.image_128">
+                                                <div style="margin-top: 8px;">
+                                                    <img t-att-src="image_data_uri(move.product_id.image_128)" style="max-width: 60px; max-height: 60px; border-radius: 4px; display: inline-block; vertical-align: top;"/>
+                                                </div>
+                                            </t>'''
+                picture_section_finished = '''
+                                            <t t-if="move.product_id.image_128">
+                                                <div style="margin-top: 8px;">
+                                                    <img t-att-src="image_data_uri(move.product_id.image_128)" style="max-width: 60px; max-height: 60px; border-radius: 4px; display: inline-block; vertical-align: top;"/>
+                                                </div>
+                                            </t>'''
+
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
             <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Manufacturing Order'"/>
             <t t-set="address">
-                <t t-if="doc.partner_id">
-                    <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">CUSTOMER DETAILS</div>
-                    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
-                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address"], "no_marker": True}}'/>
-                    </div>
-                </t>
-            </t>
-            <t t-set="information_block">
-                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">ORDER INFO</div>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">MO INFO</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-                    <div t-if="doc.date_start">
-                        <strong>Scheduled Date:</strong>
+                    <div><strong>Product:</strong> <span t-field="doc.product_id"/></div>
+                    <div style="margin-top: 4px;"><strong>Quantity:</strong> <t t-out="int(doc.product_qty) if doc.product_qty == int(doc.product_qty) else round(doc.product_qty, 2)"/> <span t-field="doc.product_uom_id"/></div>
+                    <div t-if="doc.date_start" style="margin-top: 4px;">
+                        <strong>Scheduled:</strong>
                         <span t-field="doc.date_start" t-options='{{"widget": "date"}}'/>
                     </div>
-                    <div t-if="doc.user_id.name" style="margin-top: 4px;">
+                    <div t-if="doc.user_id" style="margin-top: 4px;">
                         <strong>Responsible:</strong>
                         <span t-field="doc.user_id"/>
                     </div>
@@ -1312,99 +1331,247 @@ class VPADocumentTemplate(models.Model):
                     </div>
                 </div>
             </t>
-            <t t-set="layout_document_title">
-                Manufacturing Order # <span t-field="doc.name"/>
-            </t>
-            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
-                <!-- Product Information -->
-                <div class="row mb-4">
-                    <div class="col-6">
-                        <strong>Product:</strong> <span t-field="doc.product_id"/>
-                    </div>
-                    <div class="col-3">
-                        <strong>Quantity:</strong> <span t-field="doc.product_qty"/> <span t-field="doc.product_uom_id"/>
-                    </div>
-                    <div class="col-3">
-                        <strong>State:</strong> <span t-field="doc.state"/>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>State:</strong> <span t-field="doc.state"/></div>
+                    <div t-if="doc.priority" style="margin-top: 4px;"><strong>Priority:</strong> <span t-field="doc.priority"/></div>
+                    <div t-if="doc.date_deadline" style="margin-top: 4px;">
+                        <strong>Deadline:</strong>
+                        <span t-field="doc.date_deadline" t-options='{{"widget": "date"}}'/>
                     </div>
                 </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> - <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Manufacturing Order -->
+                <style>
+                    .vpa-mo {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-section-header {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card table thead {{
+                        background: linear-gradient(135deg, #f8f8f8 0%%, #fafafa 100%%);
+                    }}
+                    .vpa-table-card table thead th {{
+                        color: <t t-out="primary_color"/>;
+                        font-size: 9px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.3px;
+                        padding: 6px 8px;
+                        border: none;
+                        border-bottom: 1px solid #e5e5e5;
+                    }}
+                    .vpa-table-card table tbody td {{
+                        padding: 8px;
+                        border-bottom: 1px solid #f5f5f5;
+                        font-size: 11px;
+                        vertical-align: middle;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
+                    }}
+                </style>
 
-                <!-- Components Table -->
-                <h4 class="mt-4">Components to Consume</h4>
-                <table class="table table-sm o_main_table">
-                    <thead>
-                        <tr>
-                            <th class="text-start">Product</th>
-                            <th class="text-end">To Consume</th>
-                            <th class="text-end">Consumed</th>
-                            <th class="text-center">UoM</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="doc.move_raw_ids" t-as="move">
-                            <tr>
-                                <td><span t-field="move.product_id"/></td>
-                                <td class="text-end"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></td>
-                                <td class="text-end"><t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/></td>
-                                <td class="text-center"><span t-field="move.product_uom"/></td>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
+                <div class="vpa-mo">
+                    <!-- Components to Consume Table -->
+                    <t t-if="doc.move_raw_ids">
+                        <div class="vpa-table-card">
+                            <div class="vpa-section-header">COMPONENTS TO CONSUME</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%%; text-align: center;">NO.</th>
+                                        <th style="width: {desc_width}%%;">PRODUCT</th>
+                                        <th style="width: 12%%; text-align: center;">TO CONSUME</th>
+                                        <th style="width: 12%%; text-align: center;">CONSUMED</th>
+                                        <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="line_num" t-value="0"/>
+                                    <t t-foreach="doc.move_raw_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                        <t t-set="line_num" t-value="line_num + 1"/>
+                                        <tr>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="line_num"/>
+                                            </td>
+                                            <td style="text-align: left; vertical-align: middle;">
+                                                <div class="vpa-product-title">
+                                                    <t t-if="move.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <t t-out="move.product_id.name"/>
+                                                </div>
+                                                {picture_section_components}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <span t-field="move.product_uom"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
 
-                <!-- Work Orders (if any) -->
-                <t t-if="doc.workorder_ids">
-                    <h4 class="mt-4">Work Orders</h4>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th class="text-start">Operation</th>
-                                <th class="text-start">Work Center</th>
-                                <th class="text-end">Expected Duration</th>
-                                <th class="text-center">State</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="doc.workorder_ids" t-as="wo">
-                                <tr>
-                                    <td><span t-field="wo.name"/></td>
-                                    <td><span t-field="wo.workcenter_id"/></td>
-                                    <td class="text-end"><span t-field="wo.duration_expected"/> min</td>
-                                    <td class="text-center"><span t-field="wo.state"/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                </t>
+                    <!-- Work Orders Table -->
+                    <t t-if="doc.workorder_ids">
+                        <div class="vpa-table-card">
+                            <div class="vpa-section-header">WORK ORDERS</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%%; text-align: center;">NO.</th>
+                                        <th style="width: 40%%; text-align: left;">OPERATION</th>
+                                        <th style="width: 30%%; text-align: left;">WORK CENTER</th>
+                                        <th style="width: 15%%; text-align: center;">DURATION</th>
+                                        <th style="width: 10%%; text-align: center;">STATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="wo_num" t-value="0"/>
+                                    <t t-foreach="doc.workorder_ids" t-as="wo">
+                                        <t t-set="wo_num" t-value="wo_num + 1"/>
+                                        <tr>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="wo_num"/>
+                                            </td>
+                                            <td style="text-align: left; vertical-align: middle;">
+                                                <span t-field="wo.name"/>
+                                            </td>
+                                            <td style="text-align: left; vertical-align: middle;">
+                                                <span t-field="wo.workcenter_id"/>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="int(wo.duration_expected)"/> min
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <span t-field="wo.state"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
 
-                <!-- Finished Products -->
-                <t t-if="doc.move_finished_ids">
-                    <h4 class="mt-4">Finished Products</h4>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th class="text-start">Product</th>
-                                <th class="text-end">To Produce</th>
-                                <th class="text-end">Produced</th>
-                                <th class="text-center">UoM</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="doc.move_finished_ids" t-as="move">
-                                <tr>
-                                    <td><span t-field="move.product_id"/></td>
-                                    <td class="text-end"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></td>
-                                    <td class="text-end"><t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/></td>
-                                    <td class="text-center"><span t-field="move.product_uom"/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                </t>
+                    <!-- Finished Products Table -->
+                    <t t-if="doc.move_finished_ids">
+                        <div class="vpa-table-card">
+                            <div class="vpa-section-header">FINISHED PRODUCTS</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%%; text-align: center;">NO.</th>
+                                        <th style="width: {desc_width}%%;">PRODUCT</th>
+                                        <th style="width: 12%%; text-align: center;">TO PRODUCE</th>
+                                        <th style="width: 12%%; text-align: center;">PRODUCED</th>
+                                        <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="fp_num" t-value="0"/>
+                                    <t t-foreach="doc.move_finished_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                        <t t-set="fp_num" t-value="fp_num + 1"/>
+                                        <tr>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="fp_num"/>
+                                            </td>
+                                            <td style="text-align: left; vertical-align: middle;">
+                                                <div class="vpa-product-title">
+                                                    <t t-if="move.product_id.default_code">
+                                                        <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                    </t>
+                                                    <t t-out="move.product_id.name"/>
+                                                </div>
+                                                {picture_section_finished}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                <span t-field="move.product_uom"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <!-- Notes Section -->
+                    <t t-if="doc.note">
+                        <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin: 10px 0;">
+                            <div t-att-style="'color: ' + primary_color + '; margin: 0 0 6px 0; font-size: 11px; font-weight: 600;'">NOTES:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <span t-field="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id)
+</t>'''.format(
+                template_id=self.id,
+                picture_section_components=picture_section_components,
+                picture_section_finished=picture_section_finished,
+                desc_width='46' if show_pictures else '51'
+            )
         elif self.document_type == 'sale_production':
             # Sales Production Order template - Sale Order with Production Details for factory
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
@@ -2701,6 +2868,7 @@ class VPADocumentTemplate(models.Model):
             'internal_transfer': 'stock.picking',
             'internal_transfer_pictures': 'stock.picking',
             'manufacturing_order': 'mrp.production',
+            'manufacturing_order_pictures': 'mrp.production',
         }
 
         model = model_map.get(self.document_type)
