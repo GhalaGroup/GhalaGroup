@@ -1389,8 +1389,8 @@ class VPADocumentTemplate(models.Model):
             if show_pictures:
                 product_picture_section = '''
                     <t t-if="doc.product_id.image_128">
-                        <div style="flex-shrink: 0;">
-                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 180px; max-height: 180px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
+                        <div style="margin-top: 12px; text-align: center;">
+                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 150px; max-height: 150px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
                         </div>
                     </t>'''
 
@@ -1421,20 +1421,16 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="information_block">
-                <div style="display: flex; align-items: flex-start; gap: 15px;">
-                    <div style="flex: 1;">
-                        <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
-                        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-                            <div><strong>State:</strong> <span t-field="doc.state"/></div>
-                            <div t-if="doc.priority" style="margin-top: 4px;"><strong>Priority:</strong> <span t-field="doc.priority"/></div>
-                            <div t-if="doc.date_deadline" style="margin-top: 4px;">
-                                <strong>Deadline:</strong>
-                                <span t-field="doc.date_deadline" t-options='{{"widget": "date"}}'/>
-                            </div>
-                        </div>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>State:</strong> <span t-field="doc.state"/></div>
+                    <div t-if="doc.priority" style="margin-top: 4px;"><strong>Priority:</strong> <span t-field="doc.priority"/></div>
+                    <div t-if="doc.date_deadline" style="margin-top: 4px;">
+                        <strong>Deadline:</strong>
+                        <span t-field="doc.date_deadline" t-options='{{"widget": "date"}}'/>
                     </div>
-                    {product_picture_section}
                 </div>
+                {product_picture_section}
             </t>
             <t t-set="layout_document_title">
                 <t t-out="report_title"/> - <span t-field="doc.name"/>
