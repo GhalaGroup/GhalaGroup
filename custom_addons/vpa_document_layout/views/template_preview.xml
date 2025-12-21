@@ -273,6 +273,11 @@
                     <div style="margin-top: 4px;"><strong>Scheduled:</strong> 12/25/2025</div>
                     <div style="margin-top: 4px;"><strong>Responsible:</strong> John Smith</div>
                     <div style="margin-top: 4px;"><strong>Source:</strong> SO00123</div>
+                    <t t-if="template.document_type == 'manufacturing_order_pictures'">
+                        <div style="margin-top: 8px;">
+                            <div style="width: 120px; height: 120px; background: #f0f0f0; border-radius: 6px; display: block;"></div>
+                        </div>
+                    </t>
                 </div>
             </t>
             <t t-set="information_block">
@@ -597,11 +602,6 @@
                                     <td style="text-align: center; vertical-align: middle;">1</td>
                                     <td style="text-align: left; vertical-align: middle;">
                                         <span class="vpa-product-code">[FRAME_001]</span> Steel Frame
-                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
-                                            <div style="margin-top: 8px;">
-                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
-                                            </div>
-                                        </t>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
                                     <td style="text-align: center; vertical-align: middle;">0</td>
@@ -611,11 +611,6 @@
                                     <td style="text-align: center; vertical-align: middle;">2</td>
                                     <td style="text-align: left; vertical-align: middle;">
                                         <span class="vpa-product-code">[FABRIC_02]</span> Fabric Cover
-                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
-                                            <div style="margin-top: 8px;">
-                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
-                                            </div>
-                                        </t>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
                                     <td style="text-align: center; vertical-align: middle;">0</td>
@@ -625,11 +620,6 @@
                                     <td style="text-align: center; vertical-align: middle;">3</td>
                                     <td style="text-align: left; vertical-align: middle;">
                                         <span class="vpa-product-code">[FOAM_PAD]</span> Foam Padding
-                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
-                                            <div style="margin-top: 8px;">
-                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
-                                            </div>
-                                        </t>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">25</span></td>
                                     <td style="text-align: center; vertical-align: middle;">0</td>
@@ -689,11 +679,6 @@
                                     <td style="text-align: center; vertical-align: middle;">1</td>
                                     <td style="text-align: left; vertical-align: middle;">
                                         <span class="vpa-product-code">[CHAIR_001]</span> Office Chair Premium
-                                        <t t-if="template.document_type == 'manufacturing_order_pictures'">
-                                            <div style="margin-top: 8px;">
-                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: inline-block; vertical-align: top;"></div>
-                                            </div>
-                                        </t>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">50</span></td>
                                     <td style="text-align: center; vertical-align: middle;">0</td>

@@ -1383,23 +1383,16 @@ class VPADocumentTemplate(models.Model):
             # Manufacturing Order template with VPA styling
             show_pictures = self.document_type == 'manufacturing_order_pictures'
 
-            # Picture section for Components and Finished Products
-            picture_section_components = ''
-            picture_section_finished = ''
+            # Picture section - only for the main product being manufactured (in MO INFO header)
+            product_picture_section = ''
 
             if show_pictures:
-                picture_section_components = '''
-                                            <t t-if="move.product_id.image_128">
-                                                <div style="margin-top: 8px;">
-                                                    <img t-att-src="image_data_uri(move.product_id.image_128)" style="max-width: 60px; max-height: 60px; border-radius: 4px; display: inline-block; vertical-align: top;"/>
-                                                </div>
-                                            </t>'''
-                picture_section_finished = '''
-                                            <t t-if="move.product_id.image_128">
-                                                <div style="margin-top: 8px;">
-                                                    <img t-att-src="image_data_uri(move.product_id.image_128)" style="max-width: 60px; max-height: 60px; border-radius: 4px; display: inline-block; vertical-align: top;"/>
-                                                </div>
-                                            </t>'''
+                product_picture_section = '''
+                                    <t t-if="doc.product_id.image_128">
+                                        <div style="margin-top: 8px;">
+                                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 120px; max-height: 120px; border-radius: 6px; display: block;"/>
+                                        </div>
+                                    </t>'''
 
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
@@ -1425,6 +1418,7 @@ class VPADocumentTemplate(models.Model):
                         <strong>Source:</strong>
                         <span t-field="doc.origin"/>
                     </div>
+                    {product_picture_section}
                 </div>
             </t>
             <t t-set="information_block">
@@ -1543,7 +1537,6 @@ class VPADocumentTemplate(models.Model):
                                                     </t>
                                                     <t t-out="move.product_id.name"/>
                                                 </div>
-                                                {picture_section_components}
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
                                                 <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
@@ -1631,7 +1624,6 @@ class VPADocumentTemplate(models.Model):
                                                     </t>
                                                     <t t-out="move.product_id.name"/>
                                                 </div>
-                                                {picture_section_finished}
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
                                                 <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
@@ -1664,9 +1656,8 @@ class VPADocumentTemplate(models.Model):
     </t>
 </t>'''.format(
                 template_id=self.id,
-                picture_section_components=picture_section_components,
-                picture_section_finished=picture_section_finished,
-                desc_width='46' if show_pictures else '51'
+                product_picture_section=product_picture_section,
+                desc_width='51'
             )
         elif self.document_type == 'sale_production':
             # Sales Production Order template - Sale Order with Production Details for factory
