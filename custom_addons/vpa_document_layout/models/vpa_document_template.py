@@ -1646,16 +1646,6 @@ class VPADocumentTemplate(models.Model):
                             </table>
                         </div>
                     </t>
-
-                    <!-- Notes Section -->
-                    <t t-if="doc.note">
-                        <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin: 10px 0;">
-                            <div t-att-style="'color: ' + primary_color + '; margin: 0 0 6px 0; font-size: 11px; font-weight: 600;'">NOTES:</div>
-                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
-                                <span t-field="doc.note"/>
-                            </div>
-                        </div>
-                    </t>
                 </div>
             </t>
         </t>
