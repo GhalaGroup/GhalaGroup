@@ -1383,16 +1383,22 @@ class VPADocumentTemplate(models.Model):
             # Manufacturing Order template with VPA styling
             show_pictures = self.document_type == 'manufacturing_order_pictures'
 
-            # Picture section - only for the main product being manufactured (in MO INFO header)
+            # Picture section - for the main product being manufactured (positioned between info blocks)
             product_picture_section = ''
 
             if show_pictures:
                 product_picture_section = '''
-                                    <t t-if="doc.product_id.image_128">
-                                        <div style="margin-top: 8px;">
-                                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 120px; max-height: 120px; border-radius: 6px; display: block;"/>
-                                        </div>
-                                    </t>'''
+            <t t-set="middle_content">
+                <t t-if="doc.product_id.image_128">
+                    <div style="text-align: center; padding: 0 10px;">
+                        <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 140px; max-height: 140px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"/>
+                    </div>
+                </t>
+            </t>'''
+            else:
+                product_picture_section = '''
+            <t t-set="middle_content">
+            </t>'''
 
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
@@ -1402,7 +1408,7 @@ class VPADocumentTemplate(models.Model):
             <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
             <t t-set="report_title" t-value="vpa_template.report_title or 'Manufacturing Order'"/>
             <t t-set="address">
-                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">MO INFO</div>
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION INFO</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
                     <div><strong>Product:</strong> <span t-field="doc.product_id"/></div>
                     <div style="margin-top: 4px;"><strong>Quantity:</strong> <t t-out="int(doc.product_qty) if doc.product_qty == int(doc.product_qty) else round(doc.product_qty, 2)"/> <span t-field="doc.product_uom_id"/></div>
@@ -1418,9 +1424,9 @@ class VPADocumentTemplate(models.Model):
                         <strong>Source:</strong>
                         <span t-field="doc.origin"/>
                     </div>
-                    {product_picture_section}
                 </div>
             </t>
+            {product_picture_section}
             <t t-set="information_block">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
