@@ -2856,11 +2856,14 @@ class VPADocumentTemplate(models.Model):
                         </div>
                     </td>
                     <td t-if="has_middle_content" style="width: 25%%; vertical-align: top; padding: 0 0 0 10px; text-align: right;">
-                        <t t-if="doc.product_id.image_128">
-                            <div style="padding-top: 10px;">
+                        <div style="padding-top: 10px;">
+                            <t t-if="is_preview_mode">
+                                <div style="width: 140px; height: 140px; background: #f0f0f0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: 0;"></div>
+                            </t>
+                            <t t-elif="doc.product_id.image_128">
                                 <img t-att-src="image_data_uri(doc.product_id.image_128)" style="display: block; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: auto; margin-right: 0;"/>
-                            </div>
-                        </t>
+                            </t>
+                        </div>
                     </td>
                     <td t-if="information_block" t-attf-style="width: {{has_middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
                         <div style="font-size: 9pt; line-height: 1.5; color: #555; text-align: right;">

@@ -276,11 +276,7 @@
                 </div>
             </t>
             <t t-set="has_middle_content" t-value="template.document_type == 'manufacturing_order_pictures'"/>
-            <t t-if="template.document_type == 'manufacturing_order_pictures'">
-                <div style="padding-top: 10px;">
-                    <div style="width: 140px; height: 140px; background: #f0f0f0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: 0;"></div>
-                </div>
-            </t>
+            <t t-set="is_preview_mode" t-value="True"/>
             <t t-set="information_block">
                 <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">PRODUCTION STATUS</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
