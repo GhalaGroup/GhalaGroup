@@ -1384,15 +1384,18 @@ class VPADocumentTemplate(models.Model):
             show_pictures = self.document_type == 'manufacturing_order_pictures'
 
             # Picture section - for the main product being manufactured (positioned in middle column)
-            middle_content_section = ''
-
+            # Only set middle_content if pictures are enabled
             if show_pictures:
                 middle_content_section = '''
-                    <t t-if="doc.product_id.image_128">
-                        <div style="text-align: center; padding-top: 10px;">
-                            <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
-                        </div>
-                    </t>'''
+            <t t-set="middle_content">
+                <t t-if="doc.product_id.image_128">
+                    <div style="text-align: center; padding-top: 10px;">
+                        <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
+                    </div>
+                </t>
+            </t>'''
+            else:
+                middle_content_section = ''
 
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
     <t t-call="web.html_container">
@@ -1419,10 +1422,7 @@ class VPADocumentTemplate(models.Model):
                         <span t-field="doc.origin"/>
                     </div>
                 </div>
-            </t>
-            <t t-set="middle_content">
-                {middle_content_section}
-            </t>
+            </t>{middle_content_section}
             <t t-set="information_block">
                 <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + primary_color">PRODUCTION STATUS</div>
                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
