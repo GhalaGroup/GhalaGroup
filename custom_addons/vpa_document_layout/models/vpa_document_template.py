@@ -1913,7 +1913,7 @@ class VPADocumentTemplate(models.Model):
                                                 <t t-out="line.product_uom_id.name"/>
                                             </td>
                                             <td style="text-align: center;">
-                                                <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
+                                                <t t-set="mos" t-value="doc.mrp_production_ids.filtered(lambda m: line.product_id in m.move_raw_ids.mapped('product_id') or m.product_id == line.product_id)"/>
                                                 <t t-if="mos">
                                                     <t t-foreach="mos" t-as="mo">
                                                         <span class="vpa-mo-badge">
