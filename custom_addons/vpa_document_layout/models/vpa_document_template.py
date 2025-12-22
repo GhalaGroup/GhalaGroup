@@ -1916,7 +1916,14 @@ class VPADocumentTemplate(models.Model):
                                                 <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
                                                 <t t-if="mos">
                                                     <t t-foreach="mos" t-as="mo">
-                                                        <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
+                                                        <span class="vpa-mo-badge">
+                                                            <t t-if="mo.name and mo.name != 'Pending' and mo.name != '/'">
+                                                                <t t-out="mo.name"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <t t-out="mo.origin or 'Draft'"/>
+                                                            </t>
+                                                        </span>
                                                     </t>
                                                 </t>
                                                 <t t-else="">
