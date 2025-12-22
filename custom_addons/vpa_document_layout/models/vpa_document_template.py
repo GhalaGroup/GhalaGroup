@@ -1428,7 +1428,7 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                <t t-out="report_title"/> - <span t-field="doc.name"/>
+                <t t-out="report_title"/> - <t t-if="doc.name and doc.name != 'Pending' and doc.name != '/'"><span t-field="doc.name"/></t><t t-else><span t-field="doc.origin"/></t>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <!-- Inline Styles for Manufacturing Order -->
@@ -1913,10 +1913,17 @@ class VPADocumentTemplate(models.Model):
                                                 <t t-out="line.product_uom_id.name"/>
                                             </td>
                                             <td style="text-align: center;">
-                                                <t t-set="mos" t-value="line.move_ids.mapped('created_production_id') if line.move_ids else []"/>
+                                                <t t-set="mos" t-value="doc.mrp_production_ids.filtered(lambda m: line.product_id in m.move_raw_ids.mapped('product_id') or m.product_id == line.product_id)"/>
                                                 <t t-if="mos">
                                                     <t t-foreach="mos" t-as="mo">
-                                                        <span class="vpa-mo-badge"><t t-out="mo.name"/></span>
+                                                        <span class="vpa-mo-badge">
+                                                            <t t-if="mo.name and mo.name != 'Pending' and mo.name != '/'">
+                                                                <t t-out="mo.name"/>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <t t-out="mo.origin or 'Draft'"/>
+                                                            </t>
+                                                        </span>
                                                     </t>
                                                 </t>
                                                 <t t-else="">
