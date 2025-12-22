@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Document Layout',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'category': 'Reporting',
-    'summary': 'Custom VPA document layout for reports (v19.0.1.2.0)',
+    'summary': 'Custom VPA document layout for reports (v19.0.1.3.0)',
     'description': """
 VPA Document Layout
 ===================
@@ -31,6 +31,7 @@ Supported Reports
 
 Version History
 ---------------
+* **19.0.1.3.0** - Internal Transfer support: warehouse-based filenames, location paths, checkbox column, alignment fixes
 * **19.0.1.2.0** - Header spacing fix, Quotation Pictures table styling, product image border removed
 * **19.0.1.1.0** - Added template preview, header repeat on pages option
 * **19.0.1.0.0** - Initial release for Odoo 19
