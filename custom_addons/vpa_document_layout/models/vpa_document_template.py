@@ -2862,7 +2862,7 @@ class VPADocumentTemplate(models.Model):
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <td t-if="middle_content" style="width: 25%%; vertical-align: top; padding: 0 10px;">
+                    <td t-if="middle_content" style="width: 25%%; vertical-align: top; padding: 0 0 0 10px;">
                         <t t-raw="middle_content"/>
                     </td>
                     <td t-if="information_block" t-attf-style="width: {{middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
