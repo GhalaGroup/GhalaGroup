@@ -1390,7 +1390,7 @@ class VPADocumentTemplate(models.Model):
             <t t-set="middle_content">
                 <t t-if="doc.product_id.image_128">
                     <div style="text-align: right; padding-top: 10px;">
-                        <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
+                        <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid <t t-out="primary_color"/>;"/>
                     </div>
                 </t>
             </t>'''
@@ -2862,7 +2862,7 @@ class VPADocumentTemplate(models.Model):
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <td t-if="middle_content" style="width: 25%%; vertical-align: top; text-align: center; padding: 0 10px;">
+                    <td t-if="middle_content" style="width: 25%%; vertical-align: top; text-align: right; padding: 0 10px;">
                         <t t-out="middle_content"/>
                     </td>
                     <td t-if="information_block" t-attf-style="width: {{middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
