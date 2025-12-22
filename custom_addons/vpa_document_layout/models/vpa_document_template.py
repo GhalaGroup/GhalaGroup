@@ -1647,7 +1647,8 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(
                 template_id=self.id,
                 middle_content_section=middle_content_section,
-                desc_width='51'
+                desc_width='51',
+                middle_content=middle_content_section
             )
         elif self.document_type == 'sale_production':
             # Sales Production Order template - Sale Order with Production Details for factory
