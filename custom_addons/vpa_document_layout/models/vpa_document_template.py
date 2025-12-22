@@ -1389,7 +1389,7 @@ class VPADocumentTemplate(models.Model):
                 middle_content_section = '''
             <t t-set="middle_content">
                 <t t-if="doc.product_id.image_128">
-                    <div style="text-align: center; padding-top: 10px;">
+                    <div style="text-align: right; padding-top: 10px;">
                         <img t-att-src="image_data_uri(doc.product_id.image_128)" style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid %s;"/>
                     </div>
                 </t>
