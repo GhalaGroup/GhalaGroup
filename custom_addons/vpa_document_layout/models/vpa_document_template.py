@@ -1428,7 +1428,7 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                <t t-out="report_title"/> - <t t-if="doc.name and doc.name not in ['Pending', '/']"><span t-field="doc.name"/></t><t t-else><span t-field="doc.origin"/></t>
+                <t t-out="report_title"/> - <t t-if="doc.name and doc.name != 'Pending' and doc.name != '/'"><span t-field="doc.name"/></t><t t-else><span t-field="doc.origin"/></t>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <!-- Inline Styles for Manufacturing Order -->
