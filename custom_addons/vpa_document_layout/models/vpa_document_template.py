@@ -1389,8 +1389,8 @@ class VPADocumentTemplate(models.Model):
                 middle_content_section = '''
             <t t-set="middle_content">
                 <t t-if="doc.product_id.image_128">
-                    <div style="padding-top: 10px; text-align: right;">
-                        <img t-att-src="image_data_uri(doc.product_id.image_128)" t-attf-style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid {{primary_color}}; display: inline-block;"/>
+                    <div style="padding-top: 10px;">
+                        <img t-att-src="image_data_uri(doc.product_id.image_128)" t-attf-style="max-width: 100%%; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid {{primary_color}}; display: block; margin-left: auto; margin-right: 0;"/>
                     </div>
                 </t>
             </t>'''
