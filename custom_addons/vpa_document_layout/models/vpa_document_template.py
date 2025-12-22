@@ -1387,13 +1387,11 @@ class VPADocumentTemplate(models.Model):
             # Only set middle_content if pictures are enabled
             if show_pictures:
                 middle_content_section = '''
-            <t t-set="middle_content">
                 <t t-if="doc.product_id.image_128">
                     <div style="padding-top: 10px;">
                         <img t-att-src="image_data_uri(doc.product_id.image_128)" style="display: block; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: auto; margin-right: 0;"/>
                     </div>
-                </t>
-            </t>'''
+                </t>'''
             else:
                 middle_content_section = ''
 
@@ -2854,18 +2852,18 @@ class VPADocumentTemplate(models.Model):
         </div>
 
         <!-- Customer Details and Order Info (Two or Three columns below title) -->
-        <table t-if="address or information_block or middle_content" style="width: 100%%; margin-bottom: 15px; border-collapse: collapse;">
+        <table t-if="address or information_block or doc.product_id.image_128" style="width: 100%%; margin-bottom: 15px; border-collapse: collapse;">
             <tbody>
                 <tr>
-                    <td t-if="address" t-attf-style="width: {{middle_content and '40%%' or '50%%'}}; vertical-align: top; padding-right: 15px;">
+                    <td t-if="address" t-attf-style="width: {{doc.product_id.image_128 and '40%%' or '50%%'}}; vertical-align: top; padding-right: 15px;">
                         <div style="font-size: 10pt; line-height: 1.5; color: #555;">
                             <t t-out="address"/>
                         </div>
                     </td>
-                    <td t-if="middle_content" style="width: 25%%; vertical-align: top; padding: 0 0 0 10px; text-align: right;">
-                        <t t-raw="middle_content"/>
+                    <td t-if="doc.product_id.image_128" style="width: 25%%; vertical-align: top; padding: 0 0 0 10px; text-align: right;">
+                        {middle_content}
                     </td>
-                    <td t-if="information_block" t-attf-style="width: {{middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
+                    <td t-if="information_block" t-attf-style="width: {{doc.product_id.image_128 and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
                         <div style="font-size: 9pt; line-height: 1.5; color: #555; text-align: right;">
                             <t t-out="information_block"/>
                         </div>
