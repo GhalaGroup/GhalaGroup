@@ -275,7 +275,8 @@
                     <div style="margin-top: 4px;"><strong>Source:</strong> SO00123</div>
                 </div>
             </t>
-            <t t-if="template.document_type == 'manufacturing_order_pictures'" t-set="middle_content">
+            <t t-set="has_middle_content" t-value="template.document_type == 'manufacturing_order_pictures'"/>
+            <t t-if="template.document_type == 'manufacturing_order_pictures'">
                 <div style="padding-top: 10px;">
                     <div style="width: 140px; height: 140px; background: #f0f0f0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: block; margin-left: auto; margin-right: 0;"></div>
                 </div>

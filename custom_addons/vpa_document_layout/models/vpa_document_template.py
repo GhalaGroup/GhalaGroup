@@ -1386,13 +1386,7 @@ class VPADocumentTemplate(models.Model):
             # Picture section - for the main product being manufactured (positioned in middle column)
             # Only set middle_content if pictures are enabled
             if show_pictures:
-                middle_content_section = '''
-            <t t-set="has_middle_content" t-value="bool(doc.product_id.image_128)"/>
-            <t t-if="doc.product_id.image_128">
-                <div style="padding-top: 10px;">
-                    <img t-att-src="image_data_uri(doc.product_id.image_128)" style="display: block; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: auto; margin-right: 0;"/>
-                </div>
-            </t>'''
+                middle_content_section = '<t t-set="has_middle_content" t-value="bool(doc.product_id.image_128)"/>'
             else:
                 middle_content_section = '<t t-set="has_middle_content" t-value="False"/>'
 
@@ -1648,8 +1642,7 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(
                 template_id=self.id,
                 middle_content_section=middle_content_section,
-                desc_width='51',
-                middle_content=middle_content_section
+                desc_width='51'
             )
         elif self.document_type == 'sale_production':
             # Sales Production Order template - Sale Order with Production Details for factory
@@ -2863,7 +2856,11 @@ class VPADocumentTemplate(models.Model):
                         </div>
                     </td>
                     <td t-if="has_middle_content" style="width: 25%%; vertical-align: top; padding: 0 0 0 10px; text-align: right;">
-                        {middle_content}
+                        <t t-if="doc.product_id.image_128">
+                            <div style="padding-top: 10px;">
+                                <img t-att-src="image_data_uri(doc.product_id.image_128)" style="display: block; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-left: auto; margin-right: 0;"/>
+                            </div>
+                        </t>
                     </td>
                     <td t-if="information_block" t-attf-style="width: {{has_middle_content and '35%%' or '50%%'}}; vertical-align: top; text-align: right; padding-left: 15px;">
                         <div style="font-size: 9pt; line-height: 1.5; color: #555; text-align: right;">
