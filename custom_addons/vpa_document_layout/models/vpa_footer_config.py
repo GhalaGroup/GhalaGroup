@@ -93,6 +93,17 @@ class VPAFooterConfig(models.Model):
     text_color = fields.Char(string='Text Color', default='#666666')
     font_size = fields.Char(string='Font Size', default='8pt')
 
+    # Page Number Styling
+    page_number_style = fields.Selection([
+        ('plain', 'Plain Text'),
+        ('badge', 'Colored Badge'),
+    ], string='Page Number Style', default='badge', help='Style for page numbers in footer')
+    page_number_bg_color = fields.Char(
+        string='Page Number Background',
+        default='#875a7b',
+        help='Background color for page number badge (used when style is Badge)'
+    )
+
     # Content Options
     show_bank_details = fields.Boolean(string='Show Bank Details', default=True)
     show_page_numbers = fields.Boolean(string='Show Page Numbers', default=True)

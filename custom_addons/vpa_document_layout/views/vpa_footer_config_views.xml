@@ -83,6 +83,8 @@
                                 <group string="Content Options">
                                     <field name="show_bank_details"/>
                                     <field name="show_page_numbers"/>
+                                    <field name="page_number_style" invisible="not show_page_numbers"/>
+                                    <field name="page_number_bg_color" widget="color" invisible="not show_page_numbers or page_number_style != 'badge'"/>
                                     <field name="show_company_footer"/>
                                 </group>
                             </group>
