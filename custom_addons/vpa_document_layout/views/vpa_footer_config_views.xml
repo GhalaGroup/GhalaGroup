@@ -134,17 +134,21 @@
                         <!-- Styling Tab -->
                         <page string="Styling" name="styling">
                             <group>
+                                <group string="Report Colors">
+                                    <field name="primary_color" widget="color"/>
+                                    <field name="secondary_color" widget="color"/>
+                                </group>
                                 <group string="Border">
                                     <field name="show_border"/>
                                     <field name="border_color" widget="color" invisible="not show_border"/>
                                 </group>
+                            </group>
+                            <group>
                                 <group string="Decorative Shape">
                                     <field name="show_shape"/>
                                     <field name="shape_color" widget="color" invisible="not show_shape"/>
                                     <field name="shape_opacity" invisible="not show_shape"/>
                                 </group>
-                            </group>
-                            <group>
                                 <group string="Text">
                                     <field name="text_color" widget="color"/>
                                     <field name="font_size"/>

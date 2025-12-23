@@ -23,12 +23,12 @@
             <attribute name="t-call">vpa_document_layout.vpa_internal_layout</attribute>
         </xpath>
 
-        <!-- Replace the page div to use VPA colors from config -->
+        <!-- Replace the page div to use VPA colors from footer config -->
         <xpath expr="//div[@class='page']" position="before">
-            <!-- Get VPA configuration for colors -->
+            <!-- Get VPA Footer Config for colors (Internal Documents) -->
             <t t-set="company" t-value="doc.company_id"/>
-            <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
-            <t t-set="primary_color" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+            <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().get_footer_for_report(company.id, 'vpa_acc_int_transfer.report_internal_transfer')"/>
+            <t t-set="primary_color" t-value="footer_config.primary_color if footer_config else company.primary_color or '#875a7b'"/>
         </xpath>
 
         <!-- Update header title color -->

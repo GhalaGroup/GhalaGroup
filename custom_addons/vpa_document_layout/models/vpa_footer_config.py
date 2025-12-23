@@ -93,6 +93,18 @@ class VPAFooterConfig(models.Model):
     text_color = fields.Char(string='Text Color', default='#666666')
     font_size = fields.Char(string='Font Size', default='8pt')
 
+    # Report Colors (used by reports that use this footer config)
+    primary_color = fields.Char(
+        string='Primary Color',
+        default='#875a7b',
+        help='Primary accent color for report headers and titles'
+    )
+    secondary_color = fields.Char(
+        string='Secondary Color',
+        default='#21b799',
+        help='Secondary accent color for report elements'
+    )
+
     # Page Number Styling
     page_number_style = fields.Selection([
         ('plain', 'Plain Text'),
