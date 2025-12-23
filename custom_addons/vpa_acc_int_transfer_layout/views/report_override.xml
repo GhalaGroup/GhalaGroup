@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!--
+        VPA Internal Transfer - Document Layout Integration
+        =====================================================
+
+        This template overrides the Internal Transfer report to:
+        1. Use VPA's internal layout (removes Odoo's default header/footer)
+        2. Apply VPA Document Layout's configured colors for table headers
+
+        The VPA Footer Config handles the actual header/footer via wkhtmltopdf.
+    -->
+
+    <!-- Override Internal Transfer to use VPA layout -->
+    <template id="report_internal_transfer_vpa_layout"
+              inherit_id="vpa_acc_int_transfer.report_internal_transfer"
+              priority="99">
+
+        <!-- Switch from web.external_layout to VPA internal layout -->
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">vpa_document_layout.vpa_internal_layout</attribute>
+        </xpath>
+
+        <!-- Replace the page div to use VPA colors from config -->
+        <xpath expr="//div[@class='page']" position="before">
+            <!-- Get VPA configuration for colors -->
+            <t t-set="company" t-value="doc.company_id"/>
+            <t t-set="vpa_config" t-value="company.env['vpa.document.config'].sudo().get_config(company.id)"/>
+            <t t-set="primary_color" t-value="vpa_config.primary_accent_color or company.primary_color or '#875a7b'"/>
+        </xpath>
+
+        <!-- Update header title color -->
+        <xpath expr="//h4[contains(@style, '#DC143C')]" position="attributes">
+            <attribute name="style">margin-bottom: 5px;</attribute>
+            <attribute name="t-attf-style">color: {{primary_color}}; margin-bottom: 5px;</attribute>
+        </xpath>
+
+        <!-- Update Transfer Details table header -->
+        <xpath expr="//th[@colspan='4'][contains(text(), 'Transfer Details')]" position="attributes">
+            <attribute name="style">padding: 4px;</attribute>
+            <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
+        </xpath>
+
+        <!-- Update Amount table header -->
+        <xpath expr="//th[@colspan='4'][contains(text(), 'Amount')]" position="attributes">
+            <attribute name="style">padding: 4px;</attribute>
+            <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
+        </xpath>
+
+        <!-- Update Approval Trail table header -->
+        <xpath expr="//th[@colspan='6'][contains(text(), 'Approval Trail')]" position="attributes">
+            <attribute name="style">padding: 4px;</attribute>
+            <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
+        </xpath>
+
+    </template>
+</odoo>
