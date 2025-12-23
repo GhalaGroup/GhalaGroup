@@ -45,12 +45,18 @@
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
-                <div class="alert alert-warning mb-0" role="alert"
-                     invisible="state != 'draft' or can_submit">
-                    <i class="fa fa-exclamation-triangle"/> <strong>Cannot Submit:</strong>
-                    <field name="submit_blocked_reason" nolabel="1" class="d-inline"/>
-                </div>
                 <sheet>
+                    <!-- Missing fields warning banner -->
+                    <div class="alert alert-warning text-center o_form_header"
+                         role="alert"
+                         invisible="state != 'draft' or can_submit"
+                         style="margin: -24px -24px 24px -24px; border-radius: 0; border-left: 0; border-right: 0; border-top: 0;">
+                        <span class="fw-bold">
+                            <i class="fa fa-exclamation-triangle me-1"/>
+                            Cannot Submit:
+                        </span>
+                        <field name="submit_blocked_reason" nolabel="1" class="d-inline ms-1"/>
+                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_journal_entries"
                                 type="object"
