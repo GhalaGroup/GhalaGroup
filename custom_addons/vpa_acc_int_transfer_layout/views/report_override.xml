@@ -33,49 +33,89 @@
             <!-- VPA Table Styling -->
             <style>
                 /* VPA Table Style - Matching other VPA reports */
+                .page {
+                    font-size: 10pt !important;
+                }
+
+                /* Table headers - VPA style */
                 .page table.table thead th {
                     font-size: 11pt !important;
-                    padding: 10px 8px !important;
+                    padding: 10px 12px !important;
                     font-weight: bold !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.5px !important;
                 }
+
+                /* Table body cells - VPA style */
                 .page table.table tbody td {
                     font-size: 10pt !important;
-                    padding: 8px !important;
-                    line-height: 1.5 !important;
+                    padding: 10px 12px !important;
+                    line-height: 1.6 !important;
+                    border-bottom: 1px solid #e0e0e0 !important;
+                    vertical-align: middle !important;
                 }
+
                 .page table.table tbody td strong {
                     font-weight: 600 !important;
                 }
+
                 /* Label cells with gray background */
                 .page table.table tbody td[style*="background-color: #f8f9fa"] {
                     font-weight: 600 !important;
+                    background-color: #f8f9fa !important;
                 }
-                /* Amount display - larger */
+
+                /* Amount display - larger and bold */
                 .page table.table tbody td[style*="font-size: 14px"] {
-                    font-size: 12pt !important;
+                    font-size: 13pt !important;
+                    font-weight: bold !important;
                 }
+
+                /* Sub-text (account codes) */
+                .page table.table tbody td div[style*="font-size: 9px"] {
+                    font-size: 9pt !important;
+                    color: #666 !important;
+                    margin-top: 4px !important;
+                }
+
                 /* Approval trail header row */
                 .page table.table tbody tr[style*="background-color: #f8f9fa"] th {
                     font-size: 9pt !important;
-                    padding: 6px !important;
+                    padding: 8px !important;
+                    font-weight: 600 !important;
+                    text-transform: uppercase !important;
                 }
+
                 /* Approval trail data row */
                 .page table.table tbody tr[style*="font-size: 10px"] td {
                     font-size: 9pt !important;
-                    padding: 6px !important;
-                    line-height: 1.4 !important;
+                    padding: 8px !important;
+                    line-height: 1.5 !important;
                 }
+
                 /* Signature section */
-                .page .row.mt-3 .col-4 div[style*="font-size: 10px"],
+                .page .row.mt-3 .col-4 div[style*="font-size: 10px"] {
+                    font-size: 10pt !important;
+                    font-weight: 600 !important;
+                }
                 .page .row.mt-3 .col-4 div[style*="font-size: 9px"] {
                     font-size: 9pt !important;
                 }
+
                 /* Header title */
                 .page h4 {
-                    font-size: 14pt !important;
+                    font-size: 16pt !important;
+                    font-weight: bold !important;
                 }
                 .page h5 {
-                    font-size: 12pt !important;
+                    font-size: 13pt !important;
+                    font-weight: 600 !important;
+                }
+
+                /* Status badge */
+                .page .badge {
+                    font-size: 9pt !important;
+                    padding: 4px 10px !important;
                 }
             </style>
         </xpath>
@@ -100,6 +140,12 @@
 
         <!-- Update Approval Trail table header -->
         <xpath expr="//th[@colspan='6'][contains(text(), 'Approval Trail')]" position="attributes">
+            <attribute name="style">padding: 4px;</attribute>
+            <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
+        </xpath>
+
+        <!-- Update Journal Entries table header (was green #28a745) -->
+        <xpath expr="//th[@colspan='2'][contains(text(), 'Journal Entries')]" position="attributes">
             <attribute name="style">padding: 4px;</attribute>
             <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
         </xpath>

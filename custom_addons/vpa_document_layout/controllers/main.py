@@ -448,7 +448,7 @@ class VPATemplatePreview(http.Controller):
     <div class="vpa-footer">
         {f'<div class="footer-shape"></div>' if footer_config.show_shape else ''}
         {footer_content}
-        {self._render_page_numbers() if footer_config.show_page_numbers else ''}
+        {self._render_page_numbers(footer_config) if footer_config.show_page_numbers else ''}
     </div>
 </body>
 </html>'''
@@ -515,13 +515,23 @@ class VPATemplatePreview(http.Controller):
 
         return f'<div style="text-align: center;">{"".join(content_parts)}</div>'
 
-    def _render_page_numbers(self):
+    def _render_page_numbers(self, footer_config=None):
         """Render page numbers using wkhtmltopdf variables"""
-        return '''
-        <div class="page-number">
-            Page <span class="page"></span> of <span class="topage"></span>
-        </div>
-        '''
+        if footer_config and footer_config.page_number_style == 'badge':
+            bg_color = footer_config.page_number_bg_color or '#875a7b'
+            return f'''
+            <div style="text-align: right; margin-top: 8px;">
+                <span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                    Page <span class="page"></span> of <span class="topage"></span>
+                </span>
+            </div>
+            '''
+        else:
+            return '''
+            <div style="text-align: right; margin-top: 8px;">
+                Page <span class="page"></span> of <span class="topage"></span>
+            </div>
+            '''
 
     @http.route('/vpa/header/<int:footer_config_id>', type='http', auth='public')
     def get_header_config_html(self, footer_config_id, **kwargs):
