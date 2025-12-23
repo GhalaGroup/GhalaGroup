@@ -217,7 +217,8 @@ class VPAFooterConfig(models.Model):
         return Markup(html)
 
     @api.depends('name', 'footer_type', 'footer_layout', 'show_bank_details',
-                 'show_page_numbers', 'computer_generated_note', 'show_border',
+                 'show_page_numbers', 'page_number_style', 'page_number_bg_color',
+                 'computer_generated_note', 'show_border',
                  'border_color', 'text_color', 'column_1_content', 'column_2_content',
                  'column_3_content', 'custom_html')
     def _compute_preview(self):
@@ -251,7 +252,11 @@ class VPAFooterConfig(models.Model):
                     preview_html += f'<div>{company.report_footer}</div>'
 
                 if record.show_page_numbers:
-                    preview_html += '<div style="margin-top: 5px;">Page 1 of 1</div>'
+                    if record.page_number_style == 'badge':
+                        bg_color = record.page_number_bg_color or '#875a7b'
+                        preview_html += f'<div style="margin-top: 8px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                    else:
+                        preview_html += '<div style="margin-top: 5px;">Page 1 of 1</div>'
 
                 preview_html += '</div>'
 
@@ -293,7 +298,11 @@ class VPAFooterConfig(models.Model):
                 preview_html += '</tr></table>'
 
                 if record.show_page_numbers:
-                    preview_html += '<div style="text-align: center; margin-top: 5px;">Page 1 of 1</div>'
+                    if record.page_number_style == 'badge':
+                        bg_color = record.page_number_bg_color or '#875a7b'
+                        preview_html += f'<div style="text-align: center; margin-top: 8px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                    else:
+                        preview_html += '<div style="text-align: center; margin-top: 5px;">Page 1 of 1</div>'
 
             elif record.footer_layout == 'custom_html':
                 if record.custom_html:
