@@ -202,6 +202,18 @@ class InternalTransfer(models.Model):
         string='Can Manage',
     )
 
+    # === SUBMIT READINESS FLAGS ===
+    can_submit = fields.Boolean(
+        compute='_compute_can_submit',
+        string='Can Submit',
+        help='Whether all required fields are filled for submission',
+    )
+    submit_blocked_reason = fields.Text(
+        compute='_compute_can_submit',
+        string='Submission Blocked Reason',
+        help='Explanation of what is missing for submission',
+    )
+
     # === APPROVAL TRACKING ===
     submitted_by_id = fields.Many2one(
         'res.users',
@@ -523,6 +535,32 @@ class InternalTransfer(models.Model):
             transfer.can_cancel = can_cancel
             transfer.can_manage = is_manager
 
+    @api.depends('amount', 'source_journal_id', 'destination_journal_id', 'transfer_account_id', 'approver_id', 'date')
+    def _compute_can_submit(self):
+        """Check if all required fields are filled for submission"""
+        for transfer in self:
+            missing = []
+
+            if not transfer.amount or transfer.amount <= 0:
+                missing.append(_('Amount (must be greater than 0)'))
+            if not transfer.source_journal_id:
+                missing.append(_('From Journal'))
+            if not transfer.destination_journal_id:
+                missing.append(_('To Journal'))
+            if not transfer.transfer_account_id:
+                missing.append(_('Internal Transfer Account'))
+            if not transfer.approver_id:
+                missing.append(_('Approver'))
+            if not transfer.date:
+                missing.append(_('Transfer Date'))
+
+            if missing:
+                transfer.can_submit = False
+                transfer.submit_blocked_reason = _('Missing required fields: %s') % ', '.join(missing)
+            else:
+                transfer.can_submit = True
+                transfer.submit_blocked_reason = False
+
     # === ONCHANGE METHODS ===
     @api.onchange('source_journal_id')
     def _onchange_source_journal(self):
@@ -549,10 +587,16 @@ class InternalTransfer(models.Model):
                 if transfer.source_journal_id == transfer.destination_journal_id:
                     raise ValidationError(_('Source and destination journals must be different!'))
 
-    @api.constrains('amount')
+    @api.constrains('amount', 'state')
     def _check_amount_positive(self):
+        """Ensure amount is positive for non-draft transfers.
+
+        Draft transfers are allowed to have zero amount - validation
+        happens at submission time via the can_submit check.
+        """
         for transfer in self:
-            if transfer.amount <= 0:
+            # Only enforce positive amount for submitted/approved transfers
+            if transfer.state != 'draft' and transfer.amount <= 0:
                 raise ValidationError(_('Transfer amount must be positive!'))
 
     # === CRUD METHODS ===
@@ -577,8 +621,9 @@ class InternalTransfer(models.Model):
         if self.state != 'draft':
             raise UserError(_('Only draft transfers can be submitted.'))
 
-        if not self.approver_id:
-            raise UserError(_('Please select an approver before submitting.'))
+        # Check all required fields (fallback validation in case UI is bypassed)
+        if not self.can_submit:
+            raise UserError(self.submit_blocked_reason)
 
         self.write({
             'state': 'submitted',
