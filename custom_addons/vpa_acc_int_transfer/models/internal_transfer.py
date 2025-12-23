@@ -1005,3 +1005,13 @@ class InternalTransfer(models.Model):
                 'default_res_id': self.id,
             },
         }
+
+    def action_back_to_list(self):
+        """Navigate back to the internal transfers list view"""
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Internal Transfers'),
+            'res_model': 'internal.transfer',
+            'view_mode': 'list,kanban,form',
+            'target': 'current',
+        }
