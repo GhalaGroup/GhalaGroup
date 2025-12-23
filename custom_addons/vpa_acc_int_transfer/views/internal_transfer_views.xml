@@ -9,15 +9,9 @@
         <field name="arch" type="xml">
             <form string="Internal Transfer" class="o_form_view">
                 <header>
-                    <field name="can_submit" invisible="1"/>
                     <button name="action_submit" string="Submit for Approval"
                             type="object" class="btn-primary"
-                            invisible="state != 'draft' or not can_submit"/>
-                    <button name="action_submit" string="Submit for Approval"
-                            type="object" class="btn-secondary o_form_button_disabled"
-                            disabled="1"
-                            invisible="state != 'draft' or can_submit"
-                            title="Please fill in all required fields before submitting"/>
+                            invisible="state != 'draft'"/>
                     <button name="action_approve" string="Approve"
                             type="object" class="btn-primary"
                             invisible="state != 'submitted' or not can_approve"/>
@@ -46,17 +40,6 @@
                            statusbar_visible="draft,submitted,approved"/>
                 </header>
                 <sheet>
-                    <!-- Missing fields warning banner -->
-                    <div class="alert alert-warning text-center o_form_header"
-                         role="alert"
-                         invisible="state != 'draft' or can_submit"
-                         style="margin: -24px -24px 24px -24px; border-radius: 0; border-left: 0; border-right: 0; border-top: 0;">
-                        <span class="fw-bold">
-                            <i class="fa fa-exclamation-triangle me-1"/>
-                            Cannot Submit:
-                        </span>
-                        <field name="submit_blocked_reason" nolabel="1" class="d-inline ms-1"/>
-                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_journal_entries"
                                 type="object"

@@ -621,9 +621,18 @@ class InternalTransfer(models.Model):
         if self.state != 'draft':
             raise UserError(_('Only draft transfers can be submitted.'))
 
-        # Check all required fields (fallback validation in case UI is bypassed)
+        # Check all required fields - show warning notification if missing
         if not self.can_submit:
-            raise UserError(self.submit_blocked_reason)
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Cannot Submit Transfer'),
+                    'message': self.submit_blocked_reason,
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
 
         self.write({
             'state': 'submitted',
