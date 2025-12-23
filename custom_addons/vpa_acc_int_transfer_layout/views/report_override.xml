@@ -29,6 +29,55 @@
             <t t-set="company" t-value="doc.company_id"/>
             <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().get_footer_for_report(company.id, 'vpa_acc_int_transfer.report_internal_transfer')"/>
             <t t-set="primary_color" t-value="footer_config.primary_color if footer_config else company.primary_color or '#875a7b'"/>
+
+            <!-- VPA Table Styling -->
+            <style>
+                /* VPA Table Style - Matching other VPA reports */
+                .page table.table thead th {
+                    font-size: 11pt !important;
+                    padding: 10px 8px !important;
+                    font-weight: bold !important;
+                }
+                .page table.table tbody td {
+                    font-size: 10pt !important;
+                    padding: 8px !important;
+                    line-height: 1.5 !important;
+                }
+                .page table.table tbody td strong {
+                    font-weight: 600 !important;
+                }
+                /* Label cells with gray background */
+                .page table.table tbody td[style*="background-color: #f8f9fa"] {
+                    font-weight: 600 !important;
+                }
+                /* Amount display - larger */
+                .page table.table tbody td[style*="font-size: 14px"] {
+                    font-size: 12pt !important;
+                }
+                /* Approval trail header row */
+                .page table.table tbody tr[style*="background-color: #f8f9fa"] th {
+                    font-size: 9pt !important;
+                    padding: 6px !important;
+                }
+                /* Approval trail data row */
+                .page table.table tbody tr[style*="font-size: 10px"] td {
+                    font-size: 9pt !important;
+                    padding: 6px !important;
+                    line-height: 1.4 !important;
+                }
+                /* Signature section */
+                .page .row.mt-3 .col-4 div[style*="font-size: 10px"],
+                .page .row.mt-3 .col-4 div[style*="font-size: 9px"] {
+                    font-size: 9pt !important;
+                }
+                /* Header title */
+                .page h4 {
+                    font-size: 14pt !important;
+                }
+                .page h5 {
+                    font-size: 12pt !important;
+                }
+            </style>
         </xpath>
 
         <!-- Update header title color -->
