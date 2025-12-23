@@ -254,9 +254,9 @@ class VPAFooterConfig(models.Model):
                 if record.show_page_numbers:
                     if record.page_number_style == 'badge':
                         bg_color = record.page_number_bg_color or '#875a7b'
-                        preview_html += f'<div style="margin-top: 8px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                        preview_html += f'<div style="text-align: right; margin-top: 12px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
                     else:
-                        preview_html += '<div style="margin-top: 5px;">Page 1 of 1</div>'
+                        preview_html += '<div style="text-align: right; margin-top: 12px;">Page 1 of 1</div>'
 
                 preview_html += '</div>'
 
@@ -300,9 +300,9 @@ class VPAFooterConfig(models.Model):
                 if record.show_page_numbers:
                     if record.page_number_style == 'badge':
                         bg_color = record.page_number_bg_color or '#875a7b'
-                        preview_html += f'<div style="text-align: center; margin-top: 8px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                        preview_html += f'<div style="text-align: right; margin-top: 12px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
                     else:
-                        preview_html += '<div style="text-align: center; margin-top: 5px;">Page 1 of 1</div>'
+                        preview_html += '<div style="text-align: right; margin-top: 12px;">Page 1 of 1</div>'
 
             elif record.footer_layout == 'custom_html':
                 if record.custom_html:
