@@ -56,7 +56,7 @@
         </xpath>
 
         <!-- Remove the hardcoded footer note - VPA Footer handles this -->
-        <xpath expr="//div[contains(@class, 'row mt-2')][.//p[contains(text(), 'Computer generated')]]" position="replace"/>
+        <xpath expr="//p[contains(@style, 'font-size: 8px')]" position="replace"/>
 
     </template>
 </odoo>
