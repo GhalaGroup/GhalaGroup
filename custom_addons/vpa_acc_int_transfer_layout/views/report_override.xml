@@ -55,5 +55,8 @@
             <attribute name="t-attf-style">background-color: {{primary_color}}; color: white; padding: 4px;</attribute>
         </xpath>
 
+        <!-- Remove the hardcoded footer note - VPA Footer handles this -->
+        <xpath expr="//div[contains(@class, 'row mt-2')][.//p[contains(text(), 'Computer generated')]]" position="replace"/>
+
     </template>
 </odoo>
