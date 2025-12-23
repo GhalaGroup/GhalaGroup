@@ -20,7 +20,7 @@ class VPAFooterConfig(models.Model):
     # Footer Type
     footer_type = fields.Selection([
         ('customer', 'Customer-Facing (Quotes, Invoices, PO, Delivery)'),
-        ('internal', 'Internal Documents (MFG, Picking, Work Orders)'),
+        ('internal', 'Internal Documents (MFG, Picking, Internal Transfers)'),
         ('custom', 'Custom'),
     ], string='Footer Type', required=True, default='customer')
 
@@ -145,6 +145,9 @@ class VPAFooterConfig(models.Model):
             'stock.report_picking',
             'stock.action_report_picking',
             'stock.report_reception',
+            # VPA Internal Transfer
+            'vpa_acc_int_transfer.report_internal_transfer',
+            'vpa_acc_int_transfer.action_report_internal_transfer',
         ]
 
         report_xml_id = report_xml_id or ''
