@@ -70,6 +70,16 @@ class VPAFooterConfig(models.Model):
         default=60,
         help='Size of the QR code in pixels'
     )
+    header_qr_color = fields.Char(
+        string='QR Code Color',
+        default='#000000',
+        help='Color of the QR code (default: black)'
+    )
+    header_qr_show_label = fields.Boolean(
+        string='Show Document Number',
+        default=True,
+        help='Show the document number text below the QR code'
+    )
 
     # ==================== FOOTER SECTION ====================
     footer_height = fields.Char(string='Footer Height', default='30mm', help='Height reserved for footer (e.g., 30mm, 1in). Reduce to minimize gap between content and footer.')

@@ -686,7 +686,12 @@ class VPATemplatePreview(http.Controller):
         # QR Code (for document reference scanning)
         qr_html = ''
         if footer_config.header_show_qr_code and doc_name:
-            qr_html = self._generate_qr_code_html(doc_name, footer_config.header_qr_size or 60)
+            qr_html = self._generate_qr_code_html(
+                doc_name,
+                size=footer_config.header_qr_size or 60,
+                color=footer_config.header_qr_color or '#000000',
+                show_label=footer_config.header_qr_show_label
+            )
 
         # Layout-specific rendering
         if footer_config.header_layout == 'custom_html' and footer_config.header_custom_html:
@@ -720,7 +725,7 @@ class VPATemplatePreview(http.Controller):
             </div>
             '''
 
-    def _generate_qr_code_html(self, data, size=60):
+    def _generate_qr_code_html(self, data, size=60, color='#000000', show_label=True):
         """Generate QR code as base64 data URI"""
         try:
             import qrcode
@@ -737,18 +742,21 @@ class VPATemplatePreview(http.Controller):
             qr.add_data(data)
             qr.make(fit=True)
 
-            # Create image
-            img = qr.make_image(fill_color="black", back_color="white")
+            # Create image with custom color
+            img = qr.make_image(fill_color=color, back_color="white")
 
             # Convert to base64
             buffer = io.BytesIO()
             img.save(buffer, format='PNG')
             img_str = base64.b64encode(buffer.getvalue()).decode()
 
+            # Build label HTML if enabled
+            label_html = f'<div style="font-size: 7pt; color: #666; margin-top: 2px;">{data}</div>' if show_label else ''
+
             return f'''
             <div class="qr-code" style="text-align: right;">
                 <img src="data:image/png;base64,{img_str}" style="width: {size}px; height: {size}px;" alt="QR: {data}"/>
-                <div style="font-size: 7pt; color: #666; margin-top: 2px;">{data}</div>
+                {label_html}
             </div>
             '''
         except Exception as e:
@@ -768,7 +776,12 @@ class VPATemplatePreview(http.Controller):
         # Generate QR code if doc_name is available
         qr_html = ''
         if doc_name and footer_config.header_show_qr_code:
-            qr_html = self._generate_qr_code_html(doc_name, footer_config.header_qr_size or 60)
+            qr_html = self._generate_qr_code_html(
+                doc_name,
+                size=footer_config.header_qr_size or 60,
+                color=footer_config.header_qr_color or '#000000',
+                show_label=footer_config.header_qr_show_label
+            )
 
         # Replace placeholders
         replacements = {
