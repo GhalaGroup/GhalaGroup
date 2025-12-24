@@ -168,9 +168,14 @@ class IrActionsReport(models.Model):
 
                 if footer_config:
                     _logger.info(f"✅ Found VPA footer config '{footer_config.name}' (ID: {footer_config.id}) for report {report_name}")
+                    # Get document name for QR code in header
+                    doc_name = ''
+                    if docs and docs.exists() and hasattr(docs, 'name'):
+                        doc_name = docs.name or ''
                     return self.with_context(
                         vpa_force_zero_margins=True,
-                        vpa_footer_config_id=footer_config.id
+                        vpa_footer_config_id=footer_config.id,
+                        vpa_document_name=doc_name
                     )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
                 else:
                     _logger.info(f"ℹ️  No VPA footer config found for company {company.name} (ID: {company.id})")
@@ -283,7 +288,11 @@ class IrActionsReport(models.Model):
                 if footer_config.exists() and footer_config.show_header:
                     has_header = True
                     header_height = footer_config.header_height or '25mm'
-                    header_url = f"{base_url}/vpa/header/{footer_config_id}"
+                    # Pass document name for QR code
+                    doc_name = self.env.context.get('vpa_document_name', '')
+                    from urllib.parse import quote
+                    doc_name_encoded = quote(doc_name) if doc_name else ''
+                    header_url = f"{base_url}/vpa/header/{footer_config_id}?doc_name={doc_name_encoded}"
                     _logger.info(f"✅ VPA header enabled, height: {header_height}, URL: {header_url}")
                 else:
                     _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")

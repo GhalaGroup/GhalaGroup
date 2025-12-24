@@ -54,6 +54,12 @@
                                     <field name="header_show_date"/>
                                     <field name="header_date_format" invisible="not header_show_date"/>
                                 </group>
+                                <group string="QR Code">
+                                    <field name="header_show_qr_code"/>
+                                    <field name="header_qr_size" invisible="not header_show_qr_code"/>
+                                </group>
+                            </group>
+                            <group invisible="not show_header">
                                 <group string="Header Styling">
                                     <field name="header_background_color" widget="color"/>
                                     <field name="header_text_color" widget="color"/>

@@ -539,8 +539,11 @@ class VPATemplatePreview(http.Controller):
 
         This allows VPA headers to work on ANY Odoo report without needing
         a VPA Document Template - just configure a header in Header & Footer Settings.
+
+        Accepts optional doc_name parameter for QR code generation.
         """
-        _logger.info(f"📄 VPA Header route called for config ID: {footer_config_id}, kwargs: {kwargs}")
+        doc_name = kwargs.get('doc_name', '')
+        _logger.info(f"📄 VPA Header route called for config ID: {footer_config_id}, doc_name: {doc_name}")
 
         # Use sudo() since this is called by wkhtmltopdf without authentication
         footer_config = request.env['vpa.footer.config'].sudo().browse(footer_config_id)
@@ -562,7 +565,7 @@ class VPATemplatePreview(http.Controller):
         company = footer_config.company_id
 
         try:
-            header_content = self._render_header_content(footer_config, company)
+            header_content = self._render_header_content(footer_config, company, doc_name)
 
             # Wrap in complete HTML document for wkhtmltopdf
             html_str = f'''<!DOCTYPE html>
@@ -648,7 +651,7 @@ class VPATemplatePreview(http.Controller):
                 headers=[('Content-Type', 'text/html')]
             )
 
-    def _render_header_content(self, footer_config, company):
+    def _render_header_content(self, footer_config, company, doc_name=''):
         """Render header content based on layout type"""
         from datetime import date
 
@@ -683,13 +686,13 @@ class VPATemplatePreview(http.Controller):
             if details:
                 company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
 
-        # Document title
+        # Document title (optional - can be disabled when body has its own title)
         title_html = ''
         if footer_config.header_show_document_title:
             title_text = footer_config.header_custom_title or 'Document'
             title_html = f'<div class="document-title">{title_text}</div>'
 
-        # Date
+        # Date (optional - can be disabled when body has its own date)
         date_html = ''
         if footer_config.header_show_date:
             today = date.today()
@@ -700,6 +703,11 @@ class VPATemplatePreview(http.Controller):
             else:  # medium (default)
                 date_str = today.strftime('%b %d, %Y')
             date_html = f'<div class="header-date">{date_str}</div>'
+
+        # QR Code (for document reference scanning)
+        qr_html = ''
+        if footer_config.header_show_qr_code and doc_name:
+            qr_html = self._generate_qr_code_html(doc_name, footer_config.header_qr_size or 60)
 
         # Layout-specific rendering
         if footer_config.header_layout == 'custom_html' and footer_config.header_custom_html:
@@ -712,6 +720,7 @@ class VPATemplatePreview(http.Controller):
                 {company_details_html}
                 {title_html}
                 {date_html}
+                {qr_html}
             </div>
             '''
         elif footer_config.header_layout == 'minimal':
@@ -721,7 +730,9 @@ class VPATemplatePreview(http.Controller):
                 {date_html}
             </div>
             '''
-        else:  # standard (default)
+        else:  # standard (default) - Logo left, QR code right
+            # If QR code is enabled, show it on the right instead of title/date
+            right_content = qr_html if qr_html else f'{title_html}{date_html}'
             return f'''
             <div class="header-standard">
                 <div class="header-left">
@@ -730,11 +741,45 @@ class VPATemplatePreview(http.Controller):
                     {company_details_html}
                 </div>
                 <div class="header-right">
-                    {title_html}
-                    {date_html}
+                    {right_content}
                 </div>
             </div>
             '''
+
+    def _generate_qr_code_html(self, data, size=60):
+        """Generate QR code as base64 data URI"""
+        try:
+            import qrcode
+            import io
+            import base64
+
+            # Create QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=1,
+            )
+            qr.add_data(data)
+            qr.make(fit=True)
+
+            # Create image
+            img = qr.make_image(fill_color="black", back_color="white")
+
+            # Convert to base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+
+            return f'''
+            <div class="qr-code" style="text-align: right;">
+                <img src="data:image/png;base64,{img_str}" style="width: {size}px; height: {size}px;" alt="QR: {data}"/>
+                <div style="font-size: 7pt; color: #666; margin-top: 2px;">{data}</div>
+            </div>
+            '''
+        except Exception as e:
+            _logger.warning(f"QR code generation failed: {e}")
+            return ''
 
     def _render_custom_header_html(self, footer_config, company):
         """Render custom header HTML with placeholder substitution"""
