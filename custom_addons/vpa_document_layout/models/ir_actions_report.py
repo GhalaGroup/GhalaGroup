@@ -381,43 +381,22 @@ class IrActionsReport(models.Model):
             if details:
                 company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
 
-        # Document title
-        title_html = ''
-        if footer_config.header_show_document_title:
-            title_text = footer_config.header_custom_title or 'Document'
-            title_html = f'<div class="document-title">{title_text}</div>'
-
-        # Date
-        date_html = ''
-        if footer_config.header_show_date:
-            today = date.today()
-            if footer_config.header_date_format == 'short':
-                date_str = today.strftime('%m/%d/%Y')
-            elif footer_config.header_date_format == 'long':
-                date_str = today.strftime('%B %d, %Y')
-            else:  # medium (default)
-                date_str = today.strftime('%b %d, %Y')
-            date_html = f'<div class="header-date">{date_str}</div>'
-
-        # Layout-specific content
+        # Layout-specific content (no title/date - those are in the document body)
         if footer_config.header_layout == 'centered':
             header_content = f'''
             <div class="header-centered">
                 {logo_html}
                 {company_name_html}
                 {company_details_html}
-                {title_html}
-                {date_html}
             </div>
             '''
         elif footer_config.header_layout == 'minimal':
             header_content = f'''
             <div class="header-minimal">
                 {company_name_html}
-                {date_html}
             </div>
             '''
-        else:  # standard (default)
+        else:  # standard (default) - Logo left, empty right (QR code added via controller)
             header_content = f'''
             <div class="header-standard">
                 <div class="header-left">
@@ -426,8 +405,6 @@ class IrActionsReport(models.Model):
                     {company_details_html}
                 </div>
                 <div class="header-right">
-                    {title_html}
-                    {date_html}
                 </div>
             </div>
             '''

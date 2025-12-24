@@ -43,21 +43,6 @@ class VPAFooterConfig(models.Model):
         default=False,
         help='Show company address, phone, email in header'
     )
-    header_show_document_title = fields.Boolean(
-        string='Show Document Title',
-        default=True,
-        help='Show document type (e.g., "Production Order", "Invoice")'
-    )
-    header_custom_title = fields.Char(
-        string='Custom Title',
-        help='Override the default document title'
-    )
-    header_show_date = fields.Boolean(string='Show Date', default=True)
-    header_date_format = fields.Selection([
-        ('short', 'Short (12/16/2025)'),
-        ('medium', 'Medium (Dec 16, 2025)'),
-        ('long', 'Long (December 16, 2025)'),
-    ], string='Date Format', default='medium')
     header_layout = fields.Selection([
         ('standard', 'Standard (Logo left, details right)'),
         ('centered', 'Centered (Logo and company name centered)'),
@@ -66,7 +51,7 @@ class VPAFooterConfig(models.Model):
     ], string='Header Layout', default='standard')
     header_custom_html = fields.Html(
         string='Custom Header HTML',
-        help='Use placeholders: {{company_name}}, {{company_logo}}, {{document_title}}, {{date}}'
+        help='Use placeholders: {{company_name}}, {{company_logo}}, {{qr_code}}'
     )
     header_background_color = fields.Char(string='Header Background', default='#ffffff')
     header_text_color = fields.Char(string='Header Text Color', default='#333333')

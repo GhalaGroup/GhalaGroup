@@ -622,14 +622,11 @@ class VPATemplatePreview(http.Controller):
             color: {footer_config.header_text_color or '#666666'};
             margin-top: 5px;
         }}
-        .document-title {{
-            font-size: 12pt;
-            font-weight: bold;
-            margin-top: 5px;
+        .qr-code {{
+            text-align: right;
         }}
-        .header-date {{
-            font-size: 9pt;
-            color: {footer_config.header_text_color or '#666666'};
+        .qr-code img {{
+            display: inline-block;
         }}
     </style>
 </head>
@@ -686,24 +683,6 @@ class VPATemplatePreview(http.Controller):
             if details:
                 company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
 
-        # Document title (optional - can be disabled when body has its own title)
-        title_html = ''
-        if footer_config.header_show_document_title:
-            title_text = footer_config.header_custom_title or 'Document'
-            title_html = f'<div class="document-title">{title_text}</div>'
-
-        # Date (optional - can be disabled when body has its own date)
-        date_html = ''
-        if footer_config.header_show_date:
-            today = date.today()
-            if footer_config.header_date_format == 'short':
-                date_str = today.strftime('%m/%d/%Y')
-            elif footer_config.header_date_format == 'long':
-                date_str = today.strftime('%B %d, %Y')
-            else:  # medium (default)
-                date_str = today.strftime('%b %d, %Y')
-            date_html = f'<div class="header-date">{date_str}</div>'
-
         # QR Code (for document reference scanning)
         qr_html = ''
         if footer_config.header_show_qr_code and doc_name:
@@ -711,15 +690,13 @@ class VPATemplatePreview(http.Controller):
 
         # Layout-specific rendering
         if footer_config.header_layout == 'custom_html' and footer_config.header_custom_html:
-            return self._render_custom_header_html(footer_config, company)
+            return self._render_custom_header_html(footer_config, company, doc_name)
         elif footer_config.header_layout == 'centered':
             return f'''
             <div class="header-centered">
                 {logo_html}
                 {company_name_html}
                 {company_details_html}
-                {title_html}
-                {date_html}
                 {qr_html}
             </div>
             '''
@@ -727,12 +704,9 @@ class VPATemplatePreview(http.Controller):
             return f'''
             <div class="header-minimal">
                 {company_name_html}
-                {date_html}
             </div>
             '''
         else:  # standard (default) - Logo left, QR code right
-            # If QR code is enabled, show it on the right instead of title/date
-            right_content = qr_html if qr_html else f'{title_html}{date_html}'
             return f'''
             <div class="header-standard">
                 <div class="header-left">
@@ -741,7 +715,7 @@ class VPATemplatePreview(http.Controller):
                     {company_details_html}
                 </div>
                 <div class="header-right">
-                    {right_content}
+                    {qr_html}
                 </div>
             </div>
             '''
@@ -781,10 +755,8 @@ class VPATemplatePreview(http.Controller):
             _logger.warning(f"QR code generation failed: {e}")
             return ''
 
-    def _render_custom_header_html(self, footer_config, company):
+    def _render_custom_header_html(self, footer_config, company, doc_name=''):
         """Render custom header HTML with placeholder substitution"""
-        from datetime import date
-
         html = footer_config.header_custom_html or ''
 
         # Get company logo as data URI
@@ -793,21 +765,16 @@ class VPATemplatePreview(http.Controller):
             logo_data = image_data_uri(company.logo)
             logo_html = f'<img src="{logo_data}" style="max-height:50px;" alt="{company.name}"/>'
 
-        # Date formatting
-        today = date.today()
-        if footer_config.header_date_format == 'short':
-            date_str = today.strftime('%m/%d/%Y')
-        elif footer_config.header_date_format == 'long':
-            date_str = today.strftime('%B %d, %Y')
-        else:
-            date_str = today.strftime('%b %d, %Y')
+        # Generate QR code if doc_name is available
+        qr_html = ''
+        if doc_name and footer_config.header_show_qr_code:
+            qr_html = self._generate_qr_code_html(doc_name, footer_config.header_qr_size or 60)
 
         # Replace placeholders
         replacements = {
             '{{company_name}}': company.name or '',
             '{{company_logo}}': logo_html,
-            '{{document_title}}': footer_config.header_custom_title or 'Document',
-            '{{date}}': date_str,
+            '{{qr_code}}': qr_html,
         }
 
         for placeholder, value in replacements.items():
