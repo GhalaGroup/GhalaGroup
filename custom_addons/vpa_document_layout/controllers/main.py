@@ -733,6 +733,13 @@ class VPATemplatePreview(http.Controller):
             import io
             import base64
 
+            # Convert hex color to RGB tuple
+            def hex_to_rgb(hex_color):
+                hex_color = hex_color.lstrip('#')
+                return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+            color_rgb = hex_to_rgb(color)
+
             # Create QR code
             qr = qrcode.QRCode(
                 version=1,
@@ -747,29 +754,34 @@ class VPATemplatePreview(http.Controller):
             if style in ('rounded', 'circle'):
                 try:
                     from qrcode.image.styledpil import StyledPilImage
-                    from qrcode.image.styles.moduledrawers import RoundedModuleDrawer, CircleModuleDrawer
+                    from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer, CircleModuleDrawer
+                    from qrcode.image.styles.colormasks import SolidFillColorMask
+
+                    # Create color mask with RGB tuple
+                    color_mask = SolidFillColorMask(
+                        front_color=color_rgb,
+                        back_color=(255, 255, 255)
+                    )
 
                     if style == 'rounded':
                         img = qr.make_image(
                             image_factory=StyledPilImage,
                             module_drawer=RoundedModuleDrawer(),
-                            fill_color=color,
-                            back_color="white"
+                            color_mask=color_mask
                         )
                     else:  # circle
                         img = qr.make_image(
                             image_factory=StyledPilImage,
                             module_drawer=CircleModuleDrawer(),
-                            fill_color=color,
-                            back_color="white"
+                            color_mask=color_mask
                         )
-                except ImportError:
+                except ImportError as ie:
                     # Fallback to standard if styled modules not available
-                    _logger.warning("StyledPilImage not available, falling back to square style")
-                    img = qr.make_image(fill_color=color, back_color="white")
+                    _logger.warning(f"StyledPilImage not available ({ie}), falling back to square style")
+                    img = qr.make_image(fill_color=color_rgb, back_color=(255, 255, 255))
             else:
                 # Standard square style
-                img = qr.make_image(fill_color=color, back_color="white")
+                img = qr.make_image(fill_color=color_rgb, back_color=(255, 255, 255))
 
             # Convert to base64
             buffer = io.BytesIO()
