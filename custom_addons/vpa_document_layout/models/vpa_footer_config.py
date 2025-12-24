@@ -75,6 +75,11 @@ class VPAFooterConfig(models.Model):
         default='#000000',
         help='Color of the QR code (default: black)'
     )
+    header_qr_style = fields.Selection([
+        ('square', 'Square (Standard)'),
+        ('rounded', 'Rounded'),
+        ('circle', 'Circle Modules'),
+    ], string='QR Code Style', default='square', help='Style of the QR code modules')
     header_qr_show_label = fields.Boolean(
         string='Show Document Number',
         default=True,

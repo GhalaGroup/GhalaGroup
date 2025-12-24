@@ -690,6 +690,7 @@ class VPATemplatePreview(http.Controller):
                 doc_name,
                 size=footer_config.header_qr_size or 60,
                 color=footer_config.header_qr_color or '#000000',
+                style=footer_config.header_qr_style or 'square',
                 show_label=footer_config.header_qr_show_label
             )
 
@@ -725,8 +726,8 @@ class VPATemplatePreview(http.Controller):
             </div>
             '''
 
-    def _generate_qr_code_html(self, data, size=60, color='#000000', show_label=True):
-        """Generate QR code as base64 data URI"""
+    def _generate_qr_code_html(self, data, size=60, color='#000000', style='square', show_label=True):
+        """Generate QR code as base64 data URI with different styles"""
         try:
             import qrcode
             import io
@@ -742,8 +743,33 @@ class VPATemplatePreview(http.Controller):
             qr.add_data(data)
             qr.make(fit=True)
 
-            # Create image with custom color
-            img = qr.make_image(fill_color=color, back_color="white")
+            # Create image based on style
+            if style in ('rounded', 'circle'):
+                try:
+                    from qrcode.image.styledpil import StyledPilImage
+                    from qrcode.image.styles.moduledrawers import RoundedModuleDrawer, CircleModuleDrawer
+
+                    if style == 'rounded':
+                        img = qr.make_image(
+                            image_factory=StyledPilImage,
+                            module_drawer=RoundedModuleDrawer(),
+                            fill_color=color,
+                            back_color="white"
+                        )
+                    else:  # circle
+                        img = qr.make_image(
+                            image_factory=StyledPilImage,
+                            module_drawer=CircleModuleDrawer(),
+                            fill_color=color,
+                            back_color="white"
+                        )
+                except ImportError:
+                    # Fallback to standard if styled modules not available
+                    _logger.warning("StyledPilImage not available, falling back to square style")
+                    img = qr.make_image(fill_color=color, back_color="white")
+            else:
+                # Standard square style
+                img = qr.make_image(fill_color=color, back_color="white")
 
             # Convert to base64
             buffer = io.BytesIO()
@@ -780,6 +806,7 @@ class VPATemplatePreview(http.Controller):
                 doc_name,
                 size=footer_config.header_qr_size or 60,
                 color=footer_config.header_qr_color or '#000000',
+                style=footer_config.header_qr_style or 'square',
                 show_label=footer_config.header_qr_show_label
             )
 

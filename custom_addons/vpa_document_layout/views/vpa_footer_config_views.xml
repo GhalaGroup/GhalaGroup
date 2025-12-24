@@ -48,6 +48,7 @@
                                     <field name="header_show_qr_code" invisible="not show_header"/>
                                     <field name="header_qr_size" invisible="not show_header or not header_show_qr_code"/>
                                     <field name="header_qr_color" widget="color" invisible="not show_header or not header_show_qr_code"/>
+                                    <field name="header_qr_style" invisible="not show_header or not header_show_qr_code"/>
                                     <field name="header_qr_show_label" invisible="not show_header or not header_show_qr_code"/>
                                 </group>
                             </group>
