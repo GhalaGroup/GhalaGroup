@@ -8,8 +8,8 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="vpa_acc_int_transfer.res_config_settings_view_form_inherit_internal_transfer"/>
         <field name="arch" type="xml">
-            <!-- Add Receipt Confirmation setting at the top of the block -->
-            <xpath expr="//block[@name='vpa_internal_transfer_settings']/setting[@string='Memo Template']" position="before">
+            <!-- Add Receipt Confirmation settings inside the block -->
+            <xpath expr="//block[@name='vpa_internal_transfer_settings']" position="inside">
                 <setting string="Receipt Confirmation"
                          help="Require custodians to confirm receipt before creating journal entries">
                     <div class="content-group">
