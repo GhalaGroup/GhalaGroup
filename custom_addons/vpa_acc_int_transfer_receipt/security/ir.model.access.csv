@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_journal_custodian_account_user,journal.custodian.account.user,model_journal_custodian,account.group_account_user,1,0,0,0
+access_journal_custodian_account_manager,journal.custodian.account.manager,model_journal_custodian,account.group_account_manager,1,1,1,1
+access_transfer_receipt_wizard_account_user,internal.transfer.receipt.wizard.account.user,model_internal_transfer_receipt_wizard,account.group_account_user,1,1,1,1
+access_transfer_dispute_wizard_account_user,internal.transfer.dispute.wizard.account.user,model_internal_transfer_dispute_wizard,account.group_account_user,1,1,1,1
+access_transfer_resolve_wizard_account_user,internal.transfer.resolve.wizard.account.user,model_internal_transfer_resolve_wizard,account.group_account_user,1,1,1,1
+access_transfer_reassign_wizard_account_user,internal.transfer.reassign.wizard.account.user,model_internal_transfer_reassign_wizard,account.group_account_user,1,1,1,1

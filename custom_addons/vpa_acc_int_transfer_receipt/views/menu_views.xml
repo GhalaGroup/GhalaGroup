@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Add submenu items for receipt-related views under Internal Transfers -->
+    <!-- These appear when Receipt Confirmation is enabled -->
+
+    <!-- Pending Receipt menu item -->
+    <menuitem id="menu_internal_transfer_pending_receipt"
+              name="Pending Receipt"
+              action="internal_transfer_action_pending_receipt"
+              parent="vpa_acc_int_transfer.menu_internal_transfer_main"
+              sequence="15"/>
+
+    <!-- Disputed Transfers menu item -->
+    <menuitem id="menu_internal_transfer_disputed"
+              name="Disputed"
+              action="internal_transfer_action_disputed"
+              parent="vpa_acc_int_transfer.menu_internal_transfer_main"
+              sequence="25"/>
+
+    <!-- Received Transfers menu item -->
+    <menuitem id="menu_internal_transfer_received"
+              name="Received"
+              action="internal_transfer_action_received"
+              parent="vpa_acc_int_transfer.menu_internal_transfer_main"
+              sequence="35"/>
+</odoo>

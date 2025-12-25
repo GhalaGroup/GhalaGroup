@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Journal Custodian Form View -->
+    <record id="journal_custodian_view_form" model="ir.ui.view">
+        <field name="name">journal.custodian.view.form</field>
+        <field name="model">journal.custodian</field>
+        <field name="arch" type="xml">
+            <form string="Journal Custodian">
+                <sheet>
+                    <group>
+                        <group string="Journal Assignment">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="journal_id" options="{'no_create': True}"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Custodians">
+                            <field name="custodian_ids"
+                                   widget="many2many_tags"
+                                   options="{'no_create': True}"
+                                   placeholder="Select primary custodians..."/>
+                            <field name="backup_ids"
+                                   widget="many2many_tags"
+                                   options="{'no_create': True}"
+                                   placeholder="Select backup managers..."/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Internal notes about this custodian assignment..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Journal Custodian List View -->
+    <record id="journal_custodian_view_list" model="ir.ui.view">
+        <field name="name">journal.custodian.view.list</field>
+        <field name="model">journal.custodian</field>
+        <field name="arch" type="xml">
+            <list string="Journal Custodians" editable="bottom">
+                <field name="journal_id" options="{'no_create': True}"/>
+                <field name="custodian_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True, 'color_field': 'color'}"/>
+                <field name="backup_ids"
+                       widget="many2many_tags"
+                       options="{'no_create': True, 'color_field': 'color'}"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Journal Custodian Search View -->
+    <record id="journal_custodian_view_search" model="ir.ui.view">
+        <field name="name">journal.custodian.view.search</field>
+        <field name="model">journal.custodian</field>
+        <field name="arch" type="xml">
+            <search string="Search Journal Custodians">
+                <field name="journal_id"/>
+                <field name="custodian_ids"/>
+                <field name="backup_ids"/>
+                <separator/>
+                <filter string="Active" name="filter_active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="filter_archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Journal" name="group_journal" domain="[]" context="{'group_by': 'journal_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Journal Custodian Action -->
+    <record id="journal_custodian_action" model="ir.actions.act_window">
+        <field name="name">Journal Custodians</field>
+        <field name="res_model">journal.custodian</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="journal_custodian_view_list"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Assign custodians to bank and cash journals
+            </p>
+            <p>
+                Custodians are responsible for confirming receipt of funds transferred into their assigned journals.
+            </p>
+        </field>
+    </record>
+</odoo>
