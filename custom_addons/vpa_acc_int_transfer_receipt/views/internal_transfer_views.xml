@@ -33,8 +33,8 @@
                 <attribute name="statusbar_visible">draft,submitted,pending_receipt,received</attribute>
             </xpath>
 
-            <!-- Add ribbons for new states -->
-            <xpath expr="//widget[@name='web_ribbon'][@title='Approved']" position="after">
+            <!-- Add ribbons for new states - position after button_box -->
+            <xpath expr="//div[@name='button_box']" position="after">
                 <widget name="web_ribbon" title="Pending Receipt"
                         bg_color="text-bg-info"
                         invisible="state != 'pending_receipt'"/>
