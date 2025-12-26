@@ -585,3 +585,34 @@ class InternalTransferReceipt(models.Model):
             ),
             subtype_xmlid='mail.mt_note',
         )
+
+    # === OVERRIDE LOCK/UNLOCK TO SUPPORT RECEIVED STATE ===
+    def action_lock(self):
+        """Override to allow locking for both approved and received states"""
+        self.ensure_one()
+        if self.state not in ('approved', 'received'):
+            raise UserError(_('Only approved or received transfers can be locked.'))
+
+        # Check manager permission
+        self._check_manager_permission()
+
+        self.write({'is_locked': True})
+        self.message_post(
+            body=_('Transfer locked by %s.') % self.env.user.name,
+            subtype_xmlid='mail.mt_note',
+        )
+
+    def action_unlock(self):
+        """Override to allow unlocking for both approved and received states"""
+        self.ensure_one()
+        if self.state not in ('approved', 'received'):
+            raise UserError(_('Only approved or received transfers can be unlocked.'))
+
+        # Check manager permission
+        self._check_manager_permission()
+
+        self.write({'is_locked': False})
+        self.message_post(
+            body=_('Transfer unlocked by %s.') % self.env.user.name,
+            subtype_xmlid='mail.mt_note',
+        )
