@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!--
+        VPA Internal Transfer Receipt - VPA Layout Report Extensions
+        =============================================================
+
+        This template inherits from the VPA Layout template (priority 99)
+        and adds Receipt Confirmation, Dispute, and dynamic signature sections.
+
+        This template ONLY loads when vpa_acc_int_transfer_layout is installed.
+        It has priority 100, so it takes precedence over the base receipt template.
+
+        Inheritance Chain (with VPA Document Layout):
+        1. vpa_acc_int_transfer.report_internal_transfer (base)
+        2. vpa_acc_int_transfer_layout.report_internal_transfer_vpa_layout (priority 99)
+        3. This template (priority 100) - adds receipt workflow sections with VPA styling
+    -->
+
+    <!-- Extend the VPA Layout template to add receipt sections -->
+    <!-- This template will fail gracefully if the layout module is not installed -->
+    <template id="report_internal_transfer_receipt_vpa"
+              inherit_id="vpa_acc_int_transfer_layout.report_internal_transfer_vpa_layout"
+              priority="100"
+              optional="enabled">
+
+        <!-- Add CSS for new status badges and receipt styles -->
+        <xpath expr="//style" position="inside">
+                    /* Receipt Control Status Badges */
+                    .vpa-status-pending-receipt { background: #e3f2fd; color: #1565c0; }
+                    .vpa-status-received { background: #e8f5e9; color: #2e7d32; }
+                    .vpa-status-disputed { background: #ffebee; color: #c62828; }
+
+                    /* Receipt section styling */
+                    .vpa-receipt-section {
+                        border-left-color: #17a2b8 !important;
+                    }
+                    .vpa-dispute-section {
+                        border-left-color: #dc3545 !important;
+                    }
+                    .vpa-resolution-section {
+                        border-left-color: #28a745 !important;
+                    }
+                    .vpa-reassign-section {
+                        border-left-color: #6c757d !important;
+                    }
+
+                    /* Compact Journal Entries */
+                    .vpa-journal-compact table {
+                        margin-bottom: 0 !important;
+                    }
+                    .vpa-journal-compact table td,
+                    .vpa-journal-compact table th {
+                        padding: 4px 8px !important;
+                        font-size: 10px !important;
+                    }
+                    .vpa-journal-compact .vpa-section-header {
+                        margin-bottom: 4px !important;
+                        padding-bottom: 3px !important;
+                    }
+
+                    /* Side-by-side sections */
+                    .vpa-side-by-side {
+                        display: flex;
+                        gap: 10px;
+                    }
+        </xpath>
+
+        <!-- Add new status badges for pending_receipt, received, disputed -->
+        <xpath expr="//span[@class='vpa-status-badge vpa-status-cancelled']" position="after">
+                                        <span t-if="doc.state == 'pending_receipt'" class="vpa-status-badge vpa-status-pending-receipt">Pending Receipt</span>
+                                        <span t-if="doc.state == 'received'" class="vpa-status-badge vpa-status-received">Received</span>
+                                        <span t-if="doc.state == 'disputed'" class="vpa-status-badge vpa-status-disputed">Disputed</span>
+        </xpath>
+
+        <!-- Replace Amount section with side-by-side Amount & Receipt Confirmation using table layout for PDF compatibility -->
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Amount')]/parent::div[@class='vpa-table-card']" position="replace">
+                    <!-- Use table layout for PDF compatibility (wkhtmltopdf doesn't support flexbox) -->
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 10px;">
+                        <tr>
+                            <!-- Amount Section (Left) -->
+                            <td t-att-style="'width: 50%; vertical-align: top;' if doc.received_by_id else 'width: 100%; vertical-align: top;'">
+                                <div class="vpa-table-card" style="margin-bottom: 0; height: 100%;">
+                                    <div class="vpa-section-header">Amount</div>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40%;">Description</th>
+                                                <th style="width: 40%; text-align: center;">Amount</th>
+                                                <th style="width: 20%;">Currency</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><span class="vpa-value-label">Transfer Amount</span></td>
+                                                <td style="text-align: center;">
+                                                    <span class="vpa-amount-badge">
+                                                        <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                                    </span>
+                                                </td>
+                                                <td><span t-field="doc.currency_id.name"/></td>
+                                            </tr>
+                                            <t t-if="doc.is_multi_currency">
+                                                <tr>
+                                                    <td><span class="vpa-value-label">Destination Amount</span></td>
+                                                    <td style="text-align: center;">
+                                                        <span class="vpa-amount-badge">
+                                                            <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                                        </span>
+                                                    </td>
+                                                    <td><span t-field="doc.destination_currency_id.name"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><span class="vpa-value-label">Exchange Rate</span></td>
+                                                    <td style="text-align: center;">
+                                                        <span t-field="doc.exchange_rate" t-options='{"precision": 4}'/>
+                                                    </td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                            <!-- Receipt Confirmation Section (Right) - Only if received -->
+                            <t t-if="doc.received_by_id">
+                                <td style="width: 50%; vertical-align: top;">
+                                    <div class="vpa-table-card" style="margin-bottom: 0; border-left: 3px solid #28a745; height: 100%;">
+                                        <div class="vpa-section-header" style="color: #28a745;">Receipt Confirmation</div>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40%;">Received By</th>
+                                                    <th style="width: 35%;">Date/Time</th>
+                                                    <th style="width: 25%;">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <span class="vpa-value-main" t-field="doc.received_by_id.name"/>
+                                                    </td>
+                                                    <td>
+                                                        <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                                    </td>
+                                                    <td>
+                                                        <span class="vpa-amount-badge" style="border-color: #28a745; color: #28a745;">
+                                                            <span t-field="doc.received_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id if doc.is_multi_currency else doc.currency_id}'/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <t t-if="doc.receipt_notes">
+                                                    <tr>
+                                                        <td colspan="3" style="font-size: 10px; color: #666;">
+                                                            <strong>Notes:</strong> <span t-field="doc.receipt_notes"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </t>
+                        </tr>
+                    </table>
+        </xpath>
+
+        <!-- Replace Journal Entries section with compact version -->
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Journal Entries')]/parent::div[@class='vpa-table-card']" position="replace">
+                        <div class="vpa-table-card vpa-journal-compact" style="padding: 4px; margin-bottom: 10px;">
+                            <div class="vpa-section-header" style="font-size: 10px; margin: 4px;">Journal Entries</div>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 15%; background-color: #f8f8f8;"><strong>Source:</strong></td>
+                                        <td style="width: 35%;">
+                                            <t t-if="doc.source_move_id">
+                                                <span t-field="doc.source_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                        <td style="width: 15%; background-color: #f8f8f8;"><strong>Destination:</strong></td>
+                                        <td style="width: 35%;">
+                                            <t t-if="doc.destination_move_id">
+                                                <span t-field="doc.destination_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+        </xpath>
+
+        <!-- Insert Reassignment and Dispute sections before signatures -->
+        <xpath expr="//div[@class='vpa-signatures']" position="before">
+                    <!-- Reassignment History Section - Only if reassigned -->
+                    <t t-if="doc.reassigned_by_id">
+                        <div class="vpa-table-card vpa-reassign-section">
+                            <div class="vpa-section-header" style="color: #6c757d;">Reassignment History</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Reassigned By</th>
+                                        <th style="width: 25%;">Reassignment Date</th>
+                                        <th style="width: 50%;">Original Custodian(s)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="vpa-value-main" t-field="doc.reassigned_by_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span class="vpa-value-main" t-field="doc.reassignment_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                        </td>
+                                        <td>
+                                            <t t-foreach="doc.original_custodian_ids" t-as="custodian">
+                                                <span t-field="custodian.name"/>
+                                                <t t-if="not custodian_last">, </t>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <!-- Dispute Section - Only if disputed -->
+                    <t t-if="doc.dispute_raised_by_id">
+                        <div class="vpa-table-card vpa-dispute-section">
+                            <div class="vpa-section-header" style="color: #dc3545;">Dispute Details</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">Raised By</th>
+                                        <th style="width: 25%;">Dispute Date</th>
+                                        <th style="width: 25%;">Reason</th>
+                                        <th style="width: 25%;">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="vpa-value-main" t-field="doc.dispute_raised_by_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span class="vpa-value-main" t-field="doc.dispute_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                        </td>
+                                        <td>
+                                            <span class="vpa-value-main" t-field="doc.dispute_reason"/>
+                                        </td>
+                                        <td>
+                                            <t t-if="doc.dispute_notes">
+                                                <span t-field="doc.dispute_notes"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Dispute Resolution - Only if resolved -->
+                        <t t-if="doc.dispute_resolved_by_id">
+                            <div class="vpa-table-card vpa-resolution-section">
+                                <div class="vpa-section-header" style="color: #28a745;">Dispute Resolution</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 25%;">Resolved By</th>
+                                            <th style="width: 25%;">Resolution Date</th>
+                                            <th style="width: 25%;">Resolution</th>
+                                            <th style="width: 25%;">Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="vpa-value-main" t-field="doc.dispute_resolved_by_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span class="vpa-value-main" t-field="doc.dispute_resolution_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                            </td>
+                                            <td>
+                                                <span class="vpa-value-main" t-field="doc.dispute_resolution"/>
+                                            </td>
+                                            <td>
+                                                <t t-if="doc.dispute_resolution_notes">
+                                                    <span t-field="doc.dispute_resolution_notes"/>
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </t>
+        </xpath>
+
+        <!-- Replace signature section with dynamic data including time -->
+        <xpath expr="//div[@class='vpa-signatures']" position="replace">
+                    <!-- Signature Section with Dynamic Data -->
+                    <div class="vpa-signatures">
+                        <!-- Prepared By -->
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Prepared By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                <t t-if="doc.create_uid">
+                                    Name: <span t-field="doc.create_uid.name"/><br/>
+                                    Date: <span t-field="doc.create_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                </t>
+                                <t t-else="">
+                                    Name: ________________<br/>
+                                    Date: ________________
+                                </t>
+                            </div>
+                        </div>
+                        <!-- Approved By -->
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Approved By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                <t t-if="doc.approved_by_id">
+                                    Name: <span t-field="doc.approved_by_id.name"/><br/>
+                                    Date: <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                </t>
+                                <t t-else="">
+                                    Name: ________________<br/>
+                                    Date: ________________
+                                </t>
+                            </div>
+                        </div>
+                        <!-- Received By -->
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Received By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                <t t-if="doc.received_by_id">
+                                    Name: <span t-field="doc.received_by_id.name"/><br/>
+                                    Date: <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
+                                </t>
+                                <t t-else="">
+                                    Name: ________________<br/>
+                                    Date: ________________
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+        </xpath>
+
+    </template>
+</odoo>
