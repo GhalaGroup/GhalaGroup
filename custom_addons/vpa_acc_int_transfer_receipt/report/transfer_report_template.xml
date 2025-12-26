@@ -55,12 +55,10 @@
                         padding-bottom: 3px !important;
                     }
 
-                    /* Receipt row in Amount table */
-                    .vpa-receipt-row {
-                        background-color: #e8f5e9 !important;
-                    }
-                    .vpa-receipt-row td {
-                        border-top: 2px solid #28a745 !important;
+                    /* Side-by-side sections */
+                    .vpa-side-by-side {
+                        display: flex;
+                        gap: 10px;
                     }
         </xpath>
 
@@ -71,67 +69,90 @@
                                         <span t-if="doc.state == 'disputed'" class="vpa-status-badge vpa-status-disputed">Disputed</span>
         </xpath>
 
-        <!-- Replace Amount section with combined Amount & Receipt Confirmation -->
+        <!-- Replace Amount section with side-by-side Amount & Receipt Confirmation -->
         <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Amount')]/parent::div[@class='vpa-table-card']" position="replace">
-                    <div class="vpa-table-card">
-                        <div class="vpa-section-header">Amount <t t-if="doc.received_by_id">&amp; Receipt Confirmation</t></div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 25%;">Description</th>
-                                    <th style="width: 30%; text-align: center;">Amount</th>
-                                    <th style="width: 15%;">Currency</th>
-                                    <th t-if="doc.is_multi_currency" style="width: 15%;">Rate</th>
-                                    <th t-if="doc.received_by_id" style="width: 15%;">Received By</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><span class="vpa-value-label">Transfer Amount</span></td>
-                                    <td style="text-align: center;">
-                                        <span class="vpa-amount-badge">
-                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
-                                        </span>
-                                    </td>
-                                    <td><span t-field="doc.currency_id.name"/></td>
-                                    <td t-if="doc.is_multi_currency">
-                                        <span t-field="doc.exchange_rate" t-options='{"precision": 4}'/>
-                                    </td>
-                                    <td t-if="doc.received_by_id" rowspan="2" style="vertical-align: middle;">
-                                        <div class="vpa-value-main" t-field="doc.received_by_id.name"/>
-                                        <div class="vpa-value-sub" t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
-                                    </td>
-                                </tr>
-                                <t t-if="doc.is_multi_currency">
+                    <!-- Side-by-side container for Amount and Receipt Confirmation -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <!-- Amount Section (Left) -->
+                        <div class="vpa-table-card" t-attf-style="flex: #{1 if doc.received_by_id else 1}; margin-bottom: 0;">
+                            <div class="vpa-section-header">Amount</div>
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td><span class="vpa-value-label">Destination Amount</span></td>
+                                        <th style="width: 40%;">Description</th>
+                                        <th style="width: 40%; text-align: center;">Amount</th>
+                                        <th style="width: 20%;">Currency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="vpa-value-label">Transfer Amount</span></td>
                                         <td style="text-align: center;">
                                             <span class="vpa-amount-badge">
-                                                <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                                <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                             </span>
                                         </td>
-                                        <td><span t-field="doc.destination_currency_id.name"/></td>
-                                        <td>-</td>
+                                        <td><span t-field="doc.currency_id.name"/></td>
                                     </tr>
-                                </t>
-                                <!-- Receipt Confirmation Row - Only if received -->
-                                <t t-if="doc.received_by_id">
-                                    <tr class="vpa-receipt-row">
-                                        <td><span class="vpa-value-label" style="color: #28a745;">Amount Received</span></td>
-                                        <td style="text-align: center;">
-                                            <span class="vpa-amount-badge" style="border-color: #28a745; color: #28a745;">
-                                                <span t-field="doc.received_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id if doc.is_multi_currency else doc.currency_id}'/>
-                                            </span>
-                                        </td>
-                                        <td colspan="2">
-                                            <t t-if="doc.receipt_notes">
-                                                <span style="font-size: 10px; color: #666;">Note: <span t-field="doc.receipt_notes"/></span>
-                                            </t>
-                                        </td>
-                                    </tr>
-                                </t>
-                            </tbody>
-                        </table>
+                                    <t t-if="doc.is_multi_currency">
+                                        <tr>
+                                            <td><span class="vpa-value-label">Destination Amount</span></td>
+                                            <td style="text-align: center;">
+                                                <span class="vpa-amount-badge">
+                                                    <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                                </span>
+                                            </td>
+                                            <td><span t-field="doc.destination_currency_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="vpa-value-label">Exchange Rate</span></td>
+                                            <td style="text-align: center;">
+                                                <span t-field="doc.exchange_rate" t-options='{"precision": 4}'/>
+                                            </td>
+                                            <td>-</td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Receipt Confirmation Section (Right) - Only if received -->
+                        <t t-if="doc.received_by_id">
+                            <div class="vpa-table-card" style="flex: 1; margin-bottom: 0; border-left: 3px solid #28a745;">
+                                <div class="vpa-section-header" style="color: #28a745;">Receipt Confirmation</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40%;">Received By</th>
+                                            <th style="width: 35%;">Date/Time</th>
+                                            <th style="width: 25%;">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="vpa-value-main" t-field="doc.received_by_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                            </td>
+                                            <td>
+                                                <span class="vpa-amount-badge" style="border-color: #28a745; color: #28a745;">
+                                                    <span t-field="doc.received_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id if doc.is_multi_currency else doc.currency_id}'/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <t t-if="doc.receipt_notes">
+                                            <tr>
+                                                <td colspan="3" style="font-size: 10px; color: #666;">
+                                                    <strong>Notes:</strong> <span t-field="doc.receipt_notes"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
                     </div>
         </xpath>
 
