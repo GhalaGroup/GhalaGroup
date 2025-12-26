@@ -75,7 +75,7 @@
         <!-- Replace Amount section with side-by-side Amount & Receipt Confirmation using table layout for PDF compatibility -->
         <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Amount')]/parent::div[@class='vpa-table-card']" position="replace">
                     <!-- Use table layout for PDF compatibility (wkhtmltopdf doesn't support flexbox) -->
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-bottom: 10px;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 15px;">
                         <tr>
                             <!-- Amount Section (Left) -->
                             <td t-att-style="'width: 50%; vertical-align: top;' if doc.received_by_id else 'width: 100%; vertical-align: top;'">
@@ -162,6 +162,70 @@
                             </t>
                         </tr>
                     </table>
+        </xpath>
+
+        <!-- Add "Received" column to Approval Trail header -->
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Approval Trail')]/parent::div[@class='vpa-table-card']//thead/tr" position="replace">
+                                <tr>
+                                    <th style="width: 14%;">Created</th>
+                                    <th style="width: 14%;">Submitted</th>
+                                    <th style="width: 14%;">Approved</th>
+                                    <th style="width: 14%;">Received</th>
+                                    <th style="width: 14%;">Rejected</th>
+                                    <th style="width: 14%;">Cancelled</th>
+                                    <th style="width: 16%;">Assigned To</th>
+                                </tr>
+        </xpath>
+
+        <!-- Replace Approval Trail data row to include Received column -->
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Approval Trail')]/parent::div[@class='vpa-table-card']//tbody/tr[1]" position="replace">
+                                <tr>
+                                    <td>
+                                        <div class="vpa-value-main" t-field="doc.create_uid.name"/>
+                                        <div class="vpa-value-sub" t-field="doc.create_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.submitted_by_id">
+                                            <div class="vpa-value-main" t-field="doc.submitted_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.submit_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approved_by_id">
+                                            <div class="vpa-value-main" t-field="doc.approved_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.approval_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.received_by_id">
+                                            <div class="vpa-value-main" t-field="doc.received_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.rejected_by_id">
+                                            <div class="vpa-value-main" t-field="doc.rejected_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.rejection_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.cancelled_by_id">
+                                            <div class="vpa-value-main" t-field="doc.cancelled_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.cancellation_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approver_id">
+                                            <div class="vpa-value-main" t-field="doc.approver_id.name"/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                </tr>
         </xpath>
 
         <!-- Replace Journal Entries section with compact version -->
