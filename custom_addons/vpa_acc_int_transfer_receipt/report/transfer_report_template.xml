@@ -40,6 +40,28 @@
                     .vpa-reassign-section {
                         border-left-color: #6c757d !important;
                     }
+
+                    /* Compact Journal Entries */
+                    .vpa-journal-compact table {
+                        margin-bottom: 0 !important;
+                    }
+                    .vpa-journal-compact table td,
+                    .vpa-journal-compact table th {
+                        padding: 4px 8px !important;
+                        font-size: 10px !important;
+                    }
+                    .vpa-journal-compact .vpa-section-header {
+                        margin-bottom: 4px !important;
+                        padding-bottom: 3px !important;
+                    }
+
+                    /* Receipt row in Amount table */
+                    .vpa-receipt-row {
+                        background-color: #e8f5e9 !important;
+                    }
+                    .vpa-receipt-row td {
+                        border-top: 2px solid #28a745 !important;
+                    }
         </xpath>
 
         <!-- Add new status badges for pending_receipt, received, disputed -->
@@ -49,37 +71,88 @@
                                         <span t-if="doc.state == 'disputed'" class="vpa-status-badge vpa-status-disputed">Disputed</span>
         </xpath>
 
-        <!-- Insert Receipt Confirmation section before signatures -->
-        <xpath expr="//div[@class='vpa-signatures']" position="before">
-                    <!-- Receipt Confirmation Section - Only if received -->
-                    <t t-if="doc.received_by_id">
-                        <div class="vpa-table-card vpa-receipt-section">
-                            <div class="vpa-section-header" style="color: #17a2b8;">Receipt Confirmation</div>
-                            <table>
-                                <thead>
+        <!-- Replace Amount section with combined Amount & Receipt Confirmation -->
+        <xpath expr="//div[@class='vpa-section-header'][text()='Amount']/parent::div[@class='vpa-table-card']" position="replace">
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">Amount <t t-if="doc.received_by_id">&amp; Receipt Confirmation</t></div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Description</th>
+                                    <th style="width: 30%; text-align: center;">Amount</th>
+                                    <th style="width: 15%;">Currency</th>
+                                    <th t-if="doc.is_multi_currency" style="width: 15%;">Rate</th>
+                                    <th t-if="doc.received_by_id" style="width: 15%;">Received By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="vpa-value-label">Transfer Amount</span></td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-amount-badge">
+                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </span>
+                                    </td>
+                                    <td><span t-field="doc.currency_id.name"/></td>
+                                    <td t-if="doc.is_multi_currency">
+                                        <span t-field="doc.exchange_rate" t-options='{"precision": 4}'/>
+                                    </td>
+                                    <td t-if="doc.received_by_id" rowspan="2" style="vertical-align: middle;">
+                                        <div class="vpa-value-main" t-field="doc.received_by_id.name"/>
+                                        <div class="vpa-value-sub" t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                                    </td>
+                                </tr>
+                                <t t-if="doc.is_multi_currency">
                                     <tr>
-                                        <th style="width: 25%;">Received By</th>
-                                        <th style="width: 25%;">Receipt Date</th>
-                                        <th style="width: 25%;">Amount Received</th>
-                                        <th style="width: 25%;">Notes</th>
+                                        <td><span class="vpa-value-label">Destination Amount</span></td>
+                                        <td style="text-align: center;">
+                                            <span class="vpa-amount-badge">
+                                                <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="doc.destination_currency_id.name"/></td>
+                                        <td>-</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <span class="vpa-value-main" t-field="doc.received_by_id.name"/>
-                                        </td>
-                                        <td>
-                                            <span class="vpa-value-main" t-field="doc.receipt_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
-                                        </td>
-                                        <td>
-                                            <span class="vpa-amount-badge" style="border-color: #17a2b8; color: #17a2b8;">
+                                </t>
+                                <!-- Receipt Confirmation Row - Only if received -->
+                                <t t-if="doc.received_by_id">
+                                    <tr class="vpa-receipt-row">
+                                        <td><span class="vpa-value-label" style="color: #28a745;">Amount Received</span></td>
+                                        <td style="text-align: center;">
+                                            <span class="vpa-amount-badge" style="border-color: #28a745; color: #28a745;">
                                                 <span t-field="doc.received_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id if doc.is_multi_currency else doc.currency_id}'/>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td colspan="2">
                                             <t t-if="doc.receipt_notes">
-                                                <span t-field="doc.receipt_notes"/>
+                                                <span style="font-size: 10px; color: #666;">Note: <span t-field="doc.receipt_notes"/></span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+        </xpath>
+
+        <!-- Replace Journal Entries section with compact version -->
+        <xpath expr="//div[@class='vpa-section-header'][text()='Journal Entries']/parent::div[@class='vpa-table-card']" position="replace">
+                        <div class="vpa-table-card vpa-journal-compact" style="padding: 4px; margin-bottom: 10px;">
+                            <div class="vpa-section-header" style="font-size: 10px; margin: 4px;">Journal Entries</div>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 15%; background-color: #f8f8f8;"><strong>Source:</strong></td>
+                                        <td style="width: 35%;">
+                                            <t t-if="doc.source_move_id">
+                                                <span t-field="doc.source_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                        <td style="width: 15%; background-color: #f8f8f8;"><strong>Destination:</strong></td>
+                                        <td style="width: 35%;">
+                                            <t t-if="doc.destination_move_id">
+                                                <span t-field="doc.destination_move_id.name"/>
                                             </t>
                                             <t t-else="">-</t>
                                         </td>
@@ -87,8 +160,10 @@
                                 </tbody>
                             </table>
                         </div>
-                    </t>
+        </xpath>
 
+        <!-- Insert Reassignment and Dispute sections before signatures -->
+        <xpath expr="//div[@class='vpa-signatures']" position="before">
                     <!-- Reassignment History Section - Only if reassigned -->
                     <t t-if="doc.reassigned_by_id">
                         <div class="vpa-table-card vpa-reassign-section">
@@ -194,7 +269,7 @@
                     </t>
         </xpath>
 
-        <!-- Replace signature section with dynamic data -->
+        <!-- Replace signature section with dynamic data including time -->
         <xpath expr="//div[@class='vpa-signatures']" position="replace">
                     <!-- Signature Section with Dynamic Data -->
                     <div class="vpa-signatures">
@@ -206,7 +281,7 @@
                             <div class="vpa-signature-fields">
                                 <t t-if="doc.create_uid">
                                     Name: <span t-field="doc.create_uid.name"/><br/>
-                                    Date: <span t-field="doc.create_date" t-options='{"format": "dd/MM/yyyy"}'/>
+                                    Date: <span t-field="doc.create_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
                                 </t>
                                 <t t-else="">
                                     Name: ________________<br/>
@@ -222,7 +297,7 @@
                             <div class="vpa-signature-fields">
                                 <t t-if="doc.approved_by_id">
                                     Name: <span t-field="doc.approved_by_id.name"/><br/>
-                                    Date: <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yyyy"}'/>
+                                    Date: <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
                                 </t>
                                 <t t-else="">
                                     Name: ________________<br/>
@@ -238,7 +313,7 @@
                             <div class="vpa-signature-fields">
                                 <t t-if="doc.received_by_id">
                                     Name: <span t-field="doc.received_by_id.name"/><br/>
-                                    Date: <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yyyy"}'/>
+                                    Date: <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yyyy HH:mm"}'/>
                                 </t>
                                 <t t-else="">
                                     Name: ________________<br/>
