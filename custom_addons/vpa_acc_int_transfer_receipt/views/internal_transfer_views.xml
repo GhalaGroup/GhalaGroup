@@ -48,6 +48,62 @@
                 <attribute name="invisible">state not in ('approved', 'received', 'cancelled')</attribute>
             </xpath>
 
+            <!-- ============================================== -->
+            <!-- FIELD PROTECTION: Make fields readonly when locked or in final states -->
+            <!-- ============================================== -->
+            <!-- Date field -->
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Source Journal -->
+            <xpath expr="//field[@name='source_journal_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Destination Journal -->
+            <xpath expr="//field[@name='destination_journal_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Transfer Account -->
+            <xpath expr="//field[@name='transfer_account_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Amount -->
+            <xpath expr="//field[@name='amount']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Currency -->
+            <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Exchange Rate -->
+            <xpath expr="//field[@name='exchange_rate']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Exchange Rate Inverse -->
+            <xpath expr="//field[@name='exchange_rate_inverse']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Destination Amount -->
+            <xpath expr="//field[@name='destination_amount']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Memo Type -->
+            <xpath expr="//field[@name='memo_type']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Memo -->
+            <xpath expr="//field[@name='memo']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Notes -->
+            <xpath expr="//page[@name='notes']//field[@name='notes']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Attachments -->
+            <xpath expr="//field[@name='attachment_ids']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+
             <!-- Add ribbons for new states - position after button_box -->
             <xpath expr="//div[@name='button_box']" position="after">
                 <widget name="web_ribbon" title="Pending Receipt"

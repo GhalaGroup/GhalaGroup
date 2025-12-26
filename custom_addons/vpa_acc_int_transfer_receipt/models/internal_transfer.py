@@ -233,6 +233,54 @@ class InternalTransferReceipt(models.Model):
             transfer.can_dispute = can_dispute
             transfer.can_resolve_dispute = can_resolve
 
+    # === PROTECTED FIELDS - Cannot be modified when locked or in protected states ===
+    PROTECTED_FIELDS = {
+        'date', 'source_journal_id', 'destination_journal_id', 'transfer_account_id',
+        'amount', 'currency_id', 'exchange_rate', 'destination_amount',
+        'memo_type', 'memo', 'notes', 'attachment_ids',
+    }
+    # States where data modification is not allowed
+    PROTECTED_STATES = {'approved', 'pending_receipt', 'received', 'disputed'}
+
+    def write(self, vals):
+        """
+        Override write to enforce data protection rules:
+        1. When transfer is locked, protected fields cannot be modified
+        2. When in protected states, core transfer data cannot be modified
+
+        This enforcement happens at the model level, preventing bypasses through API calls.
+
+        Note: The context key 'bypass_protection' allows internal workflow methods
+        (like dispute resolution) to modify amounts when resolving disputes.
+        """
+        # Allow bypass for internal workflow operations (dispute resolution, etc.)
+        if self.env.context.get('bypass_protection'):
+            return super().write(vals)
+
+        for record in self:
+            # Check if any protected fields are being modified
+            protected_fields_being_modified = set(vals.keys()) & self.PROTECTED_FIELDS
+
+            if protected_fields_being_modified:
+                # Rule 1: If locked, block all protected field changes
+                if record.is_locked:
+                    raise UserError(_(
+                        'This transfer is locked. The following fields cannot be modified: %s\n'
+                        'Please unlock the transfer first if changes are required.'
+                    ) % ', '.join(sorted(protected_fields_being_modified)))
+
+                # Rule 2: If in protected state, block protected field changes
+                if record.state in self.PROTECTED_STATES:
+                    raise UserError(_(
+                        'This transfer is in "%s" state. The following fields cannot be modified: %s\n'
+                        'Only draft or submitted transfers can be edited.'
+                    ) % (
+                        dict(record._fields['state'].selection).get(record.state, record.state),
+                        ', '.join(sorted(protected_fields_being_modified))
+                    ))
+
+        return super().write(vals)
+
     # === OVERRIDE ACTION_APPROVE ===
     def action_approve(self):
         """
@@ -484,18 +532,9 @@ class InternalTransferReceipt(models.Model):
             )
 
         elif resolution == 'adjusted':
-            # Adjust amount and complete
-            # Update the amount
-            if adjusted_amount > 0:
-                self.amount = adjusted_amount
-                if self.is_multi_currency:
-                    self.destination_amount = adjusted_amount * self.exchange_rate
-
-            # Create journal entries with adjusted amount
-            self._create_journal_entries()
-            self._auto_reconcile()
-
-            self.write({
+            # Adjust amount and complete - use bypass_protection context
+            # since this is a legitimate workflow operation
+            update_vals = {
                 'state': 'received',
                 'dispute_resolved_by_id': self.env.uid,
                 'dispute_resolution_date': fields.Datetime.now(),
@@ -504,7 +543,20 @@ class InternalTransferReceipt(models.Model):
                 'received_by_id': self.env.uid,
                 'receipt_date': fields.Datetime.now(),
                 'received_amount': adjusted_amount,
-            })
+            }
+
+            # Update the amount if adjusted
+            if adjusted_amount > 0:
+                update_vals['amount'] = adjusted_amount
+                if self.is_multi_currency:
+                    update_vals['destination_amount'] = adjusted_amount * self.exchange_rate
+
+            # Write with bypass_protection to allow amount adjustment
+            self.with_context(bypass_protection=True).write(update_vals)
+
+            # Create journal entries with adjusted amount
+            self._create_journal_entries()
+            self._auto_reconcile()
             self.activity_feedback(['mail.mail_activity_data_todo'])
             self.message_post(
                 body=_('Dispute resolved by %s. Amount adjusted to %s. Journal entries created.\nNotes: %s') % (
