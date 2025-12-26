@@ -19,11 +19,9 @@
     -->
 
     <!-- Extend the VPA Layout template to add receipt sections -->
-    <!-- This template will fail gracefully if the layout module is not installed -->
     <template id="report_internal_transfer_receipt_vpa"
               inherit_id="vpa_acc_int_transfer_layout.report_internal_transfer_vpa_layout"
-              priority="100"
-              optional="enabled">
+              priority="100">
 
         <!-- Add CSS for new status badges and receipt styles -->
         <xpath expr="//style" position="inside">
