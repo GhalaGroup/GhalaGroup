@@ -43,6 +43,11 @@
                 <attribute name="invisible">state not in ('approved', 'received') or not is_locked or not can_manage</attribute>
             </xpath>
 
+            <!-- Update Bank Transactions/Journal Entries group to show for 'received' state -->
+            <xpath expr="//page[@name='audit']//field[@name='source_move_id']/ancestor::group[@col='2']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received', 'cancelled')</attribute>
+            </xpath>
+
             <!-- Add ribbons for new states - position after button_box -->
             <xpath expr="//div[@name='button_box']" position="after">
                 <widget name="web_ribbon" title="Pending Receipt"
@@ -56,50 +61,65 @@
                         invisible="state != 'disputed'"/>
             </xpath>
 
-            <!-- Add Receipt Confirmation tab in notebook -->
+            <!-- Add Receipt and Dispute sections to Audit Trail tab -->
+            <xpath expr="//page[@name='audit']" position="inside">
+                <!-- Receipt Confirmation section -->
+                <group col="2" invisible="not received_by_id" string="Receipt Confirmation">
+                    <group>
+                        <field name="received_by_id"/>
+                        <field name="receipt_date"/>
+                    </group>
+                    <group>
+                        <field name="received_amount"/>
+                        <field name="receipt_notes"/>
+                    </group>
+                </group>
+                <!-- Reassignment History section -->
+                <group col="2" invisible="not reassigned_by_id" string="Reassignment">
+                    <group>
+                        <field name="reassigned_by_id"/>
+                        <field name="reassignment_date"/>
+                    </group>
+                    <group>
+                        <field name="original_custodian_ids"
+                               widget="many2many_tags"
+                               readonly="1"/>
+                    </group>
+                </group>
+                <!-- Dispute section -->
+                <group col="2" invisible="not dispute_raised_by_id" string="Dispute Raised">
+                    <group>
+                        <field name="dispute_raised_by_id"/>
+                        <field name="dispute_date"/>
+                    </group>
+                    <group>
+                        <field name="dispute_reason"/>
+                        <field name="dispute_notes"/>
+                    </group>
+                </group>
+                <!-- Dispute Resolution section -->
+                <group col="2" invisible="not dispute_resolved_by_id" string="Dispute Resolution">
+                    <group>
+                        <field name="dispute_resolved_by_id"/>
+                        <field name="dispute_resolution_date"/>
+                    </group>
+                    <group>
+                        <field name="dispute_resolution"/>
+                        <field name="dispute_resolution_notes"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Add Custodian Information tab -->
             <xpath expr="//page[@name='audit']" position="after">
-                <page string="Receipt Confirmation" name="receipt"
-                      invisible="state not in ('pending_receipt', 'received', 'disputed')">
-                    <group col="2">
-                        <group string="Custodian Information">
+                <page string="Custodian Info" name="custodian_info"
+                      invisible="not receipt_confirmation_enabled">
+                    <group>
+                        <group string="Destination Journal Custodians">
                             <field name="destination_custodian_ids"
                                    widget="many2many_tags"
                                    readonly="1"/>
                             <field name="has_custodian" invisible="1"/>
-                        </group>
-                        <group string="Receipt Details" invisible="not received_by_id">
-                            <field name="received_by_id"/>
-                            <field name="receipt_date"/>
-                            <field name="received_amount"/>
-                            <field name="receipt_notes"/>
-                        </group>
-                    </group>
-                    <group string="Reassignment History" invisible="not reassigned_by_id">
-                        <group>
-                            <field name="reassigned_by_id"/>
-                            <field name="reassignment_date"/>
-                        </group>
-                        <group>
-                            <field name="original_custodian_ids"
-                                   widget="many2many_tags"
-                                   readonly="1"/>
-                        </group>
-                    </group>
-                </page>
-                <page string="Dispute Details" name="dispute"
-                      invisible="state != 'disputed' and not dispute_raised_by_id">
-                    <group col="2">
-                        <group string="Dispute Information">
-                            <field name="dispute_raised_by_id"/>
-                            <field name="dispute_date"/>
-                            <field name="dispute_reason"/>
-                            <field name="dispute_notes"/>
-                        </group>
-                        <group string="Resolution" invisible="not dispute_resolved_by_id">
-                            <field name="dispute_resolved_by_id"/>
-                            <field name="dispute_resolution_date"/>
-                            <field name="dispute_resolution"/>
-                            <field name="dispute_resolution_notes"/>
                         </group>
                     </group>
                 </page>
