@@ -59,6 +59,7 @@ Support: info@vpa.co.tz
         'views/internal_transfer_views.xml',
         'views/res_config_settings_views.xml',
         'views/menu_views.xml',
+        'report/transfer_report_template.xml',
     ],
     'images': [
         'static/description/icon.png',
