@@ -139,9 +139,19 @@
                 <attribute name="decoration-success">state in ('approved', 'received')</attribute>
                 <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
             </xpath>
-            <!-- Add received_by column -->
+
+            <!-- Update state badge decorations to include new states -->
+            <xpath expr="//field[@name='state'][@widget='badge']" position="attributes">
+                <attribute name="decoration-info">state in ('draft', 'pending_receipt')</attribute>
+                <attribute name="decoration-warning">state == 'submitted'</attribute>
+                <attribute name="decoration-success">state in ('approved', 'received')</attribute>
+                <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
+            </xpath>
+
+            <!-- Add receipt-related columns after approved_by -->
             <xpath expr="//field[@name='approved_by_id']" position="after">
-                <field name="received_by_id" optional="hide"/>
+                <field name="received_by_id" optional="show"/>
+                <field name="receipt_date" optional="hide"/>
             </xpath>
         </field>
     </record>
