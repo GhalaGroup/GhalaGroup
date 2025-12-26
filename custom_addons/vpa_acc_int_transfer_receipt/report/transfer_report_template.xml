@@ -2,18 +2,12 @@
 <!-- Copyright (C) 2025 VPA Solutions Limited -->
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
-    <!-- Inherit and extend the report template -->
+    <!-- Inherit the base template and add Receipt sections after Journal Entries -->
     <template id="report_internal_transfer_receipt" inherit_id="vpa_acc_int_transfer.report_internal_transfer">
 
-        <!-- Add new state badges - append to existing badges -->
-        <xpath expr="//span[@class='badge text-bg-secondary']" position="after">
-            <span t-if="doc.state == 'pending_receipt'" class="badge text-bg-info">Pending Receipt</span>
-            <span t-if="doc.state == 'received'" class="badge text-bg-success">Received</span>
-            <span t-if="doc.state == 'disputed'" class="badge text-bg-danger">Disputed</span>
-        </xpath>
+        <!-- Insert Receipt sections before the footer row (row mt-2 is the footer) -->
+        <xpath expr="//p[contains(@style,'font-size: 8px')]/../.." position="before">
 
-        <!-- Add Receipt/Dispute sections after Journal Entries table, before signature -->
-        <xpath expr="//div[@class='row mt-2']" position="before">
             <!-- Receipt Confirmation Section - Only if received -->
             <t t-if="doc.received_by_id">
                 <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
@@ -120,71 +114,6 @@
                 </t>
             </t>
 
-            <!-- Dynamic Signatures -->
-            <div class="row mt-3">
-                <!-- Prepared By - Always shown -->
-                <div class="col-3 text-center">
-                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
-                        <strong style="font-size: 10px;">Prepared By</strong>
-                    </div>
-                    <div style="height: 30px;"></div>
-                    <t t-if="doc.create_uid">
-                        <div style="font-size: 9px;"><span t-field="doc.create_uid.name"/></div>
-                        <div style="font-size: 9px;"><span t-field="doc.create_date" t-options='{"format": "dd/MM/yy"}'/></div>
-                    </t>
-                    <t t-else="">
-                        <div style="font-size: 9px;">Name: ________________</div>
-                        <div style="font-size: 9px;">Date: ________________</div>
-                    </t>
-                </div>
-
-                <!-- Approved By - Show approver info if approved -->
-                <div class="col-3 text-center">
-                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
-                        <strong style="font-size: 10px;">Approved By</strong>
-                    </div>
-                    <div style="height: 30px;"></div>
-                    <t t-if="doc.approved_by_id">
-                        <div style="font-size: 9px;"><span t-field="doc.approved_by_id.name"/></div>
-                        <div style="font-size: 9px;"><span t-field="doc.approval_date" t-options='{"format": "dd/MM/yy"}'/></div>
-                    </t>
-                    <t t-else="">
-                        <div style="font-size: 9px;">Name: ________________</div>
-                        <div style="font-size: 9px;">Date: ________________</div>
-                    </t>
-                </div>
-
-                <!-- Received By - Show receiver info if received -->
-                <div class="col-3 text-center">
-                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
-                        <strong style="font-size: 10px;">Received By</strong>
-                    </div>
-                    <div style="height: 30px;"></div>
-                    <t t-if="doc.received_by_id">
-                        <div style="font-size: 9px;"><span t-field="doc.received_by_id.name"/></div>
-                        <div style="font-size: 9px;"><span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy"}'/></div>
-                    </t>
-                    <t t-else="">
-                        <div style="font-size: 9px;">Name: ________________</div>
-                        <div style="font-size: 9px;">Date: ________________</div>
-                    </t>
-                </div>
-
-                <!-- Verified/Acknowledged By -->
-                <div class="col-3 text-center">
-                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
-                        <strong style="font-size: 10px;">Acknowledged By</strong>
-                    </div>
-                    <div style="height: 30px;"></div>
-                    <div style="font-size: 9px;">Name: ________________</div>
-                    <div style="font-size: 9px;">Date: ________________</div>
-                </div>
-            </div>
-        </xpath>
-
-        <!-- Remove original signature section -->
-        <xpath expr="//div[@class='col-4 text-center'][.//strong[text()='Prepared By']]/.." position="replace">
-            <!-- Replaced by dynamic signatures above -->
         </xpath>
 
     </template>
