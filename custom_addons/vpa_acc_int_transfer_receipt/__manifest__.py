@@ -50,6 +50,7 @@ Support: info@vpa.co.tz
     'currency': 'USD',
     'depends': [
         'vpa_acc_int_transfer',
+        'vpa_acc_int_transfer_layout',
     ],
     'data': [
         'security/security.xml',
