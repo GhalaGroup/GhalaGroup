@@ -55,7 +55,7 @@
                         invisible="state != 'pending_receipt'"/>
                 <widget name="web_ribbon" title="Received"
                         bg_color="text-bg-success"
-                        invisible="state != 'received'"/>
+                        invisible="state != 'received' or is_locked"/>
                 <widget name="web_ribbon" title="Disputed"
                         bg_color="text-bg-danger"
                         invisible="state != 'disputed'"/>
@@ -138,6 +138,7 @@
                 <attribute name="decoration-info">state in ('draft', 'pending_receipt')</attribute>
                 <attribute name="decoration-success">state in ('approved', 'received')</attribute>
                 <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
+                <attribute name="decoration-muted">state == 'cancelled'</attribute>
             </xpath>
 
             <!-- Update state badge decorations to include new states -->
@@ -146,12 +147,14 @@
                 <attribute name="decoration-warning">state == 'submitted'</attribute>
                 <attribute name="decoration-success">state in ('approved', 'received')</attribute>
                 <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
+                <attribute name="decoration-muted">state == 'cancelled'</attribute>
             </xpath>
 
             <!-- Add receipt-related columns after approved_by -->
             <xpath expr="//field[@name='approved_by_id']" position="after">
                 <field name="received_by_id" optional="show"/>
                 <field name="receipt_date" optional="hide"/>
+                <field name="is_locked" widget="boolean" optional="show"/>
             </xpath>
         </field>
     </record>
