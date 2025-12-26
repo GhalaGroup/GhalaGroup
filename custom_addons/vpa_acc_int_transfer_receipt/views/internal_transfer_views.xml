@@ -43,6 +43,11 @@
                 <attribute name="invisible">state not in ('approved', 'received') or not is_locked or not can_manage</attribute>
             </xpath>
 
+            <!-- Hide Reset to Draft when locked -->
+            <xpath expr="//button[@name='action_reset_to_draft']" position="attributes">
+                <attribute name="invisible">state in ('draft', 'approved', 'received') or not can_cancel or is_locked</attribute>
+            </xpath>
+
             <!-- Update Bank Transactions/Journal Entries group to show for 'received' state -->
             <xpath expr="//page[@name='audit']//field[@name='source_move_id']/ancestor::group[@col='2']" position="attributes">
                 <attribute name="invisible">state not in ('approved', 'received', 'cancelled')</attribute>

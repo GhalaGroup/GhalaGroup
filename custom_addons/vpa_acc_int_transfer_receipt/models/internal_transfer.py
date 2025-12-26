@@ -639,6 +639,30 @@ class InternalTransferReceipt(models.Model):
             subtype_xmlid='mail.mt_note',
         )
 
+    # === OVERRIDE ACTION_RESET_TO_DRAFT ===
+    def action_reset_to_draft(self):
+        """
+        Override to add protection for:
+        1. Locked transfers - cannot be reset
+        2. Receipt workflow states (pending_receipt, received, disputed) - cannot be reset
+        """
+        self.ensure_one()
+
+        # Block if locked
+        if self.is_locked:
+            raise UserError(_('This transfer is locked and cannot be reset to draft. Please unlock it first.'))
+
+        # Block for receipt workflow states
+        if self.state in ('pending_receipt', 'received', 'disputed'):
+            state_label = dict(self._fields['state'].selection).get(self.state, self.state)
+            raise UserError(_(
+                'Transfers in "%s" state cannot be reset to draft. '
+                'Use the Cancel action if you need to cancel this transfer.'
+            ) % state_label)
+
+        # Call parent method for standard states
+        return super().action_reset_to_draft()
+
     # === OVERRIDE LOCK/UNLOCK TO SUPPORT RECEIVED STATE ===
     def action_lock(self):
         """Override to allow locking for both approved and received states"""
