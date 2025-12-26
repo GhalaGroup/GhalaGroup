@@ -72,7 +72,7 @@
         </xpath>
 
         <!-- Replace Amount section with combined Amount & Receipt Confirmation -->
-        <xpath expr="//div[@class='vpa-section-header'][text()='Amount']/parent::div[@class='vpa-table-card']" position="replace">
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Amount')]/parent::div[@class='vpa-table-card']" position="replace">
                     <div class="vpa-table-card">
                         <div class="vpa-section-header">Amount <t t-if="doc.received_by_id">&amp; Receipt Confirmation</t></div>
                         <table>
@@ -136,7 +136,7 @@
         </xpath>
 
         <!-- Replace Journal Entries section with compact version -->
-        <xpath expr="//div[@class='vpa-section-header'][text()='Journal Entries']/parent::div[@class='vpa-table-card']" position="replace">
+        <xpath expr="//div[@class='vpa-section-header'][contains(text(),'Journal Entries')]/parent::div[@class='vpa-table-card']" position="replace">
                         <div class="vpa-table-card vpa-journal-compact" style="padding: 4px; margin-bottom: 10px;">
                             <div class="vpa-section-header" style="font-size: 10px; margin: 4px;">Journal Entries</div>
                             <table>
