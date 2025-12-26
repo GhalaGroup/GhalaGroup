@@ -211,11 +211,12 @@ class InternalTransferReceipt(models.Model):
             transfer_managers = company.transfer_manager_ids
 
             # Can receive: custodian OR backup OR transfer manager (fallback)
+            # NOTE: Transfer Managers can ONLY confirm if they are explicitly set
+            # No automatic fallback to Account Managers
             can_receive = (
                 user in primary_custodians or
                 user in backup_custodians or
-                (transfer_managers and user in transfer_managers) or
-                (not transfer_managers and user.has_group('account.group_account_manager'))
+                (transfer_managers and user in transfer_managers)
             )
 
             # Can dispute: same as can_receive (custodians can dispute)
