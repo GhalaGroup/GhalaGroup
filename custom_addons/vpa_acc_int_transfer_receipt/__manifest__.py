@@ -50,6 +50,7 @@ Support: info@vpa.co.tz
     'currency': 'USD',
     'depends': [
         'vpa_acc_int_transfer',
+        'vpa_acc_int_transfer_layout',
     ],
     'data': [
         'security/security.xml',
@@ -60,13 +61,11 @@ Support: info@vpa.co.tz
         'views/res_config_settings_views.xml',
         'views/menu_views.xml',
         'report/transfer_report_template.xml',
-        # Note: transfer_report_template_vpa.xml is loaded conditionally via post_init_hook
-        # when vpa_acc_int_transfer_layout module is installed
+        'report/transfer_report_template_vpa.xml',
     ],
     'images': [
         'static/description/icon.png',
     ],
-    'post_init_hook': '_load_vpa_layout_template',
     'installable': True,
     'application': False,
     'auto_install': False,
