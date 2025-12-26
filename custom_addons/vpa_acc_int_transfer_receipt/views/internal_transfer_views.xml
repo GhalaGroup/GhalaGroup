@@ -33,6 +33,16 @@
                 <attribute name="statusbar_visible">draft,submitted,pending_receipt,received</attribute>
             </xpath>
 
+            <!-- Update Lock button to also show for 'received' state -->
+            <xpath expr="//button[@name='action_lock']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received') or is_locked or not can_manage</attribute>
+            </xpath>
+
+            <!-- Update Unlock button to also show for 'received' state -->
+            <xpath expr="//button[@name='action_unlock']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received') or not is_locked or not can_manage</attribute>
+            </xpath>
+
             <!-- Add ribbons for new states - position after button_box -->
             <xpath expr="//div[@name='button_box']" position="after">
                 <widget name="web_ribbon" title="Pending Receipt"
