@@ -5,7 +5,7 @@
     'name': 'VPA Internal Transfer - Document Layout',
     'version': '19.0.1.0.0',
     'category': 'Accounting/Accounting',
-    'summary': 'Integrates Internal Transfer reports with VPA Document Layout',
+    'summary': 'Integrates Internal Transfer reports with VPA Document Layout (v1.0.0)',
     'description': """
 VPA Internal Transfer - Document Layout Integration
 ====================================================
@@ -18,14 +18,23 @@ When both modules are installed, this module:
 - Applies VPA Document Layout's universal header/footer
 - Uses VPA's configured colors and styling
 
-This module auto-installs when both dependencies are present.
-No manual installation required.
+Key Features
+------------
+* **Auto-Install**: Installs automatically when dependencies are present
+* **VPA Styling**: Left border accent design, amount badges, status badges
+* **Professional Layout**: Consistent branding across all VPA reports
+* **Company Colors**: Inherits colors from VPA Document Layout config
+
+Version History
+---------------
+* **19.0.1.0.0** - Initial release for Odoo 19
 
 Developed by VPA Solutions Limited
 Support: info@vpa.co.tz
     """,
     'author': 'VPA Solutions Limited',
     'website': 'https://www.vpa.co.tz',
+    'support': 'info@vpa.co.tz',
     'license': 'OPL-1',
     'depends': [
         'vpa_acc_int_transfer',
@@ -33,6 +42,9 @@ Support: info@vpa.co.tz
     ],
     'data': [
         'views/report_override.xml',
+    ],
+    'images': [
+        'static/description/icon.png',
     ],
     'installable': True,
     'auto_install': True,

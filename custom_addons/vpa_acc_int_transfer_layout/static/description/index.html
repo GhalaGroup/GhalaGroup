@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Internal Transfer - Document Layout Integration</title>
+</head>
+<body>
+
+<!-- HEADER SECTION -->
+<div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #875A7B 0%, #714B67 100%); color: white; border-radius: 10px; margin-bottom: 30px;">
+    <h1 style="margin: 0 0 10px 0; font-size: 2.2em; color: white;">VPA Internal Transfer - Document Layout</h1>
+    <p style="margin: 10px 0; font-size: 1.1em; color: white;">Professional Report Styling for Internal Transfer Vouchers</p>
+    <p style="margin: 5px 0; font-size: 0.95em; color: rgba(255,255,255,0.9);">Automatic Integration | VPA Styling | Professional Headers &amp; Footers</p>
+    <div style="margin-top: 15px;">
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Bridge Module</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Auto-Install</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">VPA Branding</span>
+    </div>
+    <div style="margin-top: 15px;">
+        <span style="background: #28a745; color: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">Version 19.0.1.0.0</span>
+    </div>
+</div>
+
+<!-- OVERVIEW -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Overview</h2>
+<p style="font-size: 1.05em; line-height: 1.7; margin-bottom: 25px;">
+    <strong>VPA Internal Transfer - Document Layout</strong> is a bridge module that automatically integrates
+    VPA Accounting Internal Transfer reports with VPA Document Layout styling. When both parent modules are installed,
+    this module auto-installs and transforms your transfer vouchers with professional VPA-branded headers, footers,
+    and consistent styling.
+</p>
+
+<div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 15px; margin-bottom: 25px;">
+    <strong style="color: #28a745;">Auto-Install Module</strong><br>
+    This module automatically installs when both <strong>VPA Accounting Internal Transfer</strong> and
+    <strong>VPA Document Layout</strong> are present. No manual installation required!
+</div>
+
+<!-- KEY FEATURES -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Key Features</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <tr>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">VPA-Styled Reports</strong><br>
+            Transform standard transfer vouchers into professionally styled documents matching VPA Manufacturing Order design.
+        </td>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Automatic Integration</strong><br>
+            No configuration needed. Auto-installs when dependencies are present and applies styling immediately.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Left Border Accent</strong><br>
+            Clean section design with colored left borders instead of heavy background headers. Modern and readable.
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Consistent Branding</strong><br>
+            Uses company's VPA Document Layout colors for consistent branding across all reports.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Professional Headers</strong><br>
+            Replaces default Odoo headers with VPA's configurable header design including logo placement.
+        </td>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Custom Footers</strong><br>
+            VPA footer with page numbers, company info, and professional styling via wkhtmltopdf.
+        </td>
+    </tr>
+</table>
+
+<!-- STYLING ELEMENTS -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Styling Elements</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #875A7B;">
+    <tr style="background: #875A7B; color: white;">
+        <th style="padding: 12px 15px; text-align: left; width: 30%; color: white;">Element</th>
+        <th style="padding: 12px 15px; text-align: left; color: white;">Description</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Title Bar</td>
+        <td style="padding: 12px 15px;">Colored top border with centered document title</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Info Boxes</td>
+        <td style="padding: 12px 15px;">Light background boxes for transfer info and status</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Section Cards</td>
+        <td style="padding: 12px 15px;">Left-bordered cards for Transfer Details, Amount, Approval Trail</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Amount Badges</td>
+        <td style="padding: 12px 15px;">Bordered badges highlighting transfer amounts</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Status Badges</td>
+        <td style="padding: 12px 15px;">Color-coded status indicators (Draft, Approved, etc.)</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 15px; font-weight: bold;">Signature Section</td>
+        <td style="padding: 12px 15px;">Three-column signature area for Prepared/Approved/Received</td>
+    </tr>
+</table>
+
+<!-- TECHNICAL SPECS -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Technical Specifications</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #875A7B;">
+    <tr style="background: #875A7B; color: white;">
+        <th style="padding: 12px 15px; text-align: left; width: 35%; color: white;">Specification</th>
+        <th style="padding: 12px 15px; text-align: left; color: white;">Details</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Module Name</td>
+        <td style="padding: 12px 15px;">VPA Internal Transfer - Document Layout</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Technical Name</td>
+        <td style="padding: 12px 15px;">vpa_acc_int_transfer_layout</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Version</td>
+        <td style="padding: 12px 15px;">19.0.1.0.0</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">License</td>
+        <td style="padding: 12px 15px;">OPL-1 (Proprietary)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Author</td>
+        <td style="padding: 12px 15px;">VPA Solutions Limited</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Category</td>
+        <td style="padding: 12px 15px;">Accounting/Accounting</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Odoo Version</td>
+        <td style="padding: 12px 15px;">19.0 Enterprise</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Dependencies</td>
+        <td style="padding: 12px 15px;">vpa_acc_int_transfer, vpa_document_layout</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 15px; font-weight: bold;">Auto-Install</td>
+        <td style="padding: 12px 15px;">Yes - installs automatically when dependencies are present</td>
+    </tr>
+</table>
+
+<!-- PRICING -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Pricing</h2>
+
+<div style="text-align: center; border: 3px solid #28a745; border-radius: 10px; padding: 30px; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <h3 style="margin: 0 0 10px 0; color: #28a745;">FREE Bridge Module</h3>
+    <div style="font-size: 3em; font-weight: bold; color: #28a745; margin: 20px 0;">
+        $0 <span style="font-size: 0.4em; font-weight: normal;">USD</span>
+    </div>
+    <p style="color: #666; margin: 10px 0;">Included with VPA Internal Transfer + VPA Document Layout</p>
+    <hr style="border: none; border-top: 1px solid #28a745; margin: 20px 0;">
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Auto-installs when dependencies present</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Professional VPA-styled reports</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Consistent branding across modules</p>
+</div>
+
+<!-- VERSION HISTORY -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Version History</h2>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.0.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: December 2025 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Initial release - VPA Document Layout integration</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>VPA-styled transfer voucher report</li>
+        <li>Left border accent design for sections</li>
+        <li>Amount and status badges</li>
+        <li>Professional signature section</li>
+        <li>VPA header/footer integration</li>
+        <li>Company color inheritance</li>
+    </ul>
+</div>
+
+<!-- CONTACT -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Support &amp; Contact</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #875A7B;">
+    <tr>
+        <td style="padding: 20px;">
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Email:</strong> <a href="mailto:info@vpa.co.tz" style="color: #875A7B;">info@vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Website:</strong> <a href="https://www.vpa.co.tz" style="color: #875A7B;" target="_blank">www.vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0;">
+                <strong>Response Time:</strong> Within 24 hours on business days
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- FOOTER -->
+<div style="text-align: center; padding: 20px; background: #875A7B; color: white; border-radius: 10px; margin-top: 30px;">
+    <p style="margin: 5px 0; font-size: 1.1em; color: white;"><strong>VPA Internal Transfer - Document Layout</strong></p>
+    <p style="margin: 10px 0; color: white;">Copyright 2025 <a href="https://www.vpa.co.tz" style="color: #FFD700;">VPA Solutions Limited</a>. All rights reserved.</p>
+</div>
+
+</body>
+</html>
