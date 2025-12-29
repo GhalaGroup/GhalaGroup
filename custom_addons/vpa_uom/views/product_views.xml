@@ -70,9 +70,10 @@
                 <field name="qty_available_alt_str"/>
                 <field name="primary_alt_uom_id"/>
             </xpath>
-            <xpath expr="//div[hasclass('text-bg-info')]" position="after">
-                <div t-if="record.qty_available_alt_str.raw_value" class="text-bg-secondary badge">
-                    <t t-out="record.qty_available_alt_str.value"/>
+            <!-- Add alt qty after On hand line -->
+            <xpath expr="//div[contains(@t-if, 'qty_available')]" position="after">
+                <div t-if="record.qty_available_alt_str.raw_value">
+                    <span t-out="record.qty_available_alt_str.value"/>
                 </div>
             </xpath>
         </field>
