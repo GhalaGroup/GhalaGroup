@@ -1,40 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Part of VPA Unit of Measure. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
 <odoo>
+    <data noupdate="0">
 
-    <!-- ============================================== -->
-    <!-- VPA UOM SECURITY GROUPS                        -->
-    <!-- ============================================== -->
+        <!-- ============================================== -->
+        <!-- VPA UOM SECURITY GROUPS                        -->
+        <!-- ============================================== -->
 
-    <record id="module_category_vpa_uom" model="ir.module.category">
-        <field name="name">VPA Unit of Measure</field>
-        <field name="description">Category for VPA UoM module security groups</field>
-        <field name="sequence">50</field>
-    </record>
+        <!-- Security Category -->
+        <record id="module_category_vpa_uom" model="ir.module.category">
+            <field name="name">VPA Unit of Measure</field>
+            <field name="description">Category for VPA UoM module security groups</field>
+            <field name="sequence">50</field>
+        </record>
 
-    <!-- User Group: Can view UoM conversions -->
-    <record id="group_uom_conversion_user" model="res.groups">
-        <field name="name">User</field>
-        <field name="category_id" ref="module_category_vpa_uom"/>
-        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
-        <field name="comment">Can view alternative UoM conversions on products.</field>
-    </record>
+        <!-- Privilege for UoM Conversions -->
+        <record model="res.groups.privilege" id="res_groups_privilege_vpa_uom">
+            <field name="name">VPA Unit of Measure</field>
+            <field name="category_id" ref="module_category_vpa_uom"/>
+        </record>
 
-    <!-- Manager Group: Can create/edit/delete UoM conversions -->
-    <record id="group_uom_conversion_manager" model="res.groups">
-        <field name="name">Manager</field>
-        <field name="category_id" ref="module_category_vpa_uom"/>
-        <field name="implied_ids" eval="[(4, ref('group_uom_conversion_user'))]"/>
-        <field name="comment">Can create, modify, and delete alternative UoM conversions.</field>
-    </record>
+        <!-- User Group: Can view UoM conversions -->
+        <record id="group_uom_conversion_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_uom"/>
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field name="comment">Can view alternative UoM conversions on products.</field>
+        </record>
 
-    <!-- Admin Group: Full access including backup/restore -->
-    <record id="group_uom_conversion_admin" model="res.groups">
-        <field name="name">Administrator</field>
-        <field name="category_id" ref="module_category_vpa_uom"/>
-        <field name="implied_ids" eval="[(4, ref('group_uom_conversion_manager'))]"/>
-        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
-        <field name="comment">Full access including backup/restore and configuration.</field>
-    </record>
+        <!-- Manager Group: Can create/edit/delete UoM conversions -->
+        <record id="group_uom_conversion_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_uom"/>
+            <field name="implied_ids" eval="[(4, ref('group_uom_conversion_user'))]"/>
+            <field name="comment">Can create, modify, and delete alternative UoM conversions.</field>
+        </record>
+
+        <!-- Admin Group: Full access including backup/restore -->
+        <record id="group_uom_conversion_admin" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="sequence">30</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_uom"/>
+            <field name="implied_ids" eval="[(4, ref('group_uom_conversion_manager'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+            <field name="comment">Full access including backup/restore and configuration.</field>
+        </record>
+
+    </data>
 
     <!-- ============================================== -->
     <!-- RECORD RULES - MULTI-COMPANY                   -->
@@ -63,6 +78,5 @@
         ]</field>
         <field name="groups" eval="[(4, ref('base.group_user'))]"/>
     </record>
-
 
 </odoo>
