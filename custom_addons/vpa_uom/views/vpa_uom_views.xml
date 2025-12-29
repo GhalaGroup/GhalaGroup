@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- VPA UNITS OF MEASURE                           -->
+    <!-- Our own UoM - Create units here                -->
+    <!-- ============================================== -->
+
+    <!-- VPA UoM List View -->
+    <record id="vpa_uom_view_list" model="ir.ui.view">
+        <field name="name">vpa.uom.view.list</field>
+        <field name="model">vpa.uom</field>
+        <field name="arch" type="xml">
+            <list string="Units of Measure" editable="bottom">
+                <field name="name" string="Unit Name"/>
+                <field name="factor" string="= Factor"/>
+                <field name="base_uom_name" string="Base Unit"/>
+                <field name="description" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- VPA UoM Form View -->
+    <record id="vpa_uom_view_form" model="ir.ui.view">
+        <field name="name">vpa.uom.view.form</field>
+        <field name="model">vpa.uom</field>
+        <field name="arch" type="xml">
+            <form string="Unit of Measure">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g., Board 2440x1220"/></h1>
+                    </div>
+                    <group>
+                        <group string="Conversion">
+                            <label for="factor" string="1 unit ="/>
+                            <div class="o_row">
+                                <field name="factor" class="oe_inline"/>
+                                <field name="base_uom_name" class="oe_inline" placeholder="e.g., m²"/>
+                            </div>
+                        </group>
+                        <group string="Settings">
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" placeholder="Optional notes..."/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Example:</strong> To create "Board 2440x1220" that equals 2.9768 m²:
+                        <br/>• Unit Name: Board 2440x1220
+                        <br/>• Factor: 2.9768
+                        <br/>• Base Unit: m²
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- VPA UoM Search View -->
+    <record id="vpa_uom_view_search" model="ir.ui.view">
+        <field name="name">vpa.uom.view.search</field>
+        <field name="model">vpa.uom</field>
+        <field name="arch" type="xml">
+            <search string="Units of Measure">
+                <field name="name"/>
+                <field name="base_uom_name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- VPA UoM Action -->
+    <record id="action_vpa_uom" model="ir.actions.act_window">
+        <field name="name">Units of Measure</field>
+        <field name="res_model">vpa.uom</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="vpa_uom_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Unit of Measure
+            </p>
+            <p>
+                Create units like "Board 2440x1220 = 2.9768 m²"
+                <br/>Then assign these UoMs to products.
+            </p>
+        </field>
+    </record>
+
+</odoo>

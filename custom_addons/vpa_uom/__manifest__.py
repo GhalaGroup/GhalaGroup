@@ -65,7 +65,7 @@ Support: info@vpa.co.tz
     'data': [
         'security/vpa_uom_security.xml',
         'security/ir.model.access.csv',
-        'views/uom_views.xml',
+        'views/vpa_uom_views.xml',
         'views/product_uom_conversion_views.xml',
         'views/product_views.xml',
         'views/mrp_production_views.xml',
