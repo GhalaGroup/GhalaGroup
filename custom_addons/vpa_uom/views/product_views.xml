@@ -51,6 +51,12 @@
                     <field name="uom_conversion_count" widget="statinfo" string="Alt. UoMs"/>
                 </button>
             </xpath>
+
+            <!-- Add Quantity On Hand in Alt. UoM after the regular qty_available -->
+            <xpath expr="//field[@name='qty_available']" position="after">
+                <field name="qty_available_alt_str" string="On Hand (Alt. UoM)"
+                       invisible="not primary_alt_uom_id"/>
+            </xpath>
         </field>
     </record>
 
