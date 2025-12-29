@@ -1,6 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_vpa_uom_user,vpa.uom.user,model_vpa_uom,vpa_uom.group_uom_conversion_user,1,0,0,0
-access_vpa_uom_manager,vpa.uom.manager,model_vpa_uom,vpa_uom.group_uom_conversion_manager,1,1,1,1
+access_uom_uom_vpa_manager,uom.uom.vpa.manager,uom.model_uom_uom,vpa_uom.group_uom_conversion_manager,1,1,1,1
 access_product_uom_conversion_user,product.uom.conversion.user,model_product_uom_conversion,vpa_uom.group_uom_conversion_user,1,0,0,0
 access_product_uom_conversion_manager,product.uom.conversion.manager,model_product_uom_conversion,vpa_uom.group_uom_conversion_manager,1,1,1,1
 access_uom_conversion_backup_user,uom.conversion.backup.user,model_uom_conversion_backup,vpa_uom.group_uom_conversion_user,1,0,0,0
