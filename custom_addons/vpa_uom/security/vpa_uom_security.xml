@@ -45,7 +45,6 @@
             <field name="sequence">30</field>
             <field name="privilege_id" ref="res_groups_privilege_vpa_uom"/>
             <field name="implied_ids" eval="[(4, ref('group_uom_conversion_manager'))]"/>
-            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
             <field name="comment">Full access including backup/restore and configuration.</field>
         </record>
 
