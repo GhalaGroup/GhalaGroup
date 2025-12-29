@@ -2,21 +2,34 @@
 <odoo>
 
     <!-- ============================================== -->
-    <!-- MENUS - Alternative UoM Conversions            -->
+    <!-- MENUS - Units of Measure Management            -->
     <!-- ============================================== -->
 
-    <!-- Menu 1: Inventory > Configuration > Alternative UoM Conversions -->
-    <menuitem id="menu_product_uom_conversion"
-              name="Alternative UoM Conversions"
+    <!-- Parent Menu: Inventory > Configuration > Units of Measure -->
+    <menuitem id="menu_uom_root"
+              name="Units of Measure"
               parent="stock.menu_stock_config_settings"
-              action="action_product_uom_conversion"
               sequence="24"/>
 
-    <!-- Menu 2: Settings > Technical > Alternative UoM Conversions -->
-    <menuitem id="menu_product_uom_conversion_settings"
-              name="Alternative UoM Conversions"
-              parent="base.menu_custom"
+    <!-- Submenu 1: Units of Measure (create UoMs here) -->
+    <menuitem id="menu_uom_uom"
+              name="Units of Measure"
+              parent="menu_uom_root"
+              action="action_uom_uom_vpa"
+              sequence="10"/>
+
+    <!-- Submenu 2: Product Conversions (assign UoMs to products) -->
+    <menuitem id="menu_product_uom_conversion"
+              name="Product Conversions"
+              parent="menu_uom_root"
               action="action_product_uom_conversion"
+              sequence="20"/>
+
+    <!-- Settings > Technical > Units of Measure -->
+    <menuitem id="menu_uom_settings"
+              name="Units of Measure"
+              parent="base.menu_custom"
+              action="action_uom_uom_vpa"
               sequence="50"/>
 
 </odoo>
