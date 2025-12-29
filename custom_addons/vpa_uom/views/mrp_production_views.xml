@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- MRP Production Form View - Add Alternative UoM to Components -->
+    <record id="mrp_production_form_view_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.vpa.uom</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add allowed UoMs for finished product -->
+            <xpath expr="//field[@name='product_uom_id']" position="attributes">
+                <attribute name="domain">[('id', 'in', allowed_uom_ids)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_uom_id']" position="before">
+                <field name="allowed_uom_ids" invisible="1"/>
+            </xpath>
+
+            <!-- Add Alt. Qty column to Components (raw materials) -->
+            <xpath expr="//field[@name='move_raw_ids']//field[@name='product_uom_qty']" position="after">
+                <field name="qty_alt_uom_mo_str" string="Alt. Qty" readonly="1" optional="show"/>
+            </xpath>
+
+            <!-- Add Alt. Qty column to Finished Products -->
+            <xpath expr="//field[@name='move_finished_ids']//field[@name='product_uom_qty']" position="after">
+                <field name="qty_alt_uom_str" string="Alt. Qty" readonly="1" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- MRP Production Tree View - Add Alternative UoM Display -->
+    <record id="mrp_production_tree_view_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">mrp.production.tree.inherit.vpa.uom</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Show product_uom_id for clarity -->
+            <xpath expr="//field[@name='product_qty']" position="after">
+                <field name="product_uom_id" groups="uom.group_uom" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BOM Line Tree View - Add Alternative UoM Support -->
+    <record id="mrp_bom_line_view_tree_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">mrp.bom.line.tree.inherit.vpa.uom</field>
+        <field name="model">mrp.bom.line</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_component_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Add allowed UoMs domain -->
+            <xpath expr="//field[@name='product_uom_id']" position="attributes">
+                <attribute name="domain">[('id', 'in', allowed_uom_ids)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_uom_id']" position="before">
+                <field name="allowed_uom_ids" column_invisible="1"/>
+            </xpath>
+            <!-- Add base equivalent display -->
+            <xpath expr="//field[@name='product_qty']" position="after">
+                <field name="qty_base_uom_str" string="Base Equiv." optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BOM Form View - Add Alternative UoM Support to Components -->
+    <record id="mrp_bom_form_view_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherit.vpa.uom</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add allowed UoMs domain to BOM components -->
+            <xpath expr="//field[@name='bom_line_ids']//field[@name='product_uom_id']" position="attributes">
+                <attribute name="domain">[('id', 'in', allowed_uom_ids)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='bom_line_ids']//field[@name='product_uom_id']" position="before">
+                <field name="allowed_uom_ids" column_invisible="1"/>
+            </xpath>
+            <!-- Add base equivalent display -->
+            <xpath expr="//field[@name='bom_line_ids']//field[@name='product_qty']" position="after">
+                <field name="qty_base_uom_str" string="Base Equiv." optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Move (Raw Materials) - Show Alternative UoM in picking operations -->
+    <record id="stock_move_tree_view_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.move.tree.inherit.vpa.uom</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_qty']" position="after">
+                <field name="qty_alt_uom_str" string="Alt. Qty" optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Picking Operations - Show Alternative UoM -->
+    <record id="stock_picking_form_view_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.vpa.uom</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. Qty to move lines in detailed operations -->
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_uom_qty']" position="after">
+                <field name="qty_alt_uom_str" string="Alt. Qty" optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

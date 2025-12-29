@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- UOM CONVERSION BACKUP VIEWS                    -->
+    <!-- ============================================== -->
+
+    <!-- Backup Tree View -->
+    <record id="uom_conversion_backup_view_tree" model="ir.ui.view">
+        <field name="name">uom.conversion.backup.view.tree</field>
+        <field name="model">uom.conversion.backup</field>
+        <field name="arch" type="xml">
+            <tree string="UoM Conversion Backups">
+                <field name="name"/>
+                <field name="backup_date"/>
+                <field name="backup_type" badge="True"
+                       decoration-info="backup_type == 'manual'"
+                       decoration-warning="backup_type == 'auto_uninstall'"/>
+                <field name="conversion_count" string="Conversions"/>
+                <field name="product_count" string="Products"/>
+                <field name="is_restored" widget="boolean"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Backup Form View -->
+    <record id="uom_conversion_backup_view_form" model="ir.ui.view">
+        <field name="name">uom.conversion.backup.view.form</field>
+        <field name="model">uom.conversion.backup</field>
+        <field name="arch" type="xml">
+            <form string="UoM Conversion Backup">
+                <header>
+                    <button name="action_restore" type="object"
+                            string="Restore" class="btn-primary"
+                            invisible="is_restored"
+                            confirm="This will restore all conversions from this backup. Existing conversions with the same product/UoM will be updated. Continue?"/>
+                    <button name="action_download_json" type="object"
+                            string="Download JSON" class="btn-secondary"
+                            icon="fa-download"/>
+                    <field name="is_restored" widget="badge"
+                           decoration-success="is_restored"
+                           decoration-muted="not is_restored"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="backup_date"/>
+                            <field name="backup_type"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="conversion_count"/>
+                            <field name="product_count"/>
+                        </group>
+                    </group>
+                    <group string="Restore Information" invisible="not is_restored">
+                        <group>
+                            <field name="restored_date"/>
+                            <field name="restored_by_id"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Backup Data (JSON)" groups="base.group_no_one">
+                        <field name="backup_data" nolabel="1" colspan="2" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Backup Action -->
+    <record id="action_uom_conversion_backup" model="ir.actions.act_window">
+        <field name="name">UoM Conversion Backups</field>
+        <field name="res_model">uom.conversion.backup</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No backups yet.
+            </p>
+            <p>
+                Use the Export/Import wizard to create backups of your UoM conversions.
+                Backups are also created automatically before module uninstall.
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- BACKUP WIZARD VIEWS                            -->
+    <!-- ============================================== -->
+
+    <!-- Backup Wizard Form -->
+    <record id="uom_conversion_backup_wizard_view_form" model="ir.ui.view">
+        <field name="name">uom.conversion.backup.wizard.view.form</field>
+        <field name="model">uom.conversion.backup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export/Import UoM Conversions">
+                <group>
+                    <field name="action_type" widget="radio"/>
+                </group>
+                <group invisible="action_type != 'export'">
+                    <field name="company_id"
+                           groups="base.group_multi_company"
+                           placeholder="All companies"/>
+                    <div class="alert alert-info" role="alert" colspan="2">
+                        <strong>Export:</strong> Creates a JSON backup of all alternative UoM conversions.
+                        You can use this file to restore conversions if the module is reinstalled.
+                    </div>
+                </group>
+                <group invisible="action_type != 'import'">
+                    <field name="import_file" filename="import_filename"/>
+                    <field name="import_filename" invisible="1"/>
+                    <div class="alert alert-warning" role="alert" colspan="2">
+                        <strong>Import:</strong> Restores conversions from a previously exported JSON file.
+                        Existing conversions will be updated, new ones will be created.
+                    </div>
+                </group>
+                <footer>
+                    <button name="action_execute" type="object"
+                            string="Export" class="btn-primary"
+                            invisible="action_type != 'export'"/>
+                    <button name="action_execute" type="object"
+                            string="Import" class="btn-primary"
+                            invisible="action_type != 'import'"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Backup Wizard Action -->
+    <record id="action_uom_conversion_backup_wizard" model="ir.actions.act_window">
+        <field name="name">Export/Import UoM Conversions</field>
+        <field name="res_model">uom.conversion.backup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- MENU ITEMS                                     -->
+    <!-- ============================================== -->
+
+    <!-- Menu: Inventory > Configuration > UoM Conversion Backups -->
+    <menuitem id="menu_uom_conversion_backup"
+              name="UoM Conversion Backups"
+              parent="stock.menu_stock_config_settings"
+              action="action_uom_conversion_backup"
+              sequence="26"/>
+
+    <!-- Server Action: Create Backup (for toolbar) -->
+    <record id="action_create_uom_backup" model="ir.actions.server">
+        <field name="name">Create Backup</field>
+        <field name="model_id" ref="model_product_uom_conversion"/>
+        <field name="binding_model_id" ref="model_product_uom_conversion"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+backup = env['uom.conversion.backup'].export_all_conversions(backup_type='manual')
+if backup:
+    action = backup.action_download_json()
+</field>
+    </record>
+
+</odoo>

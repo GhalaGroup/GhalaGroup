@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product UoM Conversion Tree View -->
+    <record id="product_uom_conversion_view_tree" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.tree</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <tree string="Alternative UoMs" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="uom_id" options="{'no_create': True}"/>
+                <field name="alt_qty"/>
+                <field name="base_uom_id" readonly="1"/>
+                <field name="base_qty"/>
+                <field name="name" optional="show"/>
+                <field name="rounding" optional="hide"/>
+                <field name="factor" readonly="1" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Product UoM Conversion Form View -->
+    <record id="product_uom_conversion_view_form" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.form</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <form string="Alternative UoM">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_tmpl_id" readonly="1"/>
+                            <field name="uom_id" options="{'no_create': True}"/>
+                            <field name="name" placeholder="e.g., Full board 1220x2440mm"/>
+                        </group>
+                        <group>
+                            <field name="base_uom_id" readonly="1"/>
+                            <field name="rounding"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Conversion">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <label for="alt_qty"/>
+                                <field name="alt_qty" class="oe_inline"/>
+                                <span class="oe_read_only"> </span>
+                                <field name="uom_id" class="oe_inline" readonly="1" options="{'no_open': True}"/>
+                            </div>
+                            <div class="col-md-2 text-center pt-4">
+                                <strong>=</strong>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="base_qty"/>
+                                <field name="base_qty" class="oe_inline"/>
+                                <span class="oe_read_only"> </span>
+                                <field name="base_uom_id" class="oe_inline" readonly="1" options="{'no_open': True}"/>
+                            </div>
+                        </div>
+                    </group>
+                    <group string="Computed Factors" groups="base.group_no_one">
+                        <field name="factor" readonly="1"/>
+                        <field name="inverse_factor" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Product UoM Conversion Search View -->
+    <record id="product_uom_conversion_view_search" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.search</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <search string="Alternative UoMs">
+                <field name="product_tmpl_id"/>
+                <field name="uom_id"/>
+                <field name="name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="group_product" context="{'group_by': 'product_tmpl_id'}"/>
+                    <filter string="Alternative UoM" name="group_uom" context="{'group_by': 'uom_id'}"/>
+                    <filter string="Company" name="group_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for standalone view -->
+    <record id="action_product_uom_conversion" model="ir.actions.act_window">
+        <field name="name">Alternative UoM Conversions</field>
+        <field name="res_model">product.uom.conversion</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="product_uom_conversion_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No alternative UoM conversions defined yet.
+            </p>
+            <p>
+                Alternative UoMs allow you to define product-specific conversion factors.
+                For example, one Board of MDF 18mm equals 2.9768 m².
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- VPA UOM SECURITY GROUPS                        -->
+    <!-- ============================================== -->
+
+    <record id="module_category_vpa_uom" model="ir.module.category">
+        <field name="name">VPA Unit of Measure</field>
+        <field name="description">Category for VPA UoM module security groups</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- User Group: Can view UoM conversions -->
+    <record id="group_uom_conversion_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_vpa_uom"/>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+        <field name="comment">Can view alternative UoM conversions on products.</field>
+    </record>
+
+    <!-- Manager Group: Can create/edit/delete UoM conversions -->
+    <record id="group_uom_conversion_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_vpa_uom"/>
+        <field name="implied_ids" eval="[(4, ref('group_uom_conversion_user'))]"/>
+        <field name="comment">Can create, modify, and delete alternative UoM conversions.</field>
+    </record>
+
+    <!-- Admin Group: Full access including backup/restore -->
+    <record id="group_uom_conversion_admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="category_id" ref="module_category_vpa_uom"/>
+        <field name="implied_ids" eval="[(4, ref('group_uom_conversion_manager'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Full access including backup/restore and configuration.</field>
+    </record>
+
+    <!-- ============================================== -->
+    <!-- RECORD RULES - MULTI-COMPANY                   -->
+    <!-- ============================================== -->
+
+    <!-- Product UoM Conversion: Company-based access -->
+    <record id="product_uom_conversion_company_rule" model="ir.rule">
+        <field name="name">Product UoM Conversion: Multi-Company</field>
+        <field name="model_id" ref="model_product_uom_conversion"/>
+        <field name="domain_force">[
+            '|',
+            ('company_id', '=', False),
+            ('company_id', 'in', company_ids)
+        ]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- UoM Conversion Backup: Company-based access -->
+    <record id="uom_conversion_backup_company_rule" model="ir.rule">
+        <field name="name">UoM Conversion Backup: Multi-Company</field>
+        <field name="model_id" ref="model_uom_conversion_backup"/>
+        <field name="domain_force">[
+            '|',
+            ('company_id', '=', False),
+            ('company_id', 'in', company_ids)
+        ]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+
+</odoo>
