@@ -31,12 +31,13 @@
         </record>
 
         <!-- Manager Group: Can create/edit/delete UoM conversions -->
+        <!-- Also implies uom.group_uom to allow creating standard UoMs -->
         <record id="group_uom_conversion_manager" model="res.groups">
             <field name="name">Manager</field>
             <field name="sequence">20</field>
             <field name="privilege_id" ref="res_groups_privilege_vpa_uom"/>
-            <field name="implied_ids" eval="[(4, ref('group_uom_conversion_user'))]"/>
-            <field name="comment">Can create, modify, and delete alternative UoM conversions.</field>
+            <field name="implied_ids" eval="[(4, ref('group_uom_conversion_user')), (4, ref('uom.group_uom'))]"/>
+            <field name="comment">Can create, modify, and delete alternative UoM conversions and standard UoMs.</field>
         </record>
 
         <!-- Admin Group: Full access including backup/restore -->
