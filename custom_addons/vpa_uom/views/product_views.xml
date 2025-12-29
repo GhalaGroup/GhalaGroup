@@ -20,7 +20,7 @@
                     </group>
                     <separator string="Alternative Units of Measure"/>
                     <field name="uom_conversion_ids" context="{'default_product_tmpl_id': id, 'default_company_id': company_id}">
-                        <tree string="Alternative UoMs" editable="bottom">
+                        <list string="Alternative UoMs" editable="bottom">
                             <field name="sequence" widget="handle"/>
                             <field name="uom_id" options="{'no_create': True}" required="1"/>
                             <field name="alt_qty" required="1"/>
@@ -29,7 +29,7 @@
                             <field name="name" optional="show" placeholder="Description"/>
                             <field name="rounding" optional="hide"/>
                             <field name="company_id" groups="base.group_multi_company" optional="show"/>
-                        </tree>
+                        </list>
                     </field>
                     <div class="alert alert-info" role="alert">
                         <strong>How it works:</strong> Define alternative units with product-specific conversions.

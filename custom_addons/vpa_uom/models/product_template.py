@@ -159,7 +159,7 @@ class ProductTemplate(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Alternative UoMs'),
             'res_model': 'product.uom.conversion',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('product_tmpl_id', '=', self.id)],
             'context': {'default_product_tmpl_id': self.id},
         }
