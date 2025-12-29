@@ -13,13 +13,12 @@
         </field>
     </record>
 
-    <!-- Stock Quant List View (Stock Report) - Add Alt. UoM Qty
-         view_stock_quant_tree has mode="primary" and inherits from view_stock_quant_tree_simple
-         which has the quantity field -->
-    <record id="view_stock_quant_tree_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">stock.quant.tree.inherit.vpa.uom</field>
+    <!-- Stock Quant Simple List View - Add Alt. UoM Qty
+         This is the base view that view_stock_quant_tree inherits from -->
+    <record id="view_stock_quant_tree_simple_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.simple.inherit.vpa.uom</field>
         <field name="model">stock.quant</field>
-        <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_simple"/>
         <field name="arch" type="xml">
             <!-- Add Alt. UoM quantity after the main quantity field -->
             <xpath expr="//field[@name='quantity']" position="after">
