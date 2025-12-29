@@ -23,9 +23,11 @@
                         <list string="Alternative UoMs" editable="bottom">
                             <field name="sequence" widget="handle"/>
                             <field name="alt_qty" string="Qty" required="1"/>
+                            <button string="x" class="btn btn-link p-0" disabled="1"/>
                             <field name="uom_id" string="Alternative UoM" required="1"
                                    options="{'no_create': False, 'no_quick_create': False, 'can_create': True}"/>
-                            <field name="base_qty" string="=" required="1" digits="[16, 4]"/>
+                            <button string="=" class="btn btn-link p-0" disabled="1"/>
+                            <field name="base_qty" string="Base Qty" required="1" digits="[16, 4]"/>
                             <field name="base_uom_id" string="Base UoM" readonly="1"/>
                             <field name="name" string="Description" optional="show" placeholder="Description"/>
                             <field name="rounding" optional="hide"/>
