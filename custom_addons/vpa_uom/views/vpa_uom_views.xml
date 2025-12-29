@@ -14,7 +14,7 @@
         <field name="arch" type="xml">
             <list string="Units of Measure" editable="bottom">
                 <field name="name" string="Unit Name"/>
-                <field name="relative_factor" string="= Quantity"/>
+                <field name="relative_factor" string="= Quantity" digits="[16, 4]"/>
                 <field name="relative_uom_id" string="Reference Unit"/>
                 <field name="product_count" string="Products" readonly="1"/>
                 <field name="alt_product_count" string="Alt. Products" readonly="1"/>
@@ -94,7 +94,7 @@
                         <group string="Conversion">
                             <label for="relative_factor" string="1 unit ="/>
                             <div class="o_row">
-                                <field name="relative_factor" class="oe_inline"/>
+                                <field name="relative_factor" class="oe_inline" digits="[16, 4]"/>
                                 <field name="relative_uom_id" class="oe_inline" placeholder="Reference Unit (e.g., m²)"/>
                             </div>
                         </group>
