@@ -46,7 +46,7 @@
                             <div class="o_kanban_record_body">
                                 <div t-if="record.relative_uom_id.value">
                                     <span class="text-muted">1 unit = </span>
-                                    <field name="relative_factor"/>
+                                    <t t-out="record.relative_factor.raw_value.toFixed(4)"/>
                                     <span> </span>
                                     <field name="relative_uom_id"/>
                                 </div>
