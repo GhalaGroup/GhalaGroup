@@ -63,6 +63,7 @@ class ProductUomConversion(models.Model):
     base_qty = fields.Float(
         string='Base Qty',
         required=True,
+        default=1.0,
         digits='Product Unit of Measure',
         help="Equivalent quantity in base UoM (e.g., 2.9768 for '2.9768 m²')",
     )
@@ -126,6 +127,23 @@ class ProductUomConversion(models.Model):
             else:
                 conv.factor = 0.0
                 conv.inverse_factor = 0.0
+
+    @api.onchange('uom_id', 'alt_qty')
+    def _onchange_uom_id(self):
+        """Auto-calculate base_qty when UoM or alt_qty changes.
+
+        Uses the UoM's relative_factor to pre-fill the base quantity.
+        For example, if Board 2440x1220 has relative_factor=2.9768 (meaning 1 Board = 2.9768 m²),
+        and alt_qty=1, then base_qty will be set to 2.9768.
+        """
+        for conv in self:
+            if conv.uom_id and conv.alt_qty:
+                # Use the UoM's relative_factor if it has a reference unit
+                if conv.uom_id.relative_uom_id:
+                    conv.base_qty = conv.alt_qty * conv.uom_id.relative_factor
+                elif not conv.base_qty:
+                    # Default to alt_qty if no relative factor (1:1 conversion)
+                    conv.base_qty = conv.alt_qty
 
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):
