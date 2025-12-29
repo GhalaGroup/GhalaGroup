@@ -5,4 +5,3 @@ access_uom_conversion_backup_user,uom.conversion.backup.user,model_uom_conversio
 access_uom_conversion_backup_admin,uom.conversion.backup.admin,model_uom_conversion_backup,vpa_uom.group_uom_conversion_admin,1,1,1,1
 access_uom_conversion_backup_wizard,uom.conversion.backup.wizard,model_uom_conversion_backup_wizard,vpa_uom.group_uom_conversion_admin,1,1,1,1
 access_uom_uom_vpa_manager,uom.uom.vpa.manager,uom.model_uom_uom,vpa_uom.group_uom_conversion_manager,1,1,1,1
-access_uom_category_vpa_manager,uom.category.vpa.manager,uom.model_uom_category,vpa_uom.group_uom_conversion_manager,1,1,1,1
