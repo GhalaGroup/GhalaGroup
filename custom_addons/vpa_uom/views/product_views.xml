@@ -60,23 +60,4 @@
         </field>
     </record>
 
-    <!-- Product Template Kanban View - Add Alt. UoM Qty -->
-    <record id="product_template_kanban_view_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">product.template.kanban.inherit.vpa.uom</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_kanban_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='qty_available']" position="after">
-                <field name="qty_available_alt_str"/>
-                <field name="primary_alt_uom_id"/>
-            </xpath>
-            <!-- Add alt qty after On hand line -->
-            <xpath expr="//div[contains(@t-if, 'qty_available')]" position="after">
-                <div t-if="record.qty_available_alt_str.raw_value">
-                    <span t-out="record.qty_available_alt_str.value"/>
-                </div>
-            </xpath>
-        </field>
-    </record>
-
 </odoo>
