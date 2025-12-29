@@ -128,21 +128,6 @@ class ProductUomConversion(models.Model):
                 conv.factor = 0.0
                 conv.inverse_factor = 0.0
 
-    @api.onchange('uom_id')
-    def _onchange_uom_id(self):
-        """Suggest base_qty when UoM is selected (only if base_qty is still default).
-
-        Since conversions are product-specific, this only suggests a value
-        if base_qty hasn't been modified yet. Users should enter the exact
-        conversion factor for each product.
-        """
-        for conv in self:
-            # Only auto-fill if base_qty is still the default (1.0)
-            # This allows product-specific values to be entered
-            if conv.uom_id and conv.base_qty == 1.0 and conv.alt_qty == 1.0:
-                if conv.uom_id.relative_uom_id and conv.uom_id.relative_factor != 1.0:
-                    conv.base_qty = conv.uom_id.relative_factor
-
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):
         """Ensure alternative UoM is different from base UoM."""
