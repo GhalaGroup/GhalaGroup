@@ -9,11 +9,11 @@
             <list string="Alternative UoMs" editable="bottom">
                 <field name="sequence" widget="handle"/>
                 <field name="product_tmpl_id"/>
-                <field name="uom_id"/>
-                <field name="alt_qty"/>
-                <field name="base_uom_id" readonly="1"/>
-                <field name="base_qty"/>
-                <field name="name" optional="show"/>
+                <field name="alt_qty" string="Qty"/>
+                <field name="uom_id" string="Alternative UoM"/>
+                <field name="base_qty" string="= Base Qty" digits="[16, 4]"/>
+                <field name="base_uom_id" string="Base UoM" readonly="1"/>
+                <field name="name" string="Description" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
             </list>
         </field>
