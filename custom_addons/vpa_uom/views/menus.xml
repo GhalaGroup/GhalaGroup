@@ -2,16 +2,21 @@
 <odoo>
 
     <!-- ============================================== -->
-    <!-- INVENTORY MENU - Alternative UoM Conversions   -->
+    <!-- MENUS - Alternative UoM Conversions            -->
     <!-- ============================================== -->
 
-    <!-- Single menu: Inventory > Configuration > Alternative UoM Conversions -->
-    <!-- This shows all product-specific conversions in one place -->
-    <!-- UoMs are created automatically when users type new names in the product form -->
+    <!-- Menu 1: Inventory > Configuration > Alternative UoM Conversions -->
     <menuitem id="menu_product_uom_conversion"
               name="Alternative UoM Conversions"
               parent="stock.menu_stock_config_settings"
               action="action_product_uom_conversion"
               sequence="24"/>
+
+    <!-- Menu 2: Settings > Technical > Alternative UoM Conversions -->
+    <menuitem id="menu_product_uom_conversion_settings"
+              name="Alternative UoM Conversions"
+              parent="base.menu_custom"
+              action="action_product_uom_conversion"
+              sequence="50"/>
 
 </odoo>
