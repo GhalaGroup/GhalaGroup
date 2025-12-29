@@ -77,12 +77,12 @@
                 <field name="product_tmpl_id"/>
                 <field name="uom_id"/>
                 <field name="name"/>
+                <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Product" name="group_product" context="{'group_by': 'product_tmpl_id'}"/>
-                    <filter string="Alternative UoM" name="group_uom" context="{'group_by': 'uom_id'}"/>
-                    <filter string="Company" name="group_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-                </group>
+                <separator/>
+                <filter string="Product" name="group_product" context="{'group_by': 'product_tmpl_id'}"/>
+                <filter string="Alternative UoM" name="group_uom" context="{'group_by': 'uom_id'}"/>
+                <filter string="Company" name="group_company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
             </search>
         </field>
     </record>
