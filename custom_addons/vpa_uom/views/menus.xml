@@ -2,27 +2,16 @@
 <odoo>
 
     <!-- ============================================== -->
-    <!-- INVENTORY MENU - UoM Management                -->
+    <!-- INVENTORY MENU - Alternative UoM Conversions   -->
     <!-- ============================================== -->
 
-    <!-- Parent Menu: Inventory > Configuration > Units of Measure -->
-    <menuitem id="menu_uom_config"
-              name="Units of Measure"
-              parent="stock.menu_stock_config_settings"
-              sequence="24"/>
-
-    <!-- Menu: Units of Measure (Standard Odoo UoMs) -->
-    <menuitem id="menu_uom_uom"
-              name="Units of Measure"
-              parent="menu_uom_config"
-              action="action_uom_uom_vpa"
-              sequence="10"/>
-
-    <!-- Menu: Alternative UoM Conversions (Product-Specific) -->
+    <!-- Single menu: Inventory > Configuration > Alternative UoM Conversions -->
+    <!-- This shows all product-specific conversions in one place -->
+    <!-- UoMs are created automatically when users type new names in the product form -->
     <menuitem id="menu_product_uom_conversion"
-              name="Product-Specific Conversions"
-              parent="menu_uom_config"
+              name="Alternative UoM Conversions"
+              parent="stock.menu_stock_config_settings"
               action="action_product_uom_conversion"
-              sequence="20"/>
+              sequence="24"/>
 
 </odoo>

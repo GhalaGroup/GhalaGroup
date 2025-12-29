@@ -2,6 +2,7 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
+from . import uom_uom
 from . import product_uom_conversion
 from . import product_template
 from . import stock_move

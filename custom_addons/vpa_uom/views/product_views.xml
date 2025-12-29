@@ -22,19 +22,21 @@
                     <field name="uom_conversion_ids" context="{'default_product_tmpl_id': id, 'default_company_id': company_id}">
                         <list string="Alternative UoMs" editable="bottom">
                             <field name="sequence" widget="handle"/>
-                            <field name="uom_id" options="{'no_create': True}" required="1"/>
-                            <field name="alt_qty" required="1"/>
-                            <field name="base_uom_id" column_invisible="1"/>
-                            <field name="base_qty" required="1"/>
+                            <field name="uom_id" string="Alternative UoM" required="1"
+                                   options="{'no_create': False, 'no_quick_create': False, 'can_create': True}"/>
+                            <field name="alt_qty" string="Qty" required="1"/>
+                            <field name="base_uom_id" string="=" readonly="1"/>
+                            <field name="base_qty" string="Base Qty" required="1"/>
                             <field name="name" optional="show" placeholder="Description"/>
                             <field name="rounding" optional="hide"/>
                             <field name="company_id" groups="base.group_multi_company" optional="show"/>
                         </list>
                     </field>
                     <div class="alert alert-info" role="alert">
-                        <strong>How it works:</strong> Define alternative units with product-specific conversions.
-                        <br/>Example: 1 Board = 2.9768 m² means this specific product's board is 2.9768 m².
-                        <br/>The first alternative UoM in the list is used for display in inventory views.
+                        <strong>SAP-Style Alternative UoM:</strong>
+                        <br/>Select an existing UoM or type a new name to create one automatically.
+                        <br/>Example: Type "Board 2440x1220", set Qty=1, Base Qty=2.9768 (in m²)
+                        <br/>The conversion is product-specific - same UoM can have different factors on different products.
                     </div>
                 </page>
             </xpath>

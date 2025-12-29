@@ -11,6 +11,8 @@ class ProductUomConversion(models.Model):
 
     This model stores alternative units of measure with product-specific
     conversion factors, similar to SAP's Alternative Unit of Measure (AUoM).
+
+    Key feature: Auto-creates UoM if it doesn't exist when user types a new name.
     """
     _name = 'product.uom.conversion'
     _description = 'Product UoM Conversion'
@@ -32,12 +34,15 @@ class ProductUomConversion(models.Model):
         string='Description',
         help="Optional description for this conversion (e.g., 'Full board 1220x2440mm')",
     )
+
+    # Alternative UoM - can select existing or create new
     uom_id = fields.Many2one(
         'uom.uom',
         string='Alternative UoM',
         required=True,
-        help="The alternative unit of measure for this product.",
+        help="Select an existing UoM or type a new name to create one.",
     )
+
     base_uom_id = fields.Many2one(
         'uom.uom',
         string='Base UoM',
@@ -121,20 +126,6 @@ class ProductUomConversion(models.Model):
             else:
                 conv.factor = 0.0
                 conv.inverse_factor = 0.0
-
-    @api.constrains('uom_id', 'base_uom_id')
-    def _check_uom_category(self):
-        """Ensure alternative UoM is in the same category as base UoM."""
-        for conv in self:
-            if conv.uom_id and conv.base_uom_id:
-                if conv.uom_id.category_id != conv.base_uom_id.category_id:
-                    raise ValidationError(_(
-                        "Alternative UoM '%(alt_uom)s' must be in the same category "
-                        "as the base UoM '%(base_uom)s' (%(category)s).",
-                        alt_uom=conv.uom_id.name,
-                        base_uom=conv.base_uom_id.name,
-                        category=conv.base_uom_id.category_id.name,
-                    ))
 
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):
