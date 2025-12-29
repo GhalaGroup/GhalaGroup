@@ -68,6 +68,7 @@ Support: info@vpa.co.tz
         'views/vpa_uom_views.xml',
         'views/product_uom_conversion_views.xml',
         'views/product_views.xml',
+        'views/stock_views.xml',
         'views/mrp_production_views.xml',
         'views/menus.xml',
         'views/backup_views.xml',

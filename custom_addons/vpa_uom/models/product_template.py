@@ -216,3 +216,8 @@ class ProductProduct(models.Model):
         """Convert quantity from base UoM (delegate to template)."""
         self.ensure_one()
         return self.product_tmpl_id.convert_qty_from_base(qty, to_uom, round_result=round_result)
+
+    def action_view_uom_conversions(self):
+        """Open the alternative UoM conversions for this product (delegate to template)."""
+        self.ensure_one()
+        return self.product_tmpl_id.action_view_uom_conversions()
