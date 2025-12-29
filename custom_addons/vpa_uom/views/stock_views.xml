@@ -1,39 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Stock Picking Form View - Override quantity field for 4 decimals -->
-    <record id="view_picking_form_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">stock.picking.form.inherit.vpa.uom</field>
-        <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="stock.view_picking_form"/>
-        <field name="arch" type="xml">
-            <!-- Override quantity field in operations tab to show 4 decimals -->
-            <xpath expr="//field[@name='move_ids_without_package']/list//field[@name='product_uom_qty']" position="attributes">
-                <attribute name="digits">[16, 4]</attribute>
-            </xpath>
-            <xpath expr="//field[@name='move_ids_without_package']/list//field[@name='quantity']" position="attributes">
-                <attribute name="digits">[16, 4]</attribute>
-            </xpath>
-        </field>
-    </record>
-
     <!-- Stock Move List View - Override quantity for 4 decimals -->
     <record id="view_move_tree_inherit_vpa_uom" model="ir.ui.view">
         <field name="name">stock.move.list.inherit.vpa.uom</field>
         <field name="model">stock.move</field>
         <field name="inherit_id" ref="stock.view_move_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='product_uom_qty']" position="attributes">
-                <attribute name="digits">[16, 4]</attribute>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Stock Move Form View - Override quantity for 4 decimals -->
-    <record id="view_move_form_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">stock.move.form.inherit.vpa.uom</field>
-        <field name="model">stock.move</field>
-        <field name="inherit_id" ref="stock.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_uom_qty']" position="attributes">
                 <attribute name="digits">[16, 4]</attribute>
