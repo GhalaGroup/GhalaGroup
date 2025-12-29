@@ -128,22 +128,20 @@ class ProductUomConversion(models.Model):
                 conv.factor = 0.0
                 conv.inverse_factor = 0.0
 
-    @api.onchange('uom_id', 'alt_qty')
+    @api.onchange('uom_id')
     def _onchange_uom_id(self):
-        """Auto-calculate base_qty when UoM or alt_qty changes.
+        """Suggest base_qty when UoM is selected (only if base_qty is still default).
 
-        Uses the UoM's relative_factor to pre-fill the base quantity.
-        For example, if Board 2440x1220 has relative_factor=2.9768 (meaning 1 Board = 2.9768 m²),
-        and alt_qty=1, then base_qty will be set to 2.9768.
+        Since conversions are product-specific, this only suggests a value
+        if base_qty hasn't been modified yet. Users should enter the exact
+        conversion factor for each product.
         """
         for conv in self:
-            if conv.uom_id and conv.alt_qty:
-                # Use the UoM's relative_factor if it has a reference unit
-                if conv.uom_id.relative_uom_id:
-                    conv.base_qty = conv.alt_qty * conv.uom_id.relative_factor
-                elif not conv.base_qty:
-                    # Default to alt_qty if no relative factor (1:1 conversion)
-                    conv.base_qty = conv.alt_qty
+            # Only auto-fill if base_qty is still the default (1.0)
+            # This allows product-specific values to be entered
+            if conv.uom_id and conv.base_qty == 1.0 and conv.alt_qty == 1.0:
+                if conv.uom_id.relative_uom_id and conv.uom_id.relative_factor != 1.0:
+                    conv.base_qty = conv.uom_id.relative_factor
 
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):

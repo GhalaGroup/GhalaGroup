@@ -35,10 +35,10 @@
                         </list>
                     </field>
                     <div class="alert alert-info" role="alert">
-                        <strong>SAP-Style Alternative UoM:</strong>
-                        <br/>Select an existing UoM or type a new name to create one automatically.
-                        <br/>Example: Type "Board 2440x1220", set Qty=1, Base Qty=2.9768 (in m²)
-                        <br/>The conversion is product-specific - same UoM can have different factors on different products.
+                        <strong>Product-Specific Conversion:</strong>
+                        <br/>1. Select or create an Alternative UoM (e.g., "Board 800x2120")
+                        <br/>2. Enter the exact Base Qty for THIS product (e.g., 1.6960 m²)
+                        <br/>Note: Each product can have a different conversion factor for the same UoM.
                     </div>
                 </page>
             </xpath>
