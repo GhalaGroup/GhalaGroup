@@ -131,7 +131,6 @@
                 <field name="name"/>
                 <field name="relative_uom_id"/>
                 <filter string="Reference Units" name="reference" domain="[('relative_uom_id', '=', False)]"/>
-                <filter string="With Products" name="with_products" domain="[('product_count', '>', 0)]"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
             </search>
