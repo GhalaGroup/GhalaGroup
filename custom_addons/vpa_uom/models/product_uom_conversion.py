@@ -53,18 +53,20 @@ class ProductUomConversion(models.Model):
     )
 
     # Conversion: alt_qty (Alternative UoM) = base_qty (Base UoM)
+    # Using explicit (16, 4) precision instead of 'Product Unit of Measure'
+    # to ensure 4 decimal places are preserved for accurate conversions
     alt_qty = fields.Float(
         string='Alt. Qty',
         required=True,
         default=1.0,
-        digits='Product Unit of Measure',
+        digits=(16, 4),
         help="Quantity in alternative UoM (e.g., 1 for '1 Board')",
     )
     base_qty = fields.Float(
         string='Base Qty',
         required=True,
         default=1.0,
-        digits='Product Unit of Measure',
+        digits=(16, 4),
         help="Equivalent quantity in base UoM (e.g., 2.9768 for '2.9768 m²')",
     )
 
@@ -130,13 +132,22 @@ class ProductUomConversion(models.Model):
 
     @api.onchange('uom_id')
     def _onchange_uom_id(self):
-        """Auto-fill base_qty from UoM's relative_factor when UoM is selected."""
+        """Auto-fill base_qty from UoM's relative_factor when UoM is selected.
+
+        Uses direct SQL query to bypass ORM decimal precision rounding
+        and preserve full precision of the relative_factor value.
+        """
         for conv in self:
             if conv.uom_id:
-                # Re-read from database to get fresh value
-                uom = self.env['uom.uom'].browse(conv.uom_id.id)
-                if uom.relative_uom_id and uom.relative_factor:
-                    conv.base_qty = uom.relative_factor
+                # Use direct SQL to get exact value without ORM rounding
+                self.env.cr.execute("""
+                    SELECT relative_factor, relative_uom_id
+                    FROM uom_uom
+                    WHERE id = %s
+                """, (conv.uom_id.id,))
+                result = self.env.cr.fetchone()
+                if result and result[1] and result[0]:  # has relative_uom_id and relative_factor
+                    conv.base_qty = result[0]
 
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):
