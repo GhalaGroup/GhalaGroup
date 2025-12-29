@@ -128,6 +128,13 @@ class ProductUomConversion(models.Model):
                 conv.factor = 0.0
                 conv.inverse_factor = 0.0
 
+    @api.onchange('uom_id')
+    def _onchange_uom_id(self):
+        """Auto-fill base_qty from UoM's relative_factor when UoM is selected."""
+        for conv in self:
+            if conv.uom_id and conv.uom_id.relative_uom_id:
+                conv.base_qty = conv.uom_id.relative_factor
+
     @api.constrains('uom_id', 'product_tmpl_id')
     def _check_not_base_uom(self):
         """Ensure alternative UoM is different from base UoM."""
