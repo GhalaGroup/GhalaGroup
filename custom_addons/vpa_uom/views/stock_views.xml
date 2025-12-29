@@ -13,28 +13,43 @@
         </field>
     </record>
 
-    <!-- Stock Quant Simple List View - Add Alt. UoM Qty for Stock Report -->
-    <record id="view_stock_quant_tree_simple_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">stock.quant.tree.simple.inherit.vpa.uom</field>
+    <!-- Stock Quant List View (Stock Report) - Add Alt. UoM Qty
+         view_stock_quant_tree has mode="primary" so we must inherit from it directly -->
+    <record id="view_stock_quant_tree_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.inherit.vpa.uom</field>
         <field name="model">stock.quant</field>
-        <field name="inherit_id" ref="stock.view_stock_quant_tree_simple"/>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
         <field name="arch" type="xml">
             <!-- Add Alt. UoM quantity after the main quantity field -->
-            <xpath expr="//list/field[@name='quantity']" position="after">
+            <xpath expr="//field[@name='quantity']" position="after">
                 <field name="qty_alt_uom" string="Alt. Qty" optional="show"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show"/>
             </xpath>
         </field>
     </record>
 
-    <!-- Stock Quant Inventory Report List View - Add Alt. UoM Qty -->
+    <!-- Stock Quant Editable List View (for managers) - Add Alt. UoM Qty -->
+    <record id="view_stock_quant_tree_editable_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.editable.inherit.vpa.uom</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. UoM quantity after the main quantity field -->
+            <xpath expr="//field[@name='quantity']" position="after">
+                <field name="qty_alt_uom" string="Alt. Qty" optional="show" readonly="1"/>
+                <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Quant Inventory Report List View (Physical Inventory) - Add Alt. UoM Qty -->
     <record id="view_stock_quant_tree_inventory_editable_inherit_vpa_uom" model="ir.ui.view">
         <field name="name">stock.quant.tree.inventory.inherit.vpa.uom</field>
         <field name="model">stock.quant</field>
         <field name="inherit_id" ref="stock.view_stock_quant_tree_inventory_editable"/>
         <field name="arch" type="xml">
             <!-- Add Alt. UoM quantity after the main quantity field -->
-            <xpath expr="//list/field[@name='quantity']" position="after">
+            <xpath expr="//field[@name='quantity']" position="after">
                 <field name="qty_alt_uom" string="Alt. On Hand" optional="show" readonly="1"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
             </xpath>
