@@ -16,8 +16,58 @@
                 <field name="name" string="Unit Name"/>
                 <field name="relative_factor" string="= Quantity"/>
                 <field name="relative_uom_id" string="Reference Unit"/>
+                <field name="product_count" string="Products" readonly="1"/>
+                <field name="alt_product_count" string="Alt. Products" readonly="1"/>
                 <field name="active" column_invisible="1"/>
             </list>
+        </field>
+    </record>
+
+    <!-- UoM Kanban View -->
+    <record id="uom_uom_view_kanban_vpa" model="ir.ui.view">
+        <field name="name">uom.uom.view.kanban.vpa</field>
+        <field name="model">uom.uom</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="relative_factor"/>
+                <field name="relative_uom_id"/>
+                <field name="product_count"/>
+                <field name="alt_product_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top mb-2">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div t-if="record.relative_uom_id.value">
+                                    <span class="text-muted">1 unit = </span>
+                                    <field name="relative_factor"/>
+                                    <span> </span>
+                                    <field name="relative_uom_id"/>
+                                </div>
+                                <div t-else="">
+                                    <span class="badge bg-primary">Reference Unit</span>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-2">
+                                <div class="oe_kanban_bottom_left">
+                                    <span class="badge bg-secondary" t-if="record.product_count.raw_value > 0">
+                                        <field name="product_count"/> Products
+                                    </span>
+                                    <span class="badge bg-info ms-1" t-if="record.alt_product_count.raw_value > 0">
+                                        <field name="alt_product_count"/> Alt.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -29,6 +79,13 @@
         <field name="arch" type="xml">
             <form string="Unit of Measure">
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_products" type="object"
+                                class="oe_stat_button" icon="fa-cubes"
+                                invisible="product_count == 0">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <label for="name"/>
                         <h1><field name="name" placeholder="e.g., Board 2440x1220"/></h1>
@@ -43,6 +100,14 @@
                         </group>
                         <group string="Settings">
                             <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Usage">
+                        <group>
+                            <field name="product_count" readonly="1" string="Products (Base UoM)"/>
+                        </group>
+                        <group>
+                            <field name="alt_product_count" readonly="1" string="Products (Alternative UoM)"/>
                         </group>
                     </group>
                     <div class="alert alert-info" role="alert">
@@ -65,6 +130,9 @@
             <search string="Units of Measure">
                 <field name="name"/>
                 <field name="relative_uom_id"/>
+                <filter string="Reference Units" name="reference" domain="[('relative_uom_id', '=', False)]"/>
+                <filter string="With Products" name="with_products" domain="[('product_count', '>', 0)]"/>
+                <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
             </search>
         </field>
@@ -74,9 +142,10 @@
     <record id="action_vpa_uom" model="ir.actions.act_window">
         <field name="name">Units of Measure</field>
         <field name="res_model">uom.uom</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'list', 'view_id': ref('uom_uom_view_list_vpa')}),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('uom_uom_view_kanban_vpa')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('uom_uom_view_form_vpa')})]"/>
         <field name="search_view_id" ref="uom_uom_view_search_vpa"/>
         <field name="help" type="html">
