@@ -7,8 +7,8 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <!-- Add Alternative UoM tab after Inventory tab -->
-            <xpath expr="//page[@name='inventory']" position="after">
+            <!-- Add Alternative UoM tab after General Info -->
+            <xpath expr="//page[@name='general_information']" position="after">
                 <page string="Alternative UoM" name="alternative_uom">
                     <group>
                         <group>
@@ -46,42 +46,6 @@
                         invisible="uom_conversion_count == 0">
                     <field name="uom_conversion_count" widget="statinfo" string="Alt. UoMs"/>
                 </button>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Sale Order Form - Show stock impact in order lines -->
-    <record id="sale_order_view_form_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">sale.order.form.inherit.vpa.uom</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_id']" position="attributes">
-                <attribute name="domain">[('id', 'in', allowed_uom_ids)]</attribute>
-            </xpath>
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_id']" position="before">
-                <field name="allowed_uom_ids" column_invisible="1"/>
-            </xpath>
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_qty']" position="after">
-                <field name="qty_base_uom_str" string="Stock Impact" optional="show" readonly="1"/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Purchase Order Form - Show stock impact in order lines -->
-    <record id="purchase_order_view_form_inherit_vpa_uom" model="ir.ui.view">
-        <field name="name">purchase.order.form.inherit.vpa.uom</field>
-        <field name="model">purchase.order</field>
-        <field name="inherit_id" ref="purchase.purchase_order_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_id']" position="attributes">
-                <attribute name="domain">[('id', 'in', allowed_uom_ids)]</attribute>
-            </xpath>
-            <xpath expr="//field[@name='order_line']//field[@name='product_uom_id']" position="before">
-                <field name="allowed_uom_ids" column_invisible="1"/>
-            </xpath>
-            <xpath expr="//field[@name='order_line']//field[@name='product_qty']" position="after">
-                <field name="qty_base_uom_str" string="Stock Impact" optional="show" readonly="1"/>
             </xpath>
         </field>
     </record>
