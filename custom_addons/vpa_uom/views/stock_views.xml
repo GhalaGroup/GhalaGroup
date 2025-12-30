@@ -25,6 +25,8 @@
             <xpath expr="//field[@name='qty_available']" position="after">
                 <field name="qty_available_alt" string="Alt. On Hand" optional="show"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_available_all_alt" string="All Alt. UoMs" optional="hide"/>
             </xpath>
         </field>
     </record>
@@ -40,6 +42,8 @@
             <xpath expr="//field[@name='product_uom_id']" position="after">
                 <field name="qty_alt_uom" string="Alt. Qty" optional="show"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide"/>
             </xpath>
         </field>
     </record>
@@ -54,6 +58,8 @@
             <xpath expr="//field[@name='product_uom_id']" position="after">
                 <field name="qty_alt_uom" string="Alt. Qty" optional="show" readonly="1"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide" readonly="1"/>
             </xpath>
         </field>
     </record>
@@ -68,6 +74,8 @@
             <xpath expr="//field[@name='product_uom_id']" position="after">
                 <field name="qty_alt_uom" string="Alt. On Hand" optional="show" readonly="1"/>
                 <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide" readonly="1"/>
             </xpath>
         </field>
     </record>

@@ -41,6 +41,13 @@ class ProductTemplate(models.Model):
         help="Formatted quantity on hand in primary alternative UoM.",
     )
 
+    # All alternative UoM quantities (for reports showing all conversions)
+    qty_available_all_alt = fields.Char(
+        string='All Alt. UoM Quantities',
+        compute='_compute_qty_all_alt',
+        help="Quantity on hand in all alternative UoMs (formatted for display).",
+    )
+
     # Allowed UoMs for selection (base + alternatives)
     allowed_uom_ids = fields.Many2many(
         'uom.uom',
@@ -81,6 +88,23 @@ class ProductTemplate(models.Model):
             else:
                 product.qty_available_alt = 0.0
                 product.qty_available_alt_str = ''
+
+    @api.depends('qty_available', 'uom_conversion_ids', 'uom_conversion_ids.uom_id',
+                 'uom_conversion_ids.factor', 'uom_conversion_ids.sequence')
+    def _compute_qty_all_alt(self):
+        """Compute quantity in ALL alternative UoMs as a formatted string."""
+        for product in self:
+            if product.uom_conversion_ids:
+                parts = []
+                for conversion in product.uom_conversion_ids.sorted('sequence'):
+                    alt_qty = conversion.convert_from_base(product.qty_available)
+                    if alt_qty == int(alt_qty):
+                        parts.append(f"{int(alt_qty)} {conversion.uom_id.name}")
+                    else:
+                        parts.append(f"{alt_qty:.2f} {conversion.uom_id.name}")
+                product.qty_available_all_alt = " | ".join(parts) if parts else ''
+            else:
+                product.qty_available_all_alt = ''
 
     @api.depends('uom_id', 'uom_conversion_ids.uom_id')
     def _compute_allowed_uom_ids(self):
@@ -187,6 +211,13 @@ class ProductProduct(models.Model):
         compute='_compute_qty_alt_variant',
     )
 
+    # All alternative UoM quantities (for reports showing all conversions)
+    qty_available_all_alt = fields.Char(
+        string='All Alt. UoM Quantities',
+        compute='_compute_qty_all_alt_variant',
+        help="Quantity on hand in all alternative UoMs (formatted for display).",
+    )
+
     @api.depends('qty_available', 'product_tmpl_id.uom_conversion_ids',
                  'product_tmpl_id.primary_alt_uom_id')
     def _compute_qty_alt_variant(self):
@@ -209,6 +240,26 @@ class ProductProduct(models.Model):
             else:
                 product.qty_available_alt = 0.0
                 product.qty_available_alt_str = ''
+
+    @api.depends('qty_available', 'product_tmpl_id.uom_conversion_ids',
+                 'product_tmpl_id.uom_conversion_ids.uom_id',
+                 'product_tmpl_id.uom_conversion_ids.factor',
+                 'product_tmpl_id.uom_conversion_ids.sequence')
+    def _compute_qty_all_alt_variant(self):
+        """Compute quantity in ALL alternative UoMs as a formatted string."""
+        for product in self:
+            tmpl = product.product_tmpl_id
+            if tmpl and tmpl.uom_conversion_ids:
+                parts = []
+                for conversion in tmpl.uom_conversion_ids.sorted('sequence'):
+                    alt_qty = conversion.convert_from_base(product.qty_available)
+                    if alt_qty == int(alt_qty):
+                        parts.append(f"{int(alt_qty)} {conversion.uom_id.name}")
+                    else:
+                        parts.append(f"{alt_qty:.2f} {conversion.uom_id.name}")
+                product.qty_available_all_alt = " | ".join(parts) if parts else ''
+            else:
+                product.qty_available_all_alt = ''
 
     def get_uom_conversion(self, uom):
         """Get the conversion record for a specific UoM (delegate to template)."""
