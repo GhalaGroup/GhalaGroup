@@ -29,6 +29,8 @@
                             <button string="=" class="btn btn-link p-0" disabled="1"/>
                             <field name="base_qty" string="Base Qty" required="1" digits="[16, 4]"/>
                             <field name="base_uom_id" string="Base UoM" readonly="1"/>
+                            <field name="barcode" string="Barcode" optional="show" placeholder="Barcode"/>
+                            <field name="qty_per_package" string="Pkg Qty" optional="hide"/>
                             <field name="name" string="Description" optional="show" placeholder="Description"/>
                             <field name="rounding" optional="hide"/>
                             <field name="company_id" groups="base.group_multi_company" optional="show"/>

@@ -11,3 +11,4 @@ from . import sale_order_line
 from . import purchase_order_line
 from . import mrp_production
 from . import uom_conversion_backup
+from . import stock_barcode_integration

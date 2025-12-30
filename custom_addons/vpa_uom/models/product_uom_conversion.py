@@ -96,6 +96,30 @@ class ProductUomConversion(models.Model):
         help="Rounding precision for quantities in this alternative UoM.",
     )
 
+    # Barcode for scanning (optional)
+    barcode = fields.Char(
+        string='Barcode',
+        index='btree_not_null',
+        copy=False,
+        help="Barcode for scanning this alternative UoM. Must be unique across all products and packagings.",
+    )
+
+    # Packaging quantity for display
+    qty_per_package = fields.Float(
+        string='Qty per Package',
+        default=1.0,
+        digits=(16, 4),
+        help="Number of items per package (e.g., 10 for 'Box of 10'). Used for display and labeling.",
+    )
+
+    # Computed packaging name for display
+    packaging_name = fields.Char(
+        string='Package Name',
+        compute='_compute_packaging_name',
+        store=True,
+        help="Display name like 'Box of 10 Boards'",
+    )
+
     active = fields.Boolean(default=True)
     company_id = fields.Many2one(
         'res.company',
@@ -119,6 +143,23 @@ class ProductUomConversion(models.Model):
         'CHECK(base_qty > 0)',
         'Base quantity must be positive!',
     )
+    _barcode_uniq = models.Constraint(
+        'UNIQUE(barcode)',
+        'A barcode can only be assigned to one alternative UoM conversion!',
+    )
+
+    @api.depends('qty_per_package', 'uom_id', 'uom_id.name')
+    def _compute_packaging_name(self):
+        """Compute display name for packaging like 'Box of 10 Boards'."""
+        for conv in self:
+            if conv.uom_id and conv.qty_per_package:
+                qty = conv.qty_per_package
+                if qty == int(qty):
+                    conv.packaging_name = f"{conv.uom_id.name} of {int(qty)}"
+                else:
+                    conv.packaging_name = f"{conv.uom_id.name} of {qty:.4f}"
+            else:
+                conv.packaging_name = conv.uom_id.name if conv.uom_id else ''
 
     @api.depends('alt_qty', 'base_qty')
     def _compute_factor(self):
@@ -157,6 +198,22 @@ class ProductUomConversion(models.Model):
                 raise ValidationError(_(
                     "Alternative UoM cannot be the same as the product's base UoM."
                 ))
+
+    @api.constrains('barcode')
+    def _check_barcode_uniqueness(self):
+        """Ensure barcode is unique across products, packagings, and VPA conversions."""
+        for conv in self.filtered('barcode'):
+            # Check if barcode exists in product.product
+            if self.env['product.product'].search_count([('barcode', '=', conv.barcode)], limit=1):
+                raise ValidationError(_(
+                    "A product already uses barcode '%s'. Barcodes must be unique."
+                ) % conv.barcode)
+            # Check if barcode exists in product.uom (Odoo packagings)
+            ProductUom = self.env['product.uom'] if 'product.uom' in self.env else None
+            if ProductUom and ProductUom.search_count([('barcode', '=', conv.barcode)], limit=1):
+                raise ValidationError(_(
+                    "A packaging already uses barcode '%s'. Barcodes must be unique."
+                ) % conv.barcode)
 
     @api.depends('name', 'uom_id', 'uom_id.name', 'alt_qty', 'base_qty', 'base_uom_id', 'base_uom_id.name')
     def _compute_display_name(self):
