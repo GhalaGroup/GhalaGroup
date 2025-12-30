@@ -168,7 +168,15 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    # Inherit computed fields from template
+    # Related field for primary alternative UoM (from template)
+    primary_alt_uom_id = fields.Many2one(
+        'uom.uom',
+        string='Primary Alt. UoM',
+        related='product_tmpl_id.primary_alt_uom_id',
+        store=True,
+    )
+
+    # Computed quantity in alternative UoM
     qty_available_alt = fields.Float(
         string='On Hand (Alt. UoM)',
         compute='_compute_qty_alt_variant',
