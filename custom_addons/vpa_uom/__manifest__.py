@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Unit of Measure',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Inventory/Inventory',
-    'summary': 'Product-specific alternative units of measure (v1.0.0)',
+    'summary': 'Product-specific alternative units of measure (v1.1.0)',
     'description': """
 VPA Unit of Measure
 ===================
@@ -26,6 +26,9 @@ Key Features
 * **Manufacturing Support**: Use alternative UoM in BOMs and production orders
 * **Enhanced Stock Views**: See stock on hand in alternative UoM
 * **Product Cards**: View alternative UoM quantities in list and kanban views
+* **Barcode Support**: Assign unique barcodes to alternative UoMs for scanning
+* **Packaging Display**: Qty per package and packaging name fields
+* **Stock Barcode Integration**: Scan alternative UoM barcodes in stock operations
 * **Configurable Rounding**: Set decimal precision per conversion
 * **Backup & Restore**: Export/import conversions, auto-backup before uninstall
 * **Multi-Company Support**: Each company can have its own conversion factors
@@ -40,6 +43,12 @@ Use Cases
 
 Version History
 ---------------
+* **19.0.1.1.0** - Barcode & Packaging Integration
+  - Added barcode field to alternative UoM conversions
+  - Added qty_per_package and packaging_name fields
+  - Barcode uniqueness validation across products and packagings
+  - Stock barcode scanning integration (optional)
+  - All alternative UoMs display in stock reports
 * **19.0.1.0.0** - Initial release for Odoo 19
   - Product-specific UoM conversions
   - Sales, Purchase, Stock, MRP integration
