@@ -8,9 +8,9 @@
         <field name="arch" type="xml">
             <list string="BOM Categories">
                 <field name="sequence" widget="handle"/>
-                <field name="code"/>
                 <field name="name"/>
                 <field name="parent_id" optional="show"/>
+                <field name="code" optional="hide"/>
                 <field name="description" optional="hide"/>
                 <field name="product_count" string="Products"/>
                 <field name="bom_line_count" string="BOM Lines"/>
@@ -36,8 +36,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="code" placeholder="e.g., PAINT"/>
                             <field name="parent_id" options="{'no_create': True}"/>
+                            <field name="code" placeholder="Auto-generated (optional)"/>
                             <field name="sequence"/>
                             <field name="active" invisible="1"/>
                         </group>
