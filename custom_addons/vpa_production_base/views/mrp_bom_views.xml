@@ -86,40 +86,4 @@
         </field>
     </record>
 
-    <!-- ============================================================ -->
-    <!-- BOM Manager Restrictions                                      -->
-    <!-- Non-managers cannot create/edit BOMs                          -->
-    <!-- ============================================================ -->
-
-    <!-- Make BOM form read-only for non-BOM-managers -->
-    <record id="mrp_bom_form_view_readonly_non_manager" model="ir.ui.view">
-        <field name="name">mrp.bom.form.readonly.non.manager</field>
-        <field name="model">mrp.bom</field>
-        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
-        <field name="groups_id" eval="[(4, ref('mrp.group_mrp_user'))]"/>
-        <field name="priority">99</field>
-        <field name="arch" type="xml">
-            <!-- Hide create button for non-managers -->
-            <xpath expr="//form" position="attributes">
-                <attribute name="create">0</attribute>
-                <attribute name="edit">0</attribute>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Override to allow edit for BOM Managers -->
-    <record id="mrp_bom_form_view_editable_manager" model="ir.ui.view">
-        <field name="name">mrp.bom.form.editable.manager</field>
-        <field name="model">mrp.bom</field>
-        <field name="inherit_id" ref="mrp_bom_form_view_readonly_non_manager"/>
-        <field name="groups_id" eval="[(4, ref('vpa_production_base.group_bom_manager'))]"/>
-        <field name="priority">100</field>
-        <field name="arch" type="xml">
-            <xpath expr="//form" position="attributes">
-                <attribute name="create">1</attribute>
-                <attribute name="edit">1</attribute>
-            </xpath>
-        </field>
-    </record>
-
 </odoo>
