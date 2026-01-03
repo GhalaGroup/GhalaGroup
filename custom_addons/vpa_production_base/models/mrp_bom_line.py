@@ -29,6 +29,12 @@ class MrpBomLine(models.Model):
              "Displayed on MO for worker reference.",
     )
 
+    # Override product_id to add dynamic domain
+    product_id = fields.Many2one(
+        'product.product',
+        domain="[('product_tmpl_id.is_raw_material', '=', True), '|', ('product_tmpl_id.bom_category_id', '=', False), ('product_tmpl_id.bom_category_id', '=', bom_category_id)]",
+    )
+
     # =========================================================================
     # TEMPLATE LINE DETECTION
     # =========================================================================
@@ -107,21 +113,21 @@ class MrpBomLine(models.Model):
         """When category is set, filter product dropdown to that category."""
         if self.bom_category_id:
             # If product is set and doesn't match category, clear it
-            if self.product_id and self.product_id.bom_category_id != self.bom_category_id:
+            if self.product_id and self.product_id.product_tmpl_id.bom_category_id != self.bom_category_id:
                 self.product_id = False
             # Return domain to filter products
             return {
                 'domain': {
                     'product_id': [
-                        ('is_raw_material', '=', True),
-                        ('bom_category_id', '=', self.bom_category_id.id),
+                        ('product_tmpl_id.is_raw_material', '=', True),
+                        ('product_tmpl_id.bom_category_id', '=', self.bom_category_id.id),
                     ]
                 }
             }
-        return {'domain': {'product_id': []}}
+        return {'domain': {'product_id': [('product_tmpl_id.is_raw_material', '=', True)]}}
 
     @api.onchange('product_id')
     def _onchange_product_id_category(self):
         """Auto-fill category from product if product has one."""
-        if self.product_id and self.product_id.bom_category_id:
-            self.bom_category_id = self.product_id.bom_category_id
+        if self.product_id and self.product_id.product_tmpl_id.bom_category_id:
+            self.bom_category_id = self.product_id.product_tmpl_id.bom_category_id

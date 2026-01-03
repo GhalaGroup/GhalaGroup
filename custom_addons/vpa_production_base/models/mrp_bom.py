@@ -68,6 +68,12 @@ class MrpBom(models.Model):
         copy=False,
         help="History of all BOM revisions with dates and users",
     )
+    code_with_revision = fields.Char(
+        string='Reference with Revision',
+        compute='_compute_code_with_revision',
+        store=False,
+        help="BOM code with revision number (e.g., JAZAM-DC-POOF (Rev 3.0))",
+    )
 
     # =========================================================================
     # COMPUTED FIELDS
@@ -87,6 +93,17 @@ class MrpBom(models.Model):
                 line.bom_category_id and not line.product_id
                 for line in bom.bom_line_ids
             )
+
+    @api.depends('code', 'revision')
+    def _compute_code_with_revision(self):
+        """Compute BOM code with revision number."""
+        for bom in self:
+            if bom.code and bom.revision:
+                bom.code_with_revision = f"{bom.code} (Rev {bom.revision})"
+            elif bom.code:
+                bom.code_with_revision = bom.code
+            else:
+                bom.code_with_revision = False
 
     # =========================================================================
     # OVERRIDES

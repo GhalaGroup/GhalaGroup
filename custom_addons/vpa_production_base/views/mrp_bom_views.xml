@@ -26,9 +26,13 @@
                 <field name="is_master_bom" invisible="1"/>
             </xpath>
 
-            <!-- Add Revision field after BOM Reference -->
+            <!-- Replace BOM Reference with version including revision -->
+            <xpath expr="//field[@name='code']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
             <xpath expr="//field[@name='code']" position="after">
-                <field name="revision" readonly="1"/>
+                <field name="code_with_revision" readonly="1" string="Reference"/>
+                <field name="revision" invisible="1"/>
             </xpath>
 
             <!-- Add audit info group at the bottom of the form -->
