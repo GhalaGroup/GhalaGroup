@@ -10,11 +10,23 @@
         <field name="model">mrp.bom</field>
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="arch" type="xml">
+            <!-- Add Revision Control button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_create_new_revision" string="Create New Revision"
+                        type="object" class="btn-secondary"
+                        groups="vpa_production_base.group_bom_manager"/>
+            </xpath>
+
             <!-- Add Master BOM indicator -->
             <xpath expr="//sheet" position="inside">
                 <widget name="web_ribbon" title="Master BOM" bg_color="text-bg-info"
                         invisible="not is_master_bom"/>
                 <field name="is_master_bom" invisible="1"/>
+            </xpath>
+
+            <!-- Add Revision field after BOM Reference -->
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="revision" readonly="1"/>
             </xpath>
 
             <!-- Add audit info group at the bottom of the form -->
@@ -28,6 +40,9 @@
                         <field name="last_modified_by_id" readonly="1"/>
                         <field name="last_modified_date" readonly="1"/>
                     </group>
+                </group>
+                <group string="Revision History" name="revision_history" invisible="not revision_history">
+                    <field name="revision_history" nolabel="1" readonly="1" widget="text"/>
                 </group>
             </xpath>
 

@@ -54,6 +54,22 @@ class MrpBom(models.Model):
     active = fields.Boolean(tracking=True)
 
     # =========================================================================
+    # REVISION CONTROL
+    # =========================================================================
+    revision = fields.Char(
+        string='Revision',
+        default='1.0',
+        copy=False,
+        help="BOM revision number (e.g., 1.0, 2.0, 3.0)",
+    )
+    revision_history = fields.Text(
+        string='Revision History',
+        readonly=True,
+        copy=False,
+        help="History of all BOM revisions with dates and users",
+    )
+
+    # =========================================================================
     # COMPUTED FIELDS
     # =========================================================================
     is_master_bom = fields.Boolean(
@@ -87,4 +103,42 @@ class MrpBom(models.Model):
         for vals in vals_list:
             vals.setdefault('created_by_id', self.env.user.id)
             vals.setdefault('created_date', fields.Datetime.now())
+            # Initialize revision history
+            if 'revision' in vals and vals.get('revision'):
+                revision = vals['revision']
+                user = self.env.user.name
+                date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+                vals['revision_history'] = f"Rev {revision} - {date} by {user}\n"
         return super().create(vals_list)
+
+    def action_create_new_revision(self):
+        """Create a new revision of this BOM."""
+        self.ensure_one()
+
+        # Parse current revision (e.g., "1.0" -> 1.0)
+        try:
+            current_rev = float(self.revision or '1.0')
+            new_rev = f"{int(current_rev) + 1}.0"
+        except (ValueError, TypeError):
+            new_rev = "2.0"
+
+        # Update revision history
+        user = self.env.user.name
+        date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+        history_line = f"Rev {new_rev} - {date} by {user}\n"
+
+        self.write({
+            'revision': new_rev,
+            'revision_history': (self.revision_history or '') + history_line,
+        })
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('New Revision Created'),
+                'message': _('BOM updated to revision %s') % new_rev,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
