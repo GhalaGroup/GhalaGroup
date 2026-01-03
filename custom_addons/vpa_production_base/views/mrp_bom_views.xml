@@ -66,6 +66,15 @@
 
                         <field name="display_type" column_invisible="True"/>
                         <field name="sequence" widget="handle"/>
+
+                        <!-- Section/Note Name (only visible for sections and notes) -->
+                        <field name="name"
+                               string="Section Name"
+                               invisible="not display_type"
+                               required="display_type"
+                               placeholder="e.g., PAINT, HARDWARE"/>
+
+                        <!-- Regular line fields (hidden for sections/notes) -->
                         <field name="bom_category_id"
                                invisible="display_type"
                                domain="[('is_main_category', '=', False)]"

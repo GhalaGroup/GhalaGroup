@@ -27,6 +27,10 @@ class MrpBomLine(models.Model):
         help="Technical field for section and note display"
     )
     sequence = fields.Integer(string='Sequence', default=10)
+    name = fields.Char(
+        string='Section Name / Note',
+        help="Name for sections and notes. Used to store section headers like 'PAINT', 'HARDWARE'."
+    )
 
     # =========================================================================
     # CATEGORY & DESCRIPTION FIELDS
@@ -125,11 +129,39 @@ class MrpBomLine(models.Model):
 
     @api.onchange('bom_category_id')
     def _onchange_bom_category_id(self):
-        """When category is set, filter product dropdown to that category."""
-        if self.bom_category_id:
+        """When category is set, auto-create section and filter products."""
+        if self.bom_category_id and not self.display_type:
+            # Get main category name for section
+            main_cat = self.bom_category_id.parent_id.name if self.bom_category_id.parent_id else self.bom_category_id.name
+            main_cat_upper = main_cat.upper()
+
+            # Check if section already exists in BOM for this main category
+            if self.bom_id:
+                # Look for existing section with this main category name
+                # Sections store the category name in the 'name' field
+                existing_section = self.bom_id.bom_line_ids.filtered(
+                    lambda l: l.display_type == 'line_section' and l.name == main_cat_upper
+                )
+
+                # If no section exists, add one using ORM Command
+                if not existing_section:
+                    # Find the right sequence for the section (insert before current line)
+                    max_seq = max(self.bom_id.bom_line_ids.mapped('sequence') or [0])
+                    section_seq = self.sequence - 1 if self.sequence > 10 else max_seq + 10
+
+                    # Add section line using ORM Command (0, 0, values)
+                    # In onchange context, we update the parent's One2many field
+                    self.bom_id.bom_line_ids = [(0, 0, {
+                        'display_type': 'line_section',
+                        'name': main_cat_upper,
+                        'product_qty': 0,
+                        'sequence': section_seq,
+                    })]
+
             # If product is set and doesn't match category, clear it
             if self.product_id and self.product_id.product_tmpl_id.bom_category_id != self.bom_category_id:
                 self.product_id = False
+
             # Return domain to filter products
             return {
                 'domain': {
