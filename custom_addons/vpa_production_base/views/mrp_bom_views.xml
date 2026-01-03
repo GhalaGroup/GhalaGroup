@@ -27,37 +27,37 @@
             </xpath>
 
             <!-- Replace BOM Reference with version including revision -->
-            <xpath expr="//field[@name='code']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='code']" position="after">
-                <field name="code_with_revision" readonly="1" string="Reference"/>
+            <xpath expr="//field[@name='code']" position="replace">
+                <field name="code" invisible="1"/>
+                <field name="code_with_revision" readonly="1"/>
                 <field name="revision" invisible="1"/>
             </xpath>
 
-            <!-- Add audit info group at the bottom of the form -->
-            <xpath expr="//sheet/group[last()]" position="after">
-                <group string="Audit Information" name="audit_info" groups="vpa_production_base.group_bom_manager">
-                    <group>
-                        <field name="created_by_id" readonly="1"/>
-                        <field name="created_date" readonly="1"/>
+            <!-- Add audit info at the end of notebook -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Audit &amp; Revision" name="audit_revision" groups="vpa_production_base.group_bom_manager">
+                    <group string="Audit Information" name="audit_info">
+                        <group>
+                            <field name="created_by_id" readonly="1"/>
+                            <field name="created_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="last_modified_by_id" readonly="1"/>
+                            <field name="last_modified_date" readonly="1"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="last_modified_by_id" readonly="1"/>
-                        <field name="last_modified_date" readonly="1"/>
+                    <group string="Revision History" name="revision_history" invisible="not revision_history">
+                        <field name="revision_history" nolabel="1" readonly="1" widget="text"/>
                     </group>
-                </group>
-                <group string="Revision History" name="revision_history" invisible="not revision_history">
-                    <field name="revision_history" nolabel="1" readonly="1" widget="text"/>
-                </group>
+                </page>
             </xpath>
 
             <!-- Extend BOM Lines with Category & Description -->
-            <xpath expr="//field[@name='bom_line_ids']/list" position="attributes">
-                <attribute name="default_group_by">main_category_name</attribute>
+            <xpath expr="//field[@name='bom_line_ids']" position="attributes">
+                <attribute name="context">{'default_group_by': 'main_category_name'}</attribute>
             </xpath>
             <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_id']" position="before">
-                <field name="main_category_name" column_invisible="True"/>
+                <field name="main_category_name" optional="show"/>
                 <field name="bom_category_id"
                        domain="[('is_main_category', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"/>
