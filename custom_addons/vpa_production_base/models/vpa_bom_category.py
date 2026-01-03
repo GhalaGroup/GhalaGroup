@@ -20,9 +20,10 @@ class VpaBomCategory(models.Model):
 
     code = fields.Char(
         string='Code',
-        required=True,
+        required=False,
         index=True,
-        help="Short code for the category (e.g., PAINT, HDWD, HINGE)",
+        copy=False,
+        help="Optional short code for the category (auto-generated from name if empty)",
     )
     name = fields.Char(
         string='Name',
@@ -90,9 +91,20 @@ class VpaBomCategory(models.Model):
 
     # SQL Constraints
     _sql_constraints = [
-        ('code_company_uniq', 'UNIQUE(code, company_id)',
-         'Category code must be unique per company!'),
+        ('name_company_uniq', 'UNIQUE(name, company_id)',
+         'Category name must be unique per company!'),
     ]
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Auto-generate code from name if not provided."""
+        for vals in vals_list:
+            if not vals.get('code') and vals.get('name'):
+                # Generate code from name (first 3-5 chars, uppercase, alphanumeric only)
+                name = vals['name']
+                code = ''.join(c for c in name if c.isalnum())[:5].upper()
+                vals['code'] = code or 'CAT'
+        return super().create(vals_list)
 
     @api.depends('code', 'name')
     def _compute_display_name(self):
