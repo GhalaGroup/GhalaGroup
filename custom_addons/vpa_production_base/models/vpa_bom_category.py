@@ -59,12 +59,18 @@ class VpaBomCategory(models.Model):
     )
 
     # Hierarchy fields
+    is_main_category = fields.Boolean(
+        string='Main Category',
+        default=False,
+        help="Check if this is a main category (for grouping only, cannot be assigned to products/BOMs)",
+    )
     parent_id = fields.Many2one(
         'vpa.bom.category',
         string='Parent Category',
         ondelete='restrict',
         index=True,
-        help="Parent category for hierarchical organization",
+        domain="[('is_main_category', '=', True)]",
+        help="Parent category for hierarchical organization (only main categories can be parents)",
     )
     parent_path = fields.Char(
         index=True,

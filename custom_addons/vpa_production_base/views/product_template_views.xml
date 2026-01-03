@@ -15,6 +15,7 @@
                 <field name="is_raw_material"/>
                 <field name="bom_category_id"
                        invisible="not is_raw_material"
+                       domain="[('is_main_category', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"/>
             </xpath>
         </field>

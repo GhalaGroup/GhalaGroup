@@ -9,6 +9,7 @@
             <list string="BOM Categories">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+                <field name="is_main_category" optional="show" widget="boolean_toggle"/>
                 <field name="parent_id" optional="show"/>
                 <field name="code" optional="hide"/>
                 <field name="description" optional="hide"/>
@@ -36,7 +37,8 @@
                     </div>
                     <group>
                         <group>
-                            <field name="parent_id" options="{'no_create': True}" domain="[('id', '!=', id)]"/>
+                            <field name="is_main_category"/>
+                            <field name="parent_id" options="{'no_create': True}" domain="[('id', '!=', id)]" invisible="is_main_category"/>
                             <field name="code" placeholder="Auto-generated (optional)"/>
                             <field name="sequence"/>
                             <field name="active" invisible="1"/>
