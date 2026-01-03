@@ -103,12 +103,12 @@ class MrpBom(models.Model):
         for vals in vals_list:
             vals.setdefault('created_by_id', self.env.user.id)
             vals.setdefault('created_date', fields.Datetime.now())
+            vals.setdefault('revision', '1.0')
             # Initialize revision history
-            if 'revision' in vals and vals.get('revision'):
-                revision = vals['revision']
-                user = self.env.user.name
-                date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
-                vals['revision_history'] = f"Rev {revision} - {date} by {user}\n"
+            revision = vals.get('revision', '1.0')
+            user = self.env.user.name
+            date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+            vals['revision_history'] = f"Rev {revision} - {date} by {user}\n"
         return super().create(vals_list)
 
     def action_create_new_revision(self):
