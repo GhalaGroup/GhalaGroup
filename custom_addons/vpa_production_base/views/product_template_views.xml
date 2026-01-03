@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Product Template Views - Raw Material Classification          -->
+    <!-- ============================================================ -->
+
+    <!-- Inherit Product Template Form View -->
+    <record id="product_template_form_view_inherit_vpa_production" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.vpa.production</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add Raw Material section before the Detailed Type field -->
+            <xpath expr="//field[@name='detailed_type']" position="before">
+                <field name="is_raw_material"/>
+                <field name="bom_category_id"
+                       invisible="not is_raw_material"
+                       options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Product Template Tree View -->
+    <record id="product_template_tree_view_inherit_vpa_production" model="ir.ui.view">
+        <field name="name">product.template.tree.inherit.vpa.production</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="is_raw_material" optional="hide"/>
+                <field name="bom_category_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Product Template Search View -->
+    <record id="product_template_search_view_inherit_vpa_production" model="ir.ui.view">
+        <field name="name">product.template.search.inherit.vpa.production</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='consumable']" position="after">
+                <separator/>
+                <filter string="Raw Materials" name="raw_materials" domain="[('is_raw_material', '=', True)]"/>
+            </xpath>
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="bom_category_id"/>
+            </xpath>
+            <xpath expr="//group[@name='Product']" position="inside">
+                <filter string="BOM Category" name="group_bom_category" context="{'group_by': 'bom_category_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Hide Cost Fields from Non-Accounting Users                    -->
+    <!-- ============================================================ -->
+
+    <!-- Hide standard_price from non-accounting users in form view -->
+    <record id="product_template_form_view_hide_cost" model="ir.ui.view">
+        <field name="name">product.template.form.hide.cost</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <!-- Make standard_price visible only to accounting users -->
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="groups">account.group_account_invoice</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in tree view for non-accounting users -->
+    <record id="product_template_tree_view_hide_cost" model="ir.ui.view">
+        <field name="name">product.template.tree.hide.cost</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="groups">account.group_account_invoice</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

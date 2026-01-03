@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- VPA Production Studio - Security Groups                       -->
+    <!-- ============================================================ -->
+
+    <!-- Module Category -->
+    <record id="module_category_vpa_production" model="ir.module.category">
+        <field name="name">VPA Production Studio</field>
+        <field name="description">VPA Production Studio module groups</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- BOM Manager Group                                             -->
+    <!-- Only users in this group can create/edit/delete BOMs          -->
+    <!-- ============================================================ -->
+    <record id="group_bom_manager" model="res.groups">
+        <field name="name">BOM Manager</field>
+        <field name="category_id" ref="module_category_vpa_production"/>
+        <field name="comment">
+            Users in this group can create, edit, and delete Bills of Materials.
+            Other users can only VIEW BOMs (read-only access).
+
+            BOM Managers can also:
+            - Create and manage BOM Categories
+            - View full audit trail on BOMs
+        </field>
+        <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Record Rules                                                  -->
+    <!-- ============================================================ -->
+
+    <!-- BOM Category: Multi-company rule -->
+    <record id="vpa_bom_category_comp_rule" model="ir.rule">
+        <field name="name">VPA BOM Category: Multi-Company</field>
+        <field name="model_id" ref="model_vpa_bom_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>

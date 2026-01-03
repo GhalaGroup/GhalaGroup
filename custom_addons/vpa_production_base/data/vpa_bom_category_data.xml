@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============================================================ -->
+        <!-- Pre-defined BOM Categories                                    -->
+        <!-- These are the default categories for raw material             -->
+        <!-- classification, similar to SAP BOM Groups                     -->
+        <!-- ============================================================ -->
+
+        <record id="bom_category_paint" model="vpa.bom.category">
+            <field name="code">PAINT</field>
+            <field name="name">Paint &amp; Finishes</field>
+            <field name="description">All paint products including primers, sealers, top coats, thinners, and finishes.</field>
+            <field name="sequence">10</field>
+            <field name="color">1</field>
+        </record>
+
+        <record id="bom_category_hardwood" model="vpa.bom.category">
+            <field name="code">HDWD</field>
+            <field name="name">Hardwood</field>
+            <field name="description">Solid hardwood materials including oak, mahogany, walnut, and other hardwoods.</field>
+            <field name="sequence">20</field>
+            <field name="color">2</field>
+        </record>
+
+        <record id="bom_category_plywood" model="vpa.bom.category">
+            <field name="code">PLYW</field>
+            <field name="name">Plywood &amp; Sheet Materials</field>
+            <field name="description">Plywood, MDF, chipboard, and other sheet materials.</field>
+            <field name="sequence">30</field>
+            <field name="color">3</field>
+        </record>
+
+        <record id="bom_category_hinge" model="vpa.bom.category">
+            <field name="code">HINGE</field>
+            <field name="name">Hinges</field>
+            <field name="description">Door hinges, cabinet hinges, soft-close hinges, and specialty hinges.</field>
+            <field name="sequence">40</field>
+            <field name="color">4</field>
+        </record>
+
+        <record id="bom_category_handle" model="vpa.bom.category">
+            <field name="code">HANDLE</field>
+            <field name="name">Handles &amp; Knobs</field>
+            <field name="description">Door handles, drawer pulls, cabinet knobs, and decorative hardware.</field>
+            <field name="sequence">50</field>
+            <field name="color">5</field>
+        </record>
+
+        <record id="bom_category_glass" model="vpa.bom.category">
+            <field name="code">GLASS</field>
+            <field name="name">Glass</field>
+            <field name="description">Glass panels, mirrors, tempered glass, and specialty glass materials.</field>
+            <field name="sequence">60</field>
+            <field name="color">6</field>
+        </record>
+
+        <record id="bom_category_edge" model="vpa.bom.category">
+            <field name="code">EDGE</field>
+            <field name="name">Edge Banding</field>
+            <field name="description">PVC edge banding, veneer tape, and edge finishing materials.</field>
+            <field name="sequence">70</field>
+            <field name="color">7</field>
+        </record>
+
+        <record id="bom_category_adhesive" model="vpa.bom.category">
+            <field name="code">ADHES</field>
+            <field name="name">Adhesives &amp; Sealants</field>
+            <field name="description">Wood glue, contact cement, silicone, and other bonding materials.</field>
+            <field name="sequence">80</field>
+            <field name="color">8</field>
+        </record>
+
+        <record id="bom_category_fastener" model="vpa.bom.category">
+            <field name="code">FAST</field>
+            <field name="name">Fasteners</field>
+            <field name="description">Screws, nails, bolts, cam locks, dowels, and other fastening hardware.</field>
+            <field name="sequence">90</field>
+            <field name="color">9</field>
+        </record>
+
+        <record id="bom_category_fabric" model="vpa.bom.category">
+            <field name="code">FABRC</field>
+            <field name="name">Fabric &amp; Upholstery</field>
+            <field name="description">Upholstery fabric, leather, foam, batting, and textile materials.</field>
+            <field name="sequence">100</field>
+            <field name="color">10</field>
+        </record>
+
+        <record id="bom_category_drawer" model="vpa.bom.category">
+            <field name="code">DRAWR</field>
+            <field name="name">Drawer Systems</field>
+            <field name="description">Drawer slides, drawer boxes, soft-close mechanisms, and drawer hardware.</field>
+            <field name="sequence">110</field>
+            <field name="color">11</field>
+        </record>
+
+        <record id="bom_category_misc" model="vpa.bom.category">
+            <field name="code">MISC</field>
+            <field name="name">Miscellaneous</field>
+            <field name="description">Other materials not fitting into specific categories.</field>
+            <field name="sequence">999</field>
+            <field name="color">0</field>
+        </record>
+
+    </data>
+</odoo>
