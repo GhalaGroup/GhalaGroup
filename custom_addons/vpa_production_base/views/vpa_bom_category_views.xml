@@ -104,9 +104,6 @@
                 <field name="name"/>
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Company" name="group_company" context="{'group_by': 'company_id'}"/>
-                </group>
             </search>
         </field>
     </record>
