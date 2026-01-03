@@ -47,7 +47,11 @@
             </xpath>
 
             <!-- Extend BOM Lines with Category & Description -->
+            <xpath expr="//field[@name='bom_line_ids']/list" position="attributes">
+                <attribute name="default_group_by">main_category_name</attribute>
+            </xpath>
             <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_id']" position="before">
+                <field name="main_category_name" column_invisible="True"/>
                 <field name="bom_category_id"
                        domain="[('is_main_category', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"/>

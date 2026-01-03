@@ -40,6 +40,30 @@ class MrpBomLine(models.Model):
              "Worker must select the actual product during production.",
     )
 
+    # =========================================================================
+    # MAIN CATEGORY DISPLAY
+    # =========================================================================
+    main_category_name = fields.Char(
+        string='Main Category',
+        compute='_compute_main_category_name',
+        store=True,
+        help="Main category name for grouping (e.g., PAINT, ACCESSORIES)",
+    )
+
+    @api.depends('bom_category_id', 'bom_category_id.parent_id')
+    def _compute_main_category_name(self):
+        """Get the main category name from the selected category."""
+        for line in self:
+            if line.bom_category_id:
+                # If category has a parent (it's a subcategory), use parent name
+                if line.bom_category_id.parent_id:
+                    line.main_category_name = line.bom_category_id.parent_id.name.upper()
+                else:
+                    # If no parent, use the category itself
+                    line.main_category_name = line.bom_category_id.name.upper()
+            else:
+                line.main_category_name = False
+
     @api.depends('bom_category_id', 'product_id')
     def _compute_is_template_line(self):
         """A template line has a category but no specific product."""
