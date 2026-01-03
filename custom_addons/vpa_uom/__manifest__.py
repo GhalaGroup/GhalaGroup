@@ -61,7 +61,7 @@ Support: info@vpa.co.tz
     'website': 'https://www.vpa.co.tz',
     'support': 'info@vpa.co.tz',
     'license': 'OPL-1',
-    'price': 69.00,
+    'price': 79.00,
     'currency': 'USD',
     'depends': [
         'product',
