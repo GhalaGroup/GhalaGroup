@@ -10,11 +10,6 @@
         <field name="model">mrp.bom</field>
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="arch" type="xml">
-            <!-- Add chatter for audit trail -->
-            <xpath expr="//sheet" position="after">
-                <chatter/>
-            </xpath>
-
             <!-- Add Master BOM indicator -->
             <xpath expr="//sheet" position="inside">
                 <widget name="web_ribbon" title="Master BOM" bg_color="text-bg-info"
