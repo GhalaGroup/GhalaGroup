@@ -1,33 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Part of VPA Production Studio. See LICENSE file for full copyright and licensing details. -->
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
 <odoo>
-    <!-- ============================================================ -->
-    <!-- VPA Production Studio - Security Groups                       -->
-    <!-- ============================================================ -->
+    <data noupdate="0">
 
-    <!-- Module Category -->
-    <record id="module_category_vpa_production" model="ir.module.category">
-        <field name="name">VPA Production Studio</field>
-        <field name="description">VPA Production Studio module groups</field>
-        <field name="sequence">50</field>
-    </record>
+        <!-- ============================================================ -->
+        <!-- VPA Production Studio - Security Groups                       -->
+        <!-- ============================================================ -->
 
-    <!-- ============================================================ -->
-    <!-- BOM Manager Group                                             -->
-    <!-- Only users in this group can create/edit/delete BOMs          -->
-    <!-- ============================================================ -->
-    <record id="group_bom_manager" model="res.groups">
-        <field name="name">BOM Manager</field>
-        <field name="category_id" ref="module_category_vpa_production"/>
-        <field name="comment">
-            Users in this group can create, edit, and delete Bills of Materials.
-            Other users can only VIEW BOMs (read-only access).
+        <!-- Module Category -->
+        <record id="module_category_vpa_production" model="ir.module.category">
+            <field name="name">VPA Production Studio</field>
+            <field name="description">VPA Production Studio module groups</field>
+            <field name="sequence">50</field>
+        </record>
 
-            BOM Managers can also:
-            - Create and manage BOM Categories
-            - View full audit trail on BOMs
-        </field>
-        <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
-    </record>
+        <!-- Privilege for VPA Production Studio -->
+        <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
+            <field name="name">VPA Production Studio</field>
+            <field name="category_id" ref="module_category_vpa_production"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- BOM Manager Group                                             -->
+        <!-- Only users in this group can create/edit/delete BOMs          -->
+        <!-- ============================================================ -->
+        <record id="group_bom_manager" model="res.groups">
+            <field name="name">BOM Manager</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
+            <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
+            <field name="comment">
+                Users in this group can create, edit, and delete Bills of Materials.
+                Other users can only VIEW BOMs (read-only access).
+
+                BOM Managers can also:
+                - Create and manage BOM Categories
+                - View full audit trail on BOMs
+            </field>
+        </record>
+
+    </data>
 
     <!-- ============================================================ -->
     <!-- Record Rules                                                  -->
