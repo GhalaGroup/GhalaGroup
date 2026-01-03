@@ -27,6 +27,9 @@
             </xpath>
 
             <!-- Replace BOM Reference with version including revision -->
+            <xpath expr="//label[@for='code']" position="replace">
+                <label for="code_with_revision" string="Reference with Revision"/>
+            </xpath>
             <xpath expr="//field[@name='code']" position="replace">
                 <field name="code" invisible="1"/>
                 <field name="code_with_revision" readonly="1"/>
@@ -52,17 +55,34 @@
                 </page>
             </xpath>
 
-            <!-- Extend BOM Lines with Category & Description -->
-            <xpath expr="//field[@name='bom_line_ids']" position="attributes">
-                <attribute name="context">{'default_group_by': 'main_category_name'}</attribute>
-            </xpath>
-            <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_id']" position="before">
-                <field name="main_category_name" optional="show"/>
-                <field name="bom_category_id"
-                       domain="[('is_main_category', '=', False)]"
-                       options="{'no_create': True, 'no_open': True}"/>
-                <field name="line_description" placeholder="Optional description..."/>
-                <field name="is_template_line" column_invisible="True"/>
+            <!-- Replace BOM Lines with Section Support (like quotations) -->
+            <xpath expr="//field[@name='bom_line_ids']" position="replace">
+                <field name="bom_line_ids" widget="section_and_note_one2many">
+                    <tree editable="bottom" decoration-bf="display_type == 'line_section'" decoration-it="display_type == 'line_note'">
+                        <control>
+                            <create name="add_product_control" string="Add a component"/>
+                            <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                        </control>
+
+                        <field name="display_type" column_invisible="True"/>
+                        <field name="sequence" widget="handle"/>
+                        <field name="bom_category_id"
+                               invisible="display_type"
+                               domain="[('is_main_category', '=', False)]"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="line_description"
+                               invisible="display_type"
+                               placeholder="Optional description..."/>
+                        <field name="product_id"
+                               invisible="display_type"
+                               required="not display_type"
+                               context="{'default_type': 'product'}"/>
+                        <field name="product_qty" invisible="display_type"/>
+                        <field name="product_uom_id" invisible="display_type" groups="uom.group_uom"/>
+                        <field name="is_template_line" column_invisible="True"/>
+                        <field name="main_category_name" column_invisible="True"/>
+                    </tree>
+                </field>
             </xpath>
         </field>
     </record>

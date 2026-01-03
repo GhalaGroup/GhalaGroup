@@ -13,6 +13,20 @@ class MrpBomLine(models.Model):
     The actual product is selected by the worker during production.
     """
     _inherit = 'mrp.bom.line'
+    _order = 'sequence, id'
+
+    # =========================================================================
+    # SECTION & NOTE SUPPORT (like Sale Order Lines)
+    # =========================================================================
+    display_type = fields.Selection(
+        selection=[
+            ('line_section', "Section"),
+            ('line_note', "Note"),
+        ],
+        default=False,
+        help="Technical field for section and note display"
+    )
+    sequence = fields.Integer(string='Sequence', default=10)
 
     # =========================================================================
     # CATEGORY & DESCRIPTION FIELDS
@@ -29,10 +43,11 @@ class MrpBomLine(models.Model):
              "Displayed on MO for worker reference.",
     )
 
-    # Override product_id to add dynamic domain
+    # Override product_id to make it not required for sections
     product_id = fields.Many2one(
         'product.product',
         domain="[('product_tmpl_id.is_raw_material', '=', True), '|', ('product_tmpl_id.bom_category_id', '=', False), ('product_tmpl_id.bom_category_id', '=', bom_category_id)]",
+        required=False,  # Allow empty for sections/notes
     )
 
     # =========================================================================
