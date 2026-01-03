@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- ============================================================ -->
-    <!-- BOM Category Views                                            -->
-    <!-- ============================================================ -->
 
-    <!-- Tree View -->
-    <record id="vpa_bom_category_view_tree" model="ir.ui.view">
-        <field name="name">vpa.bom.category.tree</field>
+    <!-- List View -->
+    <record id="vpa_bom_category_view_list" model="ir.ui.view">
+        <field name="name">vpa.bom.category.list</field>
         <field name="model">vpa.bom.category</field>
         <field name="arch" type="xml">
-            <tree string="BOM Categories">
+            <list string="BOM Categories">
                 <field name="sequence" widget="handle"/>
                 <field name="code"/>
                 <field name="name"/>
@@ -18,7 +15,7 @@
                 <field name="bom_line_count" string="BOM Lines"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
                 <field name="active" column_invisible="True"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -120,7 +117,7 @@
     <record id="action_vpa_bom_category" model="ir.actions.act_window">
         <field name="name">BOM Categories</field>
         <field name="res_model">vpa.bom.category</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="search_view_id" ref="vpa_bom_category_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
