@@ -95,25 +95,11 @@ class VpaBomCategory(models.Model):
          'Category name must be unique per company!'),
     ]
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """Auto-generate code from name if not provided."""
-        for vals in vals_list:
-            if not vals.get('code') and vals.get('name'):
-                # Generate code from name (first 3-5 chars, uppercase, alphanumeric only)
-                name = vals['name']
-                code = ''.join(c for c in name if c.isalnum())[:5].upper()
-                vals['code'] = code or 'CAT'
-        return super().create(vals_list)
-
-    @api.depends('code', 'name')
+    @api.depends('name')
     def _compute_display_name(self):
-        """Compute display name as 'CODE - Name'."""
+        """Compute display name from name."""
         for category in self:
-            if category.code and category.name:
-                category.display_name = f"[{category.code}] {category.name}"
-            else:
-                category.display_name = category.name or category.code or _("New Category")
+            category.display_name = category.name or _("New Category")
 
     def _compute_product_count(self):
         """Count products assigned to this category."""
