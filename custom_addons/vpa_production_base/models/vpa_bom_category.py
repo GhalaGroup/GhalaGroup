@@ -15,6 +15,8 @@ class VpaBomCategory(models.Model):
     _name = 'vpa.bom.category'
     _description = 'BOM Category'
     _order = 'sequence, code'
+    _parent_name = 'parent_id'
+    _parent_store = True
 
     code = fields.Char(
         string='Code',
@@ -53,6 +55,25 @@ class VpaBomCategory(models.Model):
         string='Color Index',
         default=0,
         help="Color for Kanban cards",
+    )
+
+    # Hierarchy fields
+    parent_id = fields.Many2one(
+        'vpa.bom.category',
+        string='Parent Category',
+        ondelete='restrict',
+        index=True,
+        help="Parent category for hierarchical organization",
+    )
+    parent_path = fields.Char(
+        index=True,
+        unaccent=False,
+    )
+    child_ids = fields.One2many(
+        'vpa.bom.category',
+        'parent_id',
+        string='Subcategories',
+        help="Child categories under this category",
     )
 
     # Related counts
