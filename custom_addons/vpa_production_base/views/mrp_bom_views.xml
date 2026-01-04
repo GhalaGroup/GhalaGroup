@@ -27,12 +27,9 @@
             </xpath>
 
             <!-- Replace BOM Reference with version including revision -->
-            <xpath expr="//label[@for='code']" position="replace">
-                <label for="code_with_revision" string="Reference with Revision"/>
-            </xpath>
             <xpath expr="//field[@name='code']" position="replace">
                 <field name="code" invisible="1"/>
-                <field name="code_with_revision" readonly="1"/>
+                <field name="code_with_revision" string="Reference" readonly="1"/>
                 <field name="revision" invisible="1"/>
             </xpath>
 
