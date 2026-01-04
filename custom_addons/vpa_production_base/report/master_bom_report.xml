@@ -13,13 +13,16 @@
             </thead>
             <tbody>
                 <t t-foreach="bom.bom_line_ids" t-as="line">
-                    <!-- Skip display_type lines (sections/notes) as they're not used in template -->
+                    <!-- Skip section/note lines -->
                     <t t-if="not line.display_type">
-                        <!-- Template Line (Category without Product) -->
-                        <t t-if="line.is_template_line">
+                        <!-- Check if template line: has category but no product -->
+                        <t t-if="line.bom_category_id and not line.product_id">
+                            <!-- Template Line with Yellow Highlight -->
                             <tr style="background-color: rgba(255, 193, 7, 0.1);">
                                 <td>
-                                    <span class="badge" style="background-color: #ffc107; color: #000;"><t t-esc="line.bom_category_id.code"/></span>
+                                    <t t-if="line.bom_category_id.code">
+                                        <span class="badge" style="background-color: #ffc107; color: #000;"><t t-esc="line.bom_category_id.code"/></span>
+                                    </t>
                                     <strong><t t-esc="line.bom_category_id.name"/></strong>
                                 </td>
                                 <td>
@@ -31,16 +34,16 @@
                                     <t t-esc="line.product_qty"/>
                                 </td>
                                 <td>
-                                    <t t-esc="line.product_uom_id.name"/>
+                                    <t t-esc="line.product_uom_id.name if line.product_uom_id else ''"/>
                                 </td>
                             </tr>
                         </t>
 
                         <!-- Standard Line (with Product) -->
-                        <t t-else="">
+                        <t t-elif="line.product_id">
                             <tr>
                                 <td>
-                                    <t t-if="line.bom_category_id">
+                                    <t t-if="line.bom_category_id and line.bom_category_id.code">
                                         <span class="badge bg-secondary"><t t-esc="line.bom_category_id.code"/></span>
                                     </t>
                                     <t t-esc="line.product_id.display_name"/>
@@ -52,7 +55,7 @@
                                     <t t-esc="line.product_qty"/>
                                 </td>
                                 <td>
-                                    <t t-esc="line.product_uom_id.name"/>
+                                    <t t-esc="line.product_uom_id.name if line.product_uom_id else ''"/>
                                 </td>
                             </tr>
                         </t>
