@@ -54,8 +54,8 @@
 
             <!-- Replace BOM Lines with Section Support (like quotations) -->
             <xpath expr="//field[@name='bom_line_ids']" position="replace">
-                <field name="bom_line_ids" widget="section_and_note_one2many">
-                    <tree editable="bottom" decoration-bf="display_type == 'line_section'" decoration-it="display_type == 'line_note'">
+                <field name="bom_line_ids">
+                    <tree editable="bottom">
                         <control>
                             <create name="add_product_control" string="Add a component"/>
                             <create name="add_section_control" string="Add a section" context="{'default_display_type': 'line_section'}"/>
