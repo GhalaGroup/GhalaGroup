@@ -10,15 +10,11 @@
         <field name="model">mrp.bom</field>
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="arch" type="xml">
-            <!-- Add Revision Control and Master BOM Preview buttons before sheet -->
+            <!-- Add Revision Control button before sheet -->
             <xpath expr="//sheet" position="before">
                 <header>
                     <button name="action_create_new_revision" string="Create New Revision"
                             type="object" class="btn-secondary"
-                            groups="vpa_production_base.group_bom_manager"/>
-                    <button name="%(action_report_master_bom_overview)d" string="Master BOM Preview"
-                            type="action" class="btn-primary"
-                            invisible="not is_master_bom"
                             groups="vpa_production_base.group_bom_manager"/>
                 </header>
             </xpath>
