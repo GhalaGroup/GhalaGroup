@@ -97,11 +97,15 @@ class MrpBom(models.Model):
     @api.depends('code', 'revision')
     def _compute_code_with_revision(self):
         """Compute BOM code with revision number."""
+        import re
         for bom in self:
-            if bom.code and bom.revision:
-                bom.code_with_revision = f"{bom.code} (Rev {bom.revision})"
-            elif bom.code:
-                bom.code_with_revision = bom.code
+            if bom.code:
+                # Clean the code by removing Odoo's automatic "(new) X" suffix
+                clean_code = re.sub(r'\s*\(new\)\s*\d*', '', bom.code).strip()
+                if bom.revision:
+                    bom.code_with_revision = f"{clean_code} (Rev {bom.revision})"
+                else:
+                    bom.code_with_revision = clean_code
             else:
                 bom.code_with_revision = False
 
