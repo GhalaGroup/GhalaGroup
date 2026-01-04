@@ -69,6 +69,7 @@ class ReportBomStructure(models.AbstractModel):
                 'base_bom_line_qty': line_quantity,
                 'is_storable': False,
                 'components_available': True,
+                'has_attachments': False,  # Template lines have no attachments
                 'description': bom_line.line_description or '',
                 'level': level,
             }
