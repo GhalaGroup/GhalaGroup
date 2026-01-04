@@ -47,11 +47,19 @@ class MrpBomLine(models.Model):
              "Displayed on MO for worker reference.",
     )
 
-    # Override product_id to make it not required for sections
+    # Override product_id to make it not required for sections/template lines
     product_id = fields.Many2one(
         'product.product',
         domain="[('product_tmpl_id.is_raw_material', '=', True), '|', ('product_tmpl_id.bom_category_id', '=', False), ('product_tmpl_id.bom_category_id', '=', bom_category_id)]",
-        required=False,  # Allow empty for sections/notes
+        required=False,  # Allow empty for sections/notes and template lines
+    )
+
+    # Override product_uom_id to ensure it's set even for template lines
+    product_uom_id = fields.Many2one(
+        'uom.uom',
+        string='Unit of Measure',
+        required=False,  # Not required for sections
+        help="Unit of measure for this BOM line. For template lines, this defines the expected UoM.",
     )
 
     # =========================================================================
@@ -178,3 +186,38 @@ class MrpBomLine(models.Model):
         """Auto-fill category from product if product has one."""
         if self.product_id and self.product_id.product_tmpl_id.bom_category_id:
             self.bom_category_id = self.product_id.product_tmpl_id.bom_category_id
+
+    @api.onchange('bom_category_id', 'product_id')
+    def _onchange_set_default_uom(self):
+        """Set default UoM for template lines if not set."""
+        # Template line = has category but no product
+        if self.bom_category_id and not self.product_id and not self.product_uom_id:
+            # Get default UoM (Units)
+            default_uom = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+            if default_uom:
+                self.product_uom_id = default_uom
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Ensure template lines have a UoM set."""
+        for vals in vals_list:
+            # If this is a template line (category but no product) and no UoM is set
+            if vals.get('bom_category_id') and not vals.get('product_id') and not vals.get('product_uom_id'):
+                # Set default UoM (Units)
+                default_uom = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+                if default_uom:
+                    vals['product_uom_id'] = default_uom.id
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Ensure template lines have a UoM when category is added."""
+        result = super().write(vals)
+
+        # After write, check if any lines became template lines without UoM
+        for line in self:
+            if line.is_template_line and not line.product_uom_id:
+                default_uom = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+                if default_uom:
+                    super(MrpBomLine, line).write({'product_uom_id': default_uom.id})
+
+        return result
