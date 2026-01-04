@@ -65,6 +65,7 @@ class ReportBomStructure(models.AbstractModel):
                 'producible_qty': 0.0,
                 'availability_display': _('Template'),
                 'availability_state': 'template',
+                'stock_avail_state': 'available',  # Template lines are always "available"
                 'base_bom_line_qty': line_quantity,
                 'is_storable': False,
                 'components_available': True,
