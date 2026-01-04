@@ -109,6 +109,23 @@ class MrpBom(models.Model):
             else:
                 bom.code_with_revision = False
 
+    @api.depends('code', 'revision', 'product_tmpl_id')
+    def _compute_display_name(self):
+        """Override display name to use cleaned code with revision."""
+        import re
+        for bom in self:
+            if bom.code:
+                # Clean the code by removing Odoo's automatic "(new) X" suffix
+                clean_code = re.sub(r'\s*\(new\)\s*\d*', '', bom.code).strip()
+                if bom.revision:
+                    bom.display_name = f"{clean_code} (Rev {bom.revision})"
+                else:
+                    bom.display_name = clean_code
+            elif bom.product_tmpl_id:
+                bom.display_name = bom.product_tmpl_id.display_name
+            else:
+                bom.display_name = _("Bill of Materials")
+
     # =========================================================================
     # OVERRIDES
     # =========================================================================

@@ -5,19 +5,22 @@
 from odoo import models
 
 
-class MrpBomLine(models.Model):
-    """Extend mrp.bom.line to mark template lines."""
-    _inherit = 'mrp.bom.line'
+class ReportBomStructure(models.AbstractModel):
+    """Extend BOM structure report to handle template lines (lines without products)."""
+    _inherit = 'report.mrp.report_bom_structure'
 
-    def _skip_bom_line(self, product):
-        """Override to skip template lines in BOM reports.
+    def _get_component_data(self, parent_bom, product, warehouse, bom_line, line_quantity, level, index, product_info, ignore_stock=False):
+        """Override to skip template lines.
 
         Template lines (lines with category but no product) should not appear
         in cost calculations or BOM structure reports.
         """
-        # Skip template lines (no product_id)
-        if not self.product_id:
-            return True
+        # Skip template lines (no product_id) - return None to skip this line
+        if not bom_line.product_id:
+            return None
 
-        # Use parent logic for other checks
-        return super()._skip_bom_line(product)
+        # For normal lines with products, use the standard logic
+        return super()._get_component_data(
+            parent_bom, product, warehouse, bom_line, line_quantity,
+            level, index, product_info, ignore_stock
+        )
