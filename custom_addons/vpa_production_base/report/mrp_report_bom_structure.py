@@ -29,28 +29,19 @@ class ReportBomStructure(models.AbstractModel):
 
     def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, level=0):
         """Override to filter template lines and fix reference display."""
-        # Create a wrapper BOM object with filtered lines
-        class FilteredBom:
-            def __init__(self, original_bom):
-                self._bom = original_bom
-                # Filter out template lines (lines without product_id)
-                self.bom_line_ids = original_bom.bom_line_ids.filtered(lambda l: l.product_id)
+        # Filter out template lines before processing
+        original_lines = bom.bom_line_ids
+        bom.bom_line_ids = original_lines.filtered(lambda l: l.product_id)
 
-            def __getattr__(self, name):
-                # Use code_with_revision for 'code' field to show revision in report
-                if name == 'code' and hasattr(self._bom, 'code_with_revision'):
-                    return self._bom.code_with_revision or self._bom.code
-                # Delegate all other attributes to original BOM
-                return getattr(self._bom, name)
+        try:
+            # Call parent with filtered lines
+            result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
 
-        # Use filtered BOM for the report
-        filtered_bom = FilteredBom(bom)
+            # Fix the 'code' field in the result dictionary to show revision
+            if result and 'code' in result and hasattr(bom, 'code_with_revision') and bom.code_with_revision:
+                result['code'] = bom.code_with_revision
 
-        # Call parent with filtered BOM
-        result = super()._get_bom_data(filtered_bom, warehouse, product, line_qty, level)
-
-        # Also fix the 'code' field in the result dictionary
-        if result and 'code' in result and bom.code_with_revision:
-            result['code'] = bom.code_with_revision
-
-        return result
+            return result
+        finally:
+            # Always restore original lines
+            bom.bom_line_ids = original_lines
