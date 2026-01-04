@@ -130,18 +130,36 @@ class MrpBom(models.Model):
     # OVERRIDES
     # =========================================================================
     def write(self, vals):
-        """Track modifications in audit fields."""
+        """Track modifications in audit fields and clean code field."""
         vals['last_modified_by_id'] = self.env.user.id
         vals['last_modified_date'] = fields.Datetime.now()
-        return super().write(vals)
+
+        # Clean the code field if it contains "(new)" suffix
+        if 'code' in vals and vals['code']:
+            import re
+            vals['code'] = re.sub(r'\s*\(new\)\s*\d*', '', vals['code']).strip()
+
+        result = super().write(vals)
+
+        # Force recompute display_name after code changes
+        if 'code' in vals or 'revision' in vals:
+            self._compute_display_name()
+
+        return result
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Ensure created_by and created_date are set."""
+        """Ensure created_by and created_date are set and clean code field."""
+        import re
         for vals in vals_list:
             vals.setdefault('created_by_id', self.env.user.id)
             vals.setdefault('created_date', fields.Datetime.now())
             vals.setdefault('revision', '1.0')
+
+            # Clean the code field if it contains "(new)" suffix
+            if 'code' in vals and vals['code']:
+                vals['code'] = re.sub(r'\s*\(new\)\s*\d*', '', vals['code']).strip()
+
             # Initialize revision history
             revision = vals.get('revision', '1.0')
             user = self.env.user.name
