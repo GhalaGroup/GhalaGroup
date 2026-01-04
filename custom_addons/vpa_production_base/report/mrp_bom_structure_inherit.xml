@@ -14,6 +14,10 @@
                         <span class="badge bg-warning text-dark me-2" t-esc="l['category_code']"/>
                     </t>
                     <strong t-esc="l['name']"/>
+                    <t t-if="l.get('description')">
+                        <br/>
+                        <small class="text-muted fst-italic" t-esc="l['description']"/>
+                    </t>
                 </t>
                 <t t-else="">
                     <!-- Standard Line: Show product name -->
