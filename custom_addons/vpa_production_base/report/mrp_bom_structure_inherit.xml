@@ -2,15 +2,11 @@
 <odoo>
     <!-- Inherit Standard BOM Overview Template to Style Template Lines -->
     <template id="report_mrp_bom_pdf_line_inherit" inherit_id="mrp.report_mrp_bom_pdf_line">
-        <!-- Add yellow styling for template lines -->
-        <xpath expr="//tr[@t-if='l[\'visible\']']" position="attributes">
-            <attribute name="t-attf-class">{{l.get('type') == 'template' and 'table-warning' or ''}}</attribute>
-            <attribute name="t-attf-style">{{l.get('type') == 'template' and 'background-color: #fff3cd !important; border-left: 4px solid #ffc107;' or ''}}</attribute>
-        </xpath>
-
         <!-- Customize the product name cell for template lines -->
         <xpath expr="//td[@name='td_mrp_code']" position="replace">
-            <td name="td_mrp_code">
+            <td name="td_mrp_code"
+                t-attf-class="{{l.get('type') == 'template' and 'table-warning' or ''}}"
+                t-attf-style="{{l.get('type') == 'template' and 'background-color: #fff3cd !important; border-left: 4px solid #ffc107; padding: 8px;' or 'padding: 8px;'}}">
                 <span t-attf-class="o_mrp_bom_foldable o_mrp_bom_unfoldable d-block ms-{{l['level'] * 4}}"/>
                 <t t-if="l.get('type') == 'template'">
                     <!-- Template Line: Show category badge + name -->
@@ -26,12 +22,28 @@
             </td>
         </xpath>
 
-        <!-- Add description for template lines in route column -->
-        <xpath expr="//td[last()]" position="before">
-            <td t-if="l.get('type') == 'template'" class="fst-italic text-muted">
-                <t t-if="l.get('description')" t-esc="l['description']"/>
-                <br/>
-                <small>(To be selected during manufacturing)</small>
+        <!-- Extend quantity column to add yellow styling for template lines -->
+        <xpath expr="//td[@class='text-end']" position="attributes">
+            <attribute name="t-attf-class">text-end {{l.get('type') == 'template' and 'table-warning' or ''}}</attribute>
+            <attribute name="t-attf-style">{{l.get('type') == 'template' and 'background-color: #fff3cd !important; padding: 8px;' or 'padding: 8px;'}}</attribute>
+        </xpath>
+
+        <!-- Extend route/description column -->
+        <xpath expr="//td[@t-if=&quot;data['forecast_mode']&quot;][1]" position="replace">
+            <td t-if="data['forecast_mode']"
+                t-attf-class="{{l.get('type') == 'template' and 'table-warning fst-italic text-muted' or ''}}"
+                t-attf-style="{{l.get('type') == 'template' and 'background-color: #fff3cd !important; padding: 8px;' or 'padding: 8px;'}}">
+                <t t-if="l.get('type') == 'template'">
+                    <t t-if="l.get('description')" t-esc="l['description']"/>
+                    <br/>
+                    <small>(To be selected during manufacturing)</small>
+                </t>
+                <t t-else="">
+                    <span t-if="l['route_name']" t-attf-class="{{'text-danger' if l.get('route_alert') else ''}}">
+                        <t t-esc="l['route_name']"/>:
+                    </span>
+                    <span t-esc="l['route_detail']"/>
+                </t>
             </td>
         </xpath>
     </template>
