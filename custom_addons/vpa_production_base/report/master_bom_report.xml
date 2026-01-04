@@ -2,9 +2,9 @@
 <odoo>
     <!-- Reusable BOM Lines Table Template -->
     <template id="master_bom_lines_table">
-        <table class="table table-sm table-bordered">
+        <table class="table table-sm o_main_table">
             <thead>
-                <tr class="table-active">
+                <tr>
                     <th>Product / Category</th>
                     <th>Description</th>
                     <th class="text-end">Quantity</th>
@@ -13,64 +13,49 @@
             </thead>
             <tbody>
                 <t t-foreach="bom.bom_line_ids" t-as="line">
-                    <!-- Section Header -->
-                    <t t-if="line.display_type == 'line_section'">
-                        <tr class="table-secondary">
-                            <td colspan="4">
-                                <strong><span t-field="line.name"/></strong>
-                            </td>
-                        </tr>
-                    </t>
+                    <!-- Skip display_type lines (sections/notes) as they're not used in template -->
+                    <t t-if="not line.display_type">
+                        <!-- Template Line (Category without Product) -->
+                        <t t-if="line.is_template_line">
+                            <tr style="background-color: rgba(255, 193, 7, 0.1);">
+                                <td>
+                                    <span class="badge" style="background-color: #ffc107; color: #000;"><t t-esc="line.bom_category_id.code"/></span>
+                                    <strong><t t-esc="line.bom_category_id.name"/></strong>
+                                </td>
+                                <td>
+                                    <em><t t-esc="line.line_description or ''"/></em>
+                                    <br/>
+                                    <small class="text-muted">(To be selected during manufacturing)</small>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="line.product_qty"/>
+                                </td>
+                                <td>
+                                    <t t-esc="line.product_uom_id.name"/>
+                                </td>
+                            </tr>
+                        </t>
 
-                    <!-- Note -->
-                    <t t-elif="line.display_type == 'line_note'">
-                        <tr class="table-light">
-                            <td colspan="4">
-                                <em><span t-field="line.name"/></em>
-                            </td>
-                        </tr>
-                    </t>
-
-                    <!-- Template Line (Category without Product) -->
-                    <t t-elif="line.is_template_line">
-                        <tr class="table-warning">
-                            <td>
-                                <span class="badge bg-warning text-dark" t-field="line.bom_category_id.code"/>
-                                <strong t-field="line.bom_category_id.name"/>
-                            </td>
-                            <td>
-                                <em><span t-field="line.line_description"/></em>
-                                <br/>
-                                <small class="text-muted">(To be selected during manufacturing)</small>
-                            </td>
-                            <td class="text-end">
-                                <span t-field="line.product_qty"/>
-                            </td>
-                            <td>
-                                <span t-field="line.product_uom_id.name"/>
-                            </td>
-                        </tr>
-                    </t>
-
-                    <!-- Standard Line (with Product) -->
-                    <t t-else="">
-                        <tr>
-                            <td>
-                                <t t-if="line.bom_category_id">
-                                    <span class="badge bg-secondary" t-field="line.bom_category_id.code"/>
-                                </t>
-                                <span t-field="line.product_id.display_name"/>
-                            </td>
-                            <td>
-                                <span t-field="line.line_description"/>
-                            </td>
-                            <td class="text-end">
-                                <span t-field="line.product_qty"/>
-                            </td>
-                            <td>
-                                <span t-field="line.product_uom_id.name"/>
-                            </td>
-                        </tr>
+                        <!-- Standard Line (with Product) -->
+                        <t t-else="">
+                            <tr>
+                                <td>
+                                    <t t-if="line.bom_category_id">
+                                        <span class="badge bg-secondary"><t t-esc="line.bom_category_id.code"/></span>
+                                    </t>
+                                    <t t-esc="line.product_id.display_name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="line.line_description or ''"/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="line.product_qty"/>
+                                </td>
+                                <td>
+                                    <t t-esc="line.product_uom_id.name"/>
+                                </td>
+                            </tr>
+                        </t>
                     </t>
                 </t>
             </tbody>
