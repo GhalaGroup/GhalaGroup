@@ -53,7 +53,7 @@
             </xpath>
 
             <!-- Add new fields to BOM lines (sections temporarily disabled) -->
-            <xpath expr="//field[@name='bom_line_ids']/tree" position="inside">
+            <xpath expr="//field[@name='bom_line_ids']//field[@name='product_id']" position="after">
                 <field name="bom_category_id" optional="show"/>
                 <field name="line_description" optional="hide"/>
             </xpath>
