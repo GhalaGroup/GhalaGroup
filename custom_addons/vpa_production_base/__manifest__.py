@@ -63,6 +63,7 @@ Support: info@vpa.co.tz
         'data/vpa_bom_category_data.xml',
         # Reports
         'report/master_bom_report.xml',
+        'report/mrp_bom_structure_inherit.xml',
         # Views
         'views/vpa_bom_category_views.xml',
         'views/product_template_views.xml',

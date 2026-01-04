@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Standard BOM Overview Template to Style Template Lines -->
+    <template id="report_mrp_bom_pdf_line_inherit" inherit_id="mrp.report_mrp_bom_pdf_line">
+        <!-- Add yellow styling for template lines -->
+        <xpath expr="//tr[@t-if='l[\'visible\']']" position="attributes">
+            <attribute name="t-attf-class">{{l.get('type') == 'template' and 'table-warning' or ''}}</attribute>
+            <attribute name="t-attf-style">{{l.get('type') == 'template' and 'background-color: #fff3cd !important; border-left: 4px solid #ffc107;' or ''}}</attribute>
+        </xpath>
+
+        <!-- Customize the product name cell for template lines -->
+        <xpath expr="//td[@name='td_mrp_code']" position="replace">
+            <td name="td_mrp_code">
+                <span t-attf-class="o_mrp_bom_foldable o_mrp_bom_unfoldable d-block ms-{{l['level'] * 4}}"/>
+                <t t-if="l.get('type') == 'template'">
+                    <!-- Template Line: Show category badge + name -->
+                    <t t-if="l.get('category_code')">
+                        <span class="badge bg-warning text-dark me-2" t-esc="l['category_code']"/>
+                    </t>
+                    <strong t-esc="l['name']"/>
+                </t>
+                <t t-else="">
+                    <!-- Standard Line: Show product name -->
+                    <span t-esc="l['name']"/>
+                </t>
+            </td>
+        </xpath>
+
+        <!-- Add description for template lines in route column -->
+        <xpath expr="//td[last()]" position="before">
+            <td t-if="l.get('type') == 'template'" class="fst-italic text-muted">
+                <t t-if="l.get('description')" t-esc="l['description']"/>
+                <br/>
+                <small>(To be selected during manufacturing)</small>
+            </td>
+        </xpath>
+    </template>
+</odoo>

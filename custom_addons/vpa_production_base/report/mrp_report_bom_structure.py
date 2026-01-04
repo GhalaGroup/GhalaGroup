@@ -28,20 +28,43 @@ class ReportBomStructure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
     def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, level=0):
-        """Override to filter template lines and fix reference display."""
-        # Filter out template lines before processing
-        original_lines = bom.bom_line_ids
-        bom.bom_line_ids = original_lines.filtered(lambda l: l.product_id)
+        """Override to handle template lines and fix reference display."""
+        result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
 
-        try:
-            # Call parent with filtered lines
-            result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
+        # Fix the 'code' field in the result dictionary to show revision
+        if result and 'code' in result and hasattr(bom, 'code_with_revision') and bom.code_with_revision:
+            result['code'] = bom.code_with_revision
 
-            # Fix the 'code' field in the result dictionary to show revision
-            if result and 'code' in result and hasattr(bom, 'code_with_revision') and bom.code_with_revision:
-                result['code'] = bom.code_with_revision
+        return result
 
-            return result
-        finally:
-            # Always restore original lines
-            bom.bom_line_ids = original_lines
+    def _get_bom_line_data(self, line, warehouse, level, index, product_info, ignore_stock=False):
+        """Override to handle template lines (lines without products)."""
+        # Check if this is a template line (has category but no product)
+        if line.bom_category_id and not line.product_id:
+            # Return custom data structure for template lines
+            return {
+                'index': index,
+                'level': level,
+                'name': line.bom_category_id.name,
+                'type': 'template',  # Mark as template line
+                'category_code': line.bom_category_id.code or '',
+                'description': line.line_description or '',
+                'quantity': line.product_qty,
+                'uom_name': line.product_uom_id.name if line.product_uom_id else '',
+                'prod_cost': 0.0,
+                'bom_cost': 0.0,
+                'route_name': '',
+                'route_detail': _('To be selected during manufacturing'),
+                'lead_time': False,
+                'visible': True,
+                'quantity_available': 0.0,
+                'quantity_on_hand': 0.0,
+                'producible_qty': 0.0,
+                'availability_display': _('Template'),
+                'availability_state': 'template',
+                'components_available': True,
+                'lines': [],  # Template lines have no sub-components
+            }
+
+        # For standard lines with products, use parent logic
+        return super()._get_bom_line_data(line, warehouse, level, index, product_info, ignore_stock)
