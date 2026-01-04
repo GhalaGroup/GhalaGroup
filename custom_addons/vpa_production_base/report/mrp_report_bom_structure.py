@@ -6,19 +6,16 @@ from odoo import api, models
 
 
 class MrpBomLine(models.Model):
-    """Extend mrp.bom.line to skip template lines in reports."""
+    """Extend mrp.bom.line to handle template lines in reports."""
     _inherit = 'mrp.bom.line'
 
     @api.model
     def _skip_bom_line(self, product):
         """Check if this BOM line should be skipped.
 
-        Override to skip template lines (lines without products) in reports.
+        Template lines (lines without products) should NOT be skipped.
         """
-        # Skip template lines - they have category but no product
-        if not self.product_id:
-            return True
-
+        # DON'T skip template lines - they should be shown in reports
         # Check parent logic for other skip conditions
         return super()._skip_bom_line(product) if hasattr(super(), '_skip_bom_line') else False
 
@@ -37,24 +34,24 @@ class ReportBomStructure(models.AbstractModel):
 
         return result
 
-    def _get_bom_line_data(self, line, warehouse, level, index, product_info, ignore_stock=False):
+    def _get_component_data(self, parent_bom, parent_product, warehouse, bom_line, line_quantity, level, index, product_info, ignore_stock=False):
         """Override to handle template lines (lines without products)."""
-        import logging
-        _logger = logging.getLogger(__name__)
-
         # Check if this is a template line (has category but no product)
-        if line.bom_category_id and not line.product_id:
-            _logger.info(f"TEMPLATE LINE FOUND: {line.bom_category_id.name}, Qty: {line.product_qty}")
+        if bom_line.bom_category_id and not bom_line.product_id:
             # Return custom data structure for template lines
+            from odoo import _
             return {
-                'index': index,
-                'level': level,
-                'name': line.bom_category_id.name,
                 'type': 'template',  # Mark as template line
-                'category_code': line.bom_category_id.code or '',
-                'description': line.line_description or '',
-                'quantity': line.product_qty,
-                'uom_name': line.product_uom_id.name if line.product_uom_id else '',
+                'index': index,
+                'product_id': False,
+                'product': self.env['product.product'],  # Empty recordset
+                'link_id': f'line_{bom_line.id}',
+                'link_model': 'mrp.bom.line',
+                'name': bom_line.bom_category_id.name,
+                'category_code': bom_line.bom_category_id.code or '',
+                'quantity': line_quantity,
+                'uom': bom_line.product_uom_id,
+                'uom_name': bom_line.product_uom_id.name if bom_line.product_uom_id else '',
                 'prod_cost': 0.0,
                 'bom_cost': 0.0,
                 'route_name': '',
@@ -63,12 +60,17 @@ class ReportBomStructure(models.AbstractModel):
                 'visible': True,
                 'quantity_available': 0.0,
                 'quantity_on_hand': 0.0,
+                'quantity_forecasted': 0.0,
+                'free_to_manufacture_qty': 0.0,
                 'producible_qty': 0.0,
                 'availability_display': _('Template'),
                 'availability_state': 'template',
+                'base_bom_line_qty': line_quantity,
+                'is_storable': False,
                 'components_available': True,
-                'lines': [],  # Template lines have no sub-components
+                'description': bom_line.line_description or '',
+                'level': level,
             }
 
         # For standard lines with products, use parent logic
-        return super()._get_bom_line_data(line, warehouse, level, index, product_info, ignore_stock)
+        return super()._get_component_data(parent_bom, parent_product, warehouse, bom_line, line_quantity, level, index, product_info, ignore_stock)
