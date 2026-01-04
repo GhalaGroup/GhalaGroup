@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Delete old report action if it exists -->
+    <delete model="ir.actions.report" search="[('id', '=', ref('vpa_production_base.action_report_master_bom_overview'))]"/>
+
     <!-- Master BOM Overview Client Action - Same as Standard BOM Overview -->
     <record id="action_report_master_bom_overview" model="ir.actions.client">
         <field name="name">Master BOM Overview</field>
