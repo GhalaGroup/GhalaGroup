@@ -28,7 +28,7 @@ class ReportBomStructure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
     def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, level=0):
-        """Override to filter template lines by wrapping bom_line_ids."""
+        """Override to filter template lines and fix reference display."""
         # Create a wrapper BOM object with filtered lines
         class FilteredBom:
             def __init__(self, original_bom):
@@ -37,6 +37,9 @@ class ReportBomStructure(models.AbstractModel):
                 self.bom_line_ids = original_bom.bom_line_ids.filtered(lambda l: l.product_id)
 
             def __getattr__(self, name):
+                # Use code_with_revision for 'code' field to show revision in report
+                if name == 'code' and hasattr(self._bom, 'code_with_revision'):
+                    return self._bom.code_with_revision or self._bom.code
                 # Delegate all other attributes to original BOM
                 return getattr(self._bom, name)
 
@@ -44,4 +47,10 @@ class ReportBomStructure(models.AbstractModel):
         filtered_bom = FilteredBom(bom)
 
         # Call parent with filtered BOM
-        return super()._get_bom_data(filtered_bom, warehouse, product, line_qty, level)
+        result = super()._get_bom_data(filtered_bom, warehouse, product, line_qty, level)
+
+        # Also fix the 'code' field in the result dictionary
+        if result and 'code' in result and bom.code_with_revision:
+            result['code'] = bom.code_with_revision
+
+        return result
