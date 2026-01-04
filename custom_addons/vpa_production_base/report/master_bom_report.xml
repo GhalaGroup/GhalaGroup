@@ -1,10 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Reusable BOM Lines Table Template -->
+    <template id="master_bom_lines_table">
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr class="table-active">
+                    <th>Product / Category</th>
+                    <th>Description</th>
+                    <th class="text-end">Quantity</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="bom.bom_line_ids" t-as="line">
+                    <!-- Section Header -->
+                    <t t-if="line.display_type == 'line_section'">
+                        <tr class="table-secondary">
+                            <td colspan="4">
+                                <strong><span t-field="line.name"/></strong>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <!-- Note -->
+                    <t t-elif="line.display_type == 'line_note'">
+                        <tr class="table-light">
+                            <td colspan="4">
+                                <em><span t-field="line.name"/></em>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <!-- Template Line (Category without Product) -->
+                    <t t-elif="line.is_template_line">
+                        <tr class="table-warning">
+                            <td>
+                                <span class="badge bg-warning text-dark" t-field="line.bom_category_id.code"/>
+                                <strong t-field="line.bom_category_id.name"/>
+                            </td>
+                            <td>
+                                <em><span t-field="line.line_description"/></em>
+                                <br/>
+                                <small class="text-muted">(To be selected during manufacturing)</small>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="line.product_qty"/>
+                            </td>
+                            <td>
+                                <span t-field="line.product_uom_id.name"/>
+                            </td>
+                        </tr>
+                    </t>
+
+                    <!-- Standard Line (with Product) -->
+                    <t t-else="">
+                        <tr>
+                            <td>
+                                <t t-if="line.bom_category_id">
+                                    <span class="badge bg-secondary" t-field="line.bom_category_id.code"/>
+                                </t>
+                                <span t-field="line.product_id.display_name"/>
+                            </td>
+                            <td>
+                                <span t-field="line.line_description"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="line.product_qty"/>
+                            </td>
+                            <td>
+                                <span t-field="line.product_uom_id.name"/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </tbody>
+        </table>
+    </template>
+
     <!-- Master BOM Preview Template -->
     <template id="master_bom_overview">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="bom">
-                <t t-call="web.external_layout">
+                <!-- Check if VPA Document Layout is installed -->
+                <t t-set="has_vpa_layout" t-value="request.env.ref('vpa_document_layout.external_layout_vpa', raise_if_not_found=False)"/>
+
+                <!-- Set variables for VPA layout (if available) -->
+                <t t-set="o" t-value="bom"/>
+                <t t-set="company" t-value="bom.company_id or res_company"/>
+                <t t-set="layout_document_title" t-value="'Master BOM'"/>
+                <t t-set="address">
+                    <div style="font-size: 9pt; line-height: 1.6;">
+                        <strong>Product:</strong> <span t-field="bom.product_tmpl_id.display_name"/><br/>
+                        <strong>Reference:</strong> <span t-field="bom.code_with_revision"/><br/>
+                        <strong>Revision:</strong> <span t-field="bom.revision"/><br/>
+                        <strong>Type:</strong> <span t-field="bom.type"/>
+                    </div>
+                </t>
+                <t t-set="information_block">
+                    <div>
+                        <strong>Quantity:</strong> <span t-field="bom.product_qty"/> <span t-field="bom.product_uom_id.name"/>
+                    </div>
+                </t>
+
+                <!-- Use VPA layout if available, otherwise use standard layout -->
+                <t t-if="has_vpa_layout" t-call="vpa_document_layout.external_layout_vpa">
+                    <div class="page">
+                        <div class="oe_structure"/>
+
+                        <!-- Master BOM Lines -->
+                        <h4 class="mt-4">Bill of Materials</h4>
+                        <p class="text-muted">
+                            <em>Template lines (category without product) will be selected by worker during manufacturing.</em>
+                        </p>
+
+                        <t t-call="vpa_production_base.master_bom_lines_table"/>
+
+                        <!-- Notes -->
+                        <t t-if="bom.code">
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <p class="text-muted">
+                                        <small>
+                                            <strong>Note:</strong> This is a Master BOM template.
+                                            Items marked with a category code but no specific product will be selected
+                                            by the manufacturing worker based on available materials and project requirements.
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </t>
+
+                        <div class="oe_structure"/>
+                    </div>
+                </t>
+
+                <!-- Fallback to standard Odoo layout -->
+                <t t-else="" t-call="web.external_layout">
                     <div class="page">
                         <div class="oe_structure"/>
 
@@ -43,79 +174,7 @@
                             <em>Template lines (category without product) will be selected by worker during manufacturing.</em>
                         </p>
 
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr class="table-active">
-                                    <th>Product / Category</th>
-                                    <th>Description</th>
-                                    <th class="text-end">Quantity</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <t t-foreach="bom.bom_line_ids" t-as="line">
-                                    <!-- Section Header -->
-                                    <t t-if="line.display_type == 'line_section'">
-                                        <tr class="table-secondary">
-                                            <td colspan="4">
-                                                <strong><span t-field="line.name"/></strong>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <!-- Note -->
-                                    <t t-elif="line.display_type == 'line_note'">
-                                        <tr class="table-light">
-                                            <td colspan="4">
-                                                <em><span t-field="line.name"/></em>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <!-- Template Line (Category without Product) -->
-                                    <t t-elif="line.is_template_line">
-                                        <tr class="table-warning">
-                                            <td>
-                                                <span class="badge bg-warning text-dark" t-field="line.bom_category_id.code"/>
-                                                <strong t-field="line.bom_category_id.name"/>
-                                            </td>
-                                            <td>
-                                                <em><span t-field="line.line_description"/></em>
-                                                <br/>
-                                                <small class="text-muted">(To be selected during manufacturing)</small>
-                                            </td>
-                                            <td class="text-end">
-                                                <span t-field="line.product_qty"/>
-                                            </td>
-                                            <td>
-                                                <span t-field="line.product_uom_id.name"/>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <!-- Standard Line (with Product) -->
-                                    <t t-else="">
-                                        <tr>
-                                            <td>
-                                                <t t-if="line.bom_category_id">
-                                                    <span class="badge bg-secondary" t-field="line.bom_category_id.code"/>
-                                                </t>
-                                                <span t-field="line.product_id.display_name"/>
-                                            </td>
-                                            <td>
-                                                <span t-field="line.line_description"/>
-                                            </td>
-                                            <td class="text-end">
-                                                <span t-field="line.product_qty"/>
-                                            </td>
-                                            <td>
-                                                <span t-field="line.product_uom_id.name"/>
-                                            </td>
-                                        </tr>
-                                    </t>
-                                </t>
-                            </tbody>
-                        </table>
+                        <t t-call="vpa_production_base.master_bom_lines_table"/>
 
                         <!-- Notes -->
                         <t t-if="bom.code">
@@ -143,7 +202,7 @@
     <record id="action_report_master_bom_overview" model="ir.actions.report">
         <field name="name">Master BOM Overview</field>
         <field name="model">mrp.bom</field>
-        <field name="report_type">qweb-html</field>
+        <field name="report_type">qweb-pdf</field>
         <field name="report_name">vpa_production_base.master_bom_overview</field>
         <field name="report_file">vpa_production_base.master_bom_overview</field>
         <field name="binding_model_id" ref="mrp.model_mrp_bom"/>
