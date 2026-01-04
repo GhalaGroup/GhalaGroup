@@ -2,7 +2,26 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import api, models
+
+
+class MrpBom(models.Model):
+    """Extend mrp.bom to filter out template lines for reports."""
+    _inherit = 'mrp.bom'
+
+    @api.depends('bom_line_ids.product_id')
+    def _compute_bom_line_ids(self):
+        """Override to provide filtered lines for reports."""
+        # This is called by various places, no actual compute needed
+        pass
+
+    def _get_report_lines(self):
+        """Return only BOM lines that have products (exclude template lines).
+
+        Template lines (category but no product) are used during manufacturing
+        for worker selection, but should not appear in cost reports.
+        """
+        return self.bom_line_ids.filtered(lambda line: line.product_id)
 
 
 class ReportBomStructure(models.AbstractModel):
@@ -10,37 +29,30 @@ class ReportBomStructure(models.AbstractModel):
 
     Template lines have bom_category_id but no product_id, which causes the standard
     report to fail when trying to calculate costs. This extension filters out template
-    lines from the component data generation.
+    lines before processing.
     """
     _inherit = 'report.mrp.report_bom_structure'
 
     def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, level=0):
-        """Override to filter out template lines before processing."""
-        # Get the original data
-        result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
+        """Override to use only lines with products.
 
-        # Filter components to remove template lines (lines without product_id)
-        if result and 'components' in result:
-            result['components'] = [
-                comp for comp in result['components']
-                if comp.get('line') and comp['line'].product_id
-            ]
+        We temporarily replace bom_line_ids with filtered lines that have products,
+        call the parent method, then restore the original lines.
+        """
+        # Store original lines
+        original_lines = bom.bom_line_ids
+
+        # Temporarily replace with filtered lines (only lines with products)
+        filtered_lines = original_lines.filtered(lambda line: line.product_id)
+
+        # Use ORM's recordset assignment to temporarily modify
+        bom.bom_line_ids = filtered_lines
+
+        try:
+            # Call parent with filtered lines
+            result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
+        finally:
+            # Restore original lines
+            bom.bom_line_ids = original_lines
 
         return result
-
-    def _get_component_data(self, parent_bom, product, warehouse, bom_line, line_quantity, level, index, product_info, ignore_stock=False):
-        """Override to skip template lines entirely.
-
-        Template lines don't have a product_id, so we can't calculate their cost
-        or display them in the BOM structure report. Workers will select the actual
-        product during manufacturing.
-        """
-        # Skip template lines (lines with category but no product)
-        if not bom_line.product_id:
-            return {}
-
-        # For normal lines with products, use the standard logic
-        return super()._get_component_data(
-            parent_bom, product, warehouse, bom_line, line_quantity,
-            level, index, product_info, ignore_stock
-        )
