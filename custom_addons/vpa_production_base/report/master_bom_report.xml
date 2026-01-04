@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Master BOM Report Action - Points to Standard BOM Structure Report -->
+    <record id="action_report_master_bom_overview" model="ir.actions.report">
+        <field name="name">Master BOM Overview</field>
+        <field name="model">mrp.bom</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">mrp.report_bom_structure</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_bom"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Master BOM - %s' % (object.code_with_revision or object.code or object.id)</field>
+    </record>
+</odoo>
