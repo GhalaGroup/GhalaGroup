@@ -61,6 +61,8 @@ Support: info@vpa.co.tz
         'security/ir.model.access.csv',
         # Data
         'data/vpa_bom_category_data.xml',
+        # Reports
+        'report/master_bom_report.xml',
         # Views
         'views/vpa_bom_category_views.xml',
         'views/product_template_views.xml',
