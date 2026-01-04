@@ -39,8 +39,12 @@ class ReportBomStructure(models.AbstractModel):
 
     def _get_bom_line_data(self, line, warehouse, level, index, product_info, ignore_stock=False):
         """Override to handle template lines (lines without products)."""
+        import logging
+        _logger = logging.getLogger(__name__)
+
         # Check if this is a template line (has category but no product)
         if line.bom_category_id and not line.product_id:
+            _logger.info(f"TEMPLATE LINE FOUND: {line.bom_category_id.name}, Qty: {line.product_qty}")
             # Return custom data structure for template lines
             return {
                 'index': index,
