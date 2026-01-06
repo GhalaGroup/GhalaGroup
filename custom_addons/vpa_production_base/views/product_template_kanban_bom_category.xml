@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Raw Materials Kanban View - Grouped by BOM Category          -->
+    <!-- VPA Production Base                                          -->
+    <!-- ============================================================ -->
+
+    <!-- Kanban view grouped by BOM Category -->
+    <!-- Priority 100 ensures this view is NOT used as default - only when explicitly referenced -->
+    <record id="product_template_kanban_bom_category" model="ir.ui.view">
+        <field name="name">product.template.kanban.bom.category</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <kanban default_group_by="bom_category_id" class="o_kanban_small_column" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="image_128"/>
+                <field name="bom_category_id"/>
+                <field name="is_raw_material"/>
+                <field name="list_price"/>
+                <field name="currency_id"/>
+                <field name="categ_id"/>
+                <field name="type"/>
+                <field name="is_storable"/>
+                <field name="qty_available"/>
+                <field name="uom_id"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside>
+                            <field name="image_128" widget="image"
+                                   options="{'img_class': 'w-100 object-fit-contain'}"
+                                   invisible="not image_128"/>
+                        </aside>
+                        <main class="ps-2">
+                            <field name="name" class="fw-bold d-block text-truncate"/>
+                            <div t-if="record.default_code.value" class="text-muted small">
+                                [<field name="default_code"/>]
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <field name="list_price" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>
+                            </div>
+                            <div t-if="record.is_storable.raw_value" class="small mt-1">
+                                <strong>Qty:</strong> <field name="qty_available"/> <field name="uom_id"/>
+                            </div>
+                            <div class="mt-1">
+                                <span t-if="record.is_raw_material.raw_value"
+                                      class="badge text-bg-success">Raw Material</span>
+                                <span t-if="record.is_storable.raw_value"
+                                      class="badge text-bg-info">Stock</span>
+                                <span t-elif="record.type.raw_value == 'consu'"
+                                      class="badge text-bg-secondary">Consumable</span>
+                                <span t-elif="record.type.raw_value == 'service'"
+                                      class="badge text-bg-warning">Service</span>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Search view for Kanban - only used by our action via search_view_id -->
+    <record id="product_template_search_bom_category" model="ir.ui.view">
+        <field name="name">product.template.search.bom.category</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <search string="Search Products">
+                <!-- Left sidebar for Product Category filtering -->
+                <searchpanel>
+                    <field name="categ_id" string="Product Category" icon="fa-th-list" enable_counters="1" expand="1"/>
+                </searchpanel>
+                <field name="name" string="Product"
+                       filter_domain="['|', ('name', 'ilike', self), ('default_code', 'ilike', self)]"/>
+                <field name="categ_id" string="Product Category" filter_domain="[('categ_id', 'child_of', self)]"/>
+                <field name="bom_category_id" string="BOM Category"/>
+                <separator/>
+                <filter string="Raw Materials" name="raw_materials"
+                        domain="[('is_raw_material', '=', True)]"/>
+                <filter string="Storable" name="storable"
+                        domain="[('type', '=', 'product')]"/>
+                <filter string="Consumable" name="consumable"
+                        domain="[('type', '=', 'consu')]"/>
+                <separator/>
+                <filter string="Has BOM Category" name="has_bom_category"
+                        domain="[('bom_category_id', '!=', False)]"/>
+                <filter string="No BOM Category" name="no_bom_category"
+                        domain="[('bom_category_id', '=', False)]"/>
+                <group>
+                    <filter string="Product Category" name="group_categ"
+                            context="{'group_by': 'categ_id'}"/>
+                    <filter string="BOM Category" name="group_bom_category"
+                            context="{'group_by': 'bom_category_id'}"/>
+                    <filter string="Type" name="group_type"
+                            context="{'group_by': 'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Raw Materials Kanban -->
+    <record id="action_product_template_bom_category_kanban" model="ir.actions.act_window">
+        <field name="name">Raw Materials by Category</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('type', 'in', ['consu', 'product']), ('is_template_placeholder', '=', False)]</field>
+        <field name="context">{
+            'default_type': 'consu',
+            'default_is_raw_material': True,
+            'search_default_group_bom_category': 1
+        }</field>
+        <field name="search_view_id" ref="product_template_search_bom_category"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No products found
+            </p>
+            <p>
+                Drag and drop products between BOM categories to assign them.
+                Products without a category appear in the "Undefined" column.
+            </p>
+        </field>
+    </record>
+
+    <!-- View reference to use our Kanban first -->
+    <record id="action_product_template_bom_category_kanban_view_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="product_template_kanban_bom_category"/>
+        <field name="act_window_id" ref="action_product_template_bom_category_kanban"/>
+    </record>
+
+    <!-- Menu under Manufacturing > Products -->
+    <menuitem id="menu_product_bom_category_kanban"
+        name="Raw Materials by Category"
+        action="action_product_template_bom_category_kanban"
+        parent="mrp.menu_mrp_bom"
+        sequence="5"/>
+
+</odoo>

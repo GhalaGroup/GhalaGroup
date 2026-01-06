@@ -17,6 +17,12 @@
                        invisible="not is_raw_material"
                        domain="[('is_main_category', '=', False)]"
                        options="{'no_create': True, 'no_open': True}"/>
+                <label for="bom_main_category_id" string="Main Category"
+                       class="text-muted" invisible="not bom_main_category_id"/>
+                <div class="text-muted" invisible="not bom_main_category_id">
+                    <field name="bom_main_category_id" nolabel="1" readonly="1"
+                           options="{'no_open': True}" class="text-muted"/>
+                </div>
             </xpath>
         </field>
     </record>
