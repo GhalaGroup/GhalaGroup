@@ -1500,21 +1500,74 @@ class VPADocumentTemplate(models.Model):
                         font-size: 11px;
                         border: 1px solid <t t-out="primary_color"/>;
                     }}
+                    /* Variance Tracking Styles */
+                    .vpa-variance-positive {{
+                        color: #dc3545;
+                        font-weight: 600;
+                    }}
+                    .vpa-variance-negative {{
+                        color: #28a745;
+                    }}
+                    .vpa-variance-zero {{
+                        color: #666;
+                    }}
+                    .vpa-master-bom-badge {{
+                        display: inline-block;
+                        background: <t t-out="primary_color"/>;
+                        color: white;
+                        font-size: 8px;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        margin-left: 8px;
+                        vertical-align: middle;
+                    }}
+                    .vpa-category-badge {{
+                        display: inline-block;
+                        background: #f0f0f0;
+                        color: #666;
+                        font-size: 9px;
+                        padding: 2px 6px;
+                        border-radius: 3px;
+                        margin-right: 5px;
+                    }}
+                    .vpa-template-desc {{
+                        font-size: 9px;
+                        color: #888;
+                        margin-top: 2px;
+                    }}
                 </style>
 
                 <div class="vpa-mo">
                     <!-- Components to Consume Table -->
                     <t t-if="doc.move_raw_ids">
                         <div class="vpa-table-card">
-                            <div class="vpa-section-header">COMPONENTS TO CONSUME</div>
+                            <div class="vpa-section-header">
+                                COMPONENTS TO CONSUME
+                                <t t-if="doc.has_template_moves">
+                                    <span class="vpa-master-bom-badge">MASTER BOM</span>
+                                </t>
+                            </div>
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style="width: 5%%; text-align: center;">NO.</th>
-                                        <th style="width: {desc_width}%%;">PRODUCT</th>
-                                        <th style="width: 12%%; text-align: center;">TO CONSUME</th>
-                                        <th style="width: 12%%; text-align: center;">CONSUMED</th>
-                                        <th style="width: 10%%; text-align: center;">UNIT</th>
+                                        <!-- Master BOM columns with variance tracking -->
+                                        <t t-if="doc.has_template_moves">
+                                            <th style="width: 4%%; text-align: center;">NO.</th>
+                                            <th style="width: 8%%; text-align: center;">CAT</th>
+                                            <th style="width: 28%%;">PRODUCT</th>
+                                            <th style="width: 12%%; text-align: center;">MASTER QTY</th>
+                                            <th style="width: 12%%; text-align: center;">PHYSICAL QTY</th>
+                                            <th style="width: 18%%; text-align: center;">VARIANCE</th>
+                                            <th style="width: 8%%; text-align: center;">UNIT</th>
+                                        </t>
+                                        <!-- Standard BOM columns -->
+                                        <t t-else="">
+                                            <th style="width: 5%%; text-align: center;">NO.</th>
+                                            <th style="width: {desc_width}%%;">PRODUCT</th>
+                                            <th style="width: 12%%; text-align: center;">TO CONSUME</th>
+                                            <th style="width: 12%%; text-align: center;">CONSUMED</th>
+                                            <th style="width: 10%%; text-align: center;">UNIT</th>
+                                        </t>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1522,26 +1575,71 @@ class VPADocumentTemplate(models.Model):
                                     <t t-foreach="doc.move_raw_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
                                         <t t-set="line_num" t-value="line_num + 1"/>
                                         <tr>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                <t t-out="line_num"/>
-                                            </td>
-                                            <td style="text-align: left; vertical-align: middle;">
-                                                <div class="vpa-product-title">
-                                                    <t t-if="move.product_id.default_code">
-                                                        <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                            <!-- Master BOM row with variance -->
+                                            <t t-if="doc.has_template_moves">
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-out="line_num"/>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-if="move.bom_category_id">
+                                                        <span class="vpa-category-badge"><t t-out="move.bom_category_id.code or move.bom_category_id.name[:3]"/></span>
                                                     </t>
-                                                    <t t-out="move.product_id.name"/>
-                                                </div>
-                                            </td>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
-                                            </td>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/>
-                                            </td>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                <span t-field="move.product_uom"/>
-                                            </td>
+                                                </td>
+                                                <td style="text-align: left; vertical-align: middle;">
+                                                    <div class="vpa-product-title">
+                                                        <t t-if="move.product_id.default_code">
+                                                            <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                        </t>
+                                                        <t t-out="move.product_id.name"/>
+                                                    </div>
+                                                    <t t-if="move.template_line_description">
+                                                        <div class="vpa-template-desc"><t t-out="move.template_line_description"/></div>
+                                                    </t>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <span class="vpa-qty-badge"><t t-out="round(move.master_bom_qty, 2) if move.master_bom_qty else '-'"/></span>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-out="round(move.physical_qty_used, 2) if move.physical_qty_used else '-'"/>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-if="move.qty_variance > 0">
+                                                        <span class="vpa-variance-positive">+<t t-out="round(move.qty_variance, 2)"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
+                                                    </t>
+                                                    <t t-elif="move.qty_variance &lt; 0">
+                                                        <span class="vpa-variance-negative"><t t-out="round(move.qty_variance, 2)"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="vpa-variance-zero">0.00 (0%)</span>
+                                                    </t>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <span t-field="move.product_uom"/>
+                                                </td>
+                                            </t>
+                                            <!-- Standard BOM row -->
+                                            <t t-else="">
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-out="line_num"/>
+                                                </td>
+                                                <td style="text-align: left; vertical-align: middle;">
+                                                    <div class="vpa-product-title">
+                                                        <t t-if="move.product_id.default_code">
+                                                            <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                        </t>
+                                                        <t t-out="move.product_id.name"/>
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 2)"/></span>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 2)"/>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <span t-field="move.product_uom"/>
+                                                </td>
+                                            </t>
                                         </tr>
                                     </t>
                                 </tbody>

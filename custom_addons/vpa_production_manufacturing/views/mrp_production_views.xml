@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- MRP Production Views - Variance Tracking                      -->
+    <!-- VPA Production Manufacturing                                  -->
+    <!-- ============================================================ -->
+
+    <!-- Inherit MO Form View - Add variance columns to components -->
+    <record id="mrp_production_form_view_inherit_vpa_manufacturing" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.vpa.manufacturing</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add computed fields before move_raw_ids -->
+            <xpath expr="//field[@name='move_raw_ids']" position="before">
+                <field name="has_template_moves" invisible="1"/>
+                <field name="template_moves_pending" invisible="1"/>
+                <!-- Warning banner for template moves needing product selection -->
+                <div class="alert alert-warning mb-3" role="alert"
+                     invisible="not has_template_moves or not template_moves_pending">
+                    <i class="fa fa-exclamation-triangle me-2" title="Warning"/>
+                    <strong>Action Required:</strong>
+                    Some components are from Master BOM templates and need actual products selected.
+                    Click on the component and choose the product from the category dropdown.
+                </div>
+            </xpath>
+
+            <!-- Add variance columns to move_raw_ids list -->
+            <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_id']" position="before">
+                <!-- Category column for template moves -->
+                <field name="bom_category_id" string="Category"
+                       optional="hide"
+                       readonly="1"
+                       column_invisible="not parent.has_template_moves"/>
+                <!-- Description from template line -->
+                <field name="template_line_description" string="Description"
+                       optional="hide"
+                       readonly="1"
+                       column_invisible="not parent.has_template_moves"/>
+                <!-- Hidden fields for decorations -->
+                <field name="is_template_move" column_invisible="True"/>
+                <field name="is_placeholder_product" column_invisible="True"/>
+                <field name="variance_percentage" column_invisible="True"/>
+            </xpath>
+
+            <!-- Add red decoration to product_id when it's a placeholder -->
+            <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_id']" position="attributes">
+                <attribute name="decoration-danger">is_placeholder_product</attribute>
+            </xpath>
+
+            <!-- Override product_id to filter by category for template moves -->
+            <!-- For template moves: show only products with matching category -->
+            <!-- For regular moves (bom_category_id=False): show all products -->
+            <!-- Domain: exclude placeholders AND match category if set -->
+            <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_id']" position="attributes">
+                <attribute name="domain">[
+                    ('product_tmpl_id.is_template_placeholder', '=', False),
+                    ('product_tmpl_id.bom_category_id', '=', bom_category_id)
+                ]</attribute>
+                <!-- Allow product changes on template moves even when MO is confirmed -->
+                <!-- Template placeholders need to be replaced before MO can be marked done -->
+                <attribute name="readonly">parent.state in ('done', 'cancel') or (not is_template_move and parent.state != 'draft')</attribute>
+            </xpath>
+
+            <!-- Add variance tracking columns after quantity -->
+            <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_uom']" position="after">
+                <!-- Master BOM Qty - Original quantity from template -->
+                <field name="master_bom_qty" string="Master BOM Qty"
+                       optional="show"
+                       readonly="1"
+                       column_invisible="not parent.has_template_moves"
+                       decoration-muted="not is_template_move"/>
+                <!-- Physical Qty Used - What worker actually used -->
+                <field name="physical_qty_used" string="Physical Qty"
+                       optional="show"
+                       column_invisible="not parent.has_template_moves"
+                       readonly="parent.state in ('done', 'cancel')"
+                       decoration-info="is_template_move"/>
+                <!-- Hidden qty_variance for decoration logic -->
+                <field name="qty_variance" column_invisible="True"/>
+                <!-- Variance Display - Shows qty and percentage -->
+                <!-- Red/bold only when variance > 5%, otherwise normal white -->
+                <field name="variance_display" string="Variance"
+                       optional="show"
+                       readonly="1"
+                       column_invisible="not parent.has_template_moves"
+                       decoration-danger="variance_percentage &gt; 5"
+                       decoration-bf="variance_percentage &gt; 5"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

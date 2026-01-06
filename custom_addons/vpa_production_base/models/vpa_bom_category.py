@@ -144,3 +144,59 @@ class VpaBomCategory(models.Model):
             'domain': [('bom_category_id', '=', self.id)],
             'context': {'default_bom_category_id': self.id},
         }
+
+    # =========================================================================
+    # PLACEHOLDER PRODUCT AUTO-CREATION
+    # =========================================================================
+    placeholder_product_id = fields.Many2one(
+        'product.product',
+        string='Placeholder Product',
+        readonly=True,
+        help="System-generated placeholder product for this category. "
+             "Used in MO when creating from Master BOM template lines.",
+    )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override to auto-create placeholder product for each new category."""
+        records = super().create(vals_list)
+        for record in records:
+            # Don't create placeholders for main categories (they're for grouping only)
+            if not record.is_main_category:
+                record._create_placeholder_product()
+        return records
+
+    def _create_placeholder_product(self):
+        """Create a placeholder product for this category."""
+        self.ensure_one()
+        if self.placeholder_product_id:
+            return  # Already has placeholder
+
+        # Build placeholder name with code if available
+        if self.code:
+            name = f"[{self.code}] Template - {self.name}"
+        else:
+            name = f"Template - {self.name}"
+
+        # Create the placeholder product
+        product_vals = {
+            'name': name,
+            'type': 'consu',  # Consumable - no stock tracking
+            'is_template_placeholder': True,
+            'is_raw_material': True,
+            'bom_category_id': self.id,
+            'sale_ok': False,
+            'purchase_ok': False,
+            'list_price': 0.0,
+            'standard_price': 0.0,
+        }
+
+        product = self.env['product.product'].sudo().create(product_vals)
+        self.placeholder_product_id = product.id
+
+    def action_create_placeholder(self):
+        """Manually create placeholder product if missing."""
+        for record in self:
+            if not record.is_main_category and not record.placeholder_product_id:
+                record._create_placeholder_product()
+        return True

@@ -9,15 +9,14 @@ class MrpBomLine(models.Model):
     """Extend mrp.bom.line to handle template lines in reports."""
     _inherit = 'mrp.bom.line'
 
-    @api.model
-    def _skip_bom_line(self, product):
+    def _skip_bom_line(self, product, never_attribute_values=False):
         """Check if this BOM line should be skipped.
 
         Template lines (lines without products) should NOT be skipped.
         """
         # DON'T skip template lines - they should be shown in reports
         # Check parent logic for other skip conditions
-        return super()._skip_bom_line(product) if hasattr(super(), '_skip_bom_line') else False
+        return super()._skip_bom_line(product, never_attribute_values)
 
 
 class ReportBomStructure(models.AbstractModel):
@@ -28,9 +27,12 @@ class ReportBomStructure(models.AbstractModel):
         """Override to handle template lines and fix reference display."""
         result = super()._get_bom_data(bom, warehouse, product, line_qty, level)
 
-        # Fix the 'code' field in the result dictionary to show revision
-        if result and 'code' in result and hasattr(bom, 'code_with_revision') and bom.code_with_revision:
-            result['code'] = bom.code_with_revision
+        # Fix the reference to show revision (used by both PDF report and JS overview)
+        if result and bom:
+            if hasattr(bom, 'code_with_revision') and bom.code_with_revision:
+                result['bom_code'] = bom.code_with_revision
+                if 'code' in result:
+                    result['code'] = bom.code_with_revision
 
         return result
 
@@ -40,6 +42,12 @@ class ReportBomStructure(models.AbstractModel):
         if bom_line.bom_category_id and not bom_line.product_id:
             # Return custom data structure for template lines
             from odoo import _
+            # Build name with description if available
+            name_parts = [bom_line.bom_category_id.name]
+            if bom_line.line_description:
+                name_parts.append(f"({bom_line.line_description})")
+            display_name = " ".join(name_parts)
+
             return {
                 'type': 'template',  # Mark as template line
                 'index': index,
@@ -47,7 +55,7 @@ class ReportBomStructure(models.AbstractModel):
                 'product': self.env['product.product'],  # Empty recordset
                 'link_id': f'line_{bom_line.id}',
                 'link_model': 'mrp.bom.line',
-                'name': bom_line.bom_category_id.name,
+                'name': display_name,
                 'category_code': bom_line.bom_category_id.code or '',
                 'quantity': line_quantity,
                 'uom': bom_line.product_uom_id,

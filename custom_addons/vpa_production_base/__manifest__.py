@@ -69,9 +69,6 @@ Support: info@vpa.co.tz
         'views/product_template_views.xml',
         'views/mrp_bom_views.xml',
     ],
-    'images': [
-        'static/description/icon.png',
-    ],
     'installable': True,
     'application': False,
     'auto_install': False,

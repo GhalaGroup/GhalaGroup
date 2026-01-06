@@ -23,9 +23,38 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
     # Don't log warning at module load - only log when actually attempting to use it
 
+# Check if wkhtmltopdf supports --header-html (patched Qt version)
+WKHTMLTOPDF_PATCHED = None  # Will be detected on first use
+
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
+
+    def _is_wkhtmltopdf_patched(self):
+        """Check if wkhtmltopdf supports --header-html (patched Qt version)"""
+        global WKHTMLTOPDF_PATCHED
+        if WKHTMLTOPDF_PATCHED is None:
+            try:
+                result = subprocess.run(
+                    ['wkhtmltopdf', '--help'],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                # Check if help output mentions header-html without warning about unpatched qt
+                help_text = result.stdout + result.stderr
+                # The patched version has header-html in help without warning
+                # The unpatched version shows: "The switch --header-html, is not support using unpatched qt"
+                if 'unpatched qt' in help_text.lower():
+                    WKHTMLTOPDF_PATCHED = False
+                    _logger.warning("⚠️ wkhtmltopdf is UNPATCHED - --header-html/--footer-html will be ignored")
+                else:
+                    WKHTMLTOPDF_PATCHED = True
+                    _logger.info("✅ wkhtmltopdf is PATCHED - --header-html/--footer-html supported")
+            except Exception as e:
+                _logger.warning(f"Could not detect wkhtmltopdf patch status: {e}")
+                WKHTMLTOPDF_PATCHED = False
+        return WKHTMLTOPDF_PATCHED
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
         """Override to redirect to VPA template if marked as default"""
@@ -308,23 +337,44 @@ class IrActionsReport(models.Model):
                     fc = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
                     if fc.exists():
                         footer_height = fc.footer_height or '30mm'
-                command_args.extend([
-                    '--enable-local-file-access',
-                    '--margin-top', header_height if has_header else '0',
-                    '--margin-bottom', footer_height if footer_url else '0',  # Reserve space for footer
-                    '--margin-left', '0',
-                    '--margin-right', '0',
-                ])
-                # Both header and footer use --header-html and --footer-html URLs
-                if has_header and header_url:
+
+                # Check if wkhtmltopdf is patched (supports --header-html/--footer-html)
+                is_patched = self._is_wkhtmltopdf_patched()
+
+                if is_patched:
+                    # Use --header-html and --footer-html URLs (patched wkhtmltopdf)
                     command_args.extend([
-                        '--header-spacing', '5',
-                        '--header-html', header_url
+                        '--enable-local-file-access',
+                        '--margin-top', header_height if has_header else '0',
+                        '--margin-bottom', footer_height if footer_url else '0',
+                        '--margin-left', '0',
+                        '--margin-right', '0',
                     ])
-                if footer_url:
+                    if has_header and header_url:
+                        command_args.extend([
+                            '--header-spacing', '5',
+                            '--header-html', header_url
+                        ])
+                    if footer_url:
+                        command_args.extend([
+                            '--footer-spacing', '0',
+                            '--footer-html', footer_url
+                        ])
+                else:
+                    # Unpatched wkhtmltopdf - header/footer URLs will be ignored
+                    # On ARM64 Mac/Linux, patched wkhtmltopdf is not available
+                    # The template still has embedded header on first page
+                    _logger.warning(
+                        "⚠️ wkhtmltopdf is UNPATCHED (ARM64?). "
+                        "Repeating header/footer will NOT appear. "
+                        "This works correctly on Odoo.sh (x86_64 with patched wkhtmltopdf)."
+                    )
+                    # Still set margins to allow some space, but no external header/footer
                     command_args.extend([
-                        '--footer-spacing', '0',
-                        '--footer-html', footer_url
+                        '--margin-top', '10mm',  # Small margin for visual separation
+                        '--margin-bottom', '15mm',
+                        '--margin-left', '0',
+                        '--margin-right', '0',
                     ])
             else:
                 # No header or footer

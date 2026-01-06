@@ -27,6 +27,11 @@
         <field name="model">vpa.bom.category</field>
         <field name="arch" type="xml">
             <form string="BOM Category">
+                <header>
+                    <button name="action_create_placeholder" string="Create Placeholder Product"
+                            type="object" class="btn-secondary"
+                            invisible="is_main_category or placeholder_product_id"/>
+                </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
@@ -46,6 +51,7 @@
                         <group>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="color" widget="color_picker"/>
+                            <field name="placeholder_product_id" readonly="1" invisible="is_main_category"/>
                         </group>
                     </group>
                     <group string="Description">

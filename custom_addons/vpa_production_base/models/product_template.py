@@ -21,6 +21,13 @@ class ProductTemplate(models.Model):
         help="Category for filtering in BOM selection (e.g., Paint, Hardwood, Hinges). "
              "Only applicable when 'Is Raw Material' is checked.",
     )
+    is_template_placeholder = fields.Boolean(
+        string='Is Template Placeholder',
+        default=False,
+        help="System field: True if this product is a placeholder for template BOM lines. "
+             "Placeholder products are auto-created for each BOM category and should be "
+             "replaced with actual products when creating Manufacturing Orders.",
+    )
 
     @api.onchange('is_raw_material')
     def _onchange_is_raw_material(self):
