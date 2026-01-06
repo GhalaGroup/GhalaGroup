@@ -189,6 +189,9 @@ class MrpProduction(models.Model):
         When the UI saves an MO, it sends move_raw_ids data without our custom fields.
         This would wipe out bom_category_id, master_bom_qty, etc.
         We preserve these before the write and restore them after.
+
+        Additionally, if moves are missing template data but their BOM line is a template
+        line, we populate the data from the BOM line.
         """
         # Preserve template move data before write
         preserved_data = {}
@@ -207,17 +210,21 @@ class MrpProduction(models.Model):
 
         result = super().write(vals)
 
-        # Restore template move data after write
-        if preserved_data:
+        # Restore or populate template move data after write
+        if 'move_raw_ids' in vals:
             for production in self:
-                if production.id not in preserved_data:
-                    continue
                 for move in production.move_raw_ids.filtered(lambda m: m.bom_line_id):
-                    bom_line_id = move.bom_line_id.id
-                    if bom_line_id in preserved_data[production.id]:
+                    bom_line = move.bom_line_id
+                    bom_line_id = bom_line.id
+
+                    # Skip if move already has template data
+                    if move.bom_category_id:
+                        continue
+
+                    # Try to restore from preserved data first
+                    if production.id in preserved_data and bom_line_id in preserved_data[production.id]:
                         preserved = preserved_data[production.id][bom_line_id]
-                        # Only restore if the move doesn't already have these values
-                        if not move.bom_category_id and preserved['bom_category_id']:
+                        if preserved['bom_category_id']:
                             move.write({
                                 'bom_category_id': preserved['bom_category_id'],
                                 'template_line_description': preserved['template_line_description'],
@@ -225,6 +232,16 @@ class MrpProduction(models.Model):
                                 'physical_qty_used': preserved['physical_qty_used'],
                                 'product_uom': preserved['product_uom'],
                             })
+                            continue
+
+                    # If BOM line is a template line, populate data from it
+                    if hasattr(bom_line, 'is_template_line') and bom_line.is_template_line and bom_line.bom_category_id:
+                        move.write({
+                            'bom_category_id': bom_line.bom_category_id.id,
+                            'template_line_description': bom_line.line_description or '',
+                            'master_bom_qty': move.product_uom_qty,
+                            'physical_qty_used': move.product_uom_qty,
+                        })
 
         return result
 
