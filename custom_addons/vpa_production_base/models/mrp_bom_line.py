@@ -97,11 +97,20 @@ class MrpBomLine(models.Model):
             else:
                 line.main_category_name = False
 
-    @api.depends('bom_category_id', 'product_id')
+    @api.depends('bom_category_id', 'product_id', 'product_id.product_tmpl_id.is_template_placeholder')
     def _compute_is_template_line(self):
-        """A template line has a category but no specific product."""
+        """A template line has a category and either no product or a placeholder product."""
         for line in self:
-            line.is_template_line = bool(line.bom_category_id and not line.product_id)
+            if line.bom_category_id:
+                # Template line if: has category AND (no product OR product is a placeholder)
+                if not line.product_id:
+                    line.is_template_line = True
+                elif line.product_id.product_tmpl_id.is_template_placeholder:
+                    line.is_template_line = True
+                else:
+                    line.is_template_line = False
+            else:
+                line.is_template_line = False
 
     # =========================================================================
     # DISPLAY NAME
