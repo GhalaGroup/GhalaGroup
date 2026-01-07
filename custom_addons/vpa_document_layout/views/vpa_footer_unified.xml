@@ -75,8 +75,15 @@
                              t-field="company.report_footer" style="margin-bottom: 5px;"/>
 
                         <!-- Page Numbers -->
-                        <div t-if="config.show_page_numbers" style="margin-top: 5px;">
-                            Page <span class="page"></span> of <span class="topage"></span>
+                        <div t-if="config.show_page_numbers" style="text-align: right; margin-top: 12px; clear: both;">
+                            <t t-if="config.page_number_style == 'badge'">
+                                <span t-attf-style="background-color: {{ config.page_number_bg_color or '#875a7b' }}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                                    Page <span class="page"></span> of <span class="topage"></span>
+                                </span>
+                            </t>
+                            <t t-else="">
+                                Page <span class="page"></span> of <span class="topage"></span>
+                            </t>
                         </div>
                     </div>
                 </t>
@@ -99,8 +106,15 @@
                             </td>
                         </tr>
                     </table>
-                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"></span> of <span class="topage"></span>
+                    <div t-if="config.show_page_numbers" style="text-align: right; margin-top: 12px; clear: both;">
+                        <t t-if="config.page_number_style == 'badge'">
+                            <span t-attf-style="background-color: {{ config.page_number_bg_color or '#875a7b' }}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                                Page <span class="page"></span> of <span class="topage"></span>
+                            </span>
+                        </t>
+                        <t t-else="">
+                            Page <span class="page"></span> of <span class="topage"></span>
+                        </t>
                     </div>
                 </t>
 
@@ -128,16 +142,30 @@
                             </td>
                         </tr>
                     </table>
-                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"></span> of <span class="topage"></span>
+                    <div t-if="config.show_page_numbers" style="text-align: right; margin-top: 12px; clear: both;">
+                        <t t-if="config.page_number_style == 'badge'">
+                            <span t-attf-style="background-color: {{ config.page_number_bg_color or '#875a7b' }}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                                Page <span class="page"></span> of <span class="topage"></span>
+                            </span>
+                        </t>
+                        <t t-else="">
+                            Page <span class="page"></span> of <span class="topage"></span>
+                        </t>
                     </div>
                 </t>
 
                 <!-- Custom HTML Layout -->
                 <t t-if="config.footer_layout == 'custom_html'">
                     <div t-out="config._render_custom_html(company)"/>
-                    <div t-if="config.show_page_numbers" style="text-align: center; margin-top: 8px;">
-                        Page <span class="page"></span> of <span class="topage"></span>
+                    <div t-if="config.show_page_numbers" style="text-align: right; margin-top: 12px; clear: both;">
+                        <t t-if="config.page_number_style == 'badge'">
+                            <span t-attf-style="background-color: {{ config.page_number_bg_color or '#875a7b' }}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                                Page <span class="page"></span> of <span class="topage"></span>
+                            </span>
+                        </t>
+                        <t t-else="">
+                            Page <span class="page"></span> of <span class="topage"></span>
+                        </t>
                     </div>
                 </t>
 
@@ -193,8 +221,15 @@
             </div>
 
             <!-- Page Numbers -->
-            <div style="margin-top: 5px;">
-                Page <span class="page"></span> of <span class="topage"></span>
+            <div style="text-align: right; margin-top: 12px; clear: both;">
+                <t t-if="footer_config and footer_config.page_number_style == 'badge'">
+                    <span t-attf-style="background-color: {{ footer_config.page_number_bg_color or '#875a7b' }}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                        Page <span class="page"></span> of <span class="topage"></span>
+                    </span>
+                </t>
+                <t t-else="">
+                    Page <span class="page"></span> of <span class="topage"></span>
+                </t>
             </div>
         </div>
     </template>

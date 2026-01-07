@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!--
+        VPA Internal Transfer Receipt - Base Report Extensions
+        =======================================================
+
+        This template inherits from the base Internal Transfer report and adds
+        Receipt Confirmation, Dispute, and dynamic signature sections.
+
+        This template is used when VPA Document Layout is NOT installed.
+        When VPA Document Layout IS installed, the template in
+        transfer_report_template_vpa.xml takes precedence (priority 100).
+
+        Inheritance Chain (without VPA Document Layout):
+        1. vpa_acc_int_transfer.report_internal_transfer (base)
+        2. This template (priority 50) - adds receipt workflow sections
+    -->
+
+    <!-- Extend the base template to add receipt sections -->
+    <template id="report_internal_transfer_receipt_base"
+              inherit_id="vpa_acc_int_transfer.report_internal_transfer"
+              priority="50">
+
+        <!-- Add new status badges for pending_receipt, received, disputed -->
+        <xpath expr="//span[@class='badge text-bg-secondary']" position="after">
+            <span t-if="doc.state == 'pending_receipt'" class="badge" style="background-color: #17a2b8; color: white;">Pending Receipt</span>
+            <span t-if="doc.state == 'received'" class="badge" style="background-color: #28a745; color: white;">Received</span>
+            <span t-if="doc.state == 'disputed'" class="badge" style="background-color: #dc3545; color: white;">Disputed</span>
+        </xpath>
+
+        <!-- Add Receipt Confirmation row to Amount table - only if received -->
+        <xpath expr="//table[.//th[contains(text(),'Amount')]]/tbody" position="inside">
+            <t t-if="doc.received_by_id">
+                <tr style="background-color: #d4edda;">
+                    <td style="background-color: #c3e6cb;"><strong>Received:</strong></td>
+                    <td style="font-size: 14px;">
+                        <strong>
+                            <span t-field="doc.received_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id if doc.is_multi_currency else doc.currency_id}'/>
+                        </strong>
+                    </td>
+                    <td style="background-color: #c3e6cb;"><strong>By:</strong></td>
+                    <td>
+                        <span t-field="doc.received_by_id.name"/>
+                        <span style="font-size: 9px; color: #666;"> - <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/></span>
+                    </td>
+                </tr>
+                <t t-if="doc.receipt_notes">
+                    <tr style="background-color: #d4edda;">
+                        <td style="background-color: #c3e6cb;"><strong>Receipt Notes:</strong></td>
+                        <td colspan="3"><span t-field="doc.receipt_notes"/></td>
+                    </tr>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Add new columns to Approval Trail header for Received -->
+        <xpath expr="//table[.//th[contains(text(),'Approval Trail')]]//tr[th[contains(text(),'Created')]]" position="replace">
+            <tr style="background-color: #f8f9fa; font-size: 10px;">
+                <th style="width: 14%;">Created</th>
+                <th style="width: 14%;">Submitted</th>
+                <th style="width: 14%;">Approved</th>
+                <th style="width: 14%;">Received</th>
+                <th style="width: 14%;">Rejected</th>
+                <th style="width: 14%;">Cancelled</th>
+                <th style="width: 16%;">Approver</th>
+            </tr>
+        </xpath>
+
+        <!-- Replace the approval trail data row to include Received column -->
+        <xpath expr="//table[.//th[contains(text(),'Approval Trail')]]//tbody/tr[1]" position="replace">
+            <tr style="font-size: 10px;">
+                <td>
+                    <span t-field="doc.create_uid.name"/><br/>
+                    <span t-field="doc.create_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                </td>
+                <td>
+                    <t t-if="doc.submitted_by_id">
+                        <span t-field="doc.submitted_by_id.name"/><br/>
+                        <span t-field="doc.submit_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+                <td>
+                    <t t-if="doc.approved_by_id">
+                        <span t-field="doc.approved_by_id.name"/><br/>
+                        <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+                <td>
+                    <t t-if="doc.received_by_id">
+                        <span t-field="doc.received_by_id.name"/><br/>
+                        <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+                <td>
+                    <t t-if="doc.rejected_by_id">
+                        <span t-field="doc.rejected_by_id.name"/><br/>
+                        <span t-field="doc.rejection_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+                <td>
+                    <t t-if="doc.cancelled_by_id">
+                        <span t-field="doc.cancelled_by_id.name"/><br/>
+                        <span t-field="doc.cancellation_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+                <td>
+                    <t t-if="doc.approver_id">
+                        <span t-field="doc.approver_id.name"/>
+                    </t>
+                    <t t-else="">-</t>
+                </td>
+            </tr>
+        </xpath>
+
+        <!-- Add Reassignment section before Journal Entries -->
+        <xpath expr="//table[.//th[contains(text(),'Journal Entries')]]" position="before">
+            <!-- Reassignment History Section - Only if reassigned -->
+            <t t-if="doc.reassigned_by_id">
+                <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                    <thead>
+                        <tr>
+                            <th colspan="3" class="text-center" style="background-color: #6c757d; color: white; padding: 4px;">
+                                Reassignment History
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="width: 33%; background-color: #f8f9fa;"><strong>Reassigned By:</strong></td>
+                            <td style="width: 33%;"><span t-field="doc.reassigned_by_id.name"/> - <span t-field="doc.reassignment_date" t-options='{"format": "dd/MM/yy HH:mm"}'/></td>
+                            <td style="width: 34%;">
+                                <strong>Original Custodians:</strong>
+                                <t t-foreach="doc.original_custodian_ids" t-as="custodian">
+                                    <span t-field="custodian.name"/>
+                                    <t t-if="not custodian_last">, </t>
+                                </t>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- Dispute Section - Only if disputed -->
+            <t t-if="doc.dispute_raised_by_id">
+                <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                    <thead>
+                        <tr>
+                            <th colspan="4" class="text-center" style="background-color: #dc3545; color: white; padding: 4px;">
+                                Dispute Details
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="width: 25%; background-color: #f8f9fa;"><strong>Raised By:</strong></td>
+                            <td style="width: 25%;"><span t-field="doc.dispute_raised_by_id.name"/></td>
+                            <td style="width: 25%; background-color: #f8f9fa;"><strong>Date:</strong></td>
+                            <td style="width: 25%;"><span t-field="doc.dispute_date" t-options='{"format": "dd/MM/yy HH:mm"}'/></td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #f8f9fa;"><strong>Reason:</strong></td>
+                            <td><span t-field="doc.dispute_reason"/></td>
+                            <td style="background-color: #f8f9fa;"><strong>Details:</strong></td>
+                            <td>
+                                <t t-if="doc.dispute_notes"><span t-field="doc.dispute_notes"/></t>
+                                <t t-else="">-</t>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Dispute Resolution - Only if resolved -->
+                <t t-if="doc.dispute_resolved_by_id">
+                    <table class="table table-sm table-bordered" style="margin-bottom: 8px;">
+                        <thead>
+                            <tr>
+                                <th colspan="4" class="text-center" style="background-color: #28a745; color: white; padding: 4px;">
+                                    Dispute Resolution
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width: 25%; background-color: #f8f9fa;"><strong>Resolved By:</strong></td>
+                                <td style="width: 25%;"><span t-field="doc.dispute_resolved_by_id.name"/></td>
+                                <td style="width: 25%; background-color: #f8f9fa;"><strong>Date:</strong></td>
+                                <td style="width: 25%;"><span t-field="doc.dispute_resolution_date" t-options='{"format": "dd/MM/yy HH:mm"}'/></td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #f8f9fa;"><strong>Resolution:</strong></td>
+                                <td><span t-field="doc.dispute_resolution"/></td>
+                                <td style="background-color: #f8f9fa;"><strong>Notes:</strong></td>
+                                <td>
+                                    <t t-if="doc.dispute_resolution_notes"><span t-field="doc.dispute_resolution_notes"/></t>
+                                    <t t-else="">-</t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+            </t>
+        </xpath>
+
+        <!-- Replace signature section with dynamic data -->
+        <xpath expr="//div[@class='row mt-3'][.//strong[contains(text(),'Prepared By')]]" position="replace">
+            <div class="row mt-3">
+                <div class="col-4 text-center">
+                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                        <strong style="font-size: 10px;">Prepared By</strong>
+                    </div>
+                    <div style="height: 25px;"></div>
+                    <div style="font-size: 9px;">
+                        <t t-if="doc.create_uid">
+                            Name: <span t-field="doc.create_uid.name"/><br/>
+                            Date: <span t-field="doc.create_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                        </t>
+                        <t t-else="">
+                            Name: ________________<br/>
+                            Date: ________________
+                        </t>
+                    </div>
+                </div>
+                <div class="col-4 text-center">
+                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                        <strong style="font-size: 10px;">Approved By</strong>
+                    </div>
+                    <div style="height: 25px;"></div>
+                    <div style="font-size: 9px;">
+                        <t t-if="doc.approved_by_id">
+                            Name: <span t-field="doc.approved_by_id.name"/><br/>
+                            Date: <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                        </t>
+                        <t t-else="">
+                            Name: ________________<br/>
+                            Date: ________________
+                        </t>
+                    </div>
+                </div>
+                <div class="col-4 text-center">
+                    <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto; padding-top: 3px;">
+                        <strong style="font-size: 10px;">Received By</strong>
+                    </div>
+                    <div style="height: 25px;"></div>
+                    <div style="font-size: 9px;">
+                        <t t-if="doc.received_by_id">
+                            Name: <span t-field="doc.received_by_id.name"/><br/>
+                            Date: <span t-field="doc.receipt_date" t-options='{"format": "dd/MM/yy HH:mm"}'/>
+                        </t>
+                        <t t-else="">
+                            Name: ________________<br/>
+                            Date: ________________
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>

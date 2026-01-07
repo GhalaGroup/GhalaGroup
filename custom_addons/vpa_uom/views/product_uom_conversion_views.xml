@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product UoM Conversion Tree View -->
+    <record id="product_uom_conversion_view_tree" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.tree</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <list string="Alternative UoMs" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="product_tmpl_id"/>
+                <field name="alt_qty" string="Qty"/>
+                <button string="x" class="btn btn-link p-0" disabled="1"/>
+                <field name="uom_id" string="Alternative UoM"/>
+                <button string="=" class="btn btn-link p-0" disabled="1"/>
+                <field name="base_qty" string="Base Qty" digits="[16, 4]"/>
+                <field name="base_uom_id" string="Base UoM" readonly="1"/>
+                <field name="barcode" string="Barcode" optional="show"/>
+                <field name="qty_per_package" string="Pkg Qty" optional="hide"/>
+                <field name="packaging_name" string="Package" optional="hide"/>
+                <field name="name" string="Description" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Product UoM Conversion Form View -->
+    <record id="product_uom_conversion_view_form" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.form</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <form string="Alternative UoM">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_tmpl_id"/>
+                            <field name="uom_id"/>
+                            <field name="name" placeholder="e.g., Full board 1220x2440mm"/>
+                            <field name="barcode" placeholder="Scan or enter barcode"/>
+                        </group>
+                        <group>
+                            <field name="base_uom_id" readonly="1"/>
+                            <field name="rounding"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Conversion">
+                        <group>
+                            <field name="alt_qty"/>
+                        </group>
+                        <group>
+                            <field name="base_qty"/>
+                        </group>
+                    </group>
+                    <group string="Packaging">
+                        <group>
+                            <field name="qty_per_package"/>
+                        </group>
+                        <group>
+                            <field name="packaging_name" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Product UoM Conversion Search View -->
+    <record id="product_uom_conversion_view_search" model="ir.ui.view">
+        <field name="name">product.uom.conversion.view.search</field>
+        <field name="model">product.uom.conversion</field>
+        <field name="arch" type="xml">
+            <search string="Alternative UoMs">
+                <field name="product_tmpl_id"/>
+                <field name="uom_id"/>
+                <field name="name"/>
+                <field name="barcode"/>
+                <filter string="Has Barcode" name="has_barcode" domain="[('barcode', '!=', False)]"/>
+                <filter string="No Barcode" name="no_barcode" domain="[('barcode', '=', False)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for standalone view -->
+    <record id="action_product_uom_conversion" model="ir.actions.act_window">
+        <field name="name">Alternative UoM Conversions</field>
+        <field name="res_model">product.uom.conversion</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="product_uom_conversion_view_search"/>
+    </record>
+
+</odoo>

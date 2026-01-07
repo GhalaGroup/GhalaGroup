@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!--
+    Menu items removed - using search filters instead for cleaner UI.
+    The search view already has filters for:
+    - Pending Receipt
+    - Received
+    - Disputed
+
+    This avoids cluttering the menu structure and keeps the base module's
+    menu intact as a direct action link.
+    -->
+</odoo>

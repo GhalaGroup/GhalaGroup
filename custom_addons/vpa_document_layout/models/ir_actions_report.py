@@ -23,9 +23,38 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
     # Don't log warning at module load - only log when actually attempting to use it
 
+# Check if wkhtmltopdf supports --header-html (patched Qt version)
+WKHTMLTOPDF_PATCHED = None  # Will be detected on first use
+
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
+
+    def _is_wkhtmltopdf_patched(self):
+        """Check if wkhtmltopdf supports --header-html (patched Qt version)"""
+        global WKHTMLTOPDF_PATCHED
+        if WKHTMLTOPDF_PATCHED is None:
+            try:
+                result = subprocess.run(
+                    ['wkhtmltopdf', '--help'],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                # Check if help output mentions header-html without warning about unpatched qt
+                help_text = result.stdout + result.stderr
+                # The patched version has header-html in help without warning
+                # The unpatched version shows: "The switch --header-html, is not support using unpatched qt"
+                if 'unpatched qt' in help_text.lower():
+                    WKHTMLTOPDF_PATCHED = False
+                    _logger.warning("⚠️ wkhtmltopdf is UNPATCHED - --header-html/--footer-html will be ignored")
+                else:
+                    WKHTMLTOPDF_PATCHED = True
+                    _logger.info("✅ wkhtmltopdf is PATCHED - --header-html/--footer-html supported")
+            except Exception as e:
+                _logger.warning(f"Could not detect wkhtmltopdf patch status: {e}")
+                WKHTMLTOPDF_PATCHED = False
+        return WKHTMLTOPDF_PATCHED
 
     def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
         """Override to redirect to VPA template if marked as default"""
@@ -168,9 +197,14 @@ class IrActionsReport(models.Model):
 
                 if footer_config:
                     _logger.info(f"✅ Found VPA footer config '{footer_config.name}' (ID: {footer_config.id}) for report {report_name}")
+                    # Get document name for QR code in header
+                    doc_name = ''
+                    if docs and docs.exists() and hasattr(docs, 'name'):
+                        doc_name = docs.name or ''
                     return self.with_context(
                         vpa_force_zero_margins=True,
-                        vpa_footer_config_id=footer_config.id
+                        vpa_footer_config_id=footer_config.id,
+                        vpa_document_name=doc_name
                     )._render_qweb_pdf_prepare_streams(report_ref, data, res_ids)
                 else:
                     _logger.info(f"ℹ️  No VPA footer config found for company {company.name} (ID: {company.id})")
@@ -283,7 +317,11 @@ class IrActionsReport(models.Model):
                 if footer_config.exists() and footer_config.show_header:
                     has_header = True
                     header_height = footer_config.header_height or '25mm'
-                    header_url = f"{base_url}/vpa/header/{footer_config_id}"
+                    # Pass document name for QR code
+                    doc_name = self.env.context.get('vpa_document_name', '')
+                    from urllib.parse import quote
+                    doc_name_encoded = quote(doc_name) if doc_name else ''
+                    header_url = f"{base_url}/vpa/header/{footer_config_id}?doc_name={doc_name_encoded}"
                     _logger.info(f"✅ VPA header enabled, height: {header_height}, URL: {header_url}")
                 else:
                     _logger.info(f"⚠️ Header disabled or config not found for footer_config_id={footer_config_id}")
@@ -299,23 +337,44 @@ class IrActionsReport(models.Model):
                     fc = self.env['vpa.footer.config'].sudo().browse(footer_config_id)
                     if fc.exists():
                         footer_height = fc.footer_height or '30mm'
-                command_args.extend([
-                    '--enable-local-file-access',
-                    '--margin-top', header_height if has_header else '0',
-                    '--margin-bottom', footer_height if footer_url else '0',  # Reserve space for footer
-                    '--margin-left', '0',
-                    '--margin-right', '0',
-                ])
-                # Both header and footer use --header-html and --footer-html URLs
-                if has_header and header_url:
+
+                # Check if wkhtmltopdf is patched (supports --header-html/--footer-html)
+                is_patched = self._is_wkhtmltopdf_patched()
+
+                if is_patched:
+                    # Use --header-html and --footer-html URLs (patched wkhtmltopdf)
                     command_args.extend([
-                        '--header-spacing', '5',
-                        '--header-html', header_url
+                        '--enable-local-file-access',
+                        '--margin-top', header_height if has_header else '0',
+                        '--margin-bottom', footer_height if footer_url else '0',
+                        '--margin-left', '0',
+                        '--margin-right', '0',
                     ])
-                if footer_url:
+                    if has_header and header_url:
+                        command_args.extend([
+                            '--header-spacing', '5',
+                            '--header-html', header_url
+                        ])
+                    if footer_url:
+                        command_args.extend([
+                            '--footer-spacing', '0',
+                            '--footer-html', footer_url
+                        ])
+                else:
+                    # Unpatched wkhtmltopdf - header/footer URLs will be ignored
+                    # On ARM64 Mac/Linux, patched wkhtmltopdf is not available
+                    # The template still has embedded header on first page
+                    _logger.warning(
+                        "⚠️ wkhtmltopdf is UNPATCHED (ARM64?). "
+                        "Repeating header/footer will NOT appear. "
+                        "This works correctly on Odoo.sh (x86_64 with patched wkhtmltopdf)."
+                    )
+                    # Still set margins to allow some space, but no external header/footer
                     command_args.extend([
-                        '--footer-spacing', '0',
-                        '--footer-html', footer_url
+                        '--margin-top', '10mm',  # Small margin for visual separation
+                        '--margin-bottom', '15mm',
+                        '--margin-left', '0',
+                        '--margin-right', '0',
                     ])
             else:
                 # No header or footer
@@ -372,43 +431,22 @@ class IrActionsReport(models.Model):
             if details:
                 company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
 
-        # Document title
-        title_html = ''
-        if footer_config.header_show_document_title:
-            title_text = footer_config.header_custom_title or 'Document'
-            title_html = f'<div class="document-title">{title_text}</div>'
-
-        # Date
-        date_html = ''
-        if footer_config.header_show_date:
-            today = date.today()
-            if footer_config.header_date_format == 'short':
-                date_str = today.strftime('%m/%d/%Y')
-            elif footer_config.header_date_format == 'long':
-                date_str = today.strftime('%B %d, %Y')
-            else:  # medium (default)
-                date_str = today.strftime('%b %d, %Y')
-            date_html = f'<div class="header-date">{date_str}</div>'
-
-        # Layout-specific content
+        # Layout-specific content (no title/date - those are in the document body)
         if footer_config.header_layout == 'centered':
             header_content = f'''
             <div class="header-centered">
                 {logo_html}
                 {company_name_html}
                 {company_details_html}
-                {title_html}
-                {date_html}
             </div>
             '''
         elif footer_config.header_layout == 'minimal':
             header_content = f'''
             <div class="header-minimal">
                 {company_name_html}
-                {date_html}
             </div>
             '''
-        else:  # standard (default)
+        else:  # standard (default) - Logo left, empty right (QR code added via controller)
             header_content = f'''
             <div class="header-standard">
                 <div class="header-left">
@@ -417,8 +455,6 @@ class IrActionsReport(models.Model):
                     {company_details_html}
                 </div>
                 <div class="header-right">
-                    {title_html}
-                    {date_html}
                 </div>
             </div>
             '''

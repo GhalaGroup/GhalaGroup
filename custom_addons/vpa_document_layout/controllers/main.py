@@ -448,7 +448,7 @@ class VPATemplatePreview(http.Controller):
     <div class="vpa-footer">
         {f'<div class="footer-shape"></div>' if footer_config.show_shape else ''}
         {footer_content}
-        {self._render_page_numbers() if footer_config.show_page_numbers else ''}
+        {self._render_page_numbers(footer_config) if footer_config.show_page_numbers else ''}
     </div>
 </body>
 </html>'''
@@ -515,13 +515,23 @@ class VPATemplatePreview(http.Controller):
 
         return f'<div style="text-align: center;">{"".join(content_parts)}</div>'
 
-    def _render_page_numbers(self):
+    def _render_page_numbers(self, footer_config=None):
         """Render page numbers using wkhtmltopdf variables"""
-        return '''
-        <div class="page-number">
-            Page <span class="page"></span> of <span class="topage"></span>
-        </div>
-        '''
+        if footer_config and footer_config.page_number_style == 'badge':
+            bg_color = footer_config.page_number_bg_color or '#875a7b'
+            return f'''
+            <div style="text-align: right; margin-top: 8px;">
+                <span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">
+                    Page <span class="page"></span> of <span class="topage"></span>
+                </span>
+            </div>
+            '''
+        else:
+            return '''
+            <div style="text-align: right; margin-top: 8px;">
+                Page <span class="page"></span> of <span class="topage"></span>
+            </div>
+            '''
 
     @http.route('/vpa/header/<int:footer_config_id>', type='http', auth='public')
     def get_header_config_html(self, footer_config_id, **kwargs):
@@ -529,8 +539,11 @@ class VPATemplatePreview(http.Controller):
 
         This allows VPA headers to work on ANY Odoo report without needing
         a VPA Document Template - just configure a header in Header & Footer Settings.
+
+        Accepts optional doc_name parameter for QR code generation.
         """
-        _logger.info(f"📄 VPA Header route called for config ID: {footer_config_id}, kwargs: {kwargs}")
+        doc_name = kwargs.get('doc_name', '')
+        _logger.info(f"📄 VPA Header route called for config ID: {footer_config_id}, doc_name: {doc_name}")
 
         # Use sudo() since this is called by wkhtmltopdf without authentication
         footer_config = request.env['vpa.footer.config'].sudo().browse(footer_config_id)
@@ -552,7 +565,7 @@ class VPATemplatePreview(http.Controller):
         company = footer_config.company_id
 
         try:
-            header_content = self._render_header_content(footer_config, company)
+            header_content = self._render_header_content(footer_config, company, doc_name)
 
             # Wrap in complete HTML document for wkhtmltopdf
             html_str = f'''<!DOCTYPE html>
@@ -609,14 +622,11 @@ class VPATemplatePreview(http.Controller):
             color: {footer_config.header_text_color or '#666666'};
             margin-top: 5px;
         }}
-        .document-title {{
-            font-size: 12pt;
-            font-weight: bold;
-            margin-top: 5px;
+        .qr-code {{
+            text-align: right;
         }}
-        .header-date {{
-            font-size: 9pt;
-            color: {footer_config.header_text_color or '#666666'};
+        .qr-code img {{
+            display: inline-block;
         }}
     </style>
 </head>
@@ -638,7 +648,7 @@ class VPATemplatePreview(http.Controller):
                 headers=[('Content-Type', 'text/html')]
             )
 
-    def _render_header_content(self, footer_config, company):
+    def _render_header_content(self, footer_config, company, doc_name=''):
         """Render header content based on layout type"""
         from datetime import date
 
@@ -673,45 +683,36 @@ class VPATemplatePreview(http.Controller):
             if details:
                 company_details_html = f'<div class="company-details">{" | ".join(details)}</div>'
 
-        # Document title
-        title_html = ''
-        if footer_config.header_show_document_title:
-            title_text = footer_config.header_custom_title or 'Document'
-            title_html = f'<div class="document-title">{title_text}</div>'
-
-        # Date
-        date_html = ''
-        if footer_config.header_show_date:
-            today = date.today()
-            if footer_config.header_date_format == 'short':
-                date_str = today.strftime('%m/%d/%Y')
-            elif footer_config.header_date_format == 'long':
-                date_str = today.strftime('%B %d, %Y')
-            else:  # medium (default)
-                date_str = today.strftime('%b %d, %Y')
-            date_html = f'<div class="header-date">{date_str}</div>'
+        # QR Code (for document reference scanning)
+        qr_html = ''
+        if footer_config.header_show_qr_code and doc_name:
+            qr_html = self._generate_qr_code_html(
+                doc_name,
+                size=footer_config.header_qr_size or 60,
+                color=footer_config.header_qr_color or '#000000',
+                style=footer_config.header_qr_style or 'square',
+                show_label=footer_config.header_qr_show_label
+            )
 
         # Layout-specific rendering
         if footer_config.header_layout == 'custom_html' and footer_config.header_custom_html:
-            return self._render_custom_header_html(footer_config, company)
+            return self._render_custom_header_html(footer_config, company, doc_name)
         elif footer_config.header_layout == 'centered':
             return f'''
             <div class="header-centered">
                 {logo_html}
                 {company_name_html}
                 {company_details_html}
-                {title_html}
-                {date_html}
+                {qr_html}
             </div>
             '''
         elif footer_config.header_layout == 'minimal':
             return f'''
             <div class="header-minimal">
                 {company_name_html}
-                {date_html}
             </div>
             '''
-        else:  # standard (default)
+        else:  # standard (default) - Logo left, QR code right
             return f'''
             <div class="header-standard">
                 <div class="header-left">
@@ -720,16 +721,88 @@ class VPATemplatePreview(http.Controller):
                     {company_details_html}
                 </div>
                 <div class="header-right">
-                    {title_html}
-                    {date_html}
+                    {qr_html}
                 </div>
             </div>
             '''
 
-    def _render_custom_header_html(self, footer_config, company):
-        """Render custom header HTML with placeholder substitution"""
-        from datetime import date
+    def _generate_qr_code_html(self, data, size=60, color='#000000', style='square', show_label=True):
+        """Generate QR code as base64 data URI with different styles"""
+        try:
+            import qrcode
+            import io
+            import base64
 
+            # Convert hex color to RGB tuple
+            def hex_to_rgb(hex_color):
+                hex_color = hex_color.lstrip('#')
+                return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+            color_rgb = hex_to_rgb(color)
+
+            # Create QR code
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=1,
+            )
+            qr.add_data(data)
+            qr.make(fit=True)
+
+            # Create image based on style
+            if style in ('rounded', 'circle'):
+                try:
+                    from qrcode.image.styledpil import StyledPilImage
+                    from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer, CircleModuleDrawer
+                    from qrcode.image.styles.colormasks import SolidFillColorMask
+
+                    # Create color mask with RGB tuple
+                    color_mask = SolidFillColorMask(
+                        front_color=color_rgb,
+                        back_color=(255, 255, 255)
+                    )
+
+                    if style == 'rounded':
+                        img = qr.make_image(
+                            image_factory=StyledPilImage,
+                            module_drawer=RoundedModuleDrawer(),
+                            color_mask=color_mask
+                        )
+                    else:  # circle
+                        img = qr.make_image(
+                            image_factory=StyledPilImage,
+                            module_drawer=CircleModuleDrawer(),
+                            color_mask=color_mask
+                        )
+                except ImportError as ie:
+                    # Fallback to standard if styled modules not available
+                    _logger.warning(f"StyledPilImage not available ({ie}), falling back to square style")
+                    img = qr.make_image(fill_color=color_rgb, back_color=(255, 255, 255))
+            else:
+                # Standard square style
+                img = qr.make_image(fill_color=color_rgb, back_color=(255, 255, 255))
+
+            # Convert to base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+
+            # Build label HTML if enabled
+            label_html = f'<div style="font-size: 7pt; color: #666; margin-top: 2px;">{data}</div>' if show_label else ''
+
+            return f'''
+            <div class="qr-code" style="text-align: right;">
+                <img src="data:image/png;base64,{img_str}" style="width: {size}px; height: {size}px;" alt="QR: {data}"/>
+                {label_html}
+            </div>
+            '''
+        except Exception as e:
+            _logger.warning(f"QR code generation failed: {e}")
+            return ''
+
+    def _render_custom_header_html(self, footer_config, company, doc_name=''):
+        """Render custom header HTML with placeholder substitution"""
         html = footer_config.header_custom_html or ''
 
         # Get company logo as data URI
@@ -738,21 +811,22 @@ class VPATemplatePreview(http.Controller):
             logo_data = image_data_uri(company.logo)
             logo_html = f'<img src="{logo_data}" style="max-height:50px;" alt="{company.name}"/>'
 
-        # Date formatting
-        today = date.today()
-        if footer_config.header_date_format == 'short':
-            date_str = today.strftime('%m/%d/%Y')
-        elif footer_config.header_date_format == 'long':
-            date_str = today.strftime('%B %d, %Y')
-        else:
-            date_str = today.strftime('%b %d, %Y')
+        # Generate QR code if doc_name is available
+        qr_html = ''
+        if doc_name and footer_config.header_show_qr_code:
+            qr_html = self._generate_qr_code_html(
+                doc_name,
+                size=footer_config.header_qr_size or 60,
+                color=footer_config.header_qr_color or '#000000',
+                style=footer_config.header_qr_style or 'square',
+                show_label=footer_config.header_qr_show_label
+            )
 
         # Replace placeholders
         replacements = {
             '{{company_name}}': company.name or '',
             '{{company_logo}}': logo_html,
-            '{{document_title}}': footer_config.header_custom_title or 'Document',
-            '{{date}}': date_str,
+            '{{qr_code}}': qr_html,
         }
 
         for placeholder, value in replacements.items():

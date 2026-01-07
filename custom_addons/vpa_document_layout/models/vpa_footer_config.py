@@ -20,7 +20,7 @@ class VPAFooterConfig(models.Model):
     # Footer Type
     footer_type = fields.Selection([
         ('customer', 'Customer-Facing (Quotes, Invoices, PO, Delivery)'),
-        ('internal', 'Internal Documents (MFG, Picking, Work Orders)'),
+        ('internal', 'Internal Documents (MFG, Picking, Internal Transfers)'),
         ('custom', 'Custom'),
     ], string='Footer Type', required=True, default='customer')
 
@@ -43,21 +43,6 @@ class VPAFooterConfig(models.Model):
         default=False,
         help='Show company address, phone, email in header'
     )
-    header_show_document_title = fields.Boolean(
-        string='Show Document Title',
-        default=True,
-        help='Show document type (e.g., "Production Order", "Invoice")'
-    )
-    header_custom_title = fields.Char(
-        string='Custom Title',
-        help='Override the default document title'
-    )
-    header_show_date = fields.Boolean(string='Show Date', default=True)
-    header_date_format = fields.Selection([
-        ('short', 'Short (12/16/2025)'),
-        ('medium', 'Medium (Dec 16, 2025)'),
-        ('long', 'Long (December 16, 2025)'),
-    ], string='Date Format', default='medium')
     header_layout = fields.Selection([
         ('standard', 'Standard (Logo left, details right)'),
         ('centered', 'Centered (Logo and company name centered)'),
@@ -66,13 +51,40 @@ class VPAFooterConfig(models.Model):
     ], string='Header Layout', default='standard')
     header_custom_html = fields.Html(
         string='Custom Header HTML',
-        help='Use placeholders: {{company_name}}, {{company_logo}}, {{document_title}}, {{date}}'
+        help='Use placeholders: {{company_name}}, {{company_logo}}, {{qr_code}}'
     )
     header_background_color = fields.Char(string='Header Background', default='#ffffff')
     header_text_color = fields.Char(string='Header Text Color', default='#333333')
     header_border_bottom = fields.Boolean(string='Show Bottom Border', default=True)
     header_border_color = fields.Char(string='Header Border Color', default='#dee2e6')
     header_height = fields.Char(string='Header Height', default='25mm', help='Height reserved for header (e.g., 25mm, 1in)')
+
+    # QR Code in Header
+    header_show_qr_code = fields.Boolean(
+        string='Show QR Code',
+        default=False,
+        help='Show QR code in header containing the document reference for quick scanning'
+    )
+    header_qr_size = fields.Integer(
+        string='QR Code Size (px)',
+        default=60,
+        help='Size of the QR code in pixels'
+    )
+    header_qr_color = fields.Char(
+        string='QR Code Color',
+        default='#000000',
+        help='Color of the QR code (default: black)'
+    )
+    header_qr_style = fields.Selection([
+        ('square', 'Square (Standard)'),
+        ('rounded', 'Rounded'),
+        ('circle', 'Circle Modules'),
+    ], string='QR Code Style', default='square', help='Style of the QR code modules')
+    header_qr_show_label = fields.Boolean(
+        string='Show Document Number',
+        default=True,
+        help='Show the document number text below the QR code'
+    )
 
     # ==================== FOOTER SECTION ====================
     footer_height = fields.Char(string='Footer Height', default='30mm', help='Height reserved for footer (e.g., 30mm, 1in). Reduce to minimize gap between content and footer.')
@@ -92,6 +104,29 @@ class VPAFooterConfig(models.Model):
     shape_opacity = fields.Float(string='Shape Opacity', default=0.1)
     text_color = fields.Char(string='Text Color', default='#666666')
     font_size = fields.Char(string='Font Size', default='8pt')
+
+    # Report Colors (used by reports that use this footer config)
+    primary_color = fields.Char(
+        string='Primary Color',
+        default='#875a7b',
+        help='Primary accent color for report headers and titles'
+    )
+    secondary_color = fields.Char(
+        string='Secondary Color',
+        default='#21b799',
+        help='Secondary accent color for report elements'
+    )
+
+    # Page Number Styling
+    page_number_style = fields.Selection([
+        ('plain', 'Plain Text'),
+        ('badge', 'Colored Badge'),
+    ], string='Page Number Style', default='badge', help='Style for page numbers in footer')
+    page_number_bg_color = fields.Char(
+        string='Page Number Background',
+        default='#875a7b',
+        help='Background color for page number badge (used when style is Badge)'
+    )
 
     # Content Options
     show_bank_details = fields.Boolean(string='Show Bank Details', default=True)
@@ -145,6 +180,9 @@ class VPAFooterConfig(models.Model):
             'stock.report_picking',
             'stock.action_report_picking',
             'stock.report_reception',
+            # VPA Internal Transfer
+            'vpa_acc_int_transfer.report_internal_transfer',
+            'vpa_acc_int_transfer.action_report_internal_transfer',
         ]
 
         report_xml_id = report_xml_id or ''
@@ -203,7 +241,8 @@ class VPAFooterConfig(models.Model):
         return Markup(html)
 
     @api.depends('name', 'footer_type', 'footer_layout', 'show_bank_details',
-                 'show_page_numbers', 'computer_generated_note', 'show_border',
+                 'show_page_numbers', 'page_number_style', 'page_number_bg_color',
+                 'computer_generated_note', 'show_border',
                  'border_color', 'text_color', 'column_1_content', 'column_2_content',
                  'column_3_content', 'custom_html')
     def _compute_preview(self):
@@ -237,7 +276,11 @@ class VPAFooterConfig(models.Model):
                     preview_html += f'<div>{company.report_footer}</div>'
 
                 if record.show_page_numbers:
-                    preview_html += '<div style="margin-top: 5px;">Page 1 of 1</div>'
+                    if record.page_number_style == 'badge':
+                        bg_color = record.page_number_bg_color or '#875a7b'
+                        preview_html += f'<div style="text-align: right; margin-top: 12px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                    else:
+                        preview_html += '<div style="text-align: right; margin-top: 12px;">Page 1 of 1</div>'
 
                 preview_html += '</div>'
 
@@ -279,7 +322,11 @@ class VPAFooterConfig(models.Model):
                 preview_html += '</tr></table>'
 
                 if record.show_page_numbers:
-                    preview_html += '<div style="text-align: center; margin-top: 5px;">Page 1 of 1</div>'
+                    if record.page_number_style == 'badge':
+                        bg_color = record.page_number_bg_color or '#875a7b'
+                        preview_html += f'<div style="text-align: right; margin-top: 12px;"><span style="background-color: {bg_color}; color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 8pt;">Page 1 of 1</span></div>'
+                    else:
+                        preview_html += '<div style="text-align: right; margin-top: 12px;">Page 1 of 1</div>'
 
             elif record.footer_layout == 'custom_html':
                 if record.custom_html:

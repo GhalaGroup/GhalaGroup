@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Receipt Confirmation Wizard -->
+    <record id="transfer_receipt_wizard_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.receipt.wizard.view.form</field>
+        <field name="model">internal.transfer.receipt.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm Receipt">
+                <group>
+                    <group string="Transfer Details">
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="source_journal_id"/>
+                        <field name="destination_journal_id"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <group string="Amount">
+                        <field name="expected_amount"/>
+                        <field name="received_amount"/>
+                        <field name="amount_matches" invisible="1"/>
+                    </group>
+                </group>
+                <div class="alert alert-warning" role="alert"
+                     invisible="amount_matches or context.get('show_amount_warning')">
+                    <i class="fa fa-warning"/>
+                    <strong>Warning:</strong> The received amount does not match the expected amount.
+                </div>
+                <div class="alert alert-danger" role="alert"
+                     invisible="not context.get('show_amount_warning')">
+                    <i class="fa fa-exclamation-circle"/>
+                    <strong>Amount Mismatch!</strong>
+                    Expected: <field name="expected_amount" readonly="1" nolabel="1" widget="monetary"/>
+                    but you entered: <field name="received_amount" readonly="1" nolabel="1" widget="monetary"/>.
+                    <br/><br/>
+                    Click "Confirm Anyway" to proceed with the different amount, or "Cancel" to correct it.
+                </div>
+                <group string="Notes">
+                    <field name="receipt_notes" nolabel="1" placeholder="Optional notes about the receipt..."/>
+                </group>
+                <footer invisible="context.get('show_amount_warning')">
+                    <button name="action_confirm" string="Confirm Receipt" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+                <footer invisible="not context.get('show_amount_warning')">
+                    <button name="action_confirm_anyway" string="Confirm Anyway" type="object" class="btn-warning"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dispute Wizard -->
+    <record id="transfer_dispute_wizard_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.dispute.wizard.view.form</field>
+        <field name="model">internal.transfer.dispute.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Raise Dispute">
+                <group>
+                    <group string="Transfer Details">
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="expected_amount"/>
+                    </group>
+                    <group string="Dispute Information">
+                        <field name="dispute_reason"/>
+                        <field name="received_amount"
+                               invisible="dispute_reason not in ('amount_mismatch', 'partial_receipt')"/>
+                    </group>
+                </group>
+                <group string="Details">
+                    <field name="dispute_notes" nolabel="1"
+                           placeholder="Describe the issue in detail..."/>
+                </group>
+                <footer>
+                    <button name="action_raise_dispute" string="Raise Dispute" type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Resolve Dispute Wizard -->
+    <record id="transfer_resolve_wizard_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.resolve.wizard.view.form</field>
+        <field name="model">internal.transfer.resolve.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Resolve Dispute">
+                <group>
+                    <group string="Transfer Details">
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="original_amount"/>
+                    </group>
+                    <group string="Dispute Information">
+                        <field name="dispute_reason"/>
+                        <field name="disputed_amount" invisible="not disputed_amount"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="dispute_notes" readonly="1" string="Dispute Details"/>
+                </group>
+                <separator string="Resolution"/>
+                <group>
+                    <group>
+                        <field name="resolution" widget="radio"/>
+                    </group>
+                    <group>
+                        <field name="adjusted_amount" invisible="resolution != 'adjusted'"/>
+                    </group>
+                </group>
+                <group string="Resolution Notes">
+                    <field name="resolution_notes" nolabel="1"
+                           placeholder="Explain the resolution..."/>
+                </group>
+                <footer>
+                    <button name="action_resolve" string="Resolve" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Reassign Custodian Wizard -->
+    <record id="transfer_reassign_wizard_view_form" model="ir.ui.view">
+        <field name="name">internal.transfer.reassign.wizard.view.form</field>
+        <field name="model">internal.transfer.reassign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reassign Custodian">
+                <group>
+                    <group string="Transfer Details">
+                        <field name="transfer_id" invisible="1"/>
+                        <field name="transfer_name"/>
+                        <field name="destination_journal_id"/>
+                    </group>
+                    <group string="Current Assignment">
+                        <field name="current_custodian_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+                </group>
+                <group string="Reassign To">
+                    <field name="new_custodian_id" options="{'no_create': True}"/>
+                    <field name="reassign_notes" placeholder="Reason for reassignment..."/>
+                </group>
+                <footer>
+                    <button name="action_reassign" string="Reassign" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Actions -->
+    <record id="transfer_receipt_wizard_action" model="ir.actions.act_window">
+        <field name="name">Confirm Receipt</field>
+        <field name="res_model">internal.transfer.receipt.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="transfer_dispute_wizard_action" model="ir.actions.act_window">
+        <field name="name">Raise Dispute</field>
+        <field name="res_model">internal.transfer.dispute.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="transfer_resolve_wizard_action" model="ir.actions.act_window">
+        <field name="name">Resolve Dispute</field>
+        <field name="res_model">internal.transfer.resolve.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="transfer_reassign_wizard_action" model="ir.actions.act_window">
+        <field name="name">Reassign Custodian</field>
+        <field name="res_model">internal.transfer.reassign.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

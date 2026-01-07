@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================== -->
+    <!-- MENUS - VPA Units of Measure                   -->
+    <!-- ============================================== -->
+
+    <!-- Parent Menu: Inventory > Configuration > VPA Units of Measure -->
+    <menuitem id="menu_vpa_uom_root"
+              name="VPA Units of Measure"
+              parent="stock.menu_stock_config_settings"
+              sequence="24"/>
+
+    <!-- Submenu 1: Units of Measure (create UoMs here) -->
+    <menuitem id="menu_vpa_uom"
+              name="Units of Measure"
+              parent="menu_vpa_uom_root"
+              action="action_vpa_uom"
+              sequence="10"/>
+
+    <!-- Submenu 2: Product Conversions (assign UoMs to products) -->
+    <menuitem id="menu_product_uom_conversion"
+              name="Product Conversions"
+              parent="menu_vpa_uom_root"
+              action="action_product_uom_conversion"
+              sequence="20"/>
+
+    <!-- Settings > Technical > VPA Units of Measure -->
+    <menuitem id="menu_vpa_uom_settings"
+              name="VPA Units of Measure"
+              parent="base.menu_custom"
+              action="action_vpa_uom"
+              sequence="50"/>
+
+</odoo>

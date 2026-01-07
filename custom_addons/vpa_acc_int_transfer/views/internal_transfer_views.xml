@@ -32,6 +32,9 @@
                             invisible="state in ('draft', 'approved') or not can_cancel"/>
                     <button name="%(action_report_internal_transfer)d" string="Print"
                             type="action" class="btn-secondary"/>
+                    <button name="action_back_to_list" string="Back to List"
+                            type="object" class="btn-secondary"
+                            icon="fa-arrow-left"/>
                     <field name="is_locked" invisible="1"/>
                     <field name="can_approve" invisible="1"/>
                     <field name="can_cancel" invisible="1"/>

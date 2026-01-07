@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!--
+        VPA Internal Transfer - Document Layout Integration
+        =====================================================
+
+        This template completely redesigns the Internal Transfer report to match
+        VPA Manufacturing Order styling:
+        - Left border accent on sections (not colored header backgrounds)
+        - Uppercase section headers with colored text
+        - Clean table headers without background colors
+        - Amount badges with colored borders
+        - Professional VPA footer via wkhtmltopdf
+    -->
+
+    <!-- Override Internal Transfer to use VPA layout and styling -->
+    <template id="report_internal_transfer_vpa_layout"
+              inherit_id="vpa_acc_int_transfer.report_internal_transfer"
+              priority="99">
+
+        <!-- Switch from web.external_layout to VPA internal layout -->
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">vpa_document_layout.vpa_internal_layout</attribute>
+        </xpath>
+
+        <!-- Replace the entire page content with VPA MO-style design -->
+        <xpath expr="//div[@class='page']" position="replace">
+            <!-- Get VPA Footer Config for colors -->
+            <t t-set="company" t-value="doc.company_id"/>
+            <t t-set="footer_config" t-value="company.env['vpa.footer.config'].sudo().get_footer_for_report(company.id, 'vpa_acc_int_transfer.report_internal_transfer')"/>
+            <t t-set="primary_color" t-value="footer_config.primary_color if footer_config else company.primary_color or '#875a7b'"/>
+
+            <div class="page">
+                <!-- VPA Inline Styles -->
+                <style>
+                    .vpa-transfer {
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 11px;
+                        color: #333;
+                    }
+
+                    /* Document Title Bar */
+                    .vpa-title-bar {
+                        border-top: 4px solid <t t-out="primary_color"/>;
+                        padding-top: 15px;
+                        margin-bottom: 20px;
+                    }
+                    .vpa-title-bar h1 {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #333;
+                        margin: 0;
+                        text-align: center;
+                    }
+
+                    /* Info Boxes */
+                    .vpa-info-row {
+                        display: table;
+                        width: 100%;
+                        margin-bottom: 15px;
+                    }
+                    .vpa-info-box {
+                        display: table-cell;
+                        width: 50%;
+                        vertical-align: top;
+                        padding: 10px;
+                    }
+                    .vpa-info-box-inner {
+                        background: #f8f9fa;
+                        padding: 12px 15px;
+                        border-radius: 4px;
+                        height: 100%;
+                    }
+                    .vpa-info-label {
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: <t t-out="primary_color"/>;
+                        margin-bottom: 8px;
+                    }
+                    .vpa-info-content {
+                        font-size: 11px;
+                        line-height: 1.6;
+                    }
+                    .vpa-info-content strong {
+                        color: #555;
+                    }
+
+                    /* Table Card Container - Left border accent */
+                    .vpa-table-card {
+                        background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 15px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }
+
+                    /* Section Header - Uppercase with colored text */
+                    .vpa-section-header {
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 8px 6px;
+                        padding-bottom: 5px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }
+
+                    /* Table styling */
+                    .vpa-table-card table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }
+                    .vpa-table-card table thead {
+                        background: linear-gradient(135deg, #f8f8f8 0%, #fafafa 100%);
+                    }
+                    .vpa-table-card table thead th {
+                        color: <t t-out="primary_color"/>;
+                        font-size: 9px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.3px;
+                        padding: 8px 10px;
+                        border: none;
+                        border-bottom: 1px solid #e5e5e5;
+                    }
+                    .vpa-table-card table tbody td {
+                        padding: 10px;
+                        border-bottom: 1px solid #f5f5f5;
+                        font-size: 11px;
+                        vertical-align: middle;
+                    }
+
+                    /* Value styling */
+                    .vpa-value-label {
+                        font-weight: 600;
+                        color: #555;
+                    }
+                    .vpa-value-main {
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #333;
+                    }
+                    .vpa-value-sub {
+                        font-size: 10px;
+                        color: #777;
+                        margin-top: 3px;
+                    }
+
+                    /* Amount Badge - Colored border box */
+                    .vpa-amount-badge {
+                        display: inline-block;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 4px 12px;
+                        border-radius: 3px;
+                        font-weight: 700;
+                        font-size: 14px;
+                        border: 2px solid <t t-out="primary_color"/>;
+                    }
+
+                    /* Status Badge */
+                    .vpa-status-badge {
+                        display: inline-block;
+                        padding: 4px 12px;
+                        border-radius: 3px;
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                    }
+                    .vpa-status-draft { background: #e3f2fd; color: #1976d2; }
+                    .vpa-status-submitted { background: #fff3e0; color: #f57c00; }
+                    .vpa-status-approved { background: #e8f5e9; color: #388e3c; }
+                    .vpa-status-rejected { background: #ffebee; color: #d32f2f; }
+                    .vpa-status-cancelled { background: #f5f5f5; color: #757575; }
+
+                    /* Signature Section */
+                    .vpa-signatures {
+                        display: table;
+                        width: 100%;
+                        margin-top: 30px;
+                    }
+                    .vpa-signature-box {
+                        display: table-cell;
+                        width: 33.33%;
+                        text-align: center;
+                        padding: 0 15px;
+                    }
+                    .vpa-signature-line {
+                        border-top: 1px solid #333;
+                        width: 80%;
+                        margin: 0 auto;
+                        padding-top: 8px;
+                    }
+                    .vpa-signature-title {
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #333;
+                        margin-bottom: 30px;
+                    }
+                    .vpa-signature-fields {
+                        font-size: 10px;
+                        color: #666;
+                        line-height: 1.8;
+                    }
+                </style>
+
+                <div class="vpa-transfer">
+                    <!-- Title Bar -->
+                    <div class="vpa-title-bar">
+                        <h1>Internal Transfer Voucher - <span t-field="doc.name"/></h1>
+                    </div>
+
+                    <!-- Info Boxes Row -->
+                    <div class="vpa-info-row">
+                        <!-- Transfer Info -->
+                        <div class="vpa-info-box">
+                            <div class="vpa-info-box-inner">
+                                <div class="vpa-info-label">Transfer Info</div>
+                                <div class="vpa-info-content">
+                                    <div><strong>Date:</strong> <span t-field="doc.date"/></div>
+                                    <div style="margin-top: 4px;"><strong>Company:</strong> <span t-field="doc.company_id.name"/></div>
+                                    <div t-if="doc.memo" style="margin-top: 4px;"><strong>Memo:</strong> <span t-field="doc.memo"/></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Status Info -->
+                        <div class="vpa-info-box">
+                            <div class="vpa-info-box-inner">
+                                <div class="vpa-info-label">Status</div>
+                                <div class="vpa-info-content">
+                                    <div>
+                                        <strong>State:</strong>
+                                        <span t-if="doc.state == 'draft'" class="vpa-status-badge vpa-status-draft">Draft</span>
+                                        <span t-if="doc.state == 'submitted'" class="vpa-status-badge vpa-status-submitted">Pending</span>
+                                        <span t-if="doc.state == 'approved'" class="vpa-status-badge vpa-status-approved">Approved</span>
+                                        <span t-if="doc.state == 'rejected'" class="vpa-status-badge vpa-status-rejected">Rejected</span>
+                                        <span t-if="doc.state == 'cancelled'" class="vpa-status-badge vpa-status-cancelled">Cancelled</span>
+                                    </div>
+                                    <div t-if="doc.approver_id" style="margin-top: 4px;"><strong>Approver:</strong> <span t-field="doc.approver_id.name"/></div>
+                                    <div t-if="doc.approval_date" style="margin-top: 4px;"><strong>Approval Date:</strong> <span t-field="doc.approval_date" t-options='{"format": "dd/MM/yyyy"}'/></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transfer Details Section -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">Transfer Details</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Type</th>
+                                    <th style="width: 35%;">Journal</th>
+                                    <th style="width: 50%;">Account</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="vpa-value-label">From</span></td>
+                                    <td><span class="vpa-value-main" t-field="doc.source_journal_id.name"/></td>
+                                    <td>
+                                        <span class="vpa-value-main" t-field="doc.source_account_id.code"/> -
+                                        <span t-field="doc.source_account_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="vpa-value-label">To</span></td>
+                                    <td><span class="vpa-value-main" t-field="doc.destination_journal_id.name"/></td>
+                                    <td>
+                                        <span class="vpa-value-main" t-field="doc.destination_account_id.code"/> -
+                                        <span t-field="doc.destination_account_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="vpa-value-label">Transfer A/C</span></td>
+                                    <td colspan="2">
+                                        <span class="vpa-value-main" t-field="doc.transfer_account_id.code"/> -
+                                        <span t-field="doc.transfer_account_id.name"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Amount Section -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">Amount</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Description</th>
+                                    <th style="width: 35%; text-align: center;">Amount</th>
+                                    <th style="width: 20%;">Currency</th>
+                                    <th t-if="doc.is_multi_currency" style="width: 20%;">Exchange Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="vpa-value-label">Transfer Amount</span></td>
+                                    <td style="text-align: center;">
+                                        <span class="vpa-amount-badge">
+                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </span>
+                                    </td>
+                                    <td><span t-field="doc.currency_id.name"/></td>
+                                    <td t-if="doc.is_multi_currency">
+                                        <span t-field="doc.exchange_rate" t-options='{"precision": 4}'/>
+                                    </td>
+                                </tr>
+                                <t t-if="doc.is_multi_currency">
+                                    <tr>
+                                        <td><span class="vpa-value-label">Destination Amount</span></td>
+                                        <td style="text-align: center;">
+                                            <span class="vpa-amount-badge">
+                                                <span t-field="doc.destination_amount" t-options='{"widget": "monetary", "display_currency": doc.destination_currency_id}'/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="doc.destination_currency_id.name"/></td>
+                                        <td>-</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notes Section (if present) -->
+                    <t t-if="doc.notes">
+                        <div class="vpa-table-card">
+                            <div class="vpa-section-header">Notes</div>
+                            <div style="padding: 10px;">
+                                <span t-field="doc.notes"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Approval Trail Section -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">Approval Trail</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 16%;">Created</th>
+                                    <th style="width: 17%;">Submitted</th>
+                                    <th style="width: 17%;">Approved</th>
+                                    <th style="width: 17%;">Rejected</th>
+                                    <th style="width: 17%;">Cancelled</th>
+                                    <th style="width: 16%;">Assigned To</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="vpa-value-main" t-field="doc.create_uid.name"/>
+                                        <div class="vpa-value-sub" t-field="doc.create_date" t-options='{"format": "dd/MM/yy"}'/>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.submitted_by_id">
+                                            <div class="vpa-value-main" t-field="doc.submitted_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.submit_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approved_by_id">
+                                            <div class="vpa-value-main" t-field="doc.approved_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.approval_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.rejected_by_id">
+                                            <div class="vpa-value-main" t-field="doc.rejected_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.rejection_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.cancelled_by_id">
+                                            <div class="vpa-value-main" t-field="doc.cancelled_by_id.name"/>
+                                            <div class="vpa-value-sub" t-field="doc.cancellation_date" t-options='{"format": "dd/MM/yy"}'/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.approver_id">
+                                            <div class="vpa-value-main" t-field="doc.approver_id.name"/>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                </tr>
+                                <t t-if="doc.rejection_reason">
+                                    <tr>
+                                        <td colspan="6" style="background-color: #fff5f5; color: #c62828;">
+                                            <strong>Rejection Reason:</strong> <span t-field="doc.rejection_reason"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-if="doc.cancellation_reason">
+                                    <tr>
+                                        <td colspan="6" style="background-color: #fafafa; color: #616161;">
+                                            <strong>Cancellation Reason:</strong> <span t-field="doc.cancellation_reason"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Journal Entries Section (if exists) -->
+                    <t t-if="doc.source_move_id or doc.destination_move_id">
+                        <div class="vpa-table-card">
+                            <div class="vpa-section-header">Journal Entries</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50%;">Source Entry</th>
+                                        <th style="width: 50%;">Destination Entry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <t t-if="doc.source_move_id">
+                                                <span class="vpa-value-main" t-field="doc.source_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                        <td>
+                                            <t t-if="doc.destination_move_id">
+                                                <span class="vpa-value-main" t-field="doc.destination_move_id.name"/>
+                                            </t>
+                                            <t t-else="">-</t>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <!-- Signature Section -->
+                    <div class="vpa-signatures">
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Prepared By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                Name: ________________<br/>
+                                Date: ________________
+                            </div>
+                        </div>
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Approved By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                Name: ________________<br/>
+                                Date: ________________
+                            </div>
+                        </div>
+                        <div class="vpa-signature-box">
+                            <div class="vpa-signature-line">
+                                <div class="vpa-signature-title">Received By</div>
+                            </div>
+                            <div class="vpa-signature-fields">
+                                Name: ________________<br/>
+                                Date: ________________
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Stock Move List View - Override quantity for 4 decimals -->
+    <record id="view_move_tree_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.move.list.inherit.vpa.uom</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="digits">[16, 4]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ========== STOCK REPORT (Reporting > Stock) ========== -->
+    <!-- This is the main "Stock" report under Reporting menu
+         Model: product.product, View: product_product_stock_tree -->
+    <record id="product_product_stock_tree_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">product.product.stock.tree.inherit.vpa.uom</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="stock.product_product_stock_tree"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. UoM quantity after On Hand field -->
+            <xpath expr="//field[@name='qty_available']" position="after">
+                <field name="qty_available_alt" string="Alt. On Hand" optional="show"/>
+                <field name="primary_alt_uom_id" string="Alt. UoM" optional="show"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_available_all_alt" string="All Alt. UoMs" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ========== STOCK QUANT VIEWS (Locations report) ========== -->
+    <!-- Stock Quant List View - Add Alt. UoM Qty -->
+    <record id="view_stock_quant_tree_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.inherit.vpa.uom</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. UoM quantity after UoM field -->
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="qty_alt_uom" string="Alt. Qty" optional="show"/>
+                <field name="primary_alt_uom_id" string="Alt. UoM" optional="show"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Quant Editable List View (for managers) - Add Alt. UoM Qty -->
+    <record id="view_stock_quant_tree_editable_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.editable.inherit.vpa.uom</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. UoM quantity after UoM field -->
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="qty_alt_uom" string="Alt. Qty" optional="show" readonly="1"/>
+                <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Quant Inventory Report List View (Physical Inventory) - Add Alt. UoM Qty -->
+    <record id="view_stock_quant_tree_inventory_editable_inherit_vpa_uom" model="ir.ui.view">
+        <field name="name">stock.quant.tree.inventory.inherit.vpa.uom</field>
+        <field name="model">stock.quant</field>
+        <field name="inherit_id" ref="stock.view_stock_quant_tree_inventory_editable"/>
+        <field name="arch" type="xml">
+            <!-- Add Alt. UoM quantity after UoM field -->
+            <xpath expr="//field[@name='product_uom_id']" position="after">
+                <field name="qty_alt_uom" string="Alt. On Hand" optional="show" readonly="1"/>
+                <field name="primary_alt_uom_id" string="Alt. UoM" optional="show" readonly="1"/>
+                <!-- All alternative UoM quantities (for products with multiple alt. UoMs) -->
+                <field name="qty_all_alt_uom" string="All Alt. UoMs" optional="hide" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

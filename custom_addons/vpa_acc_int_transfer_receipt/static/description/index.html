@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Internal Transfer - Receipt Control</title>
+</head>
+<body>
+
+<!-- HEADER SECTION -->
+<div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #875A7B 0%, #714B67 100%); color: white; border-radius: 10px; margin-bottom: 30px;">
+    <h1 style="margin: 0 0 10px 0; font-size: 2.2em; color: white;">VPA Internal Transfer - Receipt Control</h1>
+    <p style="margin: 10px 0; font-size: 1.1em; color: white;">Receiver-Focused Cash Control with Custodian Confirmation Workflow</p>
+    <p style="margin: 5px 0; font-size: 0.95em; color: rgba(255,255,255,0.9);">Receipt Confirmation | Journal Custodians | Dispute Handling | Reassignment</p>
+    <div style="margin-top: 15px;">
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Add-on Module</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Custodian Control</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Dispute Resolution</span>
+    </div>
+    <div style="margin-top: 15px;">
+        <span style="background: #28a745; color: white; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">Version 19.0.1.0.0</span>
+    </div>
+</div>
+
+<!-- OVERVIEW -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Overview</h2>
+<p style="font-size: 1.05em; line-height: 1.7; margin-bottom: 25px;">
+    <strong>VPA Internal Transfer - Receipt Control</strong> is an add-on module for VPA Accounting Internal Transfer
+    that adds receiver-focused cash control with custodian confirmation workflow. Nobody can deposit funds into a
+    cash/bank account without the custodian's authorization - providing an additional layer of financial control.
+</p>
+
+<div style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin-bottom: 25px;">
+    <strong style="color: #ff9800;">Key Control Principle</strong><br>
+    After approval, journal entries are <strong>only created after the destination custodian confirms receipt</strong>.
+    This ensures the person responsible for the receiving account verifies the funds before posting.
+</div>
+
+<!-- WORKFLOW -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Extended Workflow</h2>
+<p style="margin-bottom: 15px;">Adds receipt confirmation steps after approval:</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <tr style="text-align: center;">
+        <td style="padding: 15px; border: 1px solid #875A7B; background: #f8f9fa;">
+            <div style="background: #6c757d; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">1-4</div><br>
+            <strong>Base Workflow</strong><br>
+            <span style="font-size: 0.9em;">Draft to Approved</span>
+        </td>
+        <td style="padding: 15px; border: 1px solid #17a2b8; background: #e3f2fd;">
+            <div style="background: #17a2b8; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">5</div><br>
+            <strong>Pending Receipt</strong><br>
+            <span style="font-size: 0.9em;">Custodian notified</span>
+        </td>
+        <td style="padding: 15px; border: 1px solid #28a745; background: #e8f5e9;">
+            <div style="background: #28a745; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">6</div><br>
+            <strong>Received</strong><br>
+            <span style="font-size: 0.9em;">Journal entries created</span>
+        </td>
+    </tr>
+</table>
+
+<div style="background: #ffebee; border-left: 4px solid #dc3545; padding: 15px; margin-bottom: 25px;">
+    <strong style="color: #dc3545;">Dispute Path</strong><br>
+    If the receiver identifies an issue (wrong amount, not received, etc.), they can raise a <strong>Dispute</strong>
+    which must be resolved before the transfer can proceed.
+</div>
+
+<!-- KEY FEATURES -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Key Features</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <tr>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Receipt Confirmation</strong><br>
+            Custodians must confirm they received the funds before journal entries are created. Complete control over incoming deposits.
+        </td>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Journal Custodians</strong><br>
+            Assign primary and backup custodians to each bank/cash journal. Clear responsibility and backup coverage.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Dispute Handling</strong><br>
+            Receivers can raise disputes with reasons (amount mismatch, not received, partial receipt). Full resolution workflow.
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Reassignment</strong><br>
+            Transfer Managers can reassign pending transfers to different custodians when the original is unavailable.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Permission Hierarchy</strong><br>
+            Three-tier fallback: Primary Custodian, Backup Manager, Transfer Manager (emergency). Always someone can act.
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #875A7B;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Feature Toggle</strong><br>
+            Enable/disable receipt confirmation in settings. Opt-in when ready, gradual rollout by journal.
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Enhanced Reports</strong><br>
+            PDF voucher extended with Receipt Confirmation section, Dispute Details, and Received column in Approval Trail.
+        </td>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #875A7B; font-size: 1.1em;">Activity Notifications</strong><br>
+            Automatic activity creation for custodians when transfers need their confirmation.
+        </td>
+    </tr>
+</table>
+
+<!-- NEW WORKFLOW STATES -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">New Workflow States</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #875A7B;">
+    <tr style="background: #875A7B; color: white;">
+        <th style="padding: 12px 15px; text-align: left; width: 20%; color: white;">State</th>
+        <th style="padding: 12px 15px; text-align: left; width: 40%; color: white;">Description</th>
+        <th style="padding: 12px 15px; text-align: left; color: white;">Who Acts</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B; background: #e3f2fd;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #1565c0;">Pending Receipt</td>
+        <td style="padding: 12px 15px;">Transfer approved, awaiting custodian confirmation</td>
+        <td style="padding: 12px 15px;">Destination Custodian</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B; background: #e8f5e9;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #2e7d32;">Received</td>
+        <td style="padding: 12px 15px;">Custodian confirmed, journal entries created</td>
+        <td style="padding: 12px 15px;">System (automatic)</td>
+    </tr>
+    <tr style="background: #ffebee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #c62828;">Disputed</td>
+        <td style="padding: 12px 15px;">Receiver raised an issue requiring resolution</td>
+        <td style="padding: 12px 15px;">Originator or Receiver</td>
+    </tr>
+</table>
+
+<!-- DISPUTE REASONS -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Dispute Handling</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #dc3545;">
+    <tr>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-right: 1px solid #dc3545;">
+            <strong style="color: #dc3545;">Dispute Reasons</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Amount Mismatch</li>
+                <li>Not Received</li>
+                <li>Partial Receipt</li>
+                <li>Other (with notes)</li>
+            </ul>
+        </td>
+        <td style="padding: 15px; vertical-align: top; width: 50%;">
+            <strong style="color: #28a745;">Resolution Options</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Adjust Amount</li>
+                <li>Cancel Transfer</li>
+                <li>Reconfirm Receipt</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<!-- TECHNICAL SPECS -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Technical Specifications</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #875A7B;">
+    <tr style="background: #875A7B; color: white;">
+        <th style="padding: 12px 15px; text-align: left; width: 35%; color: white;">Specification</th>
+        <th style="padding: 12px 15px; text-align: left; color: white;">Details</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Module Name</td>
+        <td style="padding: 12px 15px;">VPA Internal Transfer - Receipt Control</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Technical Name</td>
+        <td style="padding: 12px 15px;">vpa_acc_int_transfer_receipt</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Version</td>
+        <td style="padding: 12px 15px;">19.0.1.0.0</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">License</td>
+        <td style="padding: 12px 15px;">OPL-1 (Proprietary)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Author</td>
+        <td style="padding: 12px 15px;">VPA Solutions Limited</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Category</td>
+        <td style="padding: 12px 15px;">Accounting/Accounting</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Odoo Version</td>
+        <td style="padding: 12px 15px;">19.0 Enterprise</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #875A7B;">
+        <td style="padding: 12px 15px; font-weight: bold;">Dependencies</td>
+        <td style="padding: 12px 15px;">vpa_acc_int_transfer, vpa_acc_int_transfer_layout</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 15px; font-weight: bold;">New Model</td>
+        <td style="padding: 12px 15px;">journal.custodian - Custodian assignment per journal</td>
+    </tr>
+</table>
+
+<!-- WHAT'S INCLUDED -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">What's Included</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #28a745;">
+    <tr>
+        <td style="vertical-align: top; width: 50%; padding: 15px; border-right: 1px solid #28a745;">
+            <ul style="margin: 0; padding-left: 20px; line-height: 2;">
+                <li>Receipt Confirmation Workflow</li>
+                <li>Journal Custodian Management</li>
+                <li>Primary &amp; Backup Custodians</li>
+                <li>Dispute Raising &amp; Resolution</li>
+                <li>Transfer Reassignment</li>
+                <li>Feature Toggle in Settings</li>
+            </ul>
+        </td>
+        <td style="vertical-align: top; width: 50%; padding: 15px;">
+            <ul style="margin: 0; padding-left: 20px; line-height: 2;">
+                <li>Activity Notifications</li>
+                <li>Enhanced PDF Voucher</li>
+                <li>Complete Audit Trail</li>
+                <li>Permission Hierarchy</li>
+                <li>Free Lifetime Updates</li>
+                <li>Professional Support</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<!-- PRICING -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Pricing</h2>
+
+<div style="text-align: center; border: 3px solid #875A7B; border-radius: 10px; padding: 30px; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <h3 style="margin: 0 0 10px 0;">Add-on Module</h3>
+    <div style="font-size: 3em; font-weight: bold; color: #875A7B; margin: 20px 0;">
+        $99 <span style="font-size: 0.4em; font-weight: normal;">USD</span>
+    </div>
+    <p style="color: #28a745; font-weight: bold; margin: 10px 0;">One-Time Purchase!</p>
+    <hr style="border: none; border-top: 1px solid #875A7B; margin: 20px 0;">
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Requires VPA Internal Transfer (base)</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; One-time purchase per Odoo version</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Lifetime updates for purchased version</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Professional support included</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; No monthly fees, no user limits</p>
+</div>
+
+<!-- VERSION HISTORY -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Version History</h2>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.0.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: December 2025 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Initial release - Receipt confirmation workflow</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Receipt confirmation workflow with new states</li>
+        <li>Journal custodian management model</li>
+        <li>Dispute handling with resolution workflow</li>
+        <li>Transfer reassignment for managers</li>
+        <li>Feature toggle in company settings</li>
+        <li>Permission hierarchy (Primary, Backup, Manager)</li>
+        <li>Enhanced PDF report with receipt sections</li>
+        <li>Activity notifications for custodians</li>
+    </ul>
+</div>
+
+<!-- CONTACT -->
+<h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Support &amp; Contact</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #875A7B;">
+    <tr>
+        <td style="padding: 20px;">
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Email:</strong> <a href="mailto:info@vpa.co.tz" style="color: #875A7B;">info@vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Website:</strong> <a href="https://www.vpa.co.tz" style="color: #875A7B;" target="_blank">www.vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0;">
+                <strong>Response Time:</strong> Within 24 hours on business days
+            </p>
+            <p style="margin: 10px 0;">
+                <strong>Documentation:</strong> Comprehensive user guide included with module
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- FOOTER -->
+<div style="text-align: center; padding: 20px; background: #875A7B; color: white; border-radius: 10px; margin-top: 30px;">
+    <p style="margin: 5px 0; font-size: 1.1em; color: white;"><strong>VPA Internal Transfer - Receipt Control</strong></p>
+    <p style="margin: 10px 0; color: white;">Copyright 2025 <a href="https://www.vpa.co.tz" style="color: #FFD700;">VPA Solutions Limited</a>. All rights reserved.</p>
+</div>
+
+</body>
+</html>

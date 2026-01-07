@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Inherit and extend the internal transfer form view -->
+    <record id="internal_transfer_view_form_receipt" model="ir.ui.view">
+        <field name="name">internal.transfer.view.form.receipt</field>
+        <field name="model">internal.transfer</field>
+        <field name="inherit_id" ref="vpa_acc_int_transfer.internal_transfer_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add new buttons in header -->
+            <xpath expr="//button[@name='action_cancel']" position="after">
+                <field name="can_receive" invisible="1"/>
+                <field name="can_dispute" invisible="1"/>
+                <field name="can_resolve_dispute" invisible="1"/>
+                <field name="receipt_confirmation_enabled" invisible="1"/>
+                <button name="action_confirm_receipt" string="Confirm Receipt"
+                        type="object" class="btn-primary"
+                        invisible="state != 'pending_receipt' or not can_receive"/>
+                <button name="action_raise_dispute" string="Raise Dispute"
+                        type="object" class="btn-secondary"
+                        invisible="state != 'pending_receipt' or not can_dispute"/>
+                <button name="action_resolve_dispute" string="Resolve Dispute"
+                        type="object" class="btn-primary"
+                        invisible="state != 'disputed' or not can_resolve_dispute"/>
+                <button name="action_reassign_custodian" string="Reassign"
+                        type="object" class="btn-secondary"
+                        invisible="state != 'pending_receipt' or not can_manage"/>
+            </xpath>
+
+            <!-- Update statusbar to show new states -->
+            <xpath expr="//field[@name='state'][@widget='statusbar']" position="attributes">
+                <attribute name="statusbar_visible">draft,submitted,pending_receipt,received</attribute>
+            </xpath>
+
+            <!-- Update Lock button to also show for 'received' state -->
+            <xpath expr="//button[@name='action_lock']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received') or is_locked or not can_manage</attribute>
+            </xpath>
+
+            <!-- Update Unlock button to also show for 'received' state -->
+            <xpath expr="//button[@name='action_unlock']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received') or not is_locked or not can_manage</attribute>
+            </xpath>
+
+            <!-- Hide Reset to Draft when locked -->
+            <xpath expr="//button[@name='action_reset_to_draft']" position="attributes">
+                <attribute name="invisible">state in ('draft', 'approved', 'received') or not can_cancel or is_locked</attribute>
+            </xpath>
+
+            <!-- Update Bank Transactions/Journal Entries group to show for 'received' state -->
+            <xpath expr="//page[@name='audit']//field[@name='source_move_id']/ancestor::group[@col='2']" position="attributes">
+                <attribute name="invisible">state not in ('approved', 'received', 'cancelled')</attribute>
+            </xpath>
+
+            <!-- ============================================== -->
+            <!-- FIELD PROTECTION: Make fields readonly when locked or in final states -->
+            <!-- ============================================== -->
+            <!-- Date field -->
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Source Journal -->
+            <xpath expr="//field[@name='source_journal_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Destination Journal -->
+            <xpath expr="//field[@name='destination_journal_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Transfer Account -->
+            <xpath expr="//field[@name='transfer_account_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Amount -->
+            <xpath expr="//field[@name='amount']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Currency -->
+            <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Exchange Rate -->
+            <xpath expr="//field[@name='exchange_rate']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Exchange Rate Inverse -->
+            <xpath expr="//field[@name='exchange_rate_inverse']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Destination Amount -->
+            <xpath expr="//field[@name='destination_amount']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Memo Type -->
+            <xpath expr="//field[@name='memo_type']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Memo -->
+            <xpath expr="//field[@name='memo']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Notes -->
+            <xpath expr="//page[@name='notes']//field[@name='notes']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+            <!-- Attachments -->
+            <xpath expr="//field[@name='attachment_ids']" position="attributes">
+                <attribute name="readonly">state in ('approved', 'pending_receipt', 'received', 'disputed') or is_locked</attribute>
+            </xpath>
+
+            <!-- Add ribbons for new states - position after button_box -->
+            <xpath expr="//div[@name='button_box']" position="after">
+                <widget name="web_ribbon" title="Pending Receipt"
+                        bg_color="text-bg-info"
+                        invisible="state != 'pending_receipt'"/>
+                <widget name="web_ribbon" title="Received"
+                        bg_color="text-bg-success"
+                        invisible="state != 'received' or is_locked"/>
+                <widget name="web_ribbon" title="Disputed"
+                        bg_color="text-bg-danger"
+                        invisible="state != 'disputed'"/>
+            </xpath>
+
+            <!-- Add Receipt and Dispute sections to Audit Trail tab -->
+            <xpath expr="//page[@name='audit']" position="inside">
+                <!-- Receipt Confirmation section -->
+                <group col="2" invisible="not received_by_id" string="Receipt Confirmation">
+                    <group>
+                        <field name="received_by_id"/>
+                        <field name="receipt_date"/>
+                    </group>
+                    <group>
+                        <field name="received_amount"/>
+                        <field name="receipt_notes"/>
+                    </group>
+                </group>
+                <!-- Reassignment History section -->
+                <group col="2" invisible="not reassigned_by_id" string="Reassignment">
+                    <group>
+                        <field name="reassigned_by_id"/>
+                        <field name="reassignment_date"/>
+                    </group>
+                    <group>
+                        <field name="original_custodian_ids"
+                               widget="many2many_tags"
+                               readonly="1"/>
+                    </group>
+                </group>
+                <!-- Dispute section -->
+                <group col="2" invisible="not dispute_raised_by_id" string="Dispute Raised">
+                    <group>
+                        <field name="dispute_raised_by_id"/>
+                        <field name="dispute_date"/>
+                    </group>
+                    <group>
+                        <field name="dispute_reason"/>
+                        <field name="dispute_notes"/>
+                    </group>
+                </group>
+                <!-- Dispute Resolution section -->
+                <group col="2" invisible="not dispute_resolved_by_id" string="Dispute Resolution">
+                    <group>
+                        <field name="dispute_resolved_by_id"/>
+                        <field name="dispute_resolution_date"/>
+                    </group>
+                    <group>
+                        <field name="dispute_resolution"/>
+                        <field name="dispute_resolution_notes"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- Add Custodian Information tab -->
+            <xpath expr="//page[@name='audit']" position="after">
+                <page string="Custodian Info" name="custodian_info"
+                      invisible="not receipt_confirmation_enabled">
+                    <group>
+                        <group string="Destination Journal Custodians">
+                            <field name="destination_custodian_ids"
+                                   widget="many2many_tags"
+                                   readonly="1"/>
+                            <field name="has_custodian" invisible="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit and extend the list view -->
+    <record id="internal_transfer_view_list_receipt" model="ir.ui.view">
+        <field name="name">internal.transfer.view.list.receipt</field>
+        <field name="model">internal.transfer</field>
+        <field name="inherit_id" ref="vpa_acc_int_transfer.internal_transfer_view_list"/>
+        <field name="arch" type="xml">
+            <!-- Update decoration for new states -->
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-info">state in ('draft', 'pending_receipt')</attribute>
+                <attribute name="decoration-success">state in ('approved', 'received')</attribute>
+                <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
+                <attribute name="decoration-muted">state == 'cancelled'</attribute>
+            </xpath>
+
+            <!-- Update state badge decorations to include new states -->
+            <xpath expr="//field[@name='state'][@widget='badge']" position="attributes">
+                <attribute name="decoration-info">state in ('draft', 'pending_receipt')</attribute>
+                <attribute name="decoration-warning">state == 'submitted'</attribute>
+                <attribute name="decoration-success">state in ('approved', 'received')</attribute>
+                <attribute name="decoration-danger">state in ('rejected', 'disputed')</attribute>
+                <attribute name="decoration-muted">state == 'cancelled'</attribute>
+            </xpath>
+
+            <!-- Add receipt-related columns after approved_by -->
+            <xpath expr="//field[@name='approved_by_id']" position="after">
+                <field name="received_by_id" optional="show"/>
+                <field name="receipt_date" optional="hide"/>
+                <field name="is_locked" widget="boolean" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit and extend the search view -->
+    <record id="internal_transfer_view_search_receipt" model="ir.ui.view">
+        <field name="name">internal.transfer.view.search.receipt</field>
+        <field name="model">internal.transfer</field>
+        <field name="inherit_id" ref="vpa_acc_int_transfer.internal_transfer_view_search"/>
+        <field name="arch" type="xml">
+            <!-- Add new filters for receipt states -->
+            <xpath expr="//filter[@name='filter_cancelled']" position="after">
+                <filter string="Pending Receipt" name="filter_pending_receipt"
+                        domain="[('state', '=', 'pending_receipt')]"/>
+                <filter string="Received" name="filter_received"
+                        domain="[('state', '=', 'received')]"/>
+                <filter string="Disputed" name="filter_disputed"
+                        domain="[('state', '=', 'disputed')]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action for Pending Receipt transfers -->
+    <record id="internal_transfer_action_pending_receipt" model="ir.actions.act_window">
+        <field name="name">Pending Receipt</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'pending_receipt')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No transfers pending receipt confirmation
+            </p>
+            <p>
+                Transfers awaiting custodian confirmation will appear here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Disputed transfers -->
+    <record id="internal_transfer_action_disputed" model="ir.actions.act_window">
+        <field name="name">Disputed Transfers</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'disputed')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No disputed transfers
+            </p>
+            <p>
+                Transfers with disputes will appear here for resolution.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Received transfers -->
+    <record id="internal_transfer_action_received" model="ir.actions.act_window">
+        <field name="name">Received Transfers</field>
+        <field name="res_model">internal.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'received')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No received transfers
+            </p>
+            <p>
+                Completed transfers with confirmed receipt will appear here.
+            </p>
+        </field>
+    </record>
+</odoo>
