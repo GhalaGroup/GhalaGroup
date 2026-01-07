@@ -46,6 +46,7 @@ Support: info@vpa.co.tz
     ],
     'data': [
         'security/ir.model.access.csv',
+        'views/mrp_bom_views.xml',
         'views/mrp_production_views.xml',
     ],
     'installable': True,

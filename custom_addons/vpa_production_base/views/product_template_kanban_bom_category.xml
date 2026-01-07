@@ -103,7 +103,7 @@
 
     <!-- Action for Raw Materials Kanban -->
     <record id="action_product_template_bom_category_kanban" model="ir.actions.act_window">
-        <field name="name">Raw Materials by Category</field>
+        <field name="name">Raw Materials BOM Category</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('type', 'in', ['consu', 'product']), ('is_template_placeholder', '=', False)]</field>
@@ -134,7 +134,7 @@
 
     <!-- Menu under Manufacturing > Products -->
     <menuitem id="menu_product_bom_category_kanban"
-        name="Raw Materials by Category"
+        name="Raw Materials BOM Category"
         action="action_product_template_bom_category_kanban"
         parent="mrp.menu_mrp_bom"
         sequence="5"/>

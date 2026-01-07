@@ -216,6 +216,7 @@ class MrpBomLine(models.Model):
                 default_uom = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
                 if default_uom:
                     vals['product_uom_id'] = default_uom.id
+
         return super().create(vals_list)
 
     def write(self, vals):
