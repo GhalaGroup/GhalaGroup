@@ -149,12 +149,13 @@
     </record>
 
     <!-- Menu Items -->
+    <!-- BOM Categories menu visible to all Manufacturing users -->
     <menuitem
         id="menu_vpa_bom_category"
         name="BOM Categories"
         parent="mrp.menu_mrp_configuration"
         action="action_vpa_bom_category"
         sequence="15"
-        groups="vpa_production_base.group_bom_manager"/>
+        groups="mrp.group_mrp_user"/>
 
 </odoo>
