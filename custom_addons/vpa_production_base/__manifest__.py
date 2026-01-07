@@ -69,6 +69,8 @@ Support: info@vpa.co.tz
         'views/product_template_views.xml',
         'views/product_template_kanban_bom_category.xml',
         'views/mrp_bom_views.xml',
+        # Wizards
+        'wizard/product_assign_bom_category_views.xml',
     ],
     'installable': True,
     'application': False,

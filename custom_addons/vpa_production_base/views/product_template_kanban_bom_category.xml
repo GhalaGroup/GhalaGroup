@@ -55,7 +55,20 @@
                                 <span t-elif="record.type.raw_value == 'service'"
                                       class="badge text-bg-warning">Service</span>
                             </div>
+                            <!-- BOM Category - shows current category or "No Category" -->
+                            <div class="mt-2 small">
+                                <i class="fa fa-tag text-primary me-1"/>
+                                <field name="bom_category_id" class="text-primary fw-bold"/>
+                            </div>
                         </main>
+                    </t>
+                    <t t-name="menu">
+                        <a role="menuitem" type="edit" class="dropdown-item">Edit Product</a>
+                        <div class="dropdown-divider"/>
+                        <span class="dropdown-item-text text-muted small">Assign BOM Category:</span>
+                        <a role="menuitem" type="object" name="action_assign_bom_category" class="dropdown-item">
+                            <i class="fa fa-tag me-1"/> Change Category...
+                        </a>
                     </t>
                 </templates>
             </kanban>

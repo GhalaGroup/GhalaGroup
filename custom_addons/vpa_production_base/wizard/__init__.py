@@ -2,6 +2,4 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
-from . import models
-from . import report
-from . import wizard
+from . import product_assign_bom_category

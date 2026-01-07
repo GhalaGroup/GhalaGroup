@@ -67,3 +67,20 @@ class ProductTemplate(models.Model):
         if vals.get('bom_category_id') and 'is_raw_material' not in vals:
             vals['is_raw_material'] = True
         return super().write(vals)
+
+    def action_assign_bom_category(self):
+        """Open wizard to assign BOM category to this product.
+
+        Called from the Kanban card menu to quickly change BOM category.
+        """
+        self.ensure_one()
+        return {
+            'name': _('Assign BOM Category'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'product.assign.bom.category',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_product_template_ids': [(6, 0, self.ids)],
+            },
+        }
