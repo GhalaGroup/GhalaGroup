@@ -10,6 +10,32 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     # =========================================================================
+    # STOCK AVAILABILITY
+    # =========================================================================
+    stock_availability_state = fields.Selection([
+        ('available', 'Available'),
+        ('partial', 'Partial'),
+        ('unavailable', 'Unavailable'),
+    ], string='Stock Status', compute='_compute_stock_availability_state',
+       help="Actual stock availability based on qty_available (not forecast)")
+
+    @api.depends('product_id', 'product_qty', 'state')
+    def _compute_stock_availability_state(self):
+        """Compute actual stock availability (not forecast)."""
+        for move in self:
+            if not move.product_id or not move.product_id.is_storable:
+                move.stock_availability_state = 'available'
+                continue
+
+            qty_available = move.product_id.qty_available
+            if qty_available >= move.product_qty:
+                move.stock_availability_state = 'available'
+            elif qty_available > 0:
+                move.stock_availability_state = 'partial'
+            else:
+                move.stock_availability_state = 'unavailable'
+
+    # =========================================================================
     # TEMPLATE LINE SUPPORT
     # =========================================================================
     bom_category_id = fields.Many2one(
@@ -131,10 +157,15 @@ class StockMove(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id_template(self):
-        """When product is selected for template move, default physical qty."""
+        """When product is selected for template move, default physical qty and refresh availability."""
         if self.is_template_move and self.product_id and not self.physical_qty_used:
             # Default physical qty to master bom qty when product is first selected
             self.physical_qty_used = self.master_bom_qty
+
+        # Force recompute stock availability for the new product
+        # This ensures the availability badge updates in the UI
+        if self.product_id:
+            self._compute_stock_availability_state()
 
     def _is_placeholder_product(self):
         """Check if this move has a placeholder product."""
