@@ -62,6 +62,15 @@
                 <attribute name="readonly">parent.state in ('done', 'cancel') or (not is_template_move and parent.state != 'draft')</attribute>
             </xpath>
 
+            <!-- Replace forecast_availability with actual stock availability badge -->
+            <xpath expr="//field[@name='move_raw_ids']//list//field[@name='forecast_availability']" position="replace">
+                <field name="stock_availability_state" string="" widget="badge"
+                       decoration-success="stock_availability_state == 'available'"
+                       decoration-warning="stock_availability_state == 'partial'"
+                       decoration-danger="stock_availability_state == 'unavailable'"
+                       column_invisible="parent.state in ['done', 'cancel']"/>
+            </xpath>
+
             <!-- Add variance tracking columns after quantity -->
             <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_uom']" position="after">
                 <!-- Master BOM Qty - Original quantity from template -->
