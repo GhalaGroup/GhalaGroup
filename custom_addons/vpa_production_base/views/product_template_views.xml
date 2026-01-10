@@ -24,6 +24,15 @@
                            options="{'no_open': True}" class="text-muted"/>
                 </div>
             </xpath>
+            <!-- Add Manufacturing UoM field after Category field -->
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <!-- Hidden field for available UoMs from VPA UoM module -->
+                <field name="allowed_uom_ids" invisible="1"/>
+                <field name="uom_mrp_id" string="Manufacturing UoM"
+                       domain="[('id', 'in', allowed_uom_ids)]"
+                       options="{'no_create': True}"
+                       groups="mrp.group_mrp_user"/>
+            </xpath>
         </field>
     </record>
 

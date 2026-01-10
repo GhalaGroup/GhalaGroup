@@ -54,6 +54,7 @@ Support: info@vpa.co.tz
         'product',
         'stock',
         'account',
+        'vpa_uom',  # For allowed_uom_ids field used in Manufacturing UoM dropdown
     ],
     'data': [
         # Security
