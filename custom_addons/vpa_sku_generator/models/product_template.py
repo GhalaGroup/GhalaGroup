@@ -178,11 +178,16 @@ class ProductTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Override create to auto-generate SKU"""
+        res = super(ProductTemplate, self).create(vals_list)
+
+        # Skip SKU generation if we're in a copy operation
+        # The copy() method will handle SKU generation
+        if self.env.context.get('skip_variant_sku_generation'):
+            return res
+
         auto_generate = self.env['ir.config_parameter'].sudo().get_param(
             'vpa_sku_generator.auto_generate', 'True'
         ) == 'True'
-
-        res = super(ProductTemplate, self).create(vals_list)
 
         for record, vals in zip(res, vals_list):
             if auto_generate and "categ_id" in vals and 'default_code' not in vals:
@@ -198,12 +203,28 @@ class ProductTemplate(models.Model):
         # Remove lock on copy
         default['sku_locked'] = False
 
-        template = super(ProductTemplate, self).copy(default)
+        # Use context to prevent variant from generating its own SKU during copy
+        # The template copy will handle SKU generation for both template and variant
+        template = super(ProductTemplate, self.with_context(skip_variant_sku_generation=True)).copy(default)
 
         # Always generate new SKU for duplicated product
         default_code = template._generate_default_code()
         if default_code:
-            template.with_context(skip_sku_validation=True).default_code = default_code
+            template.with_context(skip_sku_validation=True).write({'default_code': default_code})
+            # Also update variant SKU(s)
+            variants = template.product_variant_ids
+            if len(variants) == 1:
+                # Single variant: use same SKU as template
+                variants.with_context(skip_sku_validation=True).write({'default_code': default_code})
+            elif len(variants) > 1:
+                # Multiple variants: add suffix
+                sorted_variants = variants.sorted(
+                    lambda v: (','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))), v.id)
+                )
+                for idx, variant in enumerate(sorted_variants, 1):
+                    variant.with_context(skip_sku_validation=True).write({
+                        'default_code': f"{default_code}-{str(idx).zfill(3)}"
+                    })
 
         return template
 

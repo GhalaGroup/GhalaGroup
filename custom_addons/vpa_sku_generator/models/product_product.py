@@ -43,36 +43,87 @@ class ProductProduct(models.Model):
 
         res = super(ProductProduct, self).create(vals_list)
 
-        # Generate SKUs for variants
+        # Skip SKU generation if we're in a template copy operation
+        # The template's copy() method will handle SKU generation
+        if self.env.context.get('skip_variant_sku_generation'):
+            return res
+
+        # Generate SKUs for variants and update existing variants if needed
         for variant, vals in zip(res, vals_list):
             # Skip if SKU manually provided or template is locked
             if 'default_code' in vals or variant.product_tmpl_id.sku_locked:
                 continue
 
-            # Generate variant SKU
-            variant_sku = variant._generate_variant_sku()
-            if variant_sku:
-                super(ProductProduct, variant).with_context(skip_sku_validation=True).write({'default_code': variant_sku})
+            template = variant.product_tmpl_id
+            all_variants = template.product_variant_ids
+
+            # If we now have multiple variants, we need to ensure all have suffixed SKUs
+            if len(all_variants) > 1:
+                # Find the base SKU from template or existing variant
+                base_sku = template.default_code if template.default_code and template.default_code != 'False' else False
+
+                if not base_sku:
+                    for v in all_variants:
+                        if v.default_code:
+                            existing_sku = v.default_code
+                            if '-' in existing_sku:
+                                base_sku = existing_sku.rsplit('-', 1)[0]
+                            else:
+                                base_sku = existing_sku
+                            break
+
+                if base_sku:
+                    # Sort all variants consistently
+                    sorted_variants = all_variants.sorted(
+                        lambda v: (
+                            ','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))),
+                            v.id
+                        )
+                    )
+
+                    # Update ALL variants with proper suffixed SKUs
+                    for idx, v in enumerate(sorted_variants, 1):
+                        new_sku = f"{base_sku}-{str(idx).zfill(3)}"
+                        if v.default_code != new_sku:
+                            super(ProductProduct, v).with_context(skip_sku_validation=True).write({'default_code': new_sku})
+            else:
+                # Single variant - generate without suffix
+                variant_sku = variant._generate_variant_sku()
+                if variant_sku:
+                    super(ProductProduct, variant).with_context(skip_sku_validation=True).write({'default_code': variant_sku})
 
         return res
 
     def _generate_variant_sku(self):
         """Generate SKU for variant with sequential suffix
 
-        Template must have base SKU already set (e.g., UDI/OFF/00001)
-        Variants inherit template SKU:
+        Template or existing variant must have base SKU (e.g., UDI/OFF/00001)
+        Variants inherit the base SKU:
         - Single variant: same as template (UDI/OFF/00001)
-        - Multiple variants: template SKU + suffix (UDI/OFF/00001-001, -002, etc.)
+        - Multiple variants: base SKU + suffix (UDI/OFF/00001-001, -002, etc.)
         """
         self.ensure_one()
 
         template = self.product_tmpl_id
 
-        # Template MUST have SKU already - don't generate here
-        if not template.default_code or template.default_code == 'False':
-            return False
+        # First try to get base SKU from template
+        base_sku = template.default_code if template.default_code and template.default_code != 'False' else False
 
-        base_sku = template.default_code
+        # If template has no SKU, try to find base SKU from existing variants
+        if not base_sku:
+            for variant in template.product_variant_ids:
+                if variant.id != self.id and variant.default_code:
+                    # Extract base SKU (remove suffix if present)
+                    existing_sku = variant.default_code
+                    if '-' in existing_sku:
+                        base_sku = existing_sku.rsplit('-', 1)[0]
+                    else:
+                        base_sku = existing_sku
+                    break
+
+        # If still no base SKU found, cannot generate
+        if not base_sku:
+            return False
 
         # If this is the only variant, use template SKU without suffix
         if len(template.product_variant_ids) == 1:

@@ -192,9 +192,23 @@ class MrpBomLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id_category(self):
-        """Auto-fill category from product if product has one."""
-        if self.product_id and self.product_id.product_tmpl_id.bom_category_id:
-            self.bom_category_id = self.product_id.product_tmpl_id.bom_category_id
+        """Auto-fill category from product and set Manufacturing UoM.
+
+        When a product is added to a BOM line:
+        1. Auto-fill BOM category from product if it has one
+        2. Use Manufacturing UoM (uom_mrp_id) if set, otherwise use standard UoM (uom_id)
+        """
+        if self.product_id:
+            # Auto-fill BOM category from product
+            if self.product_id.product_tmpl_id.bom_category_id:
+                self.bom_category_id = self.product_id.product_tmpl_id.bom_category_id
+
+            # Set UoM: prefer Manufacturing UoM, fallback to standard UoM
+            product_tmpl = self.product_id.product_tmpl_id
+            if product_tmpl.uom_mrp_id:
+                self.product_uom_id = product_tmpl.uom_mrp_id
+            else:
+                self.product_uom_id = product_tmpl.uom_id
 
     @api.onchange('bom_category_id', 'product_id')
     def _onchange_set_default_uom(self):

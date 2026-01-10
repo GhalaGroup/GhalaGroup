@@ -31,6 +31,20 @@ class ProductTemplate(models.Model):
         help="Parent/Main category of the BOM Category (for information only).",
     )
 
+    # =========================================================================
+    # MANUFACTURING UOM - VPA UOM Feature
+    # =========================================================================
+    # Note: Uses allowed_uom_ids from VPA UoM module for dropdown domain
+    # which includes: base UoM + all VPA UoM conversions (uom_conversion_ids)
+    uom_mrp_id = fields.Many2one(
+        'uom.uom',
+        string='Manufacturing UoM',
+        help="Default Unit of Measure for BOM lines and Manufacturing Orders. "
+             "If not set, the standard UoM (Unit of Measure) is used. "
+             "Example: Purchase in 'Board', manufacture in 'm²'.",
+        tracking=True,
+    )
+
     @api.model
     def _read_group_bom_category_ids(self, categories, domain):
         """Return all BOM categories for Kanban grouping, even if empty.
