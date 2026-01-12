@@ -5,66 +5,10 @@
     <data noupdate="0">
 
         <!-- ============================================================ -->
-        <!-- VPA Production Studio - Security Groups                       -->
+        <!-- MASTER DATA SECTION - Cost & Product Creator                  -->
         <!-- ============================================================ -->
 
-        <!-- Module Category -->
-        <record id="module_category_vpa_production" model="ir.module.category">
-            <field name="name">VPA Production Studio</field>
-            <field name="description">VPA Production Studio module groups</field>
-            <field name="sequence">50</field>
-        </record>
-
-        <!-- Privilege for VPA Production Studio -->
-        <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
-            <field name="name">VPA Production Studio</field>
-            <field name="category_id" ref="module_category_vpa_production"/>
-        </record>
-
-        <!-- ============================================================ -->
-        <!-- BOM Manager Group                                             -->
-        <!-- Only users in this group can create/edit/delete BOMs          -->
-        <!-- ============================================================ -->
-        <record id="group_bom_manager" model="res.groups">
-            <field name="name">BOM Manager</field>
-            <field name="sequence">10</field>
-            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
-            <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
-            <field name="comment">
-                Users in this group can create, edit, and delete Bills of Materials.
-                Other users can only VIEW BOMs (read-only access).
-
-                BOM Managers can also:
-                - Create and manage BOM Categories
-                - View full audit trail on BOMs
-            </field>
-        </record>
-
-        <!-- ============================================================ -->
-        <!-- Product Creator Group                                         -->
-        <!-- Only users in this group can create new products              -->
-        <!-- ============================================================ -->
-        <record id="group_product_creator" model="res.groups">
-            <field name="name">Product Creator</field>
-            <field name="sequence">20</field>
-            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
-            <field name="comment">
-                Users in this group can CREATE new products.
-                Users without this group can only VIEW and EDIT existing products,
-                but cannot create new ones.
-
-                Assign this group to users who are authorized to add new products
-                to the system (e.g., inventory managers, product managers).
-            </field>
-        </record>
-
-    </data>
-
-    <!-- ============================================================ -->
-    <!-- Cost Visibility - In Master Data Section                      -->
-    <!-- ============================================================ -->
-    <data noupdate="0">
-        <!-- Privilege for Cost in Master Data section -->
+        <!-- Cost Privilege - In Master Data section -->
         <record model="res.groups.privilege" id="res_groups_privilege_cost">
             <field name="name">Cost</field>
             <field name="placeholder">Hidden</field>
@@ -72,7 +16,7 @@
             <field name="sequence">10</field>
         </record>
 
-        <!-- View Product Cost Group - shows in Master Data section -->
+        <!-- View Product Cost Group -->
         <record id="group_view_product_cost" model="res.groups">
             <field name="name">View</field>
             <field name="sequence">10</field>
@@ -83,12 +27,82 @@
                 - Product cost (standard_price)
                 - BOM component costs
                 - Manufacturing order costs
-                - Production costs
+                - Vendor prices
 
                 Users without this group will NOT see any cost fields.
                 Administrators always have access to costs.
             </field>
         </record>
+
+        <!-- ============================================================ -->
+        <!-- SUPPLY CHAIN SECTION - BOM Access                             -->
+        <!-- ============================================================ -->
+
+        <!-- BOM Privilege - In Supply Chain section (alongside Manufacturing) -->
+        <record model="res.groups.privilege" id="res_groups_privilege_bom">
+            <field name="name">BOM</field>
+            <field name="placeholder">Viewer</field>
+            <field name="category_id" ref="base.module_category_supply_chain"/>
+            <field name="sequence">15</field>
+        </record>
+
+        <!-- BOM Viewer Group - Read-only access to BOMs -->
+        <record id="group_bom_viewer" model="res.groups">
+            <field name="name">Viewer</field>
+            <field name="sequence">5</field>
+            <field name="privilege_id" ref="res_groups_privilege_bom"/>
+            <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
+            <field name="comment">
+                Users in this group can VIEW Bills of Materials (read-only).
+                They cannot create, edit, or delete BOMs.
+            </field>
+        </record>
+
+        <!-- BOM Manager Group - Full access to BOMs -->
+        <record id="group_bom_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_bom"/>
+            <field name="implied_ids" eval="[(4, ref('vpa_production_base.group_bom_viewer'))]"/>
+            <field name="comment">
+                Users in this group can create, edit, and delete Bills of Materials.
+
+                BOM Managers can also:
+                - Create and manage BOM Categories
+                - View full audit trail on BOMs
+                - Create Master BOMs with category placeholders
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- LEGACY - Keep for backwards compatibility                     -->
+        <!-- ============================================================ -->
+
+        <!-- Module Category (kept for any existing references) -->
+        <record id="module_category_vpa_production" model="ir.module.category">
+            <field name="name">VPA Production Studio</field>
+            <field name="description">VPA Production Studio module groups</field>
+            <field name="sequence">50</field>
+        </record>
+
+        <!-- Legacy privilege (hidden, for backwards compatibility) -->
+        <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
+            <field name="name">VPA Production Studio</field>
+            <field name="category_id" ref="module_category_vpa_production"/>
+        </record>
+
+        <!-- Product Creator - kept in VPA section for now -->
+        <record id="group_product_creator" model="res.groups">
+            <field name="name">Product Creator</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
+            <field name="comment">
+                Users in this group can CREATE new products.
+                Users without this group can only VIEW and EDIT existing products,
+                but cannot create new ones.
+            </field>
+        </record>
+
     </data>
 
     <!-- ============================================================ -->
