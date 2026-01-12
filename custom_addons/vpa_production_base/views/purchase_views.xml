@@ -151,4 +151,56 @@
         </field>
     </record>
 
+    <!-- Hide cost in Purchase Order calendar view -->
+    <record id="purchase_order_calendar_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.calendar.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_calendar"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order pivot view -->
+    <record id="purchase_order_pivot_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.pivot.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_pivot"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order graph view -->
+    <record id="purchase_order_graph_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.graph.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_graph"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase History pivot view -->
+    <record id="purchase_history_pivot_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.history.pivot.hide.cost</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_history_pivot"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
