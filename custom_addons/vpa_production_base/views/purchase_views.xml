@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Purchase Views - Hide Cost Fields                             -->
+    <!-- Only visible to users in View Product Cost group              -->
+    <!-- ============================================================ -->
+
+    <!-- Hide cost in Purchase History tree view -->
+    <record id="purchase_history_tree_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.history.list.hide.cost</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_history_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <!-- Hide Unit Price column -->
+            <xpath expr="//field[@name='price_unit_product_uom']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide Total Untaxed column -->
+            <xpath expr="//field[@name='price_subtotal']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order Line tree view -->
+    <record id="purchase_order_line_tree_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.line.list.hide.cost</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_subtotal']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order Line form view -->
+    <record id="purchase_order_line_form_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.line.form.hide.cost</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_form2"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order form view (order lines) -->
+    <record id="purchase_order_form_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.form.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <!-- Hide price_unit in order lines list -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='price_unit']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide price_subtotal (Amount) in order lines list -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='price_subtotal']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide discount in order lines list -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='discount']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide tax_totals widget (totals section) -->
+            <xpath expr="//field[@name='tax_totals']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide price_unit in order lines form -->
+            <xpath expr="//field[@name='order_line']//form//field[@name='price_unit']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide discount in order lines form -->
+            <xpath expr="//field[@name='order_line']//form//field[@name='discount']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order tree views -->
+    <record id="purchase_order_tree_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.list.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_kpis_tree_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.kpis.list.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total_cc']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_view_tree_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.view.list.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_untaxed']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount_total_cc']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in Purchase Order kanban view -->
+    <record id="purchase_order_kanban_hide_cost" model="ir.ui.view">
+        <field name="name">purchase.order.kanban.hide.cost</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_kanban"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
