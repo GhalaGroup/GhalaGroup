@@ -63,24 +63,24 @@
     </record>
 
     <!-- ============================================================ -->
-    <!-- Hide Cost Fields from Non-Accounting Users                    -->
+    <!-- Hide Cost Fields - Only visible to users in View Product Cost group -->
     <!-- ============================================================ -->
 
-    <!-- Hide standard_price from non-accounting users in form view -->
+    <!-- Hide standard_price from users without View Product Cost group -->
     <record id="product_template_form_view_hide_cost" model="ir.ui.view">
         <field name="name">product.template.form.hide.cost</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="priority">100</field>
         <field name="arch" type="xml">
-            <!-- Make standard_price visible only to accounting users -->
+            <!-- Make standard_price visible only to View Product Cost group -->
             <xpath expr="//field[@name='standard_price']" position="attributes">
-                <attribute name="groups">account.group_account_invoice</attribute>
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
         </field>
     </record>
 
-    <!-- Hide cost in tree view for non-accounting users -->
+    <!-- Hide cost in tree view -->
     <record id="product_template_tree_view_hide_cost" model="ir.ui.view">
         <field name="name">product.template.tree.hide.cost</field>
         <field name="model">product.template</field>
@@ -88,7 +88,59 @@
         <field name="priority">100</field>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='standard_price']" position="attributes">
-                <attribute name="groups">account.group_account_invoice</attribute>
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in product.product form view -->
+    <record id="product_product_form_view_hide_cost" model="ir.ui.view">
+        <field name="name">product.product.form.hide.cost</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in product.product tree view -->
+    <record id="product_product_tree_view_hide_cost" model="ir.ui.view">
+        <field name="name">product.product.tree.hide.cost</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost fields in vendor pricelist (product.supplierinfo) -->
+    <record id="product_supplierinfo_form_hide_cost" model="ir.ui.view">
+        <field name="name">product.supplierinfo.form.hide.cost</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Hide cost in vendor pricelist tree view -->
+    <record id="product_supplierinfo_tree_hide_cost" model="ir.ui.view">
+        <field name="name">product.supplierinfo.tree.hide.cost</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
         </field>
     </record>

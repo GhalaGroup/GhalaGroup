@@ -5,7 +5,37 @@
     <data noupdate="0">
 
         <!-- ============================================================ -->
-        <!-- VPA Production Studio - Security Groups                       -->
+        <!-- MASTER DATA SECTION - Cost & Product Creator                  -->
+        <!-- ============================================================ -->
+
+        <!-- Cost Privilege - In Master Data section -->
+        <record model="res.groups.privilege" id="res_groups_privilege_cost">
+            <field name="name">Cost</field>
+            <field name="placeholder">Hidden</field>
+            <field name="category_id" ref="base.module_category_master_data"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- View Product Cost Group -->
+        <record id="group_view_product_cost" model="res.groups">
+            <field name="name">View</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_cost"/>
+            <field name="implied_by_ids" eval="[(4, ref('base.group_system'))]"/>
+            <field name="comment">
+                Users in this group can VIEW all cost information:
+                - Product cost (standard_price)
+                - BOM component costs
+                - Manufacturing order costs
+                - Vendor prices
+
+                Users without this group will NOT see any cost fields.
+                Administrators always have access to costs.
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- VPA PRODUCTION STUDIO SECTION                                 -->
         <!-- ============================================================ -->
 
         <!-- Module Category -->
@@ -15,30 +45,52 @@
             <field name="sequence">50</field>
         </record>
 
-        <!-- Privilege for VPA Production Studio -->
+        <!-- VPA Production Studio Privilege -->
         <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
             <field name="name">VPA Production Studio</field>
+            <field name="placeholder">No</field>
             <field name="category_id" ref="module_category_vpa_production"/>
+            <field name="sequence">10</field>
         </record>
 
-        <!-- ============================================================ -->
-        <!-- BOM Manager Group                                             -->
-        <!-- Only users in this group can create/edit/delete BOMs          -->
-        <!-- ============================================================ -->
-        <record id="group_bom_manager" model="res.groups">
-            <field name="name">BOM Manager</field>
+        <!-- BOM Viewer Group -->
+        <record id="group_bom_viewer" model="res.groups">
+            <field name="name">BOM Viewer</field>
             <field name="sequence">10</field>
             <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
             <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
             <field name="comment">
+                Users in this group can VIEW Bills of Materials (read-only).
+                They cannot create, edit, or delete BOMs.
+            </field>
+        </record>
+
+        <!-- BOM Manager Group -->
+        <record id="group_bom_manager" model="res.groups">
+            <field name="name">BOM Manager</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
+            <field name="implied_ids" eval="[(4, ref('vpa_production_base.group_bom_viewer'))]"/>
+            <field name="comment">
                 Users in this group can create, edit, and delete Bills of Materials.
-                Other users can only VIEW BOMs (read-only access).
 
                 BOM Managers can also:
                 - Create and manage BOM Categories
                 - View full audit trail on BOMs
+                - Create Master BOMs with category placeholders
             </field>
         </record>
+
+        <!-- ============================================================ -->
+        <!-- CLEANUP OLD RECORDS                                           -->
+        <!-- ============================================================ -->
+
+        <!-- Delete the old BOM privilege that was in Supply Chain -->
+        <delete model="res.groups.privilege" id="res_groups_privilege_bom"/>
+
+        <!-- Delete the old Product Creator privilege -->
+        <delete model="res.groups" id="group_product_creator"/>
+        <delete model="res.groups.privilege" id="res_groups_privilege_product_creator"/>
 
     </data>
 
