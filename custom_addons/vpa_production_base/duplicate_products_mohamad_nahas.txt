@@ -1,0 +1,41 @@
+# Duplicate Products Created by Mohamad Nahas
+# ============================================
+# These products were created due to the BOM product search bug
+# (dropdown not showing existing products in Normal BOMs)
+#
+# Created: 2026-01-12
+# Bug Fix: mrp_bom_line.py - removed is_raw_material domain filter for normal BOMs
+#
+# Action Required: Archive these duplicates and update any BOMs using them
+# to point to the original products instead.
+
+# Products Created on 2026-01-10 (Bug-related duplicates)
+# -------------------------------------------------------
+ID: 8627 | HMR12MM/PL (1220*2440) - (2.9768m2)                               | 2026-01-10 12:57
+ID: 8626 | HMR18MM/PL (1220*2440) - (2.9768m2)                               | 2026-01-10 12:50 | DUPLICATE
+ID: 8625 | [UDM/RM/PNT/00015] Primer - Auto Grey Surface (Gold Star) - 4L    | 2026-01-10 12:45
+ID: 8624 | NC - Auto Paint - Green (Semi Gloss)                              | 2026-01-10 12:45 | DUPLICATE
+ID: 8623 | Thinner - Plascryl (Plascon) - 5L                                 | 2026-01-10 12:28 | DUPLICATE
+ID: 8622 | NC - Auto Paint - Matt Clear (Goldstar) - 4L                      | 2026-01-10 12:27 | DUPLICATE
+ID: 8621 | Sanding Sealer Clear (Goldstar) - 4L                              | 2026-01-10 12:25 | DUPLICATE
+ID: 8620 | Thinner - GP Solvent (Goldstar) - 5L                              | 2026-01-10 12:23 | DUPLICATE
+ID: 8619 | Sanding Sealer Clear (Goldstar) - 4L                              | 2026-01-10 12:20 | DUPLICATE
+ID: 8618 | NC Wood Stain Oil Base (N-027 Orange) - 900ml (National UAE)      | 2026-01-10 12:20 | DUPLICATE
+ID: 8617 | wood stain                                                        | 2026-01-10 12:19 | INCOMPLETE
+ID: 8616 | Sanding Sealer Clear (Goldstar) - 4L                              | 2026-01-10 12:16 | DUPLICATE
+ID: 8615 | sealer                                                            | 2026-01-10 12:15 | INCOMPLETE
+ID: 8614 | NC Wood Stain Oil Base (N-018 Walnut) - 900ml (National UAE)      | 2026-01-10 12:14 | DUPLICATE
+ID: 8613 | NC Wood Stain Oil Base (N-019 Dark Walnut) - 900ml (National UAE) | 2026-01-10 12:13 | DUPLICATE
+ID: 8612 | Sanding Sealer Clear (Goldstar) - 4L                              | 2026-01-10 12:11 | DUPLICATE
+ID: 8611 | Veneer - Natural (Ash Moire)                                      | 2026-01-10 12:09 | DUPLICATE
+ID: 8610 | HMR18MM/PL (1220*2440) - (2.9768m2)                               | 2026-01-10 12:07 | DUPLICATE
+ID: 8609 | NC - Auto Paint - Green (Semi Gloss)                              | 2026-01-10 12:03 | DUPLICATE
+
+# Older products (may or may not be duplicates - verify manually)
+# ---------------------------------------------------------------
+ID: 8572 | [UDM/RM/VNR/00008] Veneer - Oak (Sendien) Vain                    | 2025-12-29 18:13
+ID: 8571 | [UDM/RM/FB/00007] MDF18MM (MR) 4" x 8"                            | 2025-12-29 18:11
+ID: 8570 | Veneer - Natural (Ash Moire)                                      | 2025-12-29 15:11 | DUPLICATE
+ID: 8523 | [RM/PAR/00146] Rails - Under Mount (Soft Close) 18" - 45cm)       | 2025-11-29 08:11
+
+# Total: 23 products created by Mohamad Nahas (user ID 29)
