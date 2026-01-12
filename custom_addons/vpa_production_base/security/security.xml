@@ -40,6 +40,41 @@
             </field>
         </record>
 
+        <!-- ============================================================ -->
+        <!-- Product Creator Group                                         -->
+        <!-- Only users in this group can create new products              -->
+        <!-- ============================================================ -->
+        <record id="group_product_creator" model="res.groups">
+            <field name="name">Product Creator</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
+            <field name="comment">
+                Users in this group can CREATE new products.
+                Users without this group can only VIEW and EDIT existing products,
+                but cannot create new ones.
+
+                Assign this group to users who are authorized to add new products
+                to the system (e.g., inventory managers, product managers).
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- View Product Cost Group                                       -->
+        <!-- Only users in this group can see product costs                -->
+        <!-- ============================================================ -->
+        <record id="group_view_product_cost" model="res.groups">
+            <field name="name">View Product Cost</field>
+            <field name="sequence">30</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
+            <field name="comment">
+                Users in this group can VIEW product costs (standard_price).
+                Users without this group will NOT see the Cost field on products.
+
+                Use this to hide cost information from production workers,
+                sales staff, or other users who don't need to see costs.
+            </field>
+        </record>
+
     </data>
 
     <!-- ============================================================ -->
