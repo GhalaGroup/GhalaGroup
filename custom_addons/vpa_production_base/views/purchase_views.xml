@@ -71,6 +71,10 @@
             <xpath expr="//field[@name='order_line']//list//field[@name='discount']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
+            <!-- Hide taxes in order lines list -->
+            <xpath expr="//field[@name='order_line']//list//field[@name='tax_ids']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
             <!-- Hide tax_totals widget (totals section) -->
             <xpath expr="//field[@name='tax_totals']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
@@ -81,6 +85,10 @@
             </xpath>
             <!-- Hide discount in order lines form -->
             <xpath expr="//field[@name='order_line']//form//field[@name='discount']" position="attributes">
+                <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
+            </xpath>
+            <!-- Hide taxes in order lines form -->
+            <xpath expr="//field[@name='order_line']//form//field[@name='tax_ids']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
         </field>
