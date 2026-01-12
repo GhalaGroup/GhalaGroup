@@ -35,22 +35,29 @@
         </record>
 
         <!-- ============================================================ -->
-        <!-- SUPPLY CHAIN SECTION - BOM Access                             -->
+        <!-- VPA PRODUCTION STUDIO SECTION                                 -->
         <!-- ============================================================ -->
 
-        <!-- BOM Privilege - In Supply Chain section (alongside Manufacturing) -->
-        <record model="res.groups.privilege" id="res_groups_privilege_bom">
-            <field name="name">BOM</field>
-            <field name="placeholder">Viewer</field>
-            <field name="category_id" ref="base.module_category_supply_chain"/>
-            <field name="sequence">15</field>
+        <!-- Module Category -->
+        <record id="module_category_vpa_production" model="ir.module.category">
+            <field name="name">VPA Production Studio</field>
+            <field name="description">VPA Production Studio module groups</field>
+            <field name="sequence">50</field>
         </record>
 
-        <!-- BOM Viewer Group - Read-only access to BOMs -->
+        <!-- VPA Production Studio Privilege -->
+        <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
+            <field name="name">VPA Production Studio</field>
+            <field name="placeholder">No</field>
+            <field name="category_id" ref="module_category_vpa_production"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- BOM Viewer Group -->
         <record id="group_bom_viewer" model="res.groups">
-            <field name="name">Viewer</field>
-            <field name="sequence">5</field>
-            <field name="privilege_id" ref="res_groups_privilege_bom"/>
+            <field name="name">BOM Viewer</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
             <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user'))]"/>
             <field name="comment">
                 Users in this group can VIEW Bills of Materials (read-only).
@@ -58,11 +65,11 @@
             </field>
         </record>
 
-        <!-- BOM Manager Group - Full access to BOMs -->
+        <!-- BOM Manager Group -->
         <record id="group_bom_manager" model="res.groups">
-            <field name="name">Manager</field>
-            <field name="sequence">10</field>
-            <field name="privilege_id" ref="res_groups_privilege_bom"/>
+            <field name="name">BOM Manager</field>
+            <field name="sequence">20</field>
+            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
             <field name="implied_ids" eval="[(4, ref('vpa_production_base.group_bom_viewer'))]"/>
             <field name="comment">
                 Users in this group can create, edit, and delete Bills of Materials.
@@ -75,33 +82,15 @@
         </record>
 
         <!-- ============================================================ -->
-        <!-- LEGACY - Keep for backwards compatibility                     -->
+        <!-- CLEANUP OLD RECORDS                                           -->
         <!-- ============================================================ -->
 
-        <!-- Module Category (kept for any existing references) -->
-        <record id="module_category_vpa_production" model="ir.module.category">
-            <field name="name">VPA Production Studio</field>
-            <field name="description">VPA Production Studio module groups</field>
-            <field name="sequence">50</field>
-        </record>
+        <!-- Delete the old BOM privilege that was in Supply Chain -->
+        <delete model="res.groups.privilege" id="res_groups_privilege_bom"/>
 
-        <!-- Legacy privilege (hidden, for backwards compatibility) -->
-        <record model="res.groups.privilege" id="res_groups_privilege_vpa_production">
-            <field name="name">VPA Production Studio</field>
-            <field name="category_id" ref="module_category_vpa_production"/>
-        </record>
-
-        <!-- Product Creator - kept in VPA section for now -->
-        <record id="group_product_creator" model="res.groups">
-            <field name="name">Product Creator</field>
-            <field name="sequence">20</field>
-            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
-            <field name="comment">
-                Users in this group can CREATE new products.
-                Users without this group can only VIEW and EDIT existing products,
-                but cannot create new ones.
-            </field>
-        </record>
+        <!-- Delete the old Product Creator privilege -->
+        <delete model="res.groups" id="group_product_creator"/>
+        <delete model="res.groups.privilege" id="res_groups_privilege_product_creator"/>
 
     </data>
 
