@@ -1,11 +1,42 @@
 # -*- coding: utf-8 -*-
 from markupsafe import Markup
-from odoo import models, api, _
+from odoo import models, api, fields, _
 from odoo.tools import html_escape
 
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+
+    @api.depends('bom_id')
+    def _compute_product_qty(self):
+        """
+        Override to preserve explicitly set product_qty when creating MOs.
+
+        Standard Odoo 19 behavior: When a BOM is assigned, the MO's product_qty
+        is automatically set to the BOM's product_qty. This causes issues when
+        creating MOs from Sales Orders where the quantity should match the SO line,
+        not the BOM default.
+
+        This override preserves the product_qty if:
+        1. It was explicitly set during creation (in context)
+        2. The MO is being created (not modified)
+        """
+        for production in self:
+            if production.state != 'draft':
+                continue
+
+            # Check if quantity was explicitly provided via context
+            # (used by server actions and programmatic creation)
+            explicit_qty = self.env.context.get('vpa_explicit_product_qty')
+            if explicit_qty and not production._origin.id:
+                # New record with explicit quantity - preserve it
+                production.product_qty = explicit_qty
+            elif production.bom_id and production._origin.bom_id != production.bom_id:
+                # BOM changed - use BOM's quantity (standard behavior)
+                production.product_qty = production.bom_id.product_qty
+            elif not production.bom_id:
+                # No BOM - default to 1
+                production.product_qty = 1.0
 
     def _post_run_manufacture(self, post_production_values):
         """
