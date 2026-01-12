@@ -58,23 +58,37 @@
             </field>
         </record>
 
-        <!-- ============================================================ -->
-        <!-- View Product Cost Group                                       -->
-        <!-- Only users in this group can see product costs                -->
-        <!-- ============================================================ -->
-        <record id="group_view_product_cost" model="res.groups">
-            <field name="name">View Product Cost</field>
-            <field name="sequence">30</field>
-            <field name="privilege_id" ref="res_groups_privilege_vpa_production"/>
-            <field name="comment">
-                Users in this group can VIEW product costs (standard_price).
-                Users without this group will NOT see the Cost field on products.
+    </data>
 
-                Use this to hide cost information from production workers,
-                sales staff, or other users who don't need to see costs.
-            </field>
+    <!-- ============================================================ -->
+    <!-- Cost Visibility - In Master Data Section                      -->
+    <!-- ============================================================ -->
+    <data noupdate="0">
+        <!-- Privilege for Cost in Master Data section -->
+        <record model="res.groups.privilege" id="res_groups_privilege_cost">
+            <field name="name">Cost</field>
+            <field name="placeholder">Hidden</field>
+            <field name="category_id" ref="base.module_category_master_data"/>
+            <field name="sequence">10</field>
         </record>
 
+        <!-- View Product Cost Group - shows in Master Data section -->
+        <record id="group_view_product_cost" model="res.groups">
+            <field name="name">View</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_cost"/>
+            <field name="implied_by_ids" eval="[(4, ref('base.group_system'))]"/>
+            <field name="comment">
+                Users in this group can VIEW all cost information:
+                - Product cost (standard_price)
+                - BOM component costs
+                - Manufacturing order costs
+                - Production costs
+
+                Users without this group will NOT see any cost fields.
+                Administrators always have access to costs.
+            </field>
+        </record>
     </data>
 
     <!-- ============================================================ -->
