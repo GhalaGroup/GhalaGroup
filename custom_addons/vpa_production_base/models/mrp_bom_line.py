@@ -48,9 +48,11 @@ class MrpBomLine(models.Model):
     )
 
     # Override product_id to make it not required for sections/template lines
+    # Domain is applied dynamically via onchange methods based on BOM type:
+    # - Normal BOM: Show all products (standard Odoo behavior)
+    # - Master BOM: Filter by is_raw_material=True and optionally by bom_category_id
     product_id = fields.Many2one(
         'product.product',
-        domain="[('product_tmpl_id.is_raw_material', '=', True), '|', ('product_tmpl_id.bom_category_id', '=', False), ('product_tmpl_id.bom_category_id', '=', bom_category_id)]",
         required=False,  # Allow empty for sections/notes and template lines
     )
 
@@ -179,16 +181,22 @@ class MrpBomLine(models.Model):
             if self.product_id and self.product_id.product_tmpl_id.bom_category_id != self.bom_category_id:
                 self.product_id = False
 
-            # Return domain to filter products
-            return {
-                'domain': {
-                    'product_id': [
-                        ('product_tmpl_id.is_raw_material', '=', True),
-                        ('product_tmpl_id.bom_category_id', '=', self.bom_category_id.id),
-                    ]
+            # Return domain to filter products (only for Master BOMs)
+            if self.bom_id and self.bom_id.is_master_bom:
+                return {
+                    'domain': {
+                        'product_id': [
+                            ('product_tmpl_id.is_raw_material', '=', True),
+                            ('product_tmpl_id.bom_category_id', '=', self.bom_category_id.id),
+                        ]
+                    }
                 }
-            }
-        return {'domain': {'product_id': [('product_tmpl_id.is_raw_material', '=', True)]}}
+            # For normal BOMs, no filtering
+            return {}
+        # Default: only filter for Master BOMs
+        if self.bom_id and self.bom_id.is_master_bom:
+            return {'domain': {'product_id': [('product_tmpl_id.is_raw_material', '=', True)]}}
+        return {}
 
     @api.onchange('product_id')
     def _onchange_product_id_category(self):
