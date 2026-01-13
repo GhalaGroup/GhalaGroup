@@ -3,6 +3,7 @@
     <!-- ============================================================ -->
     <!-- Purchase Views - Hide Cost Fields                             -->
     <!-- Only visible to users in View Product Cost group              -->
+    <!-- Note: Some views may not exist in all Odoo versions           -->
     <!-- ============================================================ -->
 
     <!-- Hide cost in Purchase History tree view -->
@@ -12,8 +13,8 @@
         <field name="inherit_id" ref="purchase.purchase_history_tree"/>
         <field name="priority">100</field>
         <field name="arch" type="xml">
-            <!-- Hide Unit Price column (Odoo 19 uses price_unit_product_uom) -->
-            <xpath expr="//field[@name='price_unit_product_uom']" position="attributes">
+            <!-- Hide Unit Price column -->
+            <xpath expr="//field[@name='price_unit']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
             <!-- Hide Total Untaxed column -->
