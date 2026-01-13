@@ -81,17 +81,6 @@
             </field>
         </record>
 
-        <!-- ============================================================ -->
-        <!-- CLEANUP OLD RECORDS                                           -->
-        <!-- ============================================================ -->
-
-        <!-- Delete the old BOM privilege that was in Supply Chain -->
-        <delete model="res.groups.privilege" id="res_groups_privilege_bom"/>
-
-        <!-- Delete the old Product Creator privilege -->
-        <delete model="res.groups" id="group_product_creator"/>
-        <delete model="res.groups.privilege" id="res_groups_privilege_product_creator"/>
-
     </data>
 
     <!-- ============================================================ -->
