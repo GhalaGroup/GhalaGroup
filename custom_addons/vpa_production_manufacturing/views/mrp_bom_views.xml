@@ -12,13 +12,14 @@
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
             <search string="Search Master BOMs">
-                <!-- Left sidebar for Product Category filtering -->
-                <searchpanel>
-                    <field name="product_categ_id" string="Product Category" icon="fa-th-list" enable_counters="1" expand="1"/>
-                </searchpanel>
                 <field name="code" string="Reference"/>
                 <field name="product_tmpl_id" string="Product"/>
                 <field name="product_id" string="Product Variant"/>
+                <separator/>
+                <!-- Status filters (also available in dropdown) -->
+                <filter string="Pending Review" name="pending" domain="[('master_bom_status', '=', 'pending')]"/>
+                <filter string="Draft" name="draft" domain="[('master_bom_status', '=', 'draft')]"/>
+                <filter string="Active" name="active_status" domain="[('master_bom_status', '=', 'active')]"/>
                 <separator/>
                 <filter string="Normal" name="normal" domain="[('type', '=', 'normal')]"/>
                 <filter string="Kit" name="phantom" domain="[('type', '=', 'phantom')]"/>
@@ -27,18 +28,25 @@
                 <group>
                     <filter string="Product" name="group_product" context="{'group_by': 'product_tmpl_id'}"/>
                     <filter string="Product Category" name="group_categ" context="{'group_by': 'product_categ_id'}"/>
+                    <filter string="Status" name="group_status" context="{'group_by': 'master_bom_status'}"/>
                     <filter string="Created By" name="group_created_by" context="{'group_by': 'created_by_id'}"/>
                 </group>
+                <!-- Sidebar searchpanel -->
+                <searchpanel>
+                    <field name="master_bom_status" string="STATUS" select="one" enable_counters="1"/>
+                    <field name="product_categ_id" string="PRODUCT CATEGORY" select="one" enable_counters="1" icon="fa-folder" hierarchize="1"/>
+                </searchpanel>
             </search>
         </field>
     </record>
 
-    <!-- Action for Master BOMs only -->
+    <!-- Action for Master BOMs only (includes pending conversions) -->
     <record id="action_mrp_bom_master" model="ir.actions.act_window">
         <field name="name">Master BOMs</field>
         <field name="res_model">mrp.bom</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('is_master_bom', '=', True)]</field>
+        <!-- Show Master BOMs (is_master_bom=True) OR pending/draft conversions -->
+        <field name="domain">['|', ('is_master_bom', '=', True), ('master_bom_status', 'in', ['pending', 'draft'])]</field>
         <field name="context">{'default_type': 'normal'}</field>
         <field name="search_view_id" ref="mrp_bom_search_master"/>
         <field name="help" type="html">

@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Studio - Base',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Manufacturing/Manufacturing',
-    'summary': 'Master BOM with Categories & Material Selection (v1.0.0)',
+    'summary': 'Master BOM with Categories & Material Selection (v1.1.0)',
     'description': """
 VPA Production Studio - Base
 ============================
@@ -18,6 +18,7 @@ Key Features
 * **BOM Categories**: Classify raw materials (Paint, Hardwood, Hinges, etc.)
 * **Raw Material Flag**: Mark products as raw materials with category assignment
 * **Master BOM Template**: Create BOMs with Category + Description + Qty (no specific product)
+* **Convert to Master BOM**: Convert existing standard BOMs to Master BOMs with status workflow
 * **BOM Manager Security**: Only authorized users can create/edit BOMs
 * **Cost Visibility Control**: Hide costs from non-Accounting users
 * **Full Audit Trail**: Track all BOM changes with timestamps and users
@@ -27,7 +28,8 @@ Workflow
 1. Admin creates BOM Categories (Paint, Hardwood, Hinges, etc.)
 2. Products marked as "Raw Material" with assigned categories
 3. Master BOM created with Category + Description + UoM + Qty
-4. Workers select actual products from filtered category dropdown in MO
+4. OR convert existing standard BOM to Master BOM (draft -> pending -> active)
+5. Workers select actual products from filtered category dropdown in MO
 
 Part 1 of 4 - VPA Production Studio Suite
 -----------------------------------------
@@ -38,6 +40,7 @@ Part 1 of 4 - VPA Production Studio Suite
 
 Version History
 ---------------
+* **19.0.1.1.0** - Convert to Master BOM feature with status workflow (draft/pending/active)
 * **19.0.1.0.0** - Initial release with BOM Categories and Master BOM
 
 Developed by VPA Solutions Limited

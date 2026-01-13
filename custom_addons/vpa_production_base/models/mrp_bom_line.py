@@ -47,6 +47,18 @@ class MrpBomLine(models.Model):
              "Displayed on MO for worker reference.",
     )
 
+    # =========================================================================
+    # CONVERSION TRACKING
+    # =========================================================================
+    original_product_id = fields.Many2one(
+        'product.product',
+        string='Original Product',
+        readonly=True,
+        copy=False,
+        help="When this Master BOM was converted from a standard BOM, "
+             "this field stores the original product for reference.",
+    )
+
     # Override product_id to make it not required for sections/template lines
     # Domain is applied dynamically via onchange methods based on BOM type:
     # - Normal BOM: Show all products (standard Odoo behavior)

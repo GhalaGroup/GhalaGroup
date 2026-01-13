@@ -10,24 +10,62 @@
         <field name="model">mrp.bom</field>
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="arch" type="xml">
-            <!-- Add Revision Control and Master BOM Preview buttons before sheet -->
+            <!-- Add Revision Control, Master BOM Preview, and Conversion buttons before sheet -->
             <xpath expr="//sheet" position="before">
                 <header>
+                    <!-- Existing buttons -->
                     <button name="action_create_new_revision" string="Create New Revision"
                             type="object" class="btn-secondary"
                             groups="vpa_production_base.group_bom_manager"/>
                     <button name="%(action_report_master_bom_overview)d" string="Master BOM Preview"
                             type="action" class="btn-primary"
-                            invisible="not is_master_bom"
+                            invisible="not is_master_bom or master_bom_status != 'active'"
                             groups="vpa_production_base.group_bom_manager"/>
+
+                    <!-- Convert to Master BOM button -->
+                    <button name="action_convert_to_master_bom"
+                            string="Convert to Master BOM"
+                            type="object" class="btn-secondary"
+                            invisible="not can_convert_to_master"
+                            groups="vpa_production_base.group_bom_manager"
+                            confirm="This creates a new Master BOM copy. Continue?"/>
+
+                    <!-- Activate Master BOM button -->
+                    <button name="action_activate_master_bom"
+                            string="Activate Master BOM"
+                            type="object" class="btn-success"
+                            invisible="master_bom_status != 'pending'"
+                            groups="vpa_production_base.group_bom_manager"/>
+
+                    <!-- Set to Draft button -->
+                    <button name="action_set_draft"
+                            string="Set to Draft"
+                            type="object" class="btn-secondary"
+                            invisible="master_bom_status not in ('pending', 'active') or not is_master_bom"
+                            groups="vpa_production_base.group_bom_manager"/>
+
+                    <!-- Status bar for Master BOMs -->
+                    <field name="master_bom_status" widget="statusbar"
+                           statusbar_visible="draft,pending,active"
+                           invisible="not is_master_bom"/>
                 </header>
             </xpath>
 
-            <!-- Add Master BOM indicator -->
+            <!-- Add Master BOM indicators with status-based ribbons -->
             <xpath expr="//sheet" position="inside">
+                <!-- Active Master BOM ribbon -->
                 <widget name="web_ribbon" title="Master BOM" bg_color="text-bg-info"
-                        invisible="not is_master_bom"/>
+                        invisible="not is_master_bom or master_bom_status != 'active'"/>
+                <!-- Pending Master BOM ribbon -->
+                <widget name="web_ribbon" title="Pending Review" bg_color="text-bg-warning"
+                        invisible="not is_master_bom or master_bom_status != 'pending'"/>
+                <!-- Draft Master BOM ribbon -->
+                <widget name="web_ribbon" title="Draft" bg_color="text-bg-secondary"
+                        invisible="not is_master_bom or master_bom_status != 'draft'"/>
+                <!-- Hidden fields for visibility conditions -->
                 <field name="is_master_bom" invisible="1"/>
+                <field name="master_bom_status" invisible="1"/>
+                <field name="can_convert_to_master" invisible="1"/>
             </xpath>
 
             <!-- Replace BOM Reference with version including revision -->
@@ -56,15 +94,17 @@
                 </page>
             </xpath>
 
-            <!-- Add new fields to BOM lines (sections temporarily disabled) -->
+            <!-- Add new fields to BOM lines -->
             <xpath expr="//field[@name='bom_line_ids']//field[@name='product_id']" position="after">
                 <field name="bom_category_id" optional="show"/>
                 <field name="line_description" optional="hide"/>
+                <field name="original_product_id" optional="hide" readonly="1"
+                       column_invisible="parent.master_bom_status != 'pending'"/>
             </xpath>
         </field>
     </record>
 
-    <!-- Inherit BOM Tree View - Add Master BOM Column -->
+    <!-- Inherit BOM Tree View - Add Master BOM Column and Status -->
     <record id="mrp_bom_tree_view_inherit_vpa_production" model="ir.ui.view">
         <field name="name">mrp.bom.tree.inherit.vpa.production</field>
         <field name="model">mrp.bom</field>
@@ -72,8 +112,13 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='product_tmpl_id']" position="after">
                 <field name="is_master_bom" string="Master" optional="show" widget="boolean_toggle"/>
+                <field name="master_bom_status" string="Status" optional="show"
+                       decoration-warning="master_bom_status == 'pending'"
+                       decoration-muted="master_bom_status == 'draft'"
+                       widget="badge"/>
             </xpath>
             <xpath expr="//field[@name='product_qty']" position="after">
+                <field name="source_bom_id" optional="hide"/>
                 <field name="created_by_id" optional="hide"/>
                 <field name="last_modified_date" optional="hide"/>
             </xpath>
@@ -90,6 +135,11 @@
                 <separator/>
                 <filter string="Master BOMs" name="master_boms" domain="[('is_master_bom', '=', True)]"/>
                 <filter string="Standard BOMs" name="standard_boms" domain="[('is_master_bom', '=', False)]"/>
+                <separator/>
+                <filter string="Pending Review" name="pending_boms"
+                        domain="[('master_bom_status', '=', 'pending')]"/>
+                <filter string="Active Master BOMs" name="active_master_boms"
+                        domain="[('is_master_bom', '=', True), ('master_bom_status', '=', 'active')]"/>
             </xpath>
             <xpath expr="//group" position="inside">
                 <filter string="Created By" name="group_created_by" context="{'group_by': 'created_by_id'}"/>

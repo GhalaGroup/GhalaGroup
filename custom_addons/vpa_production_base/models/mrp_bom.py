@@ -78,6 +78,32 @@ class MrpBom(models.Model):
     )
 
     # =========================================================================
+    # MASTER BOM STATUS & CONVERSION TRACKING
+    # =========================================================================
+    master_bom_status = fields.Selection(
+        selection=[
+            ('draft', 'Draft'),
+            ('pending', 'Pending Review'),
+            ('active', 'Active'),
+        ],
+        string='Master BOM Status',
+        default='active',
+        tracking=True,
+        copy=False,
+        help="Status of the Master BOM:\n"
+             "- Draft: Work in progress\n"
+             "- Pending Review: Converted from standard BOM, needs category assignment\n"
+             "- Active: Ready for use in Manufacturing Orders",
+    )
+    source_bom_id = fields.Many2one(
+        'mrp.bom',
+        string='Source BOM',
+        readonly=True,
+        copy=False,
+        help="Original BOM this Master BOM was converted from",
+    )
+
+    # =========================================================================
     # COMPUTED FIELDS
     # =========================================================================
     is_master_bom = fields.Boolean(
@@ -85,6 +111,10 @@ class MrpBom(models.Model):
         compute='_compute_is_master_bom',
         store=True,
         help="True if this BOM has template lines (with categories, no specific products)",
+    )
+    can_convert_to_master = fields.Boolean(
+        compute='_compute_can_convert_to_master',
+        help="Technical field to show/hide Convert to Master BOM button",
     )
 
     @api.depends('bom_line_ids', 'bom_line_ids.bom_category_id', 'bom_line_ids.product_id')
@@ -94,6 +124,15 @@ class MrpBom(models.Model):
             bom.is_master_bom = any(
                 line.bom_category_id and not line.product_id
                 for line in bom.bom_line_ids
+            )
+
+    @api.depends('is_master_bom', 'bom_line_ids', 'bom_line_ids.product_id')
+    def _compute_can_convert_to_master(self):
+        """Can convert if: not already a Master BOM and has product lines."""
+        for bom in self:
+            bom.can_convert_to_master = (
+                not bom.is_master_bom
+                and bool(bom.bom_line_ids.filtered(lambda l: l.product_id and not l.display_type))
             )
 
     @api.depends('code', 'revision')
@@ -111,7 +150,7 @@ class MrpBom(models.Model):
             else:
                 bom.code_with_revision = False
 
-    @api.depends('code', 'revision', 'product_tmpl_id', 'is_master_bom')
+    @api.depends('code', 'revision', 'product_tmpl_id', 'is_master_bom', 'master_bom_status')
     def _compute_display_name(self):
         """Override display name to use cleaned code with revision and Master BOM indicator."""
         import re
@@ -136,6 +175,10 @@ class MrpBom(models.Model):
                     bom.display_name = name
             else:
                 bom.display_name = _("Bill of Materials")
+
+            # Add pending indicator for Master BOMs awaiting review
+            if bom.is_master_bom and bom.master_bom_status == 'pending':
+                bom.display_name = f"[PENDING] {bom.display_name}"
 
     # =========================================================================
     # OVERRIDES
@@ -209,3 +252,109 @@ class MrpBom(models.Model):
                 'sticky': False,
             }
         }
+
+    # =========================================================================
+    # MASTER BOM CONVERSION
+    # =========================================================================
+    def action_convert_to_master_bom(self):
+        """Convert this BOM to a Master BOM (creates a copy).
+
+        Creates a copy of the BOM with:
+        - Status set to 'pending'
+        - Each line's product stored in original_product_id
+        - product_id cleared (making it a template line)
+        - Code suffixed with '-MASTER'
+        - Revision reset to '1.0'
+        - Conversion logged in revision_history
+        """
+        self.ensure_one()
+
+        if self.is_master_bom:
+            from odoo.exceptions import UserError
+            raise UserError(_("This BOM is already a Master BOM."))
+
+        product_lines = self.bom_line_ids.filtered(lambda l: l.product_id and not l.display_type)
+        if not product_lines:
+            from odoo.exceptions import UserError
+            raise UserError(_("Cannot convert: BOM has no product lines."))
+
+        # Prepare new BOM values
+        new_code = f"{self.code}-MASTER" if self.code else False
+        user = self.env.user.name
+        date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+
+        # Copy BOM
+        new_bom = self.copy({
+            'code': new_code,
+            'master_bom_status': 'pending',
+            'source_bom_id': self.id,
+            'revision': '1.0',
+            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name}\n",
+        })
+
+        # Convert lines: store product in original_product_id, clear product_id
+        for line in new_bom.bom_line_ids:
+            if line.product_id and not line.display_type:
+                # Get category from line or from product
+                category = line.bom_category_id or line.product_id.product_tmpl_id.bom_category_id
+                line.write({
+                    'original_product_id': line.product_id.id,
+                    'bom_category_id': category.id if category else False,
+                    'product_id': False,
+                })
+
+        # Open the new Master BOM
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.bom',
+            'res_id': new_bom.id,
+            'view_mode': 'form',
+            'target': 'current',
+            'context': {'form_view_initial_mode': 'edit'},
+        }
+
+    def action_activate_master_bom(self):
+        """Activate the Master BOM after review.
+
+        Validates that all template lines have a bom_category_id assigned.
+        """
+        self.ensure_one()
+
+        if self.master_bom_status != 'pending':
+            from odoo.exceptions import UserError
+            raise UserError(_("Only pending Master BOMs can be activated."))
+
+        # Validation: All lines must have a category (except sections/notes)
+        lines_without_category = self.bom_line_ids.filtered(
+            lambda l: not l.product_id and not l.bom_category_id and not l.display_type
+        )
+        if lines_without_category:
+            from odoo.exceptions import ValidationError
+            raise ValidationError(_(
+                "Cannot activate: %d line(s) have no BOM Category assigned.\n"
+                "Please assign a category to all template lines before activating."
+            ) % len(lines_without_category))
+
+        user = self.env.user.name
+        date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
+
+        self.write({
+            'master_bom_status': 'active',
+            'revision_history': (self.revision_history or '') + f"  Activated: {date} by {user}\n",
+        })
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Master BOM Activated'),
+                'message': _('Master BOM %s is now active and ready for use.') % self.display_name,
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_set_draft(self):
+        """Set Master BOM back to draft status."""
+        self.ensure_one()
+        self.write({'master_bom_status': 'draft'})

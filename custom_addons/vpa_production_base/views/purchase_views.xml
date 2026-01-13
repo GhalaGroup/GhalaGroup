@@ -12,8 +12,8 @@
         <field name="inherit_id" ref="purchase.purchase_history_tree"/>
         <field name="priority">100</field>
         <field name="arch" type="xml">
-            <!-- Hide Unit Price column (field name is price_unit in older Odoo versions) -->
-            <xpath expr="//field[@name='price_unit']" position="attributes">
+            <!-- Hide Unit Price column (Odoo 19 uses price_unit_product_uom) -->
+            <xpath expr="//field[@name='price_unit_product_uom']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
             <!-- Hide Total Untaxed column -->
