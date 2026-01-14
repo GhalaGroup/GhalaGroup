@@ -278,13 +278,22 @@ class MrpBom(models.Model):
             from odoo.exceptions import UserError
             raise UserError(_("Cannot convert: BOM has no product lines."))
 
-        # Prepare new BOM values (keep same code as original)
+        # Prepare new BOM values
         user = self.env.user.name
         date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
 
+        # Use the product name as BOM code (not the internal reference)
+        product_code = ''
+        if self.product_id:
+            product_code = self.product_id.name
+        elif self.product_tmpl_id:
+            product_code = self.product_tmpl_id.name
+        else:
+            product_code = self.code or ''
+
         # Copy BOM
         new_bom = self.copy({
-            'code': self.code,  # Keep the same code as original
+            'code': product_code,  # Use product's default_code (e.g., HC-PORTMAN-DC)
             'master_bom_status': 'pending',
             'source_bom_id': self.id,
             'revision': '1.0',
