@@ -263,7 +263,7 @@ class MrpBom(models.Model):
         - Status set to 'pending'
         - Each line's product stored in original_product_id
         - product_id cleared (making it a template line)
-        - Code suffixed with '-MASTER'
+        - Same code as original BOM
         - Revision reset to '1.0'
         - Conversion logged in revision_history
         """
@@ -278,14 +278,13 @@ class MrpBom(models.Model):
             from odoo.exceptions import UserError
             raise UserError(_("Cannot convert: BOM has no product lines."))
 
-        # Prepare new BOM values
-        new_code = f"{self.code}-MASTER" if self.code else False
+        # Prepare new BOM values (keep same code as original)
         user = self.env.user.name
         date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
 
         # Copy BOM
         new_bom = self.copy({
-            'code': new_code,
+            'code': self.code,  # Keep the same code as original
             'master_bom_status': 'pending',
             'source_bom_id': self.id,
             'revision': '1.0',
