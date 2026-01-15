@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Studio - Manufacturing',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Manufacturing/Manufacturing',
-    'summary': 'Manufacturing Orders with Template BOM Support (v1.0.0)',
+    'summary': 'Manufacturing Orders with Template BOM Support (v1.1.0)',
     'description': """
 VPA Production Manufacturing
 ============================
@@ -19,6 +19,7 @@ Key Features
 * **Variance Tracking**: Track Master BOM Qty vs Physical Qty Used with auto-calculated variance
 * **Flexible Workflow**: Select products before confirmation or during production
 * **Validation**: MO cannot be completed until all template lines have actual products
+* **Master BOMs Menu**: Dedicated menu with searchpanel for STATUS and PRODUCT CATEGORY filtering
 
 Variance Tracking Columns
 -------------------------
@@ -28,6 +29,7 @@ Variance Tracking Columns
 
 Version History
 ---------------
+* **19.0.1.1.0** - Enhanced Master BOMs menu with searchpanel (status/category filtering)
 * **19.0.1.0.0** - Initial release with variance tracking and template line support
 
 Developed by VPA Solutions Limited

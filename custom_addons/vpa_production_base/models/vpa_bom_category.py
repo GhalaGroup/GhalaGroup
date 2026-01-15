@@ -74,7 +74,6 @@ class VpaBomCategory(models.Model):
     )
     parent_path = fields.Char(
         index=True,
-        unaccent=False,
     )
     child_ids = fields.One2many(
         'vpa.bom.category',

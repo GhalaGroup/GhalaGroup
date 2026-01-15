@@ -27,7 +27,7 @@
         </xpath>
 
         <!-- Extend quantity column to add yellow styling for template lines -->
-        <xpath expr="//td[@class='text-end']" position="attributes">
+        <xpath expr="//td[hasclass('text-end')]" position="attributes">
             <attribute name="t-attf-class">text-end {{l.get('type') == 'template' and 'table-warning' or ''}}</attribute>
             <attribute name="t-attf-style">{{l.get('type') == 'template' and 'background-color: #fff3cd !important; padding: 8px;' or 'padding: 8px;'}}</attribute>
         </xpath>

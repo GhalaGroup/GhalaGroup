@@ -28,6 +28,14 @@ class ProductTemplate(models.Model):
         help="The primary alternative unit of measure for display purposes.",
     )
 
+    # Char field for display in list views (workaround for Odoo 19 optional column issues)
+    primary_alt_uom_name = fields.Char(
+        string='Alt. UoM',
+        related='primary_alt_uom_id.name',
+        store=True,
+        readonly=True,
+    )
+
     # Computed quantities in alternative UoM
     qty_available_alt = fields.Float(
         string='On Hand (Alt. UoM)',
@@ -198,6 +206,14 @@ class ProductProduct(models.Model):
         string='Primary Alt. UoM',
         related='product_tmpl_id.primary_alt_uom_id',
         store=True,
+    )
+
+    # Char field for display in list views (workaround for Odoo 19 optional column issues)
+    primary_alt_uom_name = fields.Char(
+        string='Alt. UoM',
+        related='primary_alt_uom_id.name',
+        store=True,
+        readonly=True,
     )
 
     # Computed quantity in alternative UoM

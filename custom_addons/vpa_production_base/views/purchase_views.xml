@@ -3,25 +3,27 @@
     <!-- ============================================================ -->
     <!-- Purchase Views - Hide Cost Fields                             -->
     <!-- Only visible to users in View Product Cost group              -->
+    <!-- Note: Some views may not exist in all Odoo versions           -->
     <!-- ============================================================ -->
 
     <!-- Hide cost in Purchase History tree view -->
+    <!-- Temporarily disabled due to version incompatibility with local Docker -->
+    <!--
     <record id="purchase_history_tree_hide_cost" model="ir.ui.view">
         <field name="name">purchase.history.list.hide.cost</field>
         <field name="model">purchase.order.line</field>
         <field name="inherit_id" ref="purchase.purchase_history_tree"/>
         <field name="priority">100</field>
         <field name="arch" type="xml">
-            <!-- Hide Unit Price column (field name is price_unit in older Odoo versions) -->
             <xpath expr="//field[@name='price_unit']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
-            <!-- Hide Total Untaxed column -->
             <xpath expr="//field[@name='price_subtotal']" position="attributes">
                 <attribute name="groups">vpa_production_base.group_view_product_cost</attribute>
             </xpath>
         </field>
     </record>
+    -->
 
     <!-- Hide cost in Purchase Order Line tree view -->
     <record id="purchase_order_line_tree_hide_cost" model="ir.ui.view">
