@@ -332,6 +332,7 @@ class MrpBom(models.Model):
         """Activate the Master BOM after review.
 
         Validates that all template lines have a bom_category_id assigned.
+        Automatically deactivates any existing active Master BOM for the same product/variant.
         """
         self.ensure_one()
 
@@ -350,6 +351,37 @@ class MrpBom(models.Model):
                 "Please assign a category to all template lines before activating."
             ) % len(lines_without_category))
 
+        # Check for existing active Master BOM for the same product/variant
+        # Build domain to find existing Master BOMs
+        if self.product_id:
+            # Variant-specific BOM: check for other variant-specific Master BOMs
+            domain = [
+                ('id', '!=', self.id),
+                ('product_id', '=', self.product_id.id),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+            ]
+        else:
+            # Template-level BOM: check for other template-level Master BOMs
+            domain = [
+                ('id', '!=', self.id),
+                ('product_tmpl_id', '=', self.product_tmpl_id.id),
+                ('product_id', '=', False),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+            ]
+
+        existing_master_boms = self.search(domain)
+
+        # Deactivate existing Master BOMs
+        if existing_master_boms:
+            for old_bom in existing_master_boms:
+                old_bom.write({
+                    'master_bom_status': 'inactive',
+                    'revision_history': (old_bom.revision_history or '') +
+                                       f"  Deactivated: {fields.Datetime.now().strftime('%Y-%m-%d %H:%M')} by {self.env.user.name} (replaced by {self.display_name})\n",
+                })
+
         user = self.env.user.name
         date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
 
@@ -358,12 +390,16 @@ class MrpBom(models.Model):
             'revision_history': (self.revision_history or '') + f"  Activated: {date} by {user}\n",
         })
 
+        message = _('Master BOM %s is now active and ready for use.') % self.display_name
+        if existing_master_boms:
+            message += _('\n\nPrevious Master BOM(s) automatically deactivated: %s') % ', '.join(existing_master_boms.mapped('display_name'))
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Master BOM Activated'),
-                'message': _('Master BOM %s is now active and ready for use.') % self.display_name,
+                'message': message,
                 'type': 'success',
                 'sticky': False,
             }
