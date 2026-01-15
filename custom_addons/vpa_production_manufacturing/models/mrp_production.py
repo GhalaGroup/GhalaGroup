@@ -354,3 +354,21 @@ class MrpProduction(models.Model):
                     ) % '\n'.join(move_names))
 
         return super().button_mark_done()
+
+    @api.onchange('product_id')
+    def _onchange_product_id_auto_select_master_bom(self):
+        """Automatically select the Master BOM when product is chosen.
+
+        If product has multiple BOMs, prefer the active Master BOM.
+        """
+        if self.product_id:
+            # Find active Master BOM for this product
+            master_bom = self.env['mrp.bom'].search([
+                ('product_tmpl_id', '=', self.product_id.product_tmpl_id.id),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+                ('active', '=', True),
+            ], limit=1)
+
+            if master_bom:
+                self.bom_id = master_bom

@@ -291,24 +291,31 @@ class MrpBom(models.Model):
         else:
             product_code = self.code or ''
 
-        # Copy BOM
+        # Calculate scaling factor to normalize to 1 unit
+        scaling_factor = 1.0 / self.product_qty if self.product_qty else 1.0
+
+        # Copy BOM with normalized quantity (1.0)
         new_bom = self.copy({
             'code': product_code,  # Use product's default_code (e.g., HC-PORTMAN-DC)
             'master_bom_status': 'pending',
             'source_bom_id': self.id,
             'revision': '1.0',
-            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name}\n",
+            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name} (normalized to 1 unit)\n",
+            'product_qty': 1.0,  # Normalize to 1 unit
         })
 
-        # Convert lines: store product in original_product_id, clear product_id
+        # Convert lines: store product in original_product_id, clear product_id, scale quantities
         for line in new_bom.bom_line_ids:
             if line.product_id and not line.display_type:
                 # Get category from line or from product
                 category = line.bom_category_id or line.product_id.product_tmpl_id.bom_category_id
+                # Scale the line quantity to match normalized BOM quantity
+                normalized_qty = line.product_qty * scaling_factor
                 line.write({
                     'original_product_id': line.product_id.id,
                     'bom_category_id': category.id if category else False,
                     'product_id': False,
+                    'product_qty': normalized_qty,  # Scale quantity to match 1 unit of finished product
                 })
 
         # Open the new Master BOM
