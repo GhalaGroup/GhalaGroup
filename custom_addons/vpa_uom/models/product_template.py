@@ -32,7 +32,6 @@ class ProductTemplate(models.Model):
     primary_alt_uom_name = fields.Char(
         string='Alt. UoM',
         related='primary_alt_uom_id.name',
-        store=True,
         readonly=True,
     )
 
@@ -212,7 +211,6 @@ class ProductProduct(models.Model):
     primary_alt_uom_name = fields.Char(
         string='Alt. UoM',
         related='primary_alt_uom_id.name',
-        store=True,
         readonly=True,
     )
 
