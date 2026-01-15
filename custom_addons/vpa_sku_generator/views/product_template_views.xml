@@ -28,7 +28,7 @@
         </field>
     </record>
 
-    <!-- Product Variant List View - Add SKU Actions -->
+    <!-- Product Variant List View - Add SKU Actions and Alt UoM -->
     <record id="product_product_tree_view_sku_actions" model="ir.ui.view">
         <field name="name">product.product.tree.sku.actions</field>
         <field name="model">product.product</field>
@@ -79,6 +79,7 @@
                 <field name="qty_available" optional="show" readonly="1" sum="Total On Hand" string="On Hand"/>
                 <field name="virtual_available" optional="hide" readonly="1" string="Forecasted"/>
                 <field name="uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" optional="show"/>
+                <field name="primary_alt_uom_name" string="Alt. UoM" optional="show"/>
                 <field name="product_tag_ids" widget="many2many_tags" optional="hide"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </list>

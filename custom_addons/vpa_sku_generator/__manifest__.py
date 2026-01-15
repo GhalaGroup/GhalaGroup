@@ -47,6 +47,7 @@ Support: info@vpa.co.tz
     'depends': [
         'product',
         'stock',
+        'vpa_uom',
     ],
     'data': [
         'security/vpa_sku_generator_security.xml',
