@@ -409,3 +409,24 @@ class MrpBom(models.Model):
         """Set Master BOM back to draft status."""
         self.ensure_one()
         self.write({'master_bom_status': 'draft'})
+
+    def action_submit_for_review(self):
+        """Submit Draft Master BOM for review (moves to Pending status)."""
+        self.ensure_one()
+
+        if self.master_bom_status != 'draft':
+            from odoo.exceptions import UserError
+            raise UserError(_("Only Draft Master BOMs can be submitted for review."))
+
+        self.write({'master_bom_status': 'pending'})
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Submitted for Review'),
+                'message': _('Master BOM %s is now pending review. Assign categories to all template lines before activating.') % self.display_name,
+                'type': 'success',
+                'sticky': False,
+            }
+        }

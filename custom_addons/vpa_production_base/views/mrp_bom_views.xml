@@ -30,14 +30,21 @@
                             groups="vpa_production_base.group_bom_manager"
                             confirm="This creates a new Master BOM copy. Continue?"/>
 
-                    <!-- Activate Master BOM button -->
+                    <!-- Submit for Review button (Draft → Pending) -->
+                    <button name="action_submit_for_review"
+                            string="Submit for Review"
+                            type="object" class="btn-primary"
+                            invisible="master_bom_status != 'draft'"
+                            groups="vpa_production_base.group_bom_manager"/>
+
+                    <!-- Activate Master BOM button (Pending → Active) -->
                     <button name="action_activate_master_bom"
                             string="Activate Master BOM"
                             type="object" class="btn-success"
                             invisible="master_bom_status != 'pending'"
                             groups="vpa_production_base.group_bom_manager"/>
 
-                    <!-- Set to Draft button -->
+                    <!-- Set to Draft button (Pending/Active → Draft) -->
                     <button name="action_set_draft"
                             string="Set to Draft"
                             type="object" class="btn-secondary"
