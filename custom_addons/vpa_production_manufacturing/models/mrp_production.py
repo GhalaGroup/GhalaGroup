@@ -354,3 +354,33 @@ class MrpProduction(models.Model):
                     ) % '\n'.join(move_names))
 
         return super().button_mark_done()
+
+    @api.onchange('product_id')
+    def _onchange_product_id_auto_select_master_bom(self):
+        """Automatically select the Master BOM when product is chosen.
+
+        Priority order:
+        1. Variant-specific Master BOM (product_id matches)
+        2. Template-level Master BOM (product_id is False)
+        """
+        if self.product_id:
+            # First, try to find variant-specific Master BOM
+            master_bom = self.env['mrp.bom'].search([
+                ('product_id', '=', self.product_id.id),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+                ('active', '=', True),
+            ], limit=1)
+
+            # If no variant-specific BOM, look for template-level Master BOM
+            if not master_bom:
+                master_bom = self.env['mrp.bom'].search([
+                    ('product_tmpl_id', '=', self.product_id.product_tmpl_id.id),
+                    ('product_id', '=', False),  # Template-level BOM (applies to all variants)
+                    ('is_master_bom', '=', True),
+                    ('master_bom_status', '=', 'active'),
+                    ('active', '=', True),
+                ], limit=1)
+
+            if master_bom:
+                self.bom_id = master_bom

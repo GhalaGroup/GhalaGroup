@@ -291,24 +291,31 @@ class MrpBom(models.Model):
         else:
             product_code = self.code or ''
 
-        # Copy BOM
+        # Calculate scaling factor to normalize to 1 unit
+        scaling_factor = 1.0 / self.product_qty if self.product_qty else 1.0
+
+        # Copy BOM with normalized quantity (1.0)
         new_bom = self.copy({
             'code': product_code,  # Use product's default_code (e.g., HC-PORTMAN-DC)
             'master_bom_status': 'pending',
             'source_bom_id': self.id,
             'revision': '1.0',
-            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name}\n",
+            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name} (normalized to 1 unit)\n",
+            'product_qty': 1.0,  # Normalize to 1 unit
         })
 
-        # Convert lines: store product in original_product_id, clear product_id
+        # Convert lines: store product in original_product_id, clear product_id, scale quantities
         for line in new_bom.bom_line_ids:
             if line.product_id and not line.display_type:
                 # Get category from line or from product
                 category = line.bom_category_id or line.product_id.product_tmpl_id.bom_category_id
+                # Scale the line quantity to match normalized BOM quantity
+                normalized_qty = line.product_qty * scaling_factor
                 line.write({
                     'original_product_id': line.product_id.id,
                     'bom_category_id': category.id if category else False,
                     'product_id': False,
+                    'product_qty': normalized_qty,  # Scale quantity to match 1 unit of finished product
                 })
 
         # Open the new Master BOM
@@ -325,6 +332,7 @@ class MrpBom(models.Model):
         """Activate the Master BOM after review.
 
         Validates that all template lines have a bom_category_id assigned.
+        Automatically deactivates any existing active Master BOM for the same product/variant.
         """
         self.ensure_one()
 
@@ -343,6 +351,37 @@ class MrpBom(models.Model):
                 "Please assign a category to all template lines before activating."
             ) % len(lines_without_category))
 
+        # Check for existing active Master BOM for the same product/variant
+        # Build domain to find existing Master BOMs
+        if self.product_id:
+            # Variant-specific BOM: check for other variant-specific Master BOMs
+            domain = [
+                ('id', '!=', self.id),
+                ('product_id', '=', self.product_id.id),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+            ]
+        else:
+            # Template-level BOM: check for other template-level Master BOMs
+            domain = [
+                ('id', '!=', self.id),
+                ('product_tmpl_id', '=', self.product_tmpl_id.id),
+                ('product_id', '=', False),
+                ('is_master_bom', '=', True),
+                ('master_bom_status', '=', 'active'),
+            ]
+
+        existing_master_boms = self.search(domain)
+
+        # Deactivate existing Master BOMs
+        if existing_master_boms:
+            for old_bom in existing_master_boms:
+                old_bom.write({
+                    'master_bom_status': 'inactive',
+                    'revision_history': (old_bom.revision_history or '') +
+                                       f"  Deactivated: {fields.Datetime.now().strftime('%Y-%m-%d %H:%M')} by {self.env.user.name} (replaced by {self.display_name})\n",
+                })
+
         user = self.env.user.name
         date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
 
@@ -351,12 +390,16 @@ class MrpBom(models.Model):
             'revision_history': (self.revision_history or '') + f"  Activated: {date} by {user}\n",
         })
 
+        message = _('Master BOM %s is now active and ready for use.') % self.display_name
+        if existing_master_boms:
+            message += _('\n\nPrevious Master BOM(s) automatically deactivated: %s') % ', '.join(existing_master_boms.mapped('display_name'))
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Master BOM Activated'),
-                'message': _('Master BOM %s is now active and ready for use.') % self.display_name,
+                'message': message,
                 'type': 'success',
                 'sticky': False,
             }
