@@ -428,5 +428,6 @@ class MrpBom(models.Model):
                 'message': _('Master BOM %s is now pending review. Assign categories to all template lines before activating.') % self.display_name,
                 'type': 'success',
                 'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
             }
         }
