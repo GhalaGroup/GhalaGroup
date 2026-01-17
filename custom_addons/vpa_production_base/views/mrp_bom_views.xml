@@ -79,7 +79,9 @@
             <xpath expr="//field[@name='code']" position="replace">
                 <field name="code" invisible="1"/>
                 <field name="code_with_revision" string="Reference" readonly="1"/>
-                <field name="revision" invisible="1"/>
+                <field name="revision" string="Revision"
+                       readonly="master_bom_status not in ('draft', 'pending') or not is_master_bom"
+                       help="Auto-suggested revision number. You can edit this before activating the Master BOM."/>
             </xpath>
 
             <!-- Add audit info at the end of notebook -->
@@ -95,9 +97,8 @@
                             <field name="last_modified_date" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Revision History" name="revision_history" invisible="not revision_history">
-                        <field name="revision_history" nolabel="1" readonly="1" widget="text"/>
-                    </group>
+                    <separator string="Revision History" invisible="not revision_history_html"/>
+                    <field name="revision_history_html" nolabel="1" readonly="1" invisible="not revision_history_html" colspan="4"/>
                 </page>
             </xpath>
 
@@ -117,6 +118,12 @@
         <field name="model">mrp.bom</field>
         <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
         <field name="arch" type="xml">
+            <!-- Replace code field with code_with_revision to show revision in list -->
+            <xpath expr="//field[@name='code']" position="replace">
+                <field name="code" invisible="1"/>
+                <field name="code_with_revision" string="Reference"/>
+            </xpath>
+
             <xpath expr="//field[@name='product_tmpl_id']" position="after">
                 <field name="is_master_bom" string="Master" optional="show" widget="boolean_toggle"/>
                 <field name="master_bom_status" string="Status" optional="show"
