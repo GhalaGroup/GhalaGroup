@@ -3,6 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class MrpBom(models.Model):
@@ -70,6 +71,12 @@ class MrpBom(models.Model):
         copy=False,
         help="History of all BOM revisions with dates and users",
     )
+    revision_history_html = fields.Html(
+        string='Revision History (Formatted)',
+        compute='_compute_revision_history_html',
+        sanitize=False,
+        help="Formatted HTML version of revision history for display",
+    )
     code_with_revision = fields.Char(
         string='Reference with Revision',
         compute='_compute_code_with_revision',
@@ -85,6 +92,7 @@ class MrpBom(models.Model):
             ('draft', 'Draft'),
             ('pending', 'Pending Review'),
             ('active', 'Active'),
+            ('inactive', 'Inactive'),
         ],
         string='Master BOM Status',
         default='active',
@@ -93,7 +101,8 @@ class MrpBom(models.Model):
         help="Status of the Master BOM:\n"
              "- Draft: Work in progress\n"
              "- Pending Review: Converted from standard BOM, needs category assignment\n"
-             "- Active: Ready for use in Manufacturing Orders",
+             "- Active: Ready for use in Manufacturing Orders\n"
+             "- Inactive: Deactivated/replaced by another Master BOM",
     )
     source_bom_id = fields.Many2one(
         'mrp.bom',
@@ -119,12 +128,74 @@ class MrpBom(models.Model):
 
     @api.depends('bom_line_ids', 'bom_line_ids.bom_category_id', 'bom_line_ids.product_id')
     def _compute_is_master_bom(self):
-        """A Master BOM has at least one line with category but no product."""
+        """A Master BOM has at least one line with category but no product.
+
+        When a BOM becomes a Master BOM (by adding template lines), auto-calculate
+        the revision number based on existing Master BOMs for the same product.
+        """
         for bom in self:
-            bom.is_master_bom = any(
+            has_template_line = any(
                 line.bom_category_id and not line.product_id
                 for line in bom.bom_line_ids
             )
+
+            # Check if BOM is BECOMING a Master BOM by reading stored value from DB
+            was_master = False
+            if bom.id:
+                self.env.cr.execute(
+                    "SELECT is_master_bom, revision FROM mrp_bom WHERE id = %s",
+                    (bom.id,)
+                )
+                result = self.env.cr.fetchone()
+                if result:
+                    was_master = result[0] or False
+                    stored_revision = result[1] or '1.0'
+                else:
+                    stored_revision = '1.0'
+            else:
+                stored_revision = '1.0'
+
+            bom.is_master_bom = has_template_line
+
+            # Auto-increment revision when BOM BECOMES a Master BOM
+            # Only if revision is still default "1.0" and BOM exists in DB
+            if has_template_line and not was_master and bom.id and stored_revision == '1.0':
+                # Determine next revision number by checking existing Master BOMs
+                if bom.product_id:
+                    existing_boms = self.search([
+                        ('product_id', '=', bom.product_id.id),
+                        ('is_master_bom', '=', True),
+                        ('id', '!=', bom.id),
+                    ])
+                elif bom.product_tmpl_id:
+                    existing_boms = self.search([
+                        ('product_tmpl_id', '=', bom.product_tmpl_id.id),
+                        ('product_id', '=', False),
+                        ('is_master_bom', '=', True),
+                        ('id', '!=', bom.id),
+                    ])
+                else:
+                    existing_boms = self.env['mrp.bom']
+
+                if existing_boms:
+                    # Get the highest revision number and increment
+                    max_revision = 0.0
+                    for existing_bom in existing_boms:
+                        try:
+                            rev = float(existing_bom.revision)
+                            if rev > max_revision:
+                                max_revision = rev
+                        except (ValueError, TypeError):
+                            continue
+
+                    next_revision = f"{max_revision + 1.0:.1f}"
+                    # Use SQL to avoid recursion (write triggers compute again)
+                    self.env.cr.execute(
+                        "UPDATE mrp_bom SET revision = %s WHERE id = %s",
+                        (next_revision, bom.id)
+                    )
+                    # Invalidate cache so the new revision is visible
+                    bom.invalidate_recordset(['revision'])
 
     @api.depends('is_master_bom', 'bom_line_ids', 'bom_line_ids.product_id')
     def _compute_can_convert_to_master(self):
@@ -149,6 +220,103 @@ class MrpBom(models.Model):
                     bom.code_with_revision = clean_code
             else:
                 bom.code_with_revision = False
+
+    @api.depends('revision_history')
+    def _compute_revision_history_html(self):
+        """Convert plain text revision history to formatted HTML timeline.
+
+        Uses theme-aware colors that work in both light and dark modes.
+        """
+        import re
+        for bom in self:
+            if not bom.revision_history:
+                bom.revision_history_html = False
+                continue
+
+            # Group entries by revision
+            revisions = []
+            current_revision = None
+            lines = bom.revision_history.strip().split('\n')
+
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # Main revision line: "Rev X.X - YYYY-MM-DD HH:MM by User"
+                rev_match = re.match(r'^Rev\s+(\d+\.\d+)\s*-\s*(.+?)\s+by\s+(.+)$', line)
+                if rev_match:
+                    if current_revision:
+                        revisions.append(current_revision)
+                    current_revision = {
+                        'number': rev_match.group(1),
+                        'date': rev_match.group(2),
+                        'user': rev_match.group(3),
+                        'actions': []
+                    }
+                elif current_revision:
+                    current_revision['actions'].append(line)
+
+            if current_revision:
+                revisions.append(current_revision)
+
+            # Build timeline HTML with theme-aware styles
+            html = '''
+            <div class="revision-history-container" style="padding: 8px 0;">
+                <table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--o-border-color, rgba(0,0,0,0.1));">
+                            <th style="text-align: left; padding: 10px 12px; font-weight: 600; opacity: 0.7; width: 90px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Rev</th>
+                            <th style="text-align: left; padding: 10px 12px; font-weight: 600; opacity: 0.7; width: 160px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Date</th>
+                            <th style="text-align: left; padding: 10px 12px; font-weight: 600; opacity: 0.7; width: 140px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Author</th>
+                            <th style="text-align: left; padding: 10px 12px; font-weight: 600; opacity: 0.7; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            '''
+
+            for i, rev in enumerate(revisions):
+                # Format actions with theme-aware badges
+                actions_html = ''
+                for action in rev['actions']:
+                    if action.startswith('Activated:'):
+                        # Green badge - works in both themes
+                        actions_html += f'<span style="display: inline-block; padding: 3px 10px; margin: 2px 4px 2px 0; background: rgba(40, 167, 69, 0.15); color: #28a745; border-radius: 12px; font-size: 11px; font-weight: 500;">✓ Activated</span>'
+                    elif action.startswith('Deactivated:'):
+                        # Red badge
+                        actions_html += f'<span style="display: inline-block; padding: 3px 10px; margin: 2px 4px 2px 0; background: rgba(220, 53, 69, 0.15); color: #dc3545; border-radius: 12px; font-size: 11px; font-weight: 500;">✕ Deactivated</span>'
+                    elif action.startswith('Converted from:'):
+                        # Blue badge
+                        actions_html += f'<span style="display: inline-block; padding: 3px 10px; margin: 2px 4px 2px 0; background: rgba(23, 162, 184, 0.15); color: #17a2b8; border-radius: 12px; font-size: 11px; font-weight: 500;">↳ Converted</span>'
+                    else:
+                        actions_html += f'<span style="display: inline-block; padding: 3px 10px; margin: 2px 4px 2px 0; opacity: 0.6; font-size: 11px;">{action}</span>'
+
+                if not actions_html:
+                    actions_html = '<span style="opacity: 0.5; font-style: italic; font-size: 11px;">Initial version</span>'
+
+                # Row with subtle hover effect via border
+                html += f'''
+                        <tr style="border-bottom: 1px solid var(--o-border-color, rgba(0,0,0,0.05));">
+                            <td style="padding: 12px; vertical-align: middle;">
+                                <span style="display: inline-block; padding: 4px 10px; background: #714B67; color: white; border-radius: 4px; font-weight: 600; font-size: 12px; min-width: 36px; text-align: center;">
+                                    {rev['number']}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; font-size: 13px; vertical-align: middle; opacity: 0.8;">{rev['date']}</td>
+                            <td style="padding: 12px; font-size: 13px; vertical-align: middle;">
+                                <span style="color: #714B67; font-weight: 500;">{rev['user']}</span>
+                            </td>
+                            <td style="padding: 12px; vertical-align: middle;">{actions_html}</td>
+                        </tr>
+                '''
+
+            html += '''
+                    </tbody>
+                </table>
+            </div>
+            '''
+
+            bom.revision_history_html = html
 
     @api.depends('code', 'revision', 'product_tmpl_id', 'is_master_bom', 'master_bom_status')
     def _compute_display_name(self):
@@ -181,17 +349,86 @@ class MrpBom(models.Model):
                 bom.display_name = f"[PENDING] {bom.display_name}"
 
     # =========================================================================
+    # VALIDATION
+    # =========================================================================
+    def _check_unique_revision(self):
+        """Validate that revision is unique for Master BOMs of the same product."""
+        for bom in self:
+            if not bom.is_master_bom or not bom.revision:
+                continue
+
+            # Build domain to find other Master BOMs with same revision
+            domain = [
+                ('is_master_bom', '=', True),
+                ('revision', '=', bom.revision),
+                ('id', '!=', bom.id),
+            ]
+
+            # Check for variant-specific or template-level BOM
+            if bom.product_id:
+                domain.append(('product_id', '=', bom.product_id.id))
+            else:
+                domain.extend([
+                    ('product_tmpl_id', '=', bom.product_tmpl_id.id),
+                    ('product_id', '=', False),
+                ])
+
+            # Search for duplicates
+            duplicate = self.search(domain, limit=1)
+            if duplicate:
+                product_name = bom.product_id.display_name if bom.product_id else bom.product_tmpl_id.display_name
+                raise ValidationError(
+                    _("A Master BOM with revision %s already exists for %s.\n\n"
+                      "Please use a different revision number.") % (bom.revision, product_name)
+                )
+
+    # =========================================================================
     # OVERRIDES
     # =========================================================================
     def write(self, vals):
         """Track modifications in audit fields and clean code field."""
+        import re
+
         vals['last_modified_by_id'] = self.env.user.id
         vals['last_modified_date'] = fields.Datetime.now()
 
         # Clean the code field if it contains "(new)" suffix
         if 'code' in vals and vals['code']:
-            import re
             vals['code'] = re.sub(r'\s*\(new\)\s*\d*', '', vals['code']).strip()
+
+        # Auto-calculate revision when converting a BOM to Master BOM
+        # (checking the "Master BOM" checkbox on an existing BOM)
+        if vals.get('is_master_bom') and 'revision' not in vals:
+            for bom in self:
+                if not bom.is_master_bom:  # Only for BOMs being converted TO master
+                    # Determine next revision number
+                    if bom.product_id:
+                        existing_boms = self.search([
+                            ('product_id', '=', bom.product_id.id),
+                            ('is_master_bom', '=', True),
+                        ])
+                    elif bom.product_tmpl_id:
+                        existing_boms = self.search([
+                            ('product_tmpl_id', '=', bom.product_tmpl_id.id),
+                            ('product_id', '=', False),
+                            ('is_master_bom', '=', True),
+                        ])
+                    else:
+                        existing_boms = self.env['mrp.bom']
+
+                    # Get the highest revision and increment
+                    max_revision = 0.0
+                    for existing_bom in existing_boms:
+                        try:
+                            rev = float(existing_bom.revision)
+                            if rev > max_revision:
+                                max_revision = rev
+                        except (ValueError, TypeError):
+                            continue
+
+                    next_revision = f"{max_revision + 1.0:.1f}"
+                    vals['revision'] = next_revision
+                    break  # Only update revision once for batch writes
 
         result = super().write(vals)
 
@@ -199,16 +436,54 @@ class MrpBom(models.Model):
         if 'code' in vals or 'revision' in vals:
             self._compute_display_name()
 
+        # Validate revision uniqueness if revision was updated
+        if 'revision' in vals:
+            self._check_unique_revision()
+
         return result
 
     @api.model_create_multi
     def create(self, vals_list):
         """Ensure created_by and created_date are set and clean code field."""
         import re
+
         for vals in vals_list:
             vals.setdefault('created_by_id', self.env.user.id)
             vals.setdefault('created_date', fields.Datetime.now())
-            vals.setdefault('revision', '1.0')
+
+            # Auto-calculate revision for Master BOMs if not explicitly set
+            if vals.get('is_master_bom') and 'revision' not in vals:
+                # Determine next revision number by checking existing Master BOMs
+                if vals.get('product_id'):
+                    # Variant-specific BOM
+                    existing_boms = self.search([
+                        ('product_id', '=', vals['product_id']),
+                        ('is_master_bom', '=', True),
+                    ])
+                elif vals.get('product_tmpl_id'):
+                    # Template-level BOM
+                    existing_boms = self.search([
+                        ('product_tmpl_id', '=', vals['product_tmpl_id']),
+                        ('product_id', '=', False),
+                        ('is_master_bom', '=', True),
+                    ])
+                else:
+                    existing_boms = self.env['mrp.bom']
+
+                # Get the highest revision number and increment
+                max_revision = 0.0
+                for bom in existing_boms:
+                    try:
+                        rev = float(bom.revision)
+                        if rev > max_revision:
+                            max_revision = rev
+                    except (ValueError, TypeError):
+                        continue
+
+                next_revision = f"{max_revision + 1.0:.1f}"
+                vals['revision'] = next_revision
+            else:
+                vals.setdefault('revision', '1.0')
 
             # Clean the code field if it contains "(new)" suffix
             if 'code' in vals and vals['code']:
@@ -294,14 +569,46 @@ class MrpBom(models.Model):
         # Calculate scaling factor to normalize to 1 unit
         scaling_factor = 1.0 / self.product_qty if self.product_qty else 1.0
 
+        # Determine next revision number by checking existing Master BOMs
+        if self.product_id:
+            # Variant-specific BOM
+            existing_boms = self.search([
+                ('product_id', '=', self.product_id.id),
+                ('is_master_bom', '=', True),
+            ])
+        else:
+            # Template-level BOM
+            existing_boms = self.search([
+                ('product_tmpl_id', '=', self.product_tmpl_id.id),
+                ('product_id', '=', False),
+                ('is_master_bom', '=', True),
+            ])
+
+        # Get the highest revision number and increment
+        max_revision = 0.0
+        for bom in existing_boms:
+            try:
+                rev = float(bom.revision)
+                if rev > max_revision:
+                    max_revision = rev
+            except (ValueError, TypeError):
+                continue
+
+        next_revision = f"{max_revision + 1.0:.1f}"
+
         # Copy BOM with normalized quantity (1.0)
+        # First copy without revision (copy=False field will be skipped)
         new_bom = self.copy({
             'code': product_code,  # Use product's default_code (e.g., HC-PORTMAN-DC)
             'master_bom_status': 'pending',
             'source_bom_id': self.id,
-            'revision': '1.0',
-            'revision_history': f"Rev 1.0 - {date} by {user}\n  Converted from: {self.display_name} (normalized to 1 unit)\n",
             'product_qty': 1.0,  # Normalize to 1 unit
+        })
+
+        # Then update revision explicitly (avoids copy=False issue)
+        new_bom.write({
+            'revision': next_revision,
+            'revision_history': f"Rev {next_revision} - {date} by {user}\n  Converted from: {self.display_name} (normalized to 1 unit)\n",
         })
 
         # Convert lines: store product in original_product_id, clear product_id, scale quantities
@@ -391,8 +698,11 @@ class MrpBom(models.Model):
         })
 
         message = _('Master BOM %s is now active and ready for use.') % self.display_name
+        sticky = False
         if existing_master_boms:
-            message += _('\n\nPrevious Master BOM(s) automatically deactivated: %s') % ', '.join(existing_master_boms.mapped('display_name'))
+            deactivated_names = ', '.join(existing_master_boms.mapped('code_with_revision'))
+            message += _('\n\n⚠️ Previous Master BOM(s) automatically deactivated:\n%s') % deactivated_names
+            sticky = True  # Make sticky when deactivating old BOMs so user sees the notification
 
         return {
             'type': 'ir.actions.client',
@@ -401,7 +711,8 @@ class MrpBom(models.Model):
                 'title': _('Master BOM Activated'),
                 'message': message,
                 'type': 'success',
-                'sticky': False,
+                'sticky': sticky,
+                'next': {'type': 'ir.actions.act_window_close'},
             }
         }
 
@@ -409,3 +720,25 @@ class MrpBom(models.Model):
         """Set Master BOM back to draft status."""
         self.ensure_one()
         self.write({'master_bom_status': 'draft'})
+
+    def action_submit_for_review(self):
+        """Submit Draft Master BOM for review (moves to Pending status)."""
+        self.ensure_one()
+
+        if self.master_bom_status != 'draft':
+            from odoo.exceptions import UserError
+            raise UserError(_("Only Draft Master BOMs can be submitted for review."))
+
+        self.write({'master_bom_status': 'pending'})
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Submitted for Review'),
+                'message': _('Master BOM %s is now pending review. Assign categories to all template lines before activating.') % self.display_name,
+                'type': 'success',
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
+            }
+        }
