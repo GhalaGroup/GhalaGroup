@@ -67,7 +67,8 @@ class VPADocumentTemplate(models.Model):
         if doc_type in ['manufacturing_order', 'manufacturing_order_pictures']:
             return [
                 ('doc_name', 'Basic (Document + Abbreviation)'),
-                ('doc_customer', 'With Product (Document + Product Name)'),
+                ('doc_name_product', 'With Item Name (Document + Abbreviation + Item)'),
+                ('doc_customer', 'With Product (Document + Product Display Name)'),
                 ('doc_customer_ref', 'With Reference (Document + Origin)'),
                 ('doc_customer_ref_date', 'Full (Document + Origin + Date)'),
                 ('customer_doc', 'Product First (Product + Document)'),
@@ -91,6 +92,7 @@ class VPADocumentTemplate(models.Model):
         else:
             return [
                 ('doc_name', 'Basic (Document + Abbreviation)'),
+                ('doc_name_product', 'With Item Name (Document + Abbreviation + Item)'),
                 ('doc_customer', 'With Customer (Document + Customer Name)'),
                 ('doc_customer_ref', 'With Reference (Document + Customer + Ref)'),
                 ('doc_customer_ref_date', 'Full (Document + Customer + Ref + Date)'),
@@ -116,6 +118,9 @@ class VPADocumentTemplate(models.Model):
                 if record.print_name_pattern == 'doc_name':
                     # MO/00123-MO
                     record.print_name_preview = f'{mo_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_name_product':
+                    # P01M_MO_00123 - Office Chair Premium
+                    record.print_name_preview = f'{mo_num.replace("/", "_")} - {product_name}.pdf'
                 elif record.print_name_pattern == 'doc_customer':
                     # MO/00123-MO - Office Chair Premium
                     record.print_name_preview = f'{mo_num}-{abbrev} - {product_name}.pdf'
@@ -203,6 +208,9 @@ class VPADocumentTemplate(models.Model):
             if self.print_name_pattern == 'doc_name':
                 # MO/00123-MO
                 return f"(object.name or 'MO') + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_name_product':
+                # P01M_MO_00410 - JAZAR-SB (replaces / with _, no abbreviation, product name)
+                return f"(object.name or 'MO').replace('/', '_') + ' - ' + (object.product_id.name or 'Product')"
             elif self.print_name_pattern == 'doc_customer':
                 # MO/00123-MO - Office Chair Premium
                 return f"(object.name or 'MO') + '-{abbrev} - ' + (object.product_id.display_name or 'Product')"
@@ -262,6 +270,9 @@ class VPADocumentTemplate(models.Model):
         if self.print_name_pattern == 'doc_name':
             # S00001-SQ
             return f"(object.name or 'Document') + '-{abbrev}'"
+        elif self.print_name_pattern == 'doc_name_product':
+            # S00001-SQ-Customer Name (for standard docs, uses partner name)
+            return f"(object.name or 'Document') + '-{abbrev}-' + (object.partner_id.name or 'Customer')"
         elif self.print_name_pattern == 'doc_customer':
             # S00001-SQ - Customer Name
             return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer')"
