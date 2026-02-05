@@ -3,7 +3,11 @@
 <!-- Copyright (C) 2025 VPA Software Limited -->
 <odoo>
     <data>
-        <!-- Visual separator -->
+        <!-- ================================================================
+             PRODUCT VARIANT ACTIONS (product.product)
+             ================================================================ -->
+
+        <!-- Visual separator for variants -->
         <record id="action_separator_sku" model="ir.actions.server">
             <field name="name">─────────────────</field>
             <field name="model_id" ref="product.model_product_product"/>
@@ -14,7 +18,7 @@
             <field name="code">pass</field>
         </record>
 
-        <!-- Server Action: Bulk Regenerate SKUs -->
+        <!-- Server Action: Bulk Regenerate SKUs (Variants) -->
         <record id="action_server_bulk_regenerate_sku" model="ir.actions.server">
             <field name="name">SKU: Regenerate</field>
             <field name="model_id" ref="product.model_product_product"/>
@@ -28,7 +32,7 @@ if records:
             </field>
         </record>
 
-        <!-- Server Action: Lock SKU -->
+        <!-- Server Action: Lock SKU (Variants) -->
         <record id="action_server_lock_sku" model="ir.actions.server">
             <field name="name">SKU: Lock</field>
             <field name="model_id" ref="product.model_product_product"/>
@@ -53,7 +57,7 @@ action = {
             </field>
         </record>
 
-        <!-- Server Action: Unlock SKU -->
+        <!-- Server Action: Unlock SKU (Variants) -->
         <record id="action_server_unlock_sku" model="ir.actions.server">
             <field name="name">SKU: Unlock</field>
             <field name="model_id" ref="product.model_product_product"/>
@@ -70,6 +74,97 @@ action = {
     'params': {
         'title': 'SKU Unlocked',
         'message': '%d product(s) unlocked successfully' % len(templates),
+        'type': 'success',
+        'sticky': False,
+        'next': {'type': 'ir.actions.act_window_close'},
+    }
+}
+            </field>
+        </record>
+
+        <!-- ================================================================
+             PRODUCT TEMPLATE ACTIONS (product.template)
+             ================================================================ -->
+
+        <!-- Visual separator for templates -->
+        <record id="action_separator_sku_template" model="ir.actions.server">
+            <field name="name">─────────────────</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">99</field>
+            <field name="state">code</field>
+            <field name="code">pass</field>
+        </record>
+
+        <!-- Server Action: Bulk Regenerate SKUs (Templates) -->
+        <record id="action_server_bulk_regenerate_sku_template" model="ir.actions.server">
+            <field name="name">SKU: Regenerate</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">100</field>
+            <field name="state">code</field>
+            <field name="code">
+if records:
+    # Get all variants for selected templates and regenerate their SKUs
+    variants = records.mapped('product_variant_ids')
+    if variants:
+        action = variants.action_bulk_regenerate_sku()
+    else:
+        action = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'No Variants',
+                'message': 'Selected products have no variants to regenerate',
+                'type': 'warning',
+                'sticky': False,
+            }
+        }
+            </field>
+        </record>
+
+        <!-- Server Action: Lock SKU (Templates) -->
+        <record id="action_server_lock_sku_template" model="ir.actions.server">
+            <field name="name">SKU: Lock</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">101</field>
+            <field name="state">code</field>
+            <field name="code">
+records.with_context(skip_sku_validation=True).write({'sku_locked': True})
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'SKU Locked',
+        'message': '%d product(s) locked successfully' % len(records),
+        'type': 'success',
+        'sticky': False,
+        'next': {'type': 'ir.actions.act_window_close'},
+    }
+}
+            </field>
+        </record>
+
+        <!-- Server Action: Unlock SKU (Templates) -->
+        <record id="action_server_unlock_sku_template" model="ir.actions.server">
+            <field name="name">SKU: Unlock</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_view_types">list</field>
+            <field name="sequence">102</field>
+            <field name="state">code</field>
+            <field name="code">
+records.with_context(skip_sku_validation=True).write({'sku_locked': False})
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'SKU Unlocked',
+        'message': '%d product(s) unlocked successfully' % len(records),
         'type': 'success',
         'sticky': False,
         'next': {'type': 'ir.actions.act_window_close'},
