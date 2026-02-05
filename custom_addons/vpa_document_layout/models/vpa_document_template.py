@@ -3129,7 +3129,7 @@ class VPADocumentTemplate(models.Model):
         """
         Called from data/regenerate_templates.xml on EVERY module upgrade.
         1. Cleanup orphan report actions (fixes duplicate Print menu items)
-        2. Regenerate ALL templates to ensure database QWeb matches code
+        2. Regenerate sale_production templates (fixes QWeb syntax issues)
         """
         _logger.info("VPA Document Layout: Running upgrade cleanup and regeneration...")
 
@@ -3152,9 +3152,11 @@ class VPADocumentTemplate(models.Model):
         except Exception as e:
             _logger.warning(f"VPA Document Layout: Could not cleanup orphan reports: {e}")
 
-        # STEP 2: Regenerate ALL templates to ensure database QWeb matches code
+        # STEP 2: Regenerate sale_production templates to fix QWeb syntax issues
         try:
-            all_templates = self.search([])
+            all_templates = self.search([
+                ('document_type', '=', 'sale_production')
+            ])
             for template in all_templates:
                 _logger.info(f"Regenerating template: {template.name} (ID: {template.id})")
                 # Delete existing QWeb views for this template
