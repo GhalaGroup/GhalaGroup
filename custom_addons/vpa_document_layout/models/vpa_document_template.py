@@ -1074,7 +1074,7 @@ class VPADocumentTemplate(models.Model):
                     /* Table Card Container */
                     .vpa-table-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         border-radius: 5px;
                         padding: 6px;
                         margin-bottom: 10px;
@@ -1087,7 +1087,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-table-card th {{
                         background: transparent;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                         text-transform: uppercase;
                         font-size: 10px;
@@ -1117,7 +1117,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     /* Section Header in Table */
                     .vpa-section-header {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -1148,16 +1148,16 @@ class VPADocumentTemplate(models.Model):
                     .vpa-qty-badge {{
                         display: inline-block;
                         background: white;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
                         font-size: 11px;
-                        border: 1px solid <t t-out="primary_color"/>;
+                        border: 1px solid {primary_color};
                     }}
                     .vpa-amount-badge {{
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
+                        background: {primary_color};
                         color: white;
                         padding: 2px 8px;
                         border-radius: 2px;
@@ -1172,7 +1172,7 @@ class VPADocumentTemplate(models.Model):
                     /* Total Card */
                     .vpa-total-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         padding: 10px;
                         border-radius: 5px;
                         margin: 10px 0;
@@ -1188,7 +1188,7 @@ class VPADocumentTemplate(models.Model):
                         border: none !important;
                     }}
                     .vpa-total-card tr.vpa-total-row td {{
-                        border-top: 2px solid <t t-out="primary_color"/> !important;
+                        border-top: 2px solid {primary_color} !important;
                         padding-top: 10px;
                     }}
                     .vpa-total-label {{
@@ -1202,12 +1202,12 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-grand-total-label {{
                         font-size: 14px;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                     .vpa-grand-total-value {{
                         font-size: 18px;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                     /* Notes Section */
@@ -1220,7 +1220,7 @@ class VPADocumentTemplate(models.Model):
                         page-break-inside: avoid;
                     }}
                     .vpa-notes-title {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         margin: 0 0 6px 0;
                         font-size: 11px;
                         font-weight: 600;
@@ -1338,7 +1338,7 @@ class VPADocumentTemplate(models.Model):
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id)
+</t>'''.format(template_id=self.id, primary_color=self.primary_accent_color or '#DC143C')
             else:
                 # Use Odoo's standard header: Just call the full document
                 # CRITICAL: Include font-size styles INSIDE the template to override Odoo defaults
@@ -1378,7 +1378,7 @@ class VPADocumentTemplate(models.Model):
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id)
+</t>'''.format(template_id=self.id, primary_color=self.primary_accent_color or '#DC143C')
         elif self.document_type in ['manufacturing_order', 'manufacturing_order_pictures']:
             # Manufacturing Order template with VPA styling
             show_pictures = self.document_type == 'manufacturing_order_pictures'
@@ -1441,14 +1441,14 @@ class VPADocumentTemplate(models.Model):
                     /* Table Card Container */
                     .vpa-table-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         border-radius: 5px;
                         padding: 6px;
                         margin-bottom: 10px;
                         box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-section-header {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -1466,7 +1466,7 @@ class VPADocumentTemplate(models.Model):
                         background: linear-gradient(135deg, #f8f8f8 0%%, #fafafa 100%%);
                     }}
                     .vpa-table-card table thead th {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 9px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -1493,12 +1493,12 @@ class VPADocumentTemplate(models.Model):
                     .vpa-qty-badge {{
                         display: inline-block;
                         background: white;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
                         font-size: 11px;
-                        border: 1px solid <t t-out="primary_color"/>;
+                        border: 1px solid {primary_color};
                     }}
                     /* Variance Tracking Styles */
                     .vpa-variance-positive {{
@@ -1513,7 +1513,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-master-bom-badge {{
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
+                        background: {primary_color};
                         color: white;
                         font-size: 8px;
                         padding: 2px 6px;
@@ -1740,7 +1740,8 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(
                 template_id=self.id,
                 middle_content_section=middle_content_section,
-                desc_width='51'
+                desc_width='51',
+                primary_color=self.primary_accent_color or '#DC143C'
             )
         elif self.document_type == 'sale_production':
             # Sales Production Order template - Sale Order with Production Details for factory
@@ -1798,7 +1799,7 @@ class VPADocumentTemplate(models.Model):
                     /* Table Card Container */
                     .vpa-table-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         border-radius: 5px;
                         padding: 6px;
                         margin-bottom: 10px;
@@ -1811,7 +1812,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-table-card th {{
                         background: transparent;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                         text-transform: uppercase;
                         font-size: 10px;
@@ -1841,7 +1842,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     /* Section Header in Table */
                     .vpa-section-header {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -1872,16 +1873,16 @@ class VPADocumentTemplate(models.Model):
                     .vpa-qty-badge {{
                         display: inline-block;
                         background: white;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
                         font-size: 11px;
-                        border: 1px solid <t t-out="primary_color"/>;
+                        border: 1px solid {primary_color};
                     }}
                     .vpa-mo-badge {{
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
+                        background: {primary_color};
                         color: white;
                         padding: 2px 6px;
                         border-radius: 6px;
@@ -1909,7 +1910,7 @@ class VPADocumentTemplate(models.Model):
                     /* Total Card */
                     .vpa-total-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         padding: 10px;
                         border-radius: 5px;
                         margin: 10px 0;
@@ -1921,7 +1922,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-total-value {{
                         font-size: 18px;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                     /* Notes Section */
@@ -1934,7 +1935,7 @@ class VPADocumentTemplate(models.Model):
                         page-break-inside: avoid;
                     }}
                     .vpa-notes-title {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         margin: 0 0 6px 0;
                         font-size: 11px;
                         font-weight: 600;
@@ -1954,7 +1955,7 @@ class VPADocumentTemplate(models.Model):
                         color: #666;
                     }}
                     .vpa-mo-name {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                 </style>
@@ -2091,7 +2092,7 @@ class VPADocumentTemplate(models.Model):
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id)
+</t>'''.format(template_id=self.id, primary_color=self.primary_accent_color or '#DC143C')
         elif self.document_type == 'quotation_pictures':
             # Quotation with Pictures - Shows product images alongside descriptions
             main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
@@ -2143,14 +2144,14 @@ class VPADocumentTemplate(models.Model):
                     /* Table Card Container - Match UD Quote/Order style */
                     .vpa-table-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         border-radius: 5px;
                         padding: 6px;
                         margin-bottom: 10px;
                         box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-section-header {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -2166,7 +2167,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-table-card th {{
                         background: transparent;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                         text-transform: uppercase;
                         font-size: 10px;
@@ -2237,16 +2238,16 @@ class VPADocumentTemplate(models.Model):
                     .vpa-qty-badge {{
                         display: inline-block;
                         background: white;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
                         font-size: 11px;
-                        border: 1px solid <t t-out="primary_color"/>;
+                        border: 1px solid {primary_color};
                     }}
                     .vpa-amount-badge {{
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
+                        background: {primary_color};
                         color: white;
                         padding: 2px 8px;
                         border-radius: 2px;
@@ -2255,7 +2256,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-total-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         padding: 10px;
                         border-radius: 5px;
                         margin: 10px 0;
@@ -2281,12 +2282,12 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-grand-total-label {{
                         font-size: 14px;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                     .vpa-grand-total-value {{
                         font-size: 18px;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                     }}
                     .vpa-notes-section {{
@@ -2298,7 +2299,7 @@ class VPADocumentTemplate(models.Model):
                         page-break-inside: avoid;
                     }}
                     .vpa-notes-title {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         margin: 0 0 6px 0;
                         font-size: 11px;
                         font-weight: 600;
@@ -2445,7 +2446,7 @@ class VPADocumentTemplate(models.Model):
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id)
+</t>'''.format(template_id=self.id, primary_color=self.primary_accent_color or '#DC143C')
         elif self.document_type in ['internal_transfer', 'internal_transfer_pictures']:
             # Internal Transfer template - for inventory transfers (stock.picking)
             show_pictures = self.document_type == 'internal_transfer_pictures'
@@ -2530,14 +2531,14 @@ class VPADocumentTemplate(models.Model):
                     /* Table Card Container - Match Quotation style */
                     .vpa-table-card {{
                         background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
-                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-left: 3px solid {primary_color};
                         border-radius: 5px;
                         padding: 6px;
                         margin-bottom: 10px;
                         box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }}
                     .vpa-section-header {{
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-size: 11px;
                         font-weight: 600;
                         text-transform: uppercase;
@@ -2553,7 +2554,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     .vpa-table-card th {{
                         background: transparent;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         font-weight: 600;
                         text-transform: uppercase;
                         font-size: 10px;
@@ -2594,12 +2595,12 @@ class VPADocumentTemplate(models.Model):
                     .vpa-qty-badge {{
                         display: inline-block;
                         background: white;
-                        color: <t t-out="primary_color"/>;
+                        color: {primary_color};
                         padding: 2px 6px;
                         border-radius: 2px;
                         font-weight: 600;
                         font-size: 11px;
-                        border: 1px solid <t t-out="primary_color"/>;
+                        border: 1px solid {primary_color};
                     }}
                     .vpa-location {{
                         font-size: 10px;
@@ -2684,7 +2685,8 @@ class VPADocumentTemplate(models.Model):
 </t>'''.format(
                 template_id=self.id,
                 picture_section=picture_section,
-                desc_width='45' if show_pictures else '45'
+                desc_width='45' if show_pictures else '45',
+                primary_color=self.primary_accent_color or '#DC143C'
             )
         else:
             # For other document types, create a template with standard VPA styling
@@ -2720,7 +2722,7 @@ class VPADocumentTemplate(models.Model):
             </t>
         </t>
     </t>
-</t>'''.format(template_id=self.id, doc_type=self.document_type, doc_type_title=self.document_type.replace('_', ' ').title())
+</t>'''.format(template_id=self.id, doc_type=self.document_type, doc_type_title=self.document_type.replace('_', ' ').title(), primary_color=self.primary_accent_color or '#DC143C')
 
         # Create the main report template
         _logger.info(f"Creating main template view for template {self.id}")
