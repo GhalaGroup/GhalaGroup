@@ -1597,17 +1597,17 @@ class VPADocumentTemplate(models.Model):
                                                     </t>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <span class="vpa-qty-badge"><t t-out="round(move.master_bom_qty, 4) if move.master_bom_qty else '-'"/></span>
+                                                    <span class="vpa-qty-badge"><t t-out="'%.4f' % move.master_bom_qty if move.master_bom_qty else '-'"/></span>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <t t-out="round(move.physical_qty_used, 4) if move.physical_qty_used else '-'"/>
+                                                    <t t-out="'%.4f' % move.physical_qty_used if move.physical_qty_used else '-'"/>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
                                                     <t t-if="move.qty_variance > 0">
-                                                        <span class="vpa-variance-positive">+<t t-out="round(move.qty_variance, 4)"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
+                                                        <span class="vpa-variance-positive">+<t t-out="'%.4f' % move.qty_variance"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
                                                     </t>
                                                     <t t-elif="move.qty_variance &lt; 0">
-                                                        <span class="vpa-variance-negative"><t t-out="round(move.qty_variance, 4)"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
+                                                        <span class="vpa-variance-negative"><t t-out="'%.4f' % move.qty_variance"/> (<t t-out="round(move.variance_percentage, 1)"/>%)</span>
                                                     </t>
                                                     <t t-else="">
                                                         <span class="vpa-variance-zero">0.0000 (0%)</span>
@@ -1631,10 +1631,10 @@ class VPADocumentTemplate(models.Model):
                                                     </div>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 4)"/></span>
+                                                    <span class="vpa-qty-badge"><t t-out="'%.4f' % move.product_uom_qty"/></span>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 4)"/>
+                                                    <t t-out="'%.4f' % move.quantity"/>
                                                 </td>
                                                 <td style="text-align: center; vertical-align: middle;">
                                                     <span t-field="move.product_uom"/>
@@ -1719,10 +1719,10 @@ class VPADocumentTemplate(models.Model):
                                                 </div>
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
-                                                <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 4)"/></span>
+                                                <span class="vpa-qty-badge"><t t-out="'%.4f' % move.product_uom_qty"/></span>
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
-                                                <t t-out="int(move.quantity) if move.quantity == int(move.quantity) else round(move.quantity, 4)"/>
+                                                <t t-out="'%.4f' % move.quantity"/>
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
                                                 <span t-field="move.product_uom"/>
@@ -2652,7 +2652,7 @@ class VPADocumentTemplate(models.Model):
                                         </td>
                                         <!-- Quantity -->
                                         <td style="text-align: center; vertical-align: middle;">
-                                            <span class="vpa-qty-badge"><t t-out="int(move.product_uom_qty) if move.product_uom_qty == int(move.product_uom_qty) else round(move.product_uom_qty, 4)"/></span>
+                                            <span class="vpa-qty-badge"><t t-out="'%.4f' % move.product_uom_qty"/></span>
                                         </td>
                                         <!-- Unit -->
                                         <td style="text-align: center; vertical-align: middle;">
