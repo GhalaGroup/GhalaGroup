@@ -3,3 +3,4 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 from . import update_effective
+from . import mrp_production
