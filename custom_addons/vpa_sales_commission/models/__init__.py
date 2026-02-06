@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# Copyright (C) 2025 VPA Solutions Limited
+# License OPL-1 - See LICENSE file for full copyright and licensing details.
+
+from . import vpa_commission_scheme
+from . import vpa_commission_line
+from . import product_template
+from . import mrp_production
+from . import hr_employee
+from . import res_config_settings

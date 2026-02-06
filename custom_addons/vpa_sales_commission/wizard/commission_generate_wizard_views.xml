@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Commission Generate Wizard Form View -->
+    <record id="commission_generate_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.generate.wizard.form</field>
+        <field name="model">vpa.commission.generate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Commission">
+                <field name="currency_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="production_id"/>
+                        <field name="commission_date"/>
+                    </group>
+                    <group>
+                        <field name="product_id"/>
+                        <field name="product_qty"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name="total_base_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                </group>
+                <separator string="Assign To Employees"/>
+                <field name="scheme_line_ids">
+                    <list editable="bottom" decoration-muted="already_generated">
+                        <field name="selected" string="Select"
+                               readonly="already_generated"/>
+                        <field name="employee_id"/>
+                        <field name="rate" string="Rate (%)"/>
+                        <field name="estimated_amount" string="Commission"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="already_generated" column_invisible="1"/>
+                        <field name="scheme_id" column_invisible="1"/>
+                    </list>
+                </field>
+                <div class="text-muted" style="font-size: 0.85em; margin-bottom: 8px;">
+                    <em>Greyed out employees already have commission for this MO.</em>
+                </div>
+                <separator string="Raw Materials"/>
+                <field name="material_line_ids">
+                    <list editable="bottom">
+                        <field name="included" string="Include"/>
+                        <field name="product_id"/>
+                        <field name="quantity"/>
+                        <field name="unit_cost"/>
+                        <field name="amount" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_generate" string="Generate Commission"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for the wizard -->
+    <record id="action_commission_generate_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Commission</field>
+        <field name="res_model">vpa.commission.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

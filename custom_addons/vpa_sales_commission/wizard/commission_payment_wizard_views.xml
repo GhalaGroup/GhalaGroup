@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Commission Payment Wizard Form View -->
+    <record id="commission_payment_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.payment.wizard.form</field>
+        <field name="model">vpa.commission.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Payment Entry">
+                <field name="currency_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="line_count" string="Commission Lines"/>
+                        <field name="total_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                    <group>
+                        <field name="payment_date"/>
+                        <field name="journal_id"/>
+                    </group>
+                </group>
+                <group string="Accounts">
+                    <group>
+                        <field name="expense_account_id" string="Expense Account (Debit)"/>
+                    </group>
+                    <group>
+                        <field name="payable_account_id" string="Payable Account (Credit)"/>
+                    </group>
+                </group>
+                <separator string="Employee Summary"/>
+                <field name="summary_line_ids">
+                    <list>
+                        <field name="employee_id"/>
+                        <field name="line_count" string="Lines"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="total_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_create_payment" string="Create Journal Entries"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Server Action: Create Payment Entry (appears in Actions dropdown) -->
+    <record id="action_commission_create_payment" model="ir.actions.server">
+        <field name="name">Create Payment Entry</field>
+        <field name="model_id" ref="model_vpa_commission_line"/>
+        <field name="binding_model_id" ref="model_vpa_commission_line"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'name': 'Create Payment Entry',
+    'type': 'ir.actions.act_window',
+    'res_model': 'vpa.commission.payment.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': {'active_ids': records.ids, 'active_model': 'vpa.commission.line'},
+}
+        </field>
+    </record>
+
+</odoo>

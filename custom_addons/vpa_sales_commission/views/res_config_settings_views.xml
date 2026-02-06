@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- VPA Commission Settings - Dedicated section in Settings -->
+    <record id="res_config_settings_view_form_commission" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.vpa.commission</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="85"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="VPA Commission" name="vpa_sales_commission"
+                     groups="vpa_sales_commission.group_commission_manager">
+                    <block title="Commission Types" name="vpa_commission_types">
+                        <setting string="Production Commission"
+                                 help="Calculate commission based on cost of commissionable raw materials consumed in Manufacturing Orders">
+                            <field name="commission_production_enabled"/>
+                        </setting>
+                        <setting string="Sales Commission"
+                                 help="Calculate commission based on Sales Orders (Phase 2)">
+                            <field name="commission_sales_enabled"/>
+                        </setting>
+                        <setting string="Auto-create Commission"
+                                 help="Automatically create commission lines when Manufacturing Orders are completed"
+                                 invisible="not commission_production_enabled">
+                            <field name="commission_auto_create"/>
+                        </setting>
+                    </block>
+                    <block title="Commission Journal" name="vpa_commission_journal">
+                        <setting string="Journal"
+                                 help="Default journal for commission payment entries">
+                            <field name="commission_journal_id"/>
+                        </setting>
+                    </block>
+                    <block title="Production Commission Accounts" name="vpa_commission_production_accounts"
+                           invisible="not commission_production_enabled">
+                        <setting string="Expense Account (Debit)"
+                                 help="Default debit account for production commission payments">
+                            <field name="commission_production_expense_account_id"/>
+                        </setting>
+                        <setting string="Payable Account (Credit)"
+                                 help="Default credit account for production commission payments">
+                            <field name="commission_production_payable_account_id"/>
+                        </setting>
+                    </block>
+                    <block title="Sales Commission Accounts" name="vpa_commission_sales_accounts"
+                           invisible="not commission_sales_enabled">
+                        <setting string="Expense Account (Debit)"
+                                 help="Default debit account for sales commission payments">
+                            <field name="commission_sales_expense_account_id"/>
+                        </setting>
+                        <setting string="Payable Account (Credit)"
+                                 help="Default credit account for sales commission payments">
+                            <field name="commission_sales_payable_account_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

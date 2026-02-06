@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Privilege definition - creates the section in user form Access Rights tab -->
+    <record model="res.groups.privilege" id="res_groups_privilege_commission">
+        <field name="name">Sales Commission</field>
+        <field name="sequence">25</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <!-- Commission User Group - Can view own commissions only -->
+    <record id="group_commission_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_commission"/>
+        <field name="comment">Can view their own commission records only.</field>
+    </record>
+
+    <!-- Commission Manager Group - Full access to all commission data -->
+    <record id="group_commission_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_commission"/>
+        <field name="implied_ids" eval="[(4, ref('group_commission_user'))]"/>
+        <field name="comment">Full access to all commission data. Can create schemes, approve commissions, and mark as paid.</field>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Record Rules -->
+
+    <!-- Commission Line: Users can only see their own commission lines -->
+    <record id="commission_line_rule_user" model="ir.rule">
+        <field name="name">Commission Line: Own Records Only</field>
+        <field name="model_id" ref="model_vpa_commission_line"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Commission Line: Managers can see all -->
+    <record id="commission_line_rule_manager" model="ir.rule">
+        <field name="name">Commission Line: All Records (Manager)</field>
+        <field name="model_id" ref="model_vpa_commission_line"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Commission Scheme: Only managers can access -->
+    <record id="commission_scheme_rule_manager" model="ir.rule">
+        <field name="name">Commission Scheme: Manager Only</field>
+        <field name="model_id" ref="model_vpa_commission_scheme"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>
