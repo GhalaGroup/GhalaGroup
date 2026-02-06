@@ -95,10 +95,10 @@ class VpaBomCategory(models.Model):
     )
 
     # SQL Constraints
-    _sql_constraints = [
-        ('name_company_uniq', 'UNIQUE(name, company_id)',
-         'Category name must be unique per company!'),
-    ]
+    _name_company_uniq = models.Constraint(
+        'unique(name, company_id)',
+        'Category name must be unique per company!',
+    )
 
     @api.depends('name')
     def _compute_display_name(self):
