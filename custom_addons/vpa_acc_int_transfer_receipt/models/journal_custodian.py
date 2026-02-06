@@ -50,10 +50,10 @@ class JournalCustodian(models.Model):
         help="Internal notes about this custodian assignment",
     )
 
-    _sql_constraints = [
-        ('journal_company_uniq', 'unique(journal_id, company_id)',
-         'A custodian assignment already exists for this journal in this company!'),
-    ]
+    _journal_company_uniq = models.Constraint(
+        'unique(journal_id, company_id)',
+        'A custodian assignment already exists for this journal in this company!',
+    )
 
     @api.constrains('custodian_ids', 'backup_ids')
     def _check_custodians(self):
