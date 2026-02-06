@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend MRP Production Form View -->
+    <record id="mrp_production_form_view_commission" model="ir.ui.view">
+        <field name="name">mrp.production.form.commission</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add commission button to button box -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_commission_lines" type="object"
+                        class="oe_stat_button" icon="fa-money"
+                        groups="vpa_sales_commission.group_commission_manager"
+                        invisible="commission_line_count == 0">
+                    <field name="commission_line_count" string="Commissions" widget="statinfo"/>
+                </button>
+            </xpath>
+            <!-- Add Generate/Applied buttons in header -->
+            <xpath expr="//header" position="inside">
+                <field name="commission_generated" invisible="1"/>
+                <button name="action_generate_commission" type="object"
+                        string="Generate Commission" class="btn-primary"
+                        invisible="state != 'done' or commission_generated"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <button name="action_view_commission_lines" type="object"
+                        string="Commission Applied" class="btn-success"
+                        invisible="state != 'done' or not commission_generated"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+            </xpath>
+            <!-- Add commission tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Commission" name="commission"
+                      groups="vpa_sales_commission.group_commission_manager"
+                      invisible="state != 'done'">
+                    <group>
+                        <group>
+                            <field name="commission_base_amount" widget="monetary"/>
+                        </group>
+                    </group>
+                    <field name="commission_line_ids" readonly="1"
+                           invisible="not commission_generated">
+                        <list>
+                            <field name="name"/>
+                            <field name="employee_id"/>
+                            <field name="date"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="base_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="rate"/>
+                            <field name="amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="state" widget="badge"
+                                   decoration-info="state == 'pending'"
+                                   decoration-warning="state == 'confirmed'"
+                                   decoration-success="state == 'paid'"
+                                   decoration-danger="state == 'cancelled'"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

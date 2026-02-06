@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Commission Scheme Form View -->
+    <record id="vpa_commission_scheme_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.scheme.form</field>
+        <field name="model">vpa.commission.scheme</field>
+        <field name="arch" type="xml">
+            <form string="Commission Scheme">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_commission_lines" type="object"
+                                class="oe_stat_button" icon="fa-list-alt">
+                            <field name="total_commission" string="Total" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="New Scheme"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Employee">
+                            <field name="employee_id"/>
+                            <field name="currency_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Commission Types">
+                            <field name="production_commission" string="Production (Raw Material)"/>
+                            <field name="production_rate" string="Production Rate (%)" invisible="not production_commission"/>
+                            <field name="sales_commission" string="Sales"/>
+                            <field name="sales_rate" string="Sales Rate (%)" invisible="not sales_commission"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Totals">
+                            <field name="total_pending" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_paid" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="MO Filter" name="mo_filter">
+                            <group>
+                                <group>
+                                    <field name="apply_to" widget="radio"/>
+                                </group>
+                                <group>
+                                    <field name="workcenter_ids" widget="many2many_tags"
+                                           invisible="apply_to != 'workcenter'"/>
+                                    <field name="product_category_ids" widget="many2many_tags"
+                                           invisible="apply_to != 'product_category'"/>
+                                    <field name="product_ids" widget="many2many_tags"
+                                           invisible="apply_to != 'specific_products'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Minimum Guarantee" name="minimum_guarantee">
+                            <group>
+                                <group>
+                                    <field name="has_minimum"/>
+                                    <field name="minimum_amount" invisible="not has_minimum"
+                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="minimum_frequency" invisible="not has_minimum"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Commission Lines" name="commission_lines">
+                            <field name="commission_line_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="type"/>
+                                    <field name="date"/>
+                                    <field name="production_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="rate"/>
+                                    <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'pending'"
+                                           decoration-success="state in ('confirmed', 'paid')"
+                                           decoration-danger="state == 'cancelled'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Commission Scheme List View -->
+    <record id="vpa_commission_scheme_view_list" model="ir.ui.view">
+        <field name="name">vpa.commission.scheme.list</field>
+        <field name="model">vpa.commission.scheme</field>
+        <field name="arch" type="xml">
+            <list string="Commission Schemes">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="production_commission" string="Production"/>
+                <field name="production_rate" string="Prod. Rate (%)"/>
+                <field name="sales_commission" string="Sales"/>
+                <field name="sales_rate" string="Sales Rate (%)"/>
+                <field name="apply_to"/>
+                <field name="total_pending" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="total_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="total_paid" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="total_commission" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Commission Scheme Search View -->
+    <record id="vpa_commission_scheme_view_search" model="ir.ui.view">
+        <field name="name">vpa.commission.scheme.search</field>
+        <field name="model">vpa.commission.scheme</field>
+        <field name="arch" type="xml">
+            <search string="Commission Schemes">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Production Commission" name="has_production" domain="[('production_commission', '=', True)]"/>
+                <filter string="Sales Commission" name="has_sales" domain="[('sales_commission', '=', True)]"/>
+                <separator/>
+                <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Apply To" name="group_apply_to" context="{'group_by': 'apply_to'}"/>
+                <filter string="Company" name="group_company" context="{'group_by': 'company_id'}"
+                        groups="base.group_multi_company"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Commission Scheme Action -->
+    <record id="vpa_commission_scheme_action" model="ir.actions.act_window">
+        <field name="name">Commission Schemes</field>
+        <field name="res_model">vpa.commission.scheme</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="vpa_commission_scheme_view_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Commission Scheme
+            </p>
+            <p>
+                Commission schemes define how commission is calculated for each employee.
+                Set production and sales rates, and configure which Manufacturing Orders apply.
+            </p>
+        </field>
+    </record>
+
+</odoo>
