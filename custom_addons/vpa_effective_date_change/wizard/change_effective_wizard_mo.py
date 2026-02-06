@@ -18,8 +18,8 @@ class ChangeEffectiveWizardMO(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super(ChangeEffectiveWizardMO, self).default_get(fields_list)
-        if self._context.get('active_id'):
-            production = self.env['mrp.production'].browse(self._context.get('active_id'))
+        if self.env.context.get('active_id'):
+            production = self.env['mrp.production'].browse(self.env.context.get('active_id'))
             res['production_id'] = production.id
             res['original_date'] = production.date_finished
             res['effective_date'] = production.date_finished

@@ -90,55 +90,83 @@ class MrpProductionEffectiveDate(models.Model):
 
         # Update account moves (journal entries)
         if has_accounting:
-            # Find all journal entries related to this MO's stock moves
+            account_move_ids = []
             move_ids = (self.move_raw_ids | self.move_finished_ids).filtered(lambda m: m.state == 'done').ids
+
             if move_ids:
-                # Get valuation layers for these moves
-                valuation_layers = self.env['stock.valuation.layer'].search([('stock_move_id', 'in', move_ids)])
-                account_move_ids = valuation_layers.mapped('account_move_id').ids
-
-                if account_move_ids:
-                    # Update account move dates
+                # Method 1: Try to get journal entries via valuation layers (if they exist)
+                if has_valuation_layer:
                     self.env.cr.execute(
-                        "UPDATE account_move SET date = %s WHERE id IN %s",
-                        [selected_date.date() if isinstance(selected_date, datetime) else selected_date, tuple(account_move_ids)]
+                        "SELECT DISTINCT account_move_id FROM stock_valuation_layer WHERE stock_move_id IN %s AND account_move_id IS NOT NULL",
+                        [tuple(move_ids)]
                     )
-                    # Update account move line dates
+                    account_move_ids = [row[0] for row in self.env.cr.fetchall()]
+
+                # Method 2: If no valuation layer links, find journal entries by MO reference
+                if not account_move_ids:
+                    # Find journal entries with this MO's name in the reference
                     self.env.cr.execute(
-                        "UPDATE account_move_line SET date = %s WHERE move_id IN %s",
-                        [selected_date.date() if isinstance(selected_date, datetime) else selected_date, tuple(account_move_ids)]
+                        "SELECT DISTINCT id FROM account_move WHERE ref LIKE %s AND state = 'posted'",
+                        [f"{self.name} - %"]
                     )
+                    account_move_ids = [row[0] for row in self.env.cr.fetchall()]
 
-                    # Update journal entry names if date is in different month/year
-                    selected_datetime = selected_date if isinstance(selected_date, datetime) else datetime.combine(selected_date, datetime.min.time())
-                    selected_month = selected_datetime.month
-                    selected_year = selected_datetime.year
-                    current_month = datetime.now().month
-                    current_year = datetime.now().year
+            if account_move_ids:
+                selected_date_only = selected_date.date() if isinstance(selected_date, datetime) else selected_date
 
-                    if selected_month != current_month or selected_year != current_year:
-                        self._update_journal_names(account_move_ids, selected_datetime)
+                # Update account move dates
+                self.env.cr.execute(
+                    "UPDATE account_move SET date = %s WHERE id IN %s",
+                    [selected_date_only, tuple(account_move_ids)]
+                )
+                # Update account move line dates
+                self.env.cr.execute(
+                    "UPDATE account_move_line SET date = %s WHERE move_id IN %s",
+                    [selected_date_only, tuple(account_move_ids)]
+                )
+
+                # Update journal entry names if date is in different month/year
+                selected_datetime = selected_date if isinstance(selected_date, datetime) else datetime.combine(selected_date, datetime.min.time())
+                selected_month = selected_datetime.month
+                selected_year = selected_datetime.year
+                current_month = datetime.now().month
+                current_year = datetime.now().year
+
+                if selected_month != current_month or selected_year != current_year:
+                    self._update_journal_names(account_move_ids, selected_datetime)
 
     def _update_journal_names(self, account_move_ids, selected_date):
         """Update journal entry names with new sequence based on selected date."""
+        selected_year = selected_date.strftime("%Y")
+        selected_month = selected_date.strftime("%m")
+
+        # Track sequence numbers per journal to handle multiple entries
+        journal_sequences = {}
+
         for account_move in self.env['account.move'].browse(account_move_ids):
             if not account_move.journal_id.code:
                 continue
 
-            selected_year = selected_date.strftime("%Y")
-            selected_month = selected_date.strftime("%m")
+            journal_id = account_move.journal_id.id
             selected_prefix = f"{account_move.journal_id.code}/{selected_year}/{selected_month}/"
 
-            # Find the max sequence number for this prefix
-            existing_moves = self.env['account.move'].search([
-                ('sequence_prefix', '=', selected_prefix)
-            ])
-            seq_numbers = [m.sequence_number for m in existing_moves if m.sequence_number]
-            max_sequence_number = max(seq_numbers, default=0) + 1
+            # Get or calculate the next sequence number for this journal
+            if journal_id not in journal_sequences:
+                # Find the max sequence number for this prefix (first time for this journal)
+                existing_moves = self.env['account.move'].search([
+                    ('sequence_prefix', '=', selected_prefix),
+                    ('id', 'not in', account_move_ids),  # Exclude the ones we're updating
+                ])
+                seq_numbers = [m.sequence_number for m in existing_moves if m.sequence_number]
+                journal_sequences[journal_id] = max(seq_numbers, default=0)
+
+            # Increment and use the next sequence number
+            journal_sequences[journal_id] += 1
+            next_sequence = journal_sequences[journal_id]
 
             # Update the journal entry
-            new_name = f"{selected_prefix}{str(max_sequence_number).zfill(4)}"
+            new_name = f"{selected_prefix}{str(next_sequence).zfill(4)}"
             self.env.cr.execute(
                 "UPDATE account_move SET name = %s, sequence_number = %s, sequence_prefix = %s WHERE id = %s",
-                [new_name, max_sequence_number, selected_prefix, account_move.id]
+                [new_name, next_sequence, selected_prefix, account_move.id]
             )
