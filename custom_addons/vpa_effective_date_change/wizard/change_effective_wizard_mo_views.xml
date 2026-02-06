@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data>
+        <!-- Wizard Form View -->
+        <record id="change_effective_wizard_mo_form" model="ir.ui.view">
+            <field name="name">change.effective.wizard.mo.form</field>
+            <field name="model">change.effective.wizard.mo</field>
+            <field name="arch" type="xml">
+                <form string="Change Effective Date">
+                    <group>
+                        <field name="production_id" invisible="1"/>
+                        <field name="original_date"/>
+                        <field name="effective_date"/>
+                    </group>
+                    <footer>
+                        <button name="update_effective_date" type="object" string="Apply Changes" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Wizard Action -->
+        <record id="change_effective_wizard_mo_action" model="ir.actions.act_window">
+            <field name="name">Change Effective Date</field>
+            <field name="res_model">change.effective.wizard.mo</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

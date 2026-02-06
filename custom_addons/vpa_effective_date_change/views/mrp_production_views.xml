@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data>
+        <!-- Add Effective Date field to MO form (before validation) -->
+        <record model="ir.ui.view" id="mrp_production_effective_date">
+            <field name="name">mrp.production.effective.date</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='group_extra_info']/field[@name='user_id']" position="after">
+                    <field name="date_of_completion" invisible="state == 'done'"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Add Change Effective Date button (after validation) -->
+        <record model="ir.ui.view" id="mrp_production_effective_date_button">
+            <field name="name">mrp.production.effective.date.button</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_cancel']" position="after">
+                    <button name="wiz_open_mo"
+                            groups="vpa_effective_date_change.vpa_effective_date_change_group"
+                            type="object"
+                            string="Change Effective Date"
+                            invisible="state != 'done'"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
