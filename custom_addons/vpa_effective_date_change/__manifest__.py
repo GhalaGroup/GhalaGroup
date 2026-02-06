@@ -4,8 +4,8 @@
 {
     'name': 'VPA Effective Date Change',
     'author': 'VPA Solutions Limited',
-    'version': '19.0.1.1.0',
-    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.1.0)',
+    'version': '19.0.1.2.0',
+    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.2.0)',
     'license': 'OPL-1',
     'sequence': 10,
     'description': """
@@ -34,6 +34,11 @@ Key Features
 
 Version History
 ---------------
+* **19.0.1.2.0** - Privilege-based security & bug fixes
+  - Added privilege section in Settings > Users > Access Rights
+  - Fixed journal entry sequence handling for multiple entries
+  - Fixed deprecation warnings (self.env.context)
+
 * **19.0.1.1.0** - Added Manufacturing Order support
   - Change completion date for done MOs
   - Pre-set effective date before marking MO as done
