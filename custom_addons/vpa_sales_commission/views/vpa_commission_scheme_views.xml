@@ -13,6 +13,10 @@
                                 class="oe_stat_button" icon="fa-list-alt">
                             <field name="total_commission" string="Total" widget="statinfo"/>
                         </button>
+                        <button name="action_view_guarantees" type="object"
+                                class="oe_stat_button" icon="fa-shield">
+                            <field name="guarantee_count" string="Guarantees" widget="statinfo"/>
+                        </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
@@ -38,7 +42,6 @@
                         <group string="Totals">
                             <field name="total_pending" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                             <field name="total_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <field name="total_paid" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
                     </group>
                     <notebook>
@@ -66,6 +69,29 @@
                                     <field name="minimum_frequency" invisible="not has_minimum"/>
                                 </group>
                             </group>
+                            <separator string="Annual Guarantee Table"/>
+                            <field name="guarantee_ids">
+                                <list editable="bottom">
+                                    <field name="year"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="guarantee_amount" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" string="Guarantee"/>
+                                    <field name="guarantee_amount_usd" string="USD Equiv."/>
+                                    <field name="total_earned" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" string="Earned"/>
+                                    <field name="total_paid" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" string="Paid"/>
+                                    <field name="shortfall" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" string="Shortfall"
+                                           decoration-danger="shortfall > 0"/>
+                                    <field name="outstanding" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}" string="Outstanding"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'on_track'"
+                                           decoration-danger="status == 'shortfall'"
+                                           decoration-muted="status == 'no_lines'"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Commission Lines" name="commission_lines">
                             <field name="commission_line_ids" readonly="1">
@@ -74,13 +100,16 @@
                                     <field name="type"/>
                                     <field name="date"/>
                                     <field name="production_id"/>
+                                    <field name="sale_order_name"/>
+                                    <field name="item_name"/>
                                     <field name="currency_id" column_invisible="1"/>
                                     <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     <field name="rate"/>
                                     <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     <field name="state" widget="badge"
                                            decoration-info="state == 'pending'"
-                                           decoration-success="state in ('confirmed', 'paid')"
+                                           decoration-warning="state == 'confirmed'"
+                                           decoration-success="state == 'paid'"
                                            decoration-danger="state == 'cancelled'"/>
                                 </list>
                             </field>
@@ -107,7 +136,6 @@
                 <field name="apply_to"/>
                 <field name="total_pending" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="total_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="total_paid" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="total_commission" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>

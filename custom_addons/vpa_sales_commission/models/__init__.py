@@ -7,4 +7,5 @@ from . import vpa_commission_line
 from . import product_template
 from . import mrp_production
 from . import hr_employee
+from . import vpa_commission_guarantee
 from . import res_config_settings

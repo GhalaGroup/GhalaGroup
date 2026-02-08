@@ -118,6 +118,17 @@ class VpaCommissionScheme(models.Model):
         string='Commission Lines',
     )
 
+    # Annual guarantees
+    guarantee_ids = fields.One2many(
+        'vpa.commission.guarantee',
+        'scheme_id',
+        string='Annual Guarantees',
+    )
+    guarantee_count = fields.Integer(
+        string='Guarantees',
+        compute='_compute_guarantee_count',
+    )
+
     # Computed fields for dashboard/reporting
     total_commission = fields.Float(
         string='Total Commission',
@@ -131,11 +142,6 @@ class VpaCommissionScheme(models.Model):
     )
     total_confirmed = fields.Float(
         string='Confirmed Commission',
-        compute='_compute_totals',
-        store=True,
-    )
-    total_paid = fields.Float(
-        string='Paid Commission',
         compute='_compute_totals',
         store=True,
     )
@@ -159,8 +165,7 @@ class VpaCommissionScheme(models.Model):
             lines = scheme.commission_line_ids.filtered(lambda l: l.state != 'cancelled')
             scheme.total_commission = sum(lines.mapped('amount'))
             scheme.total_pending = sum(lines.filtered(lambda l: l.state == 'pending').mapped('amount'))
-            scheme.total_confirmed = sum(lines.filtered(lambda l: l.state == 'confirmed').mapped('amount'))
-            scheme.total_paid = sum(lines.filtered(lambda l: l.state == 'paid').mapped('amount'))
+            scheme.total_confirmed = sum(lines.filtered(lambda l: l.state in ('confirmed', 'paid')).mapped('amount'))
 
     @api.constrains('production_rate', 'sales_rate')
     def _check_commission_rates(self):
@@ -201,6 +206,11 @@ class VpaCommissionScheme(models.Model):
             return production.product_id in self.product_ids
         return False
 
+    @api.depends('guarantee_ids')
+    def _compute_guarantee_count(self):
+        for scheme in self:
+            scheme.guarantee_count = len(scheme.guarantee_ids)
+
     def action_view_commission_lines(self):
         """Open commission lines for this scheme."""
         self.ensure_one()
@@ -208,6 +218,18 @@ class VpaCommissionScheme(models.Model):
             'name': _('Commission Lines'),
             'type': 'ir.actions.act_window',
             'res_model': 'vpa.commission.line',
+            'view_mode': 'list,form',
+            'domain': [('scheme_id', '=', self.id)],
+            'context': {'default_scheme_id': self.id},
+        }
+
+    def action_view_guarantees(self):
+        """Open annual guarantees for this scheme."""
+        self.ensure_one()
+        return {
+            'name': _('Annual Guarantees'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'vpa.commission.guarantee',
             'view_mode': 'list,form',
             'domain': [('scheme_id', '=', self.id)],
             'context': {'default_scheme_id': self.id},

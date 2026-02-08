@@ -52,7 +52,14 @@ class VpaCommissionLine(models.Model):
         index=True,
         help='Manufacturing Order completion date',
     )
-    date_year = fields.Char(
+    @api.model
+    def _get_year_selection(self):
+        """Generate year selection from 2020 to current year + 2."""
+        current_year = fields.Date.today().year
+        return [(str(y), str(y)) for y in range(2020, current_year + 3)]
+
+    date_year = fields.Selection(
+        selection='_get_year_selection',
         string='Year',
         compute='_compute_date_parts',
         store=True,
@@ -71,6 +78,16 @@ class VpaCommissionLine(models.Model):
         string='Manufacturing Order',
         index=True,
         ondelete='set null',
+    )
+    sale_order_name = fields.Char(
+        string='Sales Order',
+        compute='_compute_sale_order_info',
+        store=True,
+    )
+    item_name = fields.Char(
+        string='Item',
+        compute='_compute_sale_order_info',
+        store=True,
     )
     invoice_id = fields.Many2one(
         'account.move',
@@ -130,14 +147,25 @@ class VpaCommissionLine(models.Model):
         string='Paid By',
         readonly=True,
     )
-
-    # Payment tracking
-    payment_move_id = fields.Many2one(
-        'account.move',
-        string='Payment Journal Entry',
+    payment_id = fields.Many2one(
+        'account.payment',
+        string='Payment',
         readonly=True,
         ondelete='set null',
-        help='Journal entry created when commission was paid',
+        index=True,
+    )
+
+    amount_paid = fields.Float(
+        string='Amount Paid',
+        digits=(12, 2),
+        compute='_compute_amount_paid',
+        store=True,
+    )
+    amount_due = fields.Float(
+        string='Amount Due',
+        digits=(12, 2),
+        compute='_compute_amount_paid',
+        store=True,
     )
 
     notes = fields.Text(string='Notes')
@@ -194,6 +222,15 @@ class VpaCommissionLine(models.Model):
                 if not line.delivery_date:
                     line.delivery_date = False
 
+    @api.depends('production_id', 'production_id.sale_line_id.order_id', 'production_id.product_id')
+    def _compute_sale_order_info(self):
+        for line in self:
+            sale_order = False
+            if line.production_id and hasattr(line.production_id, 'sale_line_id') and line.production_id.sale_line_id:
+                sale_order = line.production_id.sale_line_id.order_id
+            line.sale_order_name = sale_order.name if sale_order else (line.production_id.origin or False)
+            line.item_name = line.production_id.product_id.name if line.production_id else False
+
     @api.depends('date')
     def _compute_date_parts(self):
         for line in self:
@@ -208,6 +245,15 @@ class VpaCommissionLine(models.Model):
     def _compute_amount(self):
         for line in self:
             line.amount = line.base_amount * line.rate / 100
+
+    @api.depends('amount', 'state')
+    def _compute_amount_paid(self):
+        for line in self:
+            if line.state == 'paid':
+                line.amount_paid = line.amount
+            else:
+                line.amount_paid = 0.0
+            line.amount_due = line.amount - line.amount_paid
 
     def action_confirm(self):
         """Confirm commission lines - only managers can do this."""
@@ -224,20 +270,21 @@ class VpaCommissionLine(models.Model):
         """Cancel commission lines."""
         for line in self:
             if line.state == 'paid':
-                raise UserError(_('Paid commission lines cannot be cancelled.'))
+                raise UserError(_('Paid commission lines cannot be cancelled. Reset to pending first.'))
             line.write({'state': 'cancelled'})
 
     def action_reset_to_pending(self):
-        """Reset confirmed or cancelled lines back to pending."""
+        """Reset confirmed, paid, or cancelled lines back to pending."""
         for line in self:
-            if line.state not in ('confirmed', 'cancelled'):
-                raise UserError(_('Only confirmed or cancelled commission lines can be reset to pending.'))
+            if line.state not in ('confirmed', 'paid', 'cancelled'):
+                raise UserError(_('Only confirmed, paid, or cancelled commission lines can be reset to pending.'))
             line.write({
                 'state': 'pending',
                 'confirmed_date': False,
                 'confirmed_by': False,
                 'paid_date': False,
                 'paid_by': False,
+                'payment_id': False,
             })
 
     def action_view_production(self):
@@ -251,6 +298,21 @@ class VpaCommissionLine(models.Model):
             'res_model': 'mrp.production',
             'view_mode': 'form',
             'res_id': self.production_id.id,
+        }
+
+    @api.model
+    def action_open_commission_payments(self):
+        """Open all payments linked to commission lines."""
+        payment_ids = self.search([
+            ('payment_id', '!=', False),
+        ]).mapped('payment_id').ids
+        return {
+            'name': _('Commission Payments'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.payment',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', payment_ids)],
+            'context': {'create': False},
         }
 
 

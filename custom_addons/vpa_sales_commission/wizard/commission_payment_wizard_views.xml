@@ -2,43 +2,51 @@
 <odoo>
 
     <!-- Commission Payment Wizard Form View -->
-    <record id="commission_payment_wizard_view_form" model="ir.ui.view">
+    <record id="vpa_commission_payment_wizard_view_form" model="ir.ui.view">
         <field name="name">vpa.commission.payment.wizard.form</field>
         <field name="model">vpa.commission.payment.wizard</field>
         <field name="arch" type="xml">
-            <form string="Create Payment Entry">
-                <field name="currency_id" invisible="1"/>
+            <form string="Make Payment">
                 <group>
                     <group>
-                        <field name="line_count" string="Commission Lines"/>
-                        <field name="total_amount" widget="monetary"
-                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="payment_method" widget="radio"/>
                     </group>
                     <group>
-                        <field name="payment_date"/>
-                        <field name="journal_id"/>
-                    </group>
-                </group>
-                <group string="Accounts">
-                    <group>
-                        <field name="expense_account_id" string="Expense Account (Debit)"/>
-                    </group>
-                    <group>
-                        <field name="payable_account_id" string="Payable Account (Credit)"/>
-                    </group>
-                </group>
-                <separator string="Employee Summary"/>
-                <field name="summary_line_ids">
-                    <list>
-                        <field name="employee_id"/>
-                        <field name="line_count" string="Lines"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="total_amount" widget="monetary"
-                               options="{'currency_field': 'currency_id'}" sum="Total"/>
+                               options="{'currency_field': 'currency_id'}" readonly="1"/>
+                    </group>
+                </group>
+                <separator string="Commission Lines"/>
+                <field name="line_ids" readonly="1">
+                    <list>
+                        <field name="name"/>
+                        <field name="employee_id"/>
+                        <field name="date"/>
+                        <field name="production_id"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
                     </list>
                 </field>
+                <separator/>
+                <group invisible="payment_method != 'existing'">
+                    <group string="Link Existing Payment">
+                        <field name="existing_payment_id"
+                               required="payment_method == 'existing'"/>
+                    </group>
+                </group>
+                <group invisible="payment_method != 'new'">
+                    <group string="Create New Payment">
+                        <field name="journal_id"
+                               required="payment_method == 'new'"/>
+                        <field name="payment_date"
+                               required="payment_method == 'new'"/>
+                        <field name="partner_id" readonly="1"/>
+                    </group>
+                </group>
                 <footer>
-                    <button name="action_create_payment" string="Create Journal Entries"
+                    <button name="action_make_payment" string="Confirm Payment"
                             type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
@@ -46,23 +54,15 @@
         </field>
     </record>
 
-    <!-- Server Action: Create Payment Entry (appears in Actions dropdown) -->
-    <record id="action_commission_create_payment" model="ir.actions.server">
-        <field name="name">Create Payment Entry</field>
-        <field name="model_id" ref="model_vpa_commission_line"/>
-        <field name="binding_model_id" ref="model_vpa_commission_line"/>
-        <field name="binding_type">action</field>
-        <field name="state">code</field>
-        <field name="code">
-action = {
-    'name': 'Create Payment Entry',
-    'type': 'ir.actions.act_window',
-    'res_model': 'vpa.commission.payment.wizard',
-    'view_mode': 'form',
-    'target': 'new',
-    'context': {'active_ids': records.ids, 'active_model': 'vpa.commission.line'},
-}
-        </field>
+    <!-- Server Action: Make Payment (appears in Actions dropdown on Commission Lines) -->
+    <record id="action_commission_make_payment" model="ir.actions.act_window">
+        <field name="name">Make Payment</field>
+        <field name="res_model">vpa.commission.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="vpa_commission_payment_wizard_view_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="vpa_sales_commission.model_vpa_commission_line"/>
+        <field name="binding_view_types">list</field>
     </record>
 
 </odoo>

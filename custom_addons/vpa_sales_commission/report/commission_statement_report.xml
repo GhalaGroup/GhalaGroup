@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Report 1: Commission Statement from Annual Guarantee -->
+    <record id="action_report_commission_statement_guarantee" model="ir.actions.report">
+        <field name="name">Commission Statement</field>
+        <field name="model">vpa.commission.guarantee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_commission_statement_guarantee</field>
+        <field name="report_file">vpa_sales_commission.report_commission_statement_guarantee</field>
+        <field name="print_report_name">'Commission Statement - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_vpa_commission_guarantee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report 2: Commission Statement from Wizard (custom date range) -->
+    <record id="action_report_commission_statement_wizard" model="ir.actions.report">
+        <field name="name">Commission Statement</field>
+        <field name="model">vpa.commission.statement.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_commission_statement_wizard</field>
+        <field name="report_file">vpa_sales_commission.report_commission_statement_wizard</field>
+        <field name="print_report_name">'Commission Statement - %s' % (object.employee_id.name)</field>
+    </record>
+
+</odoo>

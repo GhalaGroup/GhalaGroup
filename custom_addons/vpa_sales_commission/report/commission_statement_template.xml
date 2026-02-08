@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Shared Statement Body Template -->
+    <template id="report_commission_statement_body">
+        <!-- Inline styles block for wkhtmltopdf -->
+        <style>
+            .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+            .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+            .cs-subtitle { font-size: 14px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+            .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+
+            .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+            .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; border: none; }
+            .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border: none; }
+            .cs-th-right { text-align: right; }
+            .cs-th-center { text-align: center; }
+
+            .cs-td { padding: 6px 5px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
+            .cs-td-right { text-align: right; }
+            .cs-td-center { text-align: center; }
+            .cs-td-bold { font-weight: 700; }
+            .cs-td-small { font-size: 8px; color: #666; }
+
+            .cs-row-paid { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
+            .cs-row-confirmed { background-color: #fff8e1 !important; -webkit-print-color-adjust: exact; }
+            .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+
+            .cs-badge { padding: 3px 10px; border-radius: 12px; font-size: 8px; font-weight: 700; color: #fff !important; display: inline-block; letter-spacing: 0.3px; -webkit-print-color-adjust: exact; }
+            .cs-badge-paid { background-color: #27ae60 !important; }
+            .cs-badge-confirmed { background-color: #f39c12 !important; }
+            .cs-badge-pending { background-color: #3498db !important; }
+
+            .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+
+            .cs-summary { width: 48%; margin-left: auto; border-collapse: collapse; margin-bottom: 16px; }
+            .cs-summary-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; border: none; }
+            .cs-summary td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
+            .cs-summary-label { font-weight: 600; color: #2d3436; background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 58%; }
+            .cs-summary-value { text-align: right; color: #2d3436; }
+            .cs-summary-highlight td { border-top: 2px solid #2d3436; border-bottom: 2px solid #2d3436; font-weight: 800 !important; font-size: 11px; }
+            .cs-summary-danger td { background-color: #fdecea !important; -webkit-print-color-adjust: exact; border: 1px solid #e74c3c; }
+            .cs-summary-danger .cs-summary-value { color: #DC143C; font-weight: 800; font-size: 11px; }
+            .cs-summary-success td { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; border: 1px solid #27ae60; }
+            .cs-summary-success .cs-summary-value { color: #27ae60; font-weight: 800; font-size: 11px; }
+
+            .cs-sig-table { width: 100%; margin-top: 30px; }
+            .cs-sig-table td { text-align: center; vertical-align: top; padding: 0 15px; }
+            .cs-sig-line { border-top: 1px solid #2d3436; padding-top: 4px; font-size: 10px; font-weight: 700; color: #2d3436; margin-bottom: 30px; }
+            .cs-sig-field { font-size: 9px; color: #777; }
+            .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+        </style>
+
+        <div class="page cs-page">
+
+            <!-- Header -->
+            <table style="width: 100%; margin-bottom: 15px;">
+                <tr>
+                    <td style="width: 100%; border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                        <div class="cs-title">COMMISSION STATEMENT — <span style="font-size: 22px;">FY <t t-out="period_label"/></span></div>
+                        <div class="cs-subtitle"><t t-out="employee_name"/></div>
+                        <div class="cs-date" style="margin-top: 2px;">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Scheme Details -->
+            <t t-if="scheme">
+                <table class="cs-table o_ignore_layout_styling" style="margin-bottom: 14px;">
+                    <tr class="cs-table-title"><td colspan="6">Scheme Details</td></tr>
+                    <tr>
+                        <td class="cs-td cs-td-bold" style="background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 15%;">Company</td>
+                        <td class="cs-td" style="width: 18%;"><t t-out="scheme.company_id.name"/></td>
+                        <td class="cs-td cs-td-bold" style="background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 15%;">Type</td>
+                        <td class="cs-td" style="width: 18%;">
+                            <t t-if="scheme.production_commission">Production</t>
+                            <t t-if="scheme.production_commission and scheme.sales_commission"> / </t>
+                            <t t-if="scheme.sales_commission">Sales</t>
+                        </td>
+                        <td class="cs-td cs-td-bold" style="background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 15%;">Rate</td>
+                        <td class="cs-td" style="width: 19%;">
+                            <t t-if="scheme.production_commission"><t t-out="scheme.production_rate"/>%<t t-if="scheme.sales_commission"> (Prod)</t></t>
+                            <t t-if="scheme.sales_commission"><t t-if="scheme.production_commission"> / </t><t t-out="scheme.sales_rate"/>%<t t-if="scheme.production_commission"> (Sales)</t></t>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="cs-td cs-td-bold" style="background-color: #f5f6fa !important; -webkit-print-color-adjust: exact;">Applies To</td>
+                        <td class="cs-td" colspan="3">
+                            <t t-if="scheme.apply_to == 'all'">All Manufacturing Orders</t>
+                            <t t-if="scheme.apply_to == 'workcenter'">Workcenters: <t t-out="', '.join(scheme.workcenter_ids.mapped('name'))"/></t>
+                            <t t-if="scheme.apply_to == 'product_category'">Categories: <t t-out="', '.join(scheme.product_category_ids.mapped('name'))"/></t>
+                            <t t-if="scheme.apply_to == 'specific_products'">Products: <t t-out="', '.join(scheme.product_ids.mapped('name'))"/></t>
+                        </td>
+                        <td class="cs-td cs-td-bold" style="background-color: #f5f6fa !important; -webkit-print-color-adjust: exact;">Currency</td>
+                        <td class="cs-td"><t t-out="scheme.currency_id.name"/></td>
+                    </tr>
+                </table>
+            </t>
+
+            <!-- Commission Details -->
+            <table class="cs-table o_ignore_layout_styling">
+                <tr class="cs-table-title"><td colspan="12">Commission Details</td></tr>
+                <tr>
+                    <th class="cs-th" style="width: 7%;">Date</th>
+                    <th class="cs-th" style="width: 10%;">MO</th>
+                    <th class="cs-th" style="width: 6%;">SO</th>
+                    <th class="cs-th" style="width: 14%;">Item</th>
+                    <th class="cs-th cs-th-right" style="width: 9%;">Base Amt</th>
+                    <th class="cs-th cs-th-center" style="width: 4%;">%</th>
+                    <th class="cs-th cs-th-right" style="width: 9%;">Commission</th>
+                    <th class="cs-th cs-th-center" style="width: 7%;">Status</th>
+                    <th class="cs-th cs-th-right" style="width: 9%;">Paid</th>
+                    <th class="cs-th cs-th-right" style="width: 9%;">Due</th>
+                    <th class="cs-th" style="width: 9%;">Pay Ref</th>
+                    <th class="cs-th" style="width: 7%;">Pay Date</th>
+                </tr>
+                <t t-foreach="lines" t-as="line">
+                    <t t-set="rc" t-value="'cs-row-paid' if line.state == 'paid' else ('cs-row-confirmed' if line.state == 'confirmed' else ('cs-row-alt' if line_index % 2 == 1 else ''))"/>
+                    <tr t-att-class="rc">
+                        <td class="cs-td"><span t-field="line.date" t-options='{"format": "dd/MM/yy"}'/></td>
+                        <td class="cs-td cs-td-small"><span t-field="line.production_id"/></td>
+                        <td class="cs-td"><t t-out="line.sale_order_name or '-'"/></td>
+                        <td class="cs-td" style="font-size: 9px;"><t t-out="line.item_name or '-'"/></td>
+                        <td class="cs-td cs-td-right"><span t-field="line.base_amount" t-options='{"widget": "float", "precision": 2}'/></td>
+                        <td class="cs-td cs-td-center"><span t-field="line.rate"/>%</td>
+                        <td class="cs-td cs-td-right cs-td-bold"><span t-field="line.amount" t-options='{"widget": "float", "precision": 2}'/></td>
+                        <td class="cs-td cs-td-center">
+                            <t t-if="line.state == 'pending'"><span class="cs-badge cs-badge-pending">PENDING</span></t>
+                            <t t-if="line.state == 'confirmed'"><span class="cs-badge cs-badge-confirmed">CONFIRMED</span></t>
+                            <t t-if="line.state == 'paid'"><span class="cs-badge cs-badge-paid">PAID</span></t>
+                        </td>
+                        <td class="cs-td cs-td-right"><span t-field="line.amount_paid" t-options='{"widget": "float", "precision": 2}'/></td>
+                        <td class="cs-td cs-td-right"><span t-field="line.amount_due" t-options='{"widget": "float", "precision": 2}'/></td>
+                        <td class="cs-td cs-td-small"><t t-if="line.payment_id"><span t-field="line.payment_id"/></t><t t-else="">-</t></td>
+                        <td class="cs-td" style="font-size: 9px;"><t t-if="line.paid_date"><span t-field="line.paid_date" t-options='{"format": "dd/MM/yy"}'/></t><t t-else="">-</t></td>
+                    </tr>
+                </t>
+                <t t-if="not lines">
+                    <tr><td colspan="12" class="cs-td" style="text-align: center; color: #999; font-style: italic; padding: 15px;">No commission lines for this period</td></tr>
+                </t>
+                <!-- Totals -->
+                <t t-if="lines">
+                    <tr class="cs-totals">
+                        <td colspan="4" style="text-align: right;">TOTALS</td>
+                        <td style="text-align: right;"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(sum(lines.mapped('base_amount')))"/></td>
+                        <td></td>
+                        <td style="text-align: right;"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(total_earned)"/></td>
+                        <td></td>
+                        <td style="text-align: right;"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(total_paid)"/></td>
+                        <td style="text-align: right;"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(outstanding)"/></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </t>
+            </table>
+
+            <!-- Statement Summary -->
+            <table class="cs-summary o_ignore_layout_styling">
+                <tr class="cs-summary-title"><td colspan="2">Statement Summary</td></tr>
+                <tr>
+                    <td class="cs-summary-label">A. Total Commission Earned</td>
+                    <td class="cs-summary-value"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(total_earned)"/></td>
+                </tr>
+                <tr>
+                    <td class="cs-summary-label">B. Total Paid</td>
+                    <td class="cs-summary-value"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(total_paid)"/></td>
+                </tr>
+                <tr class="cs-summary-highlight">
+                    <td class="cs-summary-label" style="font-weight: 800 !important;">C. Outstanding (A - B)</td>
+                    <td class="cs-summary-value" style="font-weight: 800 !important; font-size: 12px;"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(outstanding)"/></td>
+                </tr>
+                <t t-if="guarantee_amount">
+                    <tr>
+                        <td class="cs-summary-label">D. Minimum Guarantee</td>
+                        <td class="cs-summary-value"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(guarantee_amount)"/></td>
+                    </tr>
+                    <t t-if="shortfall > 0">
+                        <tr class="cs-summary-danger">
+                            <td class="cs-summary-label" style="font-weight: 800; color: #c0392b;">E. Shortfall (D - A)</td>
+                            <td class="cs-summary-value"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(shortfall)"/></td>
+                        </tr>
+                    </t>
+                    <t t-else="">
+                        <tr class="cs-summary-success">
+                            <td class="cs-summary-label" style="font-weight: 800; color: #27ae60;">E. Above Guarantee</td>
+                            <td class="cs-summary-value"><t t-out="currency_symbol"/>&#160;<t t-out="'{:,.2f}'.format(total_earned - guarantee_amount)"/></td>
+                        </tr>
+                    </t>
+                </t>
+            </table>
+
+            <!-- Signatures -->
+            <table class="cs-sig-table o_ignore_layout_styling">
+                <tr>
+                    <td style="width: 33%;">
+                        <div class="cs-sig-line">Prepared By</div>
+                        <div class="cs-sig-field">Name: ________________________</div>
+                        <div class="cs-sig-field" style="margin-top: 3px;">Date: ________________________</div>
+                    </td>
+                    <td style="width: 33%;">
+                        <div class="cs-sig-line">Employee</div>
+                        <div class="cs-sig-field">Name: ________________________</div>
+                        <div class="cs-sig-field" style="margin-top: 3px;">Date: ________________________</div>
+                    </td>
+                    <td style="width: 33%;">
+                        <div class="cs-sig-line">Authorized By</div>
+                        <div class="cs-sig-field">Name: ________________________</div>
+                        <div class="cs-sig-field" style="margin-top: 3px;">Date: ________________________</div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="cs-footer-note">
+                Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- Report Template: Guarantee (yearly) -->
+    <template id="report_commission_statement_guarantee">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-set="company" t-value="doc.company_id"/>
+                    <t t-set="scheme" t-value="doc.scheme_id"/>
+                    <t t-set="employee_name" t-value="doc.employee_id.name"/>
+                    <t t-set="period_label" t-value="doc.year"/>
+                    <t t-set="currency" t-value="doc.currency_id"/>
+                    <t t-set="currency_symbol" t-value="doc.currency_id.symbol"/>
+                    <t t-set="guarantee_amount" t-value="doc.guarantee_amount"/>
+                    <t t-set="total_earned" t-value="doc.total_earned"/>
+                    <t t-set="total_confirmed" t-value="doc.total_confirmed"/>
+                    <t t-set="total_pending" t-value="doc.total_pending"/>
+                    <t t-set="total_paid" t-value="doc.total_paid"/>
+                    <t t-set="outstanding" t-value="doc.outstanding"/>
+                    <t t-set="shortfall" t-value="doc.shortfall"/>
+                    <t t-set="lines" t-value="doc.commission_line_ids.sorted(key=lambda l: l.date)"/>
+                    <t t-set="payment_lines" t-value="doc.commission_line_ids.filtered(lambda l: l.state == 'paid').sorted(key=lambda l: l.paid_date or l.date)"/>
+                    <t t-call="vpa_sales_commission.report_commission_statement_body"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Template: Wizard (custom date range) -->
+    <template id="report_commission_statement_wizard">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-set="company" t-value="doc.company_id or doc.env.company"/>
+                    <t t-set="scheme" t-value="doc.env['vpa.commission.scheme'].search([('employee_id', '=', doc.employee_id.id)], limit=1)"/>
+                    <t t-set="employee_name" t-value="doc.employee_id.name"/>
+                    <t t-set="period_label" t-value="doc.get_period_label()"/>
+                    <t t-set="currency" t-value="doc.currency_id"/>
+                    <t t-set="currency_symbol" t-value="doc.currency_id.symbol"/>
+                    <t t-set="guarantee_amount" t-value="0"/>
+                    <t t-set="all_lines" t-value="doc.get_commission_lines()"/>
+                    <t t-set="totals" t-value="doc.get_totals(all_lines)"/>
+                    <t t-set="total_earned" t-value="totals['total_earned']"/>
+                    <t t-set="total_confirmed" t-value="totals['total_confirmed']"/>
+                    <t t-set="total_pending" t-value="totals['total_pending']"/>
+                    <t t-set="total_paid" t-value="totals['total_paid']"/>
+                    <t t-set="outstanding" t-value="totals['outstanding']"/>
+                    <t t-set="shortfall" t-value="0"/>
+                    <t t-set="lines" t-value="all_lines"/>
+                    <t t-set="payment_lines" t-value="all_lines.filtered(lambda l: l.state == 'paid').sorted(key=lambda l: l.paid_date or l.date)"/>
+                    <t t-call="vpa_sales_commission.report_commission_statement_body"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

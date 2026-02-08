@@ -26,34 +26,6 @@
                             <field name="commission_auto_create"/>
                         </setting>
                     </block>
-                    <block title="Commission Journal" name="vpa_commission_journal">
-                        <setting string="Journal"
-                                 help="Default journal for commission payment entries">
-                            <field name="commission_journal_id"/>
-                        </setting>
-                    </block>
-                    <block title="Production Commission Accounts" name="vpa_commission_production_accounts"
-                           invisible="not commission_production_enabled">
-                        <setting string="Expense Account (Debit)"
-                                 help="Default debit account for production commission payments">
-                            <field name="commission_production_expense_account_id"/>
-                        </setting>
-                        <setting string="Payable Account (Credit)"
-                                 help="Default credit account for production commission payments">
-                            <field name="commission_production_payable_account_id"/>
-                        </setting>
-                    </block>
-                    <block title="Sales Commission Accounts" name="vpa_commission_sales_accounts"
-                           invisible="not commission_sales_enabled">
-                        <setting string="Expense Account (Debit)"
-                                 help="Default debit account for sales commission payments">
-                            <field name="commission_sales_expense_account_id"/>
-                        </setting>
-                        <setting string="Payable Account (Credit)"
-                                 help="Default credit account for sales commission payments">
-                            <field name="commission_sales_payable_account_id"/>
-                        </setting>
-                    </block>
                 </app>
             </xpath>
         </field>
