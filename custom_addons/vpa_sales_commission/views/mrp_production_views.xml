@@ -16,16 +16,31 @@
                     <field name="commission_line_count" string="Commissions" widget="statinfo"/>
                 </button>
             </xpath>
-            <!-- Add Generate/Applied buttons in header -->
+            <!-- Add Generate/Block/Unblock buttons in header -->
             <xpath expr="//header" position="inside">
                 <field name="commission_generated" invisible="1"/>
+                <field name="commission_blocked" invisible="1"/>
+                <!-- Generate Commission: visible when done, not generated, not blocked -->
                 <button name="action_generate_commission" type="object"
                         string="Generate Commission" class="btn-primary"
-                        invisible="state != 'done' or commission_generated"
+                        invisible="state != 'done' or commission_generated or commission_blocked"
                         groups="vpa_sales_commission.group_commission_manager"/>
+                <!-- Commission Applied: visible when generated -->
                 <button name="action_view_commission_lines" type="object"
                         string="Commission Applied" class="btn-success"
                         invisible="state != 'done' or not commission_generated"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <!-- Block Commission: visible in all states, not blocked, not generated -->
+                <button name="action_block_commission" type="object"
+                        string="Block Commission" class="btn-warning"
+                        icon="fa-ban"
+                        invisible="commission_blocked or commission_generated"
+                        groups="vpa_sales_commission.group_commission_user"/>
+                <!-- Unblock Commission: visible when blocked (manager only) -->
+                <button name="action_unblock_commission" type="object"
+                        string="Unblock Commission" class="btn-danger"
+                        icon="fa-unlock"
+                        invisible="not commission_blocked"
                         groups="vpa_sales_commission.group_commission_manager"/>
             </xpath>
             <!-- Add commission tab -->

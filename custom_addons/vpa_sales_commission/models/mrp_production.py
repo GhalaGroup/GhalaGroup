@@ -3,10 +3,19 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+
+    commission_blocked = fields.Boolean(
+        string='Commission Blocked',
+        default=False,
+        tracking=True,
+        groups='vpa_sales_commission.group_commission_user',
+        help='If checked, commission cannot be generated for this Manufacturing Order.',
+    )
 
     commission_line_ids = fields.One2many(
         'vpa.commission.line',
@@ -51,9 +60,21 @@ class MrpProduction(models.Model):
                     base_amount += move.product_id.standard_price * move.quantity
             production.commission_base_amount = base_amount
 
+    def action_block_commission(self):
+        """Block commission generation for this MO."""
+        self.ensure_one()
+        self.commission_blocked = True
+
+    def action_unblock_commission(self):
+        """Unblock commission generation for this MO. Manager only."""
+        self.ensure_one()
+        self.commission_blocked = False
+
     def action_generate_commission(self):
         """Create and open the commission generation wizard."""
         self.ensure_one()
+        if self.commission_blocked:
+            raise UserError(_('Commission generation is blocked for this Manufacturing Order.'))
 
         # Build material lines
         material_lines = []
