@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add Sync Delivery Quantities button to Sale Order form -->
+    <record id="view_order_form_inherit_sync_delivery" model="ir.ui.view">
+        <field name="name">sale.order.form.sync.delivery</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add button in header after existing buttons -->
+            <xpath expr="//button[@name='action_quotation_send']" position="after">
+                <button name="action_sync_delivery_quantities"
+                        type="object"
+                        string="Sync Delivery Quantities"
+                        class="btn-secondary"
+                        invisible="state not in ('sale', 'done') or not picking_ids"
+                        help="Update delivery order quantities to match current sale order quantities"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

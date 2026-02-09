@@ -45,11 +45,13 @@ Support: info@vpa.co.tz
         'vpa_production_base',
         'mrp',
         'stock',
+        'sale',
     ],
     'data': [
         'security/ir.model.access.csv',
         'views/mrp_bom_views.xml',
         'views/mrp_production_views.xml',
+        'views/sale_order_views.xml',
     ],
     'installable': True,
     'application': False,

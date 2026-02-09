@@ -77,8 +77,8 @@ class MrpProductionCommissionReport(models.Model):
 
                     -- Commission Status Logic
                     CASE
-                        WHEN mp.state NOT IN ('done', 'to_close') THEN 'not_applicable'
                         WHEN mp.commission_blocked = true THEN 'blocked'
+                        WHEN mp.state NOT IN ('done', 'to_close') THEN 'not_applicable'
                         WHEN COUNT(cl.id) = 0 THEN 'pending_generation'
                         WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'paid') = COUNT(cl.id) THEN 'paid'
                         WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'confirmed') > 0 THEN 'confirmed'
@@ -98,7 +98,7 @@ class MrpProductionCommissionReport(models.Model):
                 FROM mrp_production mp
                 LEFT JOIN vpa_commission_line cl ON cl.production_id = mp.id AND cl.state != 'cancelled'
                 LEFT JOIN res_company rc ON rc.id = mp.company_id
-                WHERE mp.state IN ('done', 'to_close', 'progress')
+                WHERE mp.state IN ('draft', 'confirmed', 'progress', 'to_close', 'done')
                 GROUP BY mp.id, mp.name, mp.product_id, mp.product_qty, mp.date_finished,
                          mp.state, mp.commission_blocked,
                          mp.company_id, rc.currency_id
