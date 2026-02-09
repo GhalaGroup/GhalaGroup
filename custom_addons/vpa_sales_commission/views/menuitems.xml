@@ -40,6 +40,21 @@
               sequence="17"
               groups="vpa_sales_commission.group_commission_manager"/>
 
+    <!-- Reporting Menu -->
+    <menuitem id="menu_commission_reporting"
+              name="Reporting"
+              parent="menu_commission_root"
+              sequence="90"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
+
+    <!-- MO Commission Report -->
+    <menuitem id="menu_mrp_production_commission_report"
+              name="MO Commission Report"
+              parent="menu_commission_reporting"
+              action="action_mrp_production_commission_report"
+              sequence="10"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
+
     <!-- Configuration Menu -->
     <menuitem id="menu_commission_config"
               name="Configuration"

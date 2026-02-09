@@ -112,6 +112,33 @@ class MrpProduction(models.Model):
                 'already_generated': bool(existing),
             }))
 
+        # Build commission history for this product variant
+        history_lines = []
+        past_commissions = self.env['vpa.commission.line'].search([
+            ('type', '=', 'production'),
+            ('production_id', '!=', self.id),
+            ('production_id.product_id', '=', self.product_id.id),
+            ('state', '!=', 'cancelled'),
+        ], order='date desc')
+        seen_productions = {}
+        for cl in past_commissions:
+            if cl.production_id.id not in seen_productions:
+                seen_productions[cl.production_id.id] = {
+                    'production_id': cl.production_id.id,
+                    'production_name': cl.production_id.name,
+                    'date': cl.date,
+                    'product_qty': cl.production_id.product_qty,
+                    'base_amount': cl.base_amount,
+                    'commission_amount': cl.amount,
+                    'currency_id': cl.currency_id.id,
+                }
+            else:
+                # Aggregate commission amounts for this MO
+                seen_productions[cl.production_id.id]['commission_amount'] += cl.amount
+
+        for prod_data in seen_productions.values():
+            history_lines.append((0, 0, prod_data))
+
         # Create wizard record with all data persisted
         wizard = self.env['vpa.commission.generate.wizard'].create({
             'production_id': self.id,
@@ -120,6 +147,7 @@ class MrpProduction(models.Model):
             ),
             'material_line_ids': material_lines,
             'scheme_line_ids': scheme_lines,
+            'history_line_ids': history_lines,
         })
 
         return {

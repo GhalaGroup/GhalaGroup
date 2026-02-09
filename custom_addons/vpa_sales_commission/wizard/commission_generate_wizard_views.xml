@@ -8,6 +8,8 @@
         <field name="arch" type="xml">
             <form string="Generate Commission">
                 <field name="currency_id" invisible="1"/>
+                <field name="has_history" invisible="1"/>
+                <field name="use_override" invisible="1"/>
                 <group>
                     <group>
                         <field name="production_id"/>
@@ -22,8 +24,43 @@
                     <group>
                         <field name="total_base_amount" widget="monetary"
                                options="{'currency_field': 'currency_id'}"/>
+                        <field name="total_commission_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
                     </group>
                 </group>
+                <!-- Override Banner -->
+                <div class="alert alert-info d-flex align-items-center justify-content-between"
+                     role="alert" invisible="not use_override">
+                    <div>
+                        <i class="fa fa-info-circle me-1"/>
+                        <strong>Historical base amount applied</strong> from
+                        <field name="override_source" readonly="1" nolabel="1" class="d-inline"/>
+                    </div>
+                    <button name="action_clear_override" type="object"
+                            string="Clear Override" class="btn btn-sm btn-outline-secondary ms-2"/>
+                </div>
+                <!-- Commission History -->
+                <separator string="Commission History for This Product"
+                           invisible="not has_history"/>
+                <div class="text-muted" style="font-size: 0.85em; margin-bottom: 4px;"
+                     invisible="not has_history">
+                    <em>Past commissions for the same product. Click "Use" to apply a historical base amount.</em>
+                </div>
+                <field name="history_line_ids" invisible="not has_history" readonly="1">
+                    <list create="false" delete="false">
+                        <field name="production_name" string="MO"/>
+                        <field name="date"/>
+                        <field name="product_qty" string="Qty"/>
+                        <field name="base_amount" string="Base Amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="commission_amount" string="Commission" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <button name="action_use_this_amount" type="object"
+                                string="Use" class="btn-link"
+                                icon="fa-check-circle"/>
+                    </list>
+                </field>
                 <separator string="Assign To Employees"/>
                 <field name="scheme_line_ids">
                     <list editable="bottom" decoration-muted="already_generated">

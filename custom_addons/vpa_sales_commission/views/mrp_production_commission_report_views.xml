@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- MO Commission Report Tree View -->
+    <record id="mrp_production_commission_report_view_tree" model="ir.ui.view">
+        <field name="name">mrp.production.commission.report.tree</field>
+        <field name="model">mrp.production.commission.report</field>
+        <field name="arch" type="xml">
+            <list string="MO Commission Report" create="false" delete="false" edit="false"
+                  decoration-danger="commission_status == 'blocked'"
+                  decoration-warning="commission_status == 'pending_generation'"
+                  decoration-info="commission_status == 'pending_confirmation'"
+                  decoration-success="commission_status == 'paid'">
+                <field name="name" string="MO Reference"/>
+                <field name="product_id"/>
+                <field name="product_qty"/>
+                <field name="date_finished"/>
+                <field name="state" optional="hide"/>
+                <field name="commission_status" widget="badge"
+                       decoration-danger="commission_status == 'blocked'"
+                       decoration-warning="commission_status == 'pending_generation'"
+                       decoration-info="commission_status in ('pending_confirmation', 'confirmed')"
+                       decoration-success="commission_status == 'paid'"/>
+                <field name="commission_base_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="total_commission_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" sum="Total"/>
+                <field name="pending_commission_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="confirmed_commission_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="paid_commission_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="employee_count" string="Employees"/>
+                <field name="commission_line_count" string="Lines" optional="hide"/>
+                <field name="commission_blocked" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="date_year" column_invisible="1"/>
+                <field name="date_month" column_invisible="1"/>
+                <button name="action_open_production" type="object" string="Open MO" icon="fa-folder-open"/>
+                <button name="action_view_commission_lines" type="object" string="View Commissions"
+                        icon="fa-money" invisible="commission_line_count == 0"/>
+                <button name="action_generate_commission" type="object" string="Generate"
+                        icon="fa-plus-circle" invisible="commission_status != 'pending_generation'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- MO Commission Report Pivot View -->
+    <record id="mrp_production_commission_report_view_pivot" model="ir.ui.view">
+        <field name="name">mrp.production.commission.report.pivot</field>
+        <field name="model">mrp.production.commission.report</field>
+        <field name="arch" type="xml">
+            <pivot string="MO Commission Analysis">
+                <field name="date_month" type="row" interval="month"/>
+                <field name="commission_status" type="col"/>
+                <field name="total_commission_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- MO Commission Report Graph View -->
+    <record id="mrp_production_commission_report_view_graph" model="ir.ui.view">
+        <field name="name">mrp.production.commission.report.graph</field>
+        <field name="model">mrp.production.commission.report</field>
+        <field name="arch" type="xml">
+            <graph string="MO Commission Analysis" type="bar" stacked="True">
+                <field name="date_month" interval="month"/>
+                <field name="commission_status" type="col"/>
+                <field name="total_commission_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- MO Commission Report Search View -->
+    <record id="mrp_production_commission_report_view_search" model="ir.ui.view">
+        <field name="name">mrp.production.commission.report.search</field>
+        <field name="model">mrp.production.commission.report</field>
+        <field name="arch" type="xml">
+            <search string="Search MO Commission">
+                <searchpanel>
+                    <field name="commission_status" string="Commission Status" icon="fa-tasks" select="multi" enable_counters="1"/>
+                    <field name="state" string="MO Status" icon="fa-cog" select="multi" enable_counters="1"/>
+                </searchpanel>
+                <field name="name" string="MO"/>
+                <field name="product_id"/>
+                <field name="date_finished" string="Date Finished"/>
+                <field name="date_year"/>
+                <field name="date_month"/>
+                <separator/>
+                <filter string="Commission Blocked" name="filter_commission_blocked" domain="[('commission_blocked', '=', True)]"/>
+                <separator/>
+                <filter string="Blocked" name="filter_blocked" domain="[('commission_status', '=', 'blocked')]"/>
+                <filter string="Pending Generation" name="filter_pending_generation"
+                        domain="[('commission_status', '=', 'pending_generation')]"/>
+                <filter string="Pending Confirmation" name="filter_pending_confirmation"
+                        domain="[('commission_status', '=', 'pending_confirmation')]"/>
+                <filter string="Confirmed" name="filter_confirmed"
+                        domain="[('commission_status', '=', 'confirmed')]"/>
+                <filter string="Paid" name="filter_paid"
+                        domain="[('commission_status', '=', 'paid')]"/>
+                <separator/>
+                <filter string="Has Commission" name="filter_has_commission"
+                        domain="[('commission_generated', '=', True)]"/>
+                <filter string="No Commission" name="filter_no_commission"
+                        domain="[('commission_generated', '=', False)]"/>
+                <separator/>
+                <filter string="This Month" name="filter_this_month"
+                        domain="[('date_finished', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('date_finished', '&lt;', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Year" name="filter_this_year"
+                        domain="[('date_finished', '&gt;=', (context_today() - relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="2024" name="filter_2024" domain="[('date_year', '=', '2024')]"/>
+                <filter string="2025" name="filter_2025" domain="[('date_year', '=', '2025')]"/>
+                <filter string="2026" name="filter_2026" domain="[('date_year', '=', '2026')]"/>
+                <separator/>
+                <filter string="Commission Status" name="group_commission_status"
+                        context="{'group_by': 'commission_status'}"/>
+                <filter string="Product" name="group_product" context="{'group_by': 'product_id'}"/>
+                <filter string="Year" name="group_year" context="{'group_by': 'date_year'}"/>
+                <filter string="Month" name="group_month" context="{'group_by': 'date_month'}"/>
+                <filter string="MO Status" name="group_state" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for MO Commission Report -->
+    <record id="action_mrp_production_commission_report" model="ir.actions.act_window">
+        <field name="name">MO Commission Report</field>
+        <field name="res_model">mrp.production.commission.report</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="mrp_production_commission_report_view_search"/>
+        <field name="context">{'search_default_filter_this_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No manufacturing orders found
+            </p>
+            <p>
+                This report shows all manufacturing orders with their commission status.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

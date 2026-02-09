@@ -70,6 +70,7 @@ Support: info@vpa.co.tz
         'views/vpa_commission_line_views.xml',
         'views/product_template_views.xml',
         'views/mrp_production_views.xml',
+        'views/mrp_production_commission_report_views.xml',
         'views/hr_employee_views.xml',
         'views/res_config_settings_views.xml',
         'views/vpa_commission_guarantee_views.xml',
