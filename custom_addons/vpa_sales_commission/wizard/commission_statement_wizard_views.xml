@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Commission Statement Wizard Form -->
+    <record id="vpa_commission_statement_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.statement.wizard.form</field>
+        <field name="model">vpa.commission.statement.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Commission Statement">
+                <group>
+                    <field name="employee_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="include_pending"/>
+                    <field name="currency_id" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_print_statement" string="Print Statement"
+                            type="object" class="btn-primary" icon="fa-print"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Commission Statement Wizard Action -->
+    <record id="action_commission_statement_wizard" model="ir.actions.act_window">
+        <field name="name">Commission Statement</field>
+        <field name="res_model">vpa.commission.statement.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="vpa_commission_statement_wizard_view_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

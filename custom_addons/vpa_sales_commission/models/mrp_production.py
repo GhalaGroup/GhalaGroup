@@ -3,10 +3,19 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+
+    commission_blocked = fields.Boolean(
+        string='Commission Blocked',
+        default=False,
+        tracking=True,
+        groups='vpa_sales_commission.group_commission_user',
+        help='If checked, commission cannot be generated for this Manufacturing Order.',
+    )
 
     commission_line_ids = fields.One2many(
         'vpa.commission.line',
@@ -51,9 +60,21 @@ class MrpProduction(models.Model):
                     base_amount += move.product_id.standard_price * move.quantity
             production.commission_base_amount = base_amount
 
+    def action_block_commission(self):
+        """Block commission generation for this MO."""
+        self.ensure_one()
+        self.commission_blocked = True
+
+    def action_unblock_commission(self):
+        """Unblock commission generation for this MO. Manager only."""
+        self.ensure_one()
+        self.commission_blocked = False
+
     def action_generate_commission(self):
         """Create and open the commission generation wizard."""
         self.ensure_one()
+        if self.commission_blocked:
+            raise UserError(_('Commission generation is blocked for this Manufacturing Order.'))
 
         # Build material lines
         material_lines = []
@@ -91,6 +112,33 @@ class MrpProduction(models.Model):
                 'already_generated': bool(existing),
             }))
 
+        # Build commission history for this product variant
+        history_lines = []
+        past_commissions = self.env['vpa.commission.line'].search([
+            ('type', '=', 'production'),
+            ('production_id', '!=', self.id),
+            ('production_id.product_id', '=', self.product_id.id),
+            ('state', '!=', 'cancelled'),
+        ], order='date desc')
+        seen_productions = {}
+        for cl in past_commissions:
+            if cl.production_id.id not in seen_productions:
+                seen_productions[cl.production_id.id] = {
+                    'production_id': cl.production_id.id,
+                    'production_name': cl.production_id.name,
+                    'date': cl.date,
+                    'product_qty': cl.production_id.product_qty,
+                    'base_amount': cl.base_amount,
+                    'commission_amount': cl.amount,
+                    'currency_id': cl.currency_id.id,
+                }
+            else:
+                # Aggregate commission amounts for this MO
+                seen_productions[cl.production_id.id]['commission_amount'] += cl.amount
+
+        for prod_data in seen_productions.values():
+            history_lines.append((0, 0, prod_data))
+
         # Create wizard record with all data persisted
         wizard = self.env['vpa.commission.generate.wizard'].create({
             'production_id': self.id,
@@ -99,6 +147,7 @@ class MrpProduction(models.Model):
             ),
             'material_line_ids': material_lines,
             'scheme_line_ids': scheme_lines,
+            'history_line_ids': history_lines,
         })
 
         return {

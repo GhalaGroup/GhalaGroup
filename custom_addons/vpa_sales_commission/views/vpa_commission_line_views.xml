@@ -16,7 +16,7 @@
                             invisible="state in ('paid', 'cancelled')"
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <button name="action_reset_to_pending" string="Reset to Pending" type="object"
-                            invisible="state not in ('confirmed', 'cancelled')"
+                            invisible="state not in ('confirmed', 'paid', 'cancelled')"
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="pending,confirmed,paid"/>
@@ -29,14 +29,16 @@
                     </div>
                     <group>
                         <group>
-                            <field name="scheme_id"/>
+                            <field name="scheme_id" readonly="1"/>
                             <field name="employee_id"/>
-                            <field name="type"/>
-                            <field name="date"/>
+                            <field name="type" readonly="1"/>
+                            <field name="date" readonly="1"/>
                         </group>
                         <group>
-                            <field name="production_id"/>
-                            <field name="invoice_id" invisible="type != 'sales'"/>
+                            <field name="production_id" readonly="1"/>
+                            <field name="sale_order_name"/>
+                            <field name="item_name"/>
+                            <field name="invoice_id" invisible="type != 'sales'" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="delivered"/>
                             <field name="delivery_date" invisible="not delivered"/>
@@ -44,8 +46,8 @@
                     </group>
                     <group string="Commission Calculation">
                         <group>
-                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <field name="rate"/>
+                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                            <field name="rate" readonly="1"/>
                         </group>
                         <group>
                             <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
@@ -57,10 +59,10 @@
                             <field name="confirmed_date"/>
                             <field name="confirmed_by"/>
                         </group>
-                        <group invisible="not paid_date">
+                        <group invisible="state != 'paid'">
                             <field name="paid_date"/>
                             <field name="paid_by"/>
-                            <field name="payment_move_id" invisible="not payment_move_id"/>
+                            <field name="payment_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -89,13 +91,20 @@
         <field name="name">vpa.commission.line.list</field>
         <field name="model">vpa.commission.line</field>
         <field name="arch" type="xml">
-            <list string="Commission Lines" multi_edit="1">
+            <list string="Commission Lines" multi_edit="1" create="0">
+                <header>
+                    <button name="%(action_commission_make_payment)d" string="Make Payment"
+                            type="action" class="btn-primary"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                </header>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="employee_id"/>
                 <field name="scheme_id" optional="hide"/>
                 <field name="type" optional="hide"/>
                 <field name="production_id"/>
+                <field name="sale_order_name"/>
+                <field name="item_name"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="rate"/>
@@ -146,6 +155,7 @@
                 <searchpanel>
                     <field name="state" string="Status" enable_counters="1" icon="fa-check-square-o"/>
                     <field name="employee_id" string="Employee" enable_counters="1" icon="fa-user" limit="20"/>
+                    <field name="date_year" string="Year" enable_counters="1" icon="fa-calendar"/>
                 </searchpanel>
             </search>
         </field>
@@ -190,9 +200,17 @@
             </p>
             <p>
                 Commission lines are automatically created when Manufacturing Orders are completed.
-                They require manager approval before being marked as paid.
+                They require manager confirmation. Use the "Make Payment" action to process payments.
             </p>
         </field>
+    </record>
+
+    <!-- Commission Payments Action (server action to query linked payments) -->
+    <record id="vpa_commission_payments_action" model="ir.actions.server">
+        <field name="name">Commission Payments</field>
+        <field name="model_id" ref="vpa_sales_commission.model_vpa_commission_line"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_commission_payments()</field>
     </record>
 
     <!-- My Commissions Action (for Users - shows only own commissions) -->

@@ -4,3 +4,4 @@
 
 from . import commission_generate_wizard
 from . import commission_payment_wizard
+from . import commission_statement_wizard

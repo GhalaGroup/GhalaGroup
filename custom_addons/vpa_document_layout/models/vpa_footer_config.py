@@ -185,7 +185,17 @@ class VPAFooterConfig(models.Model):
             'vpa_acc_int_transfer.action_report_internal_transfer',
         ]
 
+        # Reports that use web.external_layout and should NOT have VPA header/footer injection
+        # (VPA clears standard header/footer and replaces with URL-based ones which may not render)
+        skip_reports = [
+            'vpa_sales_commission.report_commission_statement',
+        ]
+
         report_xml_id = report_xml_id or ''
+
+        # Skip VPA injection entirely - let web.external_layout handle header/footer
+        if any(r in report_xml_id for r in skip_reports):
+            return self.browse()
 
         if any(r in report_xml_id for r in customer_reports):
             footer_type = 'customer'

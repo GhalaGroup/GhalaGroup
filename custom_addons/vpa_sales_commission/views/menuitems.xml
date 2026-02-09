@@ -8,21 +8,52 @@
               sequence="50"
               groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
 
-    <!-- Commission Lines Menu -->
-    <menuitem id="menu_commission_lines"
-              name="Commission Lines"
+    <!-- Commissions Menu (all employees) -->
+    <menuitem id="menu_my_commissions"
+              name="Commissions"
               parent="menu_commission_root"
               action="vpa_commission_line_action"
               sequence="10"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
+
+    <!-- Commission Payments Menu -->
+    <menuitem id="menu_commission_payments"
+              name="Commission Payments"
+              parent="menu_commission_root"
+              action="vpa_commission_payments_action"
+              sequence="12"
               groups="vpa_sales_commission.group_commission_manager"/>
 
-    <!-- My Commissions Menu -->
-    <menuitem id="menu_my_commissions"
-              name="My Commissions"
+    <!-- Annual Guarantees Menu -->
+    <menuitem id="menu_commission_guarantees"
+              name="Annual Guarantees"
               parent="menu_commission_root"
-              action="vpa_commission_line_action_my"
-              sequence="20"
-              groups="vpa_sales_commission.group_commission_user"/>
+              action="vpa_commission_guarantee_action"
+              sequence="15"
+              groups="vpa_sales_commission.group_commission_manager"/>
+
+    <!-- Commission Statement Menu -->
+    <menuitem id="menu_commission_statement"
+              name="Commission Statement"
+              parent="menu_commission_root"
+              action="action_commission_statement_wizard"
+              sequence="17"
+              groups="vpa_sales_commission.group_commission_manager"/>
+
+    <!-- Reporting Menu -->
+    <menuitem id="menu_commission_reporting"
+              name="Reporting"
+              parent="menu_commission_root"
+              sequence="90"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
+
+    <!-- MO Commission Report -->
+    <menuitem id="menu_mrp_production_commission_report"
+              name="MO Commission Report"
+              parent="menu_commission_reporting"
+              action="action_mrp_production_commission_report"
+              sequence="10"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_commission_config"
