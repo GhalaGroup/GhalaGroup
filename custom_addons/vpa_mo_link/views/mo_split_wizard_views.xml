@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Split MO Wizard Line List View -->
+    <record id="view_mo_split_wizard_line_list" model="ir.ui.view">
+        <field name="name">vpa.mo.split.wizard.line.list</field>
+        <field name="model">vpa.mo.split.wizard.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="false">
+                <field name="lot_number"/>
+                <field name="quantity"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Split MO Wizard Line Form View -->
+    <record id="view_mo_split_wizard_line_form" model="ir.ui.view">
+        <field name="name">vpa.mo.split.wizard.line.form</field>
+        <field name="model">vpa.mo.split.wizard.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="lot_number"/>
+                    <field name="quantity"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Split MO Wizard Form View -->
+    <record id="view_mo_split_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.mo.split.wizard.form</field>
+        <field name="model">vpa.mo.split.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Split Manufacturing Order">
+                <!-- Warning banner when quantities don't match -->
+                <div class="alert alert-warning" role="alert" invisible="total_qty == original_qty">
+                    <strong>Warning:</strong> Total quantity (<field name="total_qty" readonly="1" class="oe_inline"/>)
+                    must equal original quantity (<field name="original_qty" readonly="1" class="oe_inline"/>).
+                    Please adjust the lot quantities.
+                </div>
+
+                <group>
+                    <group>
+                        <field name="production_id" readonly="1"/>
+                        <field name="product_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <label for="original_qty" string="Original Quantity"/>
+                        <div>
+                            <field name="original_qty" readonly="1" class="oe_inline"/>
+                            <field name="product_uom_id" readonly="1" class="oe_inline"/>
+                        </div>
+                        <label for="total_qty" string="Total Lot Quantity"/>
+                        <field name="total_qty" readonly="1"
+                               class="oe_inline"
+                               decoration-success="total_qty == original_qty"
+                               decoration-danger="total_qty != original_qty"
+                               decoration-bf="total_qty != original_qty"/>
+                    </group>
+                </group>
+
+                <notebook>
+                    <page string="Lots">
+                        <field name="line_ids"/>
+                        <div class="oe_right">
+                            <button name="action_add_lot"
+                                    type="object"
+                                    string="Add Lot"
+                                    class="btn-primary"
+                                    icon="fa-plus"/>
+                        </div>
+                    </page>
+                </notebook>
+
+                <footer>
+                    <button name="action_split"
+                            type="object"
+                            string="Split MO"
+                            class="btn-primary"
+                            disabled="total_qty != original_qty"
+                            data-hotkey="q"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"
+                            data-hotkey="z"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Split MO Wizard Action -->
+    <record id="action_mo_split_wizard" model="ir.actions.act_window">
+        <field name="name">Split Manufacturing Order</field>
+        <field name="res_model">vpa.mo.split.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

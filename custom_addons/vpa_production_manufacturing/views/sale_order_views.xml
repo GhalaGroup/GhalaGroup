@@ -13,7 +13,7 @@
                         type="object"
                         string="Sync Delivery Quantities"
                         class="btn-secondary"
-                        invisible="state not in ('sale', 'done') or not picking_ids"
+                        invisible="state not in ('sale', 'done') or not picking_ids or locked"
                         help="Update delivery order quantities to match current sale order quantities"/>
             </xpath>
         </field>

@@ -7,6 +7,26 @@ from odoo.tools import html_escape
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
+    lot_reference = fields.Char(
+        string='Lot Reference',
+        help="Reference for production lots (e.g., 'Lot 1/3', 'Lot 2/3')",
+    )
+
+    def action_split_mo(self):
+        """Open wizard to split this MO into multiple lots."""
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Split Manufacturing Order'),
+            'res_model': 'vpa.mo.split.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_production_id': self.id,
+            },
+        }
+
     @api.depends('bom_id')
     def _compute_product_qty(self):
         """
