@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_vpa_mo_link_wizard,vpa.mo.link.wizard,model_vpa_mo_link_wizard,mrp.group_mrp_user,1,1,1,1
+access_vpa_mo_split_wizard,vpa.mo.split.wizard,model_vpa_mo_split_wizard,mrp.group_mrp_user,1,1,1,1
+access_vpa_mo_split_wizard_line,vpa.mo.split.wizard.line,model_vpa_mo_split_wizard_line,mrp.group_mrp_user,1,1,1,1

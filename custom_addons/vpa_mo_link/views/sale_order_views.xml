@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add Create Remaining MO button to Sale Order form -->
+    <record id="view_order_form_create_remaining_mo" model="ir.ui.view">
+        <field name="name">sale.order.form.create.remaining.mo</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add button in header after existing buttons -->
+            <xpath expr="//button[@name='action_confirm']" position="after">
+                <button name="action_create_remaining_mo"
+                        type="object"
+                        string="Create Remaining MO"
+                        class="btn-secondary"
+                        groups="mrp.group_mrp_user"
+                        invisible="state not in ('sale', 'done') or not mrp_production_count"
+                        help="Create Manufacturing Orders for remaining quantities not covered by existing MOs"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
