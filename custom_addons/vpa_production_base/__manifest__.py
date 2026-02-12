@@ -78,6 +78,9 @@ Support: info@vpa.co.tz
         # Wizards
         'wizard/product_assign_bom_category_views.xml',
     ],
+    'images': [
+        'static/description/icon.png',
+    ],
     'installable': True,
     'application': False,
     'auto_install': False,

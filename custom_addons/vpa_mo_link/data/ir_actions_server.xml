@@ -11,6 +11,7 @@
 # MO - Link/Unlink Toggle: For MANUALLY created MOs only
 # Auto-created MOs (from SO confirmation) are linked via stock_reference_ids - cannot be unlinked
 # This action only works with MOs where you manually set the Source/Origin field
+from markupsafe import Markup
 
 # Check if MRP module is installed
 try:
@@ -49,15 +50,15 @@ if manually_linked_mos:
         mo.write({'origin': False})
 
         # Add chatter message in MO
-        so_link = f"<a href='#id={record.id}&amp;model=sale.order'>{record.name}</a>"
-        mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+        so_link = Markup("<a href='#id=%s&amp;model=sale.order'>%s</a>") % (record.id, record.name)
+        mo.message_post(body=Markup("Unlinked from Sales Order %s") % so_link)
 
     # Invalidate cache to refresh computed field
     record.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])
 
     # Log in Sales Order
-    mo_links = ', '.join([f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>" for mo in manually_linked_mos])
-    record.message_post(body=f"Unlinked {len(manually_linked_mos)} manually linked MO(s): {mo_links}")
+    mo_links = Markup(', ').join([Markup("<a href='#id=%s&amp;model=mrp.production'>%s</a>") % (mo.id, mo.name) for mo in manually_linked_mos])
+    record.message_post(body=Markup("Unlinked %s manually linked MO(s): %s") % (len(manually_linked_mos), mo_links))
 
     action = {
         'type': 'ir.actions.client',
@@ -113,6 +114,7 @@ else:
 # Link/Unlink MO to Sales Order
 # If origin is set and matches an SO -> Unlink (clear origin)
 # If origin is empty -> Show wizard to select SO to link
+from markupsafe import Markup
 
 for mo in records:
     if mo.origin:
@@ -124,11 +126,11 @@ for mo in records:
             mo.write({'origin': False})
 
             # Post messages
-            so_link = f"<a href='#id={sale_order.id}&amp;model=sale.order'>{old_origin}</a>"
-            mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+            so_link = Markup("<a href='#id=%s&amp;model=sale.order'>%s</a>") % (sale_order.id, old_origin)
+            mo.message_post(body=Markup("Unlinked from Sales Order %s") % so_link)
 
-            mo_link = f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>"
-            sale_order.message_post(body=f"Unlinked Manufacturing Order {mo_link}")
+            mo_link = Markup("<a href='#id=%s&amp;model=mrp.production'>%s</a>") % (mo.id, mo.name)
+            sale_order.message_post(body=Markup("Unlinked Manufacturing Order %s") % mo_link)
 
             # Invalidate SO cache
             sale_order.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])
