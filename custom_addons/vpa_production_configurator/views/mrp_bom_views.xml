@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- BOM Line - Add dimension scaling and linked variable -->
+    <record id="mrp_bom_form_inherit_dimension" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherit.dimension</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_qty']" position="after">
+                <field name="scales_with_dimensions" optional="hide"
+                       string="Scales w/ Dims"/>
+                <field name="linked_variable_id" optional="hide"
+                       string="Linked Variable"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

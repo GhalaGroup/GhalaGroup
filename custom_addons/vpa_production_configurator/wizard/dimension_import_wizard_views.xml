@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Dimension Import Wizard Form -->
+    <record id="vpa_dimension_import_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.dimension.import.wizard.form</field>
+        <field name="model">vpa.dimension.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Dimensions">
+                <field name="state" invisible="1"/>
+                <field name="sale_order_id" invisible="1"/>
+
+                <!-- Upload Step -->
+                <div invisible="state != 'upload'">
+                    <group>
+                        <group>
+                            <field name="file_data" filename="file_name"/>
+                            <field name="file_name" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="template_id"
+                                   placeholder="All templates (optional)"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Instructions:</strong>
+                        <ol class="mb-0">
+                            <li>Download the template to see required columns</li>
+                            <li>Fill in product codes, quantities, dimensions, and configuration options</li>
+                            <li>Upload the filled file and click Preview</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Preview Step -->
+                <div invisible="state != 'preview'">
+                    <div class="alert alert-success" role="status">
+                        <strong><field name="import_count" readonly="1"/> lines</strong> ready to import.
+                    </div>
+                    <field name="preview_html" readonly="1"/>
+                </div>
+
+                <!-- Done Step -->
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success" role="status">
+                        <strong>Import complete!</strong> Lines have been added to the sale order.
+                    </div>
+                </div>
+
+                <field name="preview_data_json" invisible="1"/>
+
+                <footer>
+                    <button name="action_download_template" string="Download Template"
+                            type="object" class="btn-secondary"
+                            invisible="state != 'upload'"/>
+                    <button name="action_preview" string="Preview"
+                            type="object" class="btn-primary"
+                            invisible="state != 'upload'"/>
+                    <button name="action_import" string="Import"
+                            type="object" class="btn-primary"
+                            invisible="state != 'preview'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

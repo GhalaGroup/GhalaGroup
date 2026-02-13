@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Sale Order Form - Add Import Dimensions button -->
+    <record id="sale_order_form_inherit_dimension" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.dimension</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Import Dimensions button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_import_dimensions" type="object"
+                        string="Import Dimensions" icon="fa-file-excel-o"
+                        class="btn-secondary"
+                        invisible="state in ('done', 'cancel')"/>
+            </xpath>
+            <!-- Hidden helper field -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="before">
+                <field name="has_dimensions" column_invisible="True"/>
+            </xpath>
+            <!-- Configure gear icon right after product name - minimal width -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']" position="after">
+                <button name="action_open_configurator" type="object"
+                        icon="fa-cog" title="Configure Dimensions"
+                        class="btn-link p-0 ms-0"
+                        invisible="not has_dimensions"
+                        column_invisible="False"
+                        width="24px"/>
+            </xpath>
+            <!-- Dim. Qty after the Unit column -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_id']" position="after">
+                <field name="computed_qty_display" string="Dim. Qty" optional="show"
+                       readonly="1" width="90px"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

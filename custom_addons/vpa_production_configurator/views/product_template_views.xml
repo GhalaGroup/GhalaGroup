@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product Template Form - Add Dimension Template fields -->
+    <record id="product_template_form_inherit_dimension" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.dimension</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='group_general']" position="inside">
+                <field name="dimension_template_id"/>
+                <field name="dimension_rate"
+                       invisible="not dimension_template_id"
+                       readonly="1"
+                       widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="has_dimensions" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

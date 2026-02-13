@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product Configurator Wizard Form -->
+    <record id="vpa_product_configurator_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.product.configurator.wizard.form</field>
+        <field name="model">vpa.product.configurator.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Product Configurator">
+                <group>
+                    <group>
+                        <field name="product_id" readonly="1"/>
+                        <field name="template_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="rate" readonly="1"/>
+                    </group>
+                </group>
+                <separator string="DIMENSIONS"/>
+                <field name="dimension_line_ids">
+                    <list editable="bottom" no_open="1" create="0" delete="0">
+                        <field name="name" readonly="1" string="Label"/>
+                        <field name="value" string="Value"/>
+                        <field name="uom_type" readonly="1" string="Unit"/>
+                        <field name="min_value" readonly="1" optional="show"/>
+                        <field name="max_value" readonly="1" optional="show"/>
+                        <field name="required" column_invisible="True"/>
+                        <field name="field_code" column_invisible="True"/>
+                        <field name="dimension_line_id" column_invisible="True"/>
+                        <field name="sequence" column_invisible="True"/>
+                    </list>
+                </field>
+                <separator string="CONFIGURATION"/>
+                <field name="config_line_ids">
+                    <list editable="bottom" no_open="1" create="0" delete="0">
+                        <field name="display_group_name" readonly="1" string="Group"/>
+                        <field name="name" readonly="1" string="Label"/>
+                        <field name="option_id" string="Selection"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="surcharge_display" readonly="1" string="Surcharge"/>
+                        <field name="variable_type" column_invisible="True"/>
+                        <field name="variable_id" column_invisible="True"/>
+                        <field name="required" column_invisible="True"/>
+                        <field name="affects_price" column_invisible="True"/>
+                        <field name="sequence" column_invisible="True"/>
+                    </list>
+                </field>
+                <separator string="PRICE PREVIEW"/>
+                <group>
+                    <group>
+                        <label for="preview_qty" string="Computed Quantity"/>
+                        <div class="o_row">
+                            <field name="preview_qty" nolabel="1" readonly="1"/>
+                            <field name="preview_qty_label" nolabel="1" readonly="1"/>
+                        </div>
+                        <field name="preview_base_price" string="Base Price" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="preview_total_price" string="Unit Price"
+                               class="fw-bold fs-4" readonly="1"/>
+                    </group>
+                </group>
+                <field name="preview_surcharges_display" readonly="1"
+                       invisible="not preview_surcharges_display"
+                       widget="text" nolabel="1"/>
+                <field name="sale_line_id" invisible="1"/>
+                <footer>
+                    <button name="action_apply" string="Apply" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
