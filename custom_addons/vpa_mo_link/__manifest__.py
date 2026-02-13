@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '19.0.1.3.0',
+    'version': '19.0.1.3.1',
     'category': 'Manufacturing',
     'summary': 'Advanced Manufacturing Order management with flexible workflows, manual linking, and lot splitting',
     'price': 199.00,

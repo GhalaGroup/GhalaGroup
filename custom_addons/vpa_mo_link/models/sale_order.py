@@ -81,6 +81,24 @@ class SaleOrder(models.Model):
             })
             created_mos.append(mo.name)
 
+            # Link MO finished move to pending delivery move (MTO chain)
+            pending_pickings = self.env['stock.picking'].search([
+                ('origin', '=', self.name),
+                ('state', 'not in', ('done', 'cancel')),
+                ('picking_type_code', '=', 'outgoing'),
+            ])
+            for picking in pending_pickings:
+                delivery_move = picking.move_ids.filtered(
+                    lambda m: m.product_id == product and m.state not in ('done', 'cancel')
+                )
+                if delivery_move and mo.move_finished_ids:
+                    finished_move = mo.move_finished_ids.filtered(
+                        lambda m: m.product_id == product
+                    )
+                    if finished_move:
+                        delivery_move.write({'move_orig_ids': [(4, finished_move[0].id)]})
+                        finished_move[0].write({'move_dest_ids': [(4, delivery_move[0].id)]})
+
         # Post message on Sale Order
         message = _(
             'Created %d Manufacturing Order(s) for remaining quantities: %s'
