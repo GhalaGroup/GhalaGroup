@@ -1148,7 +1148,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     /* Note Row */
                     .vpa-note-row td {{
-                        padding: 4px 12px;
+                        padding: 4px 12px 4px 30px;
                         font-style: italic;
                         color: #555;
                         font-size: 11px;
@@ -1269,7 +1269,15 @@ class VPADocumentTemplate(models.Model):
                                     <!-- Note Lines -->
                                     <t t-elif="line.display_type == 'line_note'">
                                         <tr class="vpa-note-row">
-                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                            <td t-att-colspan="'7' if display_discount else '6'">
+                                                <t t-if="': ' in (line.name or '')">
+                                                    <t t-set="note_parts" t-value="(line.name or '').split(': ', 1)"/>
+                                                    <b t-out="note_parts[0]"/>: <t t-out="note_parts[1]"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="line.name"/>
+                                                </t>
+                                            </td>
                                         </tr>
                                     </t>
                                     <!-- Regular Product Lines -->
@@ -1873,7 +1881,7 @@ class VPADocumentTemplate(models.Model):
                     }}
                     /* Note Row */
                     .vpa-note-row td {{
-                        padding: 4px 12px;
+                        padding: 4px 12px 4px 30px;
                         font-style: italic;
                         color: #555;
                         font-size: 11px;
@@ -1999,7 +2007,15 @@ class VPADocumentTemplate(models.Model):
                                     <!-- Note Lines -->
                                     <t t-elif="line.display_type == 'line_note'">
                                         <tr class="vpa-note-row">
-                                            <td colspan="5"><t t-out="line.name"/></td>
+                                            <td colspan="5">
+                                                <t t-if="': ' in (line.name or '')">
+                                                    <t t-set="note_parts" t-value="(line.name or '').split(': ', 1)"/>
+                                                    <b t-out="note_parts[0]"/>: <t t-out="note_parts[1]"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="line.name"/>
+                                                </t>
+                                            </td>
                                         </tr>
                                     </t>
                                     <!-- Regular Product Lines -->
@@ -2216,7 +2232,7 @@ class VPADocumentTemplate(models.Model):
                         border-bottom: 1px solid #ddd !important;
                     }}
                     .vpa-note-row td {{
-                        padding: 4px 12px;
+                        padding: 4px 12px 4px 30px;
                         font-style: italic;
                         color: #555;
                         font-size: 11px;
@@ -2348,7 +2364,15 @@ class VPADocumentTemplate(models.Model):
                                     <!-- Note Lines -->
                                     <t t-elif="line.display_type == 'line_note'">
                                         <tr class="vpa-note-row">
-                                            <td t-att-colspan="'7' if display_discount else '6'"><span t-field="line.name"/></td>
+                                            <td t-att-colspan="'7' if display_discount else '6'">
+                                                <t t-if="': ' in (line.name or '')">
+                                                    <t t-set="note_parts" t-value="(line.name or '').split(': ', 1)"/>
+                                                    <b t-out="note_parts[0]"/>: <t t-out="note_parts[1]"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="line.name"/>
+                                                </t>
+                                            </td>
                                         </tr>
                                     </t>
                                     <!-- Regular Product Lines with Pictures -->

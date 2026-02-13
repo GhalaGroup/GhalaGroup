@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from markupsafe import Markup
 from odoo import models, fields, api
 
 
@@ -29,11 +30,11 @@ class MoLinkWizard(models.TransientModel):
         mo.write({'origin': so.name})
 
         # Post messages
-        so_link = f"<a href='#id={so.id}&model=sale.order'>{so.name}</a>"
-        mo.message_post(body=f"Linked to Sales Order {so_link}")
+        so_link = Markup("<a href='#id=%s&model=sale.order'>%s</a>") % (so.id, so.name)
+        mo.message_post(body=Markup("Linked to Sales Order %s") % so_link)
 
-        mo_link = f"<a href='#id={mo.id}&model=mrp.production'>{mo.name}</a>"
-        so.message_post(body=f"Linked Manufacturing Order {mo_link}")
+        mo_link = Markup("<a href='#id=%s&model=mrp.production'>%s</a>") % (mo.id, mo.name)
+        so.message_post(body=Markup("Linked Manufacturing Order %s") % mo_link)
 
         # Invalidate SO cache to refresh smart button
         so.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])

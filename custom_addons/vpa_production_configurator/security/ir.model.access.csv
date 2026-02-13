@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vpa_dimension_template_user,vpa.dimension.template user,model_vpa_dimension_template,base.group_user,1,0,0,0
+access_vpa_dimension_template_manager,vpa.dimension.template manager,model_vpa_dimension_template,vpa_production_base.group_bom_manager,1,1,1,1
+access_vpa_dimension_template_line_user,vpa.dimension.template.line user,model_vpa_dimension_template_line,base.group_user,1,0,0,0
+access_vpa_dimension_template_line_manager,vpa.dimension.template.line manager,model_vpa_dimension_template_line,vpa_production_base.group_bom_manager,1,1,1,1
+access_vpa_display_group_user,vpa.display.group user,model_vpa_display_group,base.group_user,1,0,0,0
+access_vpa_display_group_manager,vpa.display.group manager,model_vpa_display_group,vpa_production_base.group_bom_manager,1,1,1,1
+access_vpa_config_variable_user,vpa.config.variable user,model_vpa_config_variable,base.group_user,1,0,0,0
+access_vpa_config_variable_manager,vpa.config.variable manager,model_vpa_config_variable,vpa_production_base.group_bom_manager,1,1,1,1
+access_vpa_config_variable_option_user,vpa.config.variable.option user,model_vpa_config_variable_option,base.group_user,1,0,0,0
+access_vpa_config_variable_option_manager,vpa.config.variable.option manager,model_vpa_config_variable_option,vpa_production_base.group_bom_manager,1,1,1,1
+access_sale_order_line_dimension_user,sale.order.line.dimension user,model_sale_order_line_dimension,base.group_user,1,1,1,1
+access_sale_order_line_config_user,sale.order.line.config user,model_sale_order_line_config,base.group_user,1,1,1,1
+access_vpa_product_configurator_wizard,vpa.product.configurator.wizard,model_vpa_product_configurator_wizard,base.group_user,1,1,1,1
+access_vpa_configurator_dimension_line,vpa.configurator.dimension.line,model_vpa_configurator_dimension_line,base.group_user,1,1,1,1
+access_vpa_configurator_config_line,vpa.configurator.config.line,model_vpa_configurator_config_line,base.group_user,1,1,1,1
+access_vpa_dimension_import_wizard,vpa.dimension.import.wizard,model_vpa_dimension_import_wizard,base.group_user,1,1,1,1

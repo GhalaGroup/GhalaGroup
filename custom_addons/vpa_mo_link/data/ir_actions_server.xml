@@ -50,14 +50,14 @@ if manually_linked_mos:
 
         # Add chatter message in MO
         so_link = f"<a href='#id={record.id}&amp;model=sale.order'>{record.name}</a>"
-        mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+        mo.message_post(body=f"Unlinked from Sales Order {so_link}", body_is_html=True)
 
     # Invalidate cache to refresh computed field
     record.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])
 
     # Log in Sales Order
     mo_links = ', '.join([f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>" for mo in manually_linked_mos])
-    record.message_post(body=f"Unlinked {len(manually_linked_mos)} manually linked MO(s): {mo_links}")
+    record.message_post(body=f"Unlinked {len(manually_linked_mos)} manually linked MO(s): {mo_links}", body_is_html=True)
 
     action = {
         'type': 'ir.actions.client',
@@ -125,10 +125,10 @@ for mo in records:
 
             # Post messages
             so_link = f"<a href='#id={sale_order.id}&amp;model=sale.order'>{old_origin}</a>"
-            mo.message_post(body=f"Unlinked from Sales Order {so_link}")
+            mo.message_post(body=f"Unlinked from Sales Order {so_link}", body_is_html=True)
 
             mo_link = f"<a href='#id={mo.id}&amp;model=mrp.production'>{mo.name}</a>"
-            sale_order.message_post(body=f"Unlinked Manufacturing Order {mo_link}")
+            sale_order.message_post(body=f"Unlinked Manufacturing Order {mo_link}", body_is_html=True)
 
             # Invalidate SO cache
             sale_order.invalidate_recordset(['mrp_production_ids', 'mrp_production_count'])

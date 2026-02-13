@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Production Commission - Manufacturing Commission Management for Odoo</title>
+</head>
+<body>
+
+<!-- HEADER SECTION - Crimson gradient matching commission theme -->
+<div style="text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #DC143C 0%, #B22222 100%); color: white; border-radius: 10px; margin-bottom: 30px;">
+    <h1 style="margin: 0 0 10px 0; font-size: 2.2em; color: white;">VPA Production Commission</h1>
+    <p style="margin: 10px 0; font-size: 1.1em; color: white;">Manufacturing Commission Management for Odoo 19 Enterprise</p>
+    <p style="margin: 5px 0; font-size: 0.95em; color: rgba(255,255,255,0.9);">MO-based calculation | Per-employee schemes | Approval workflow</p>
+    <div style="margin-top: 15px;">
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Commission Schemes</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">MO Completion</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Commission History</span>
+        <span style="background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 15px; margin: 3px; display: inline-block; font-size: 0.85em; color: white;">Minimum Guarantee</span>
+    </div>
+</div>
+
+<!-- OVERVIEW -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Overview</h2>
+<p style="font-size: 1.05em; line-height: 1.7; margin-bottom: 25px;">
+    <strong>VPA Production Commission</strong> automates the calculation and management of employee commissions based on Manufacturing Order completion.
+    The system tracks commissionable raw materials consumed during production, applies configurable commission rates per employee,
+    and provides a complete approval workflow from pending to paid status with historical reference tracking.
+</p>
+
+<!-- KEY FEATURES -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Key Features</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <tr>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Per-Employee Schemes</strong><br>
+            Create individual commission schemes for each employee with customizable rates, minimum guarantees, and MO filters!
+        </td>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">MO-Based Commission</strong><br>
+            Automatic commission calculation when Manufacturing Orders are completed, based on consumed raw materials!
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Commission History</strong><br>
+            View and use historical base amounts from previous MOs for same product. Compare and reference past calculations!
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Commissionable Products</strong><br>
+            Mark specific raw materials as commissionable. Only flagged products contribute to commission calculation!
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Flexible MO Filtering</strong><br>
+            Configure which MOs apply per scheme: all MOs, specific workcenters, product categories, or specific products!
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Minimum Guarantee</strong><br>
+            Set annual minimum commission amounts with monthly/quarterly tracking to ensure employee income stability!
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Approval Workflow</strong><br>
+            Complete status tracking: Pending → Confirmed → Paid. Manager approval required before payment!
+        </td>
+        <td style="padding: 15px; vertical-align: top; border-bottom: 1px solid #DC143C;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Search Panel &amp; Filters</strong><br>
+            Side panel with Status and Employee filters. Date filter with year/month/quarter selection for easy reporting!
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #DC143C; font-size: 1.1em;">Pivot &amp; Graph Views</strong><br>
+            Visual commission analysis with pivot tables and charts. Export to Excel for external reporting!
+        </td>
+        <td style="padding: 15px; vertical-align: top;">
+            <strong style="color: #DC143C; font-size: 1.1em;">User Access Rights</strong><br>
+            Privilege-based access control. Sales Commission section appears in User form Access Rights tab!
+        </td>
+    </tr>
+</table>
+
+<!-- WORKFLOW -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Commission Workflow</h2>
+<p style="margin-bottom: 15px;">Simple 4-step workflow from setup to payment:</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+    <tr style="text-align: center;">
+        <td style="padding: 15px; border: 1px solid #DC143C;">
+            <div style="background: #DC143C; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">1</div><br>
+            <strong>Setup</strong><br>
+            <span style="font-size: 0.9em;">Create schemes</span>
+        </td>
+        <td style="padding: 15px; border: 1px solid #DC143C;">
+            <div style="background: #DC143C; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">2</div><br>
+            <strong>Mark</strong><br>
+            <span style="font-size: 0.9em;">Flag products</span>
+        </td>
+        <td style="padding: 15px; border: 1px solid #DC143C;">
+            <div style="background: #DC143C; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">3</div><br>
+            <strong>Complete</strong><br>
+            <span style="font-size: 0.9em;">Finish MOs</span>
+        </td>
+        <td style="padding: 15px; border: 1px solid #DC143C;">
+            <div style="background: #DC143C; color: white; width: 35px; height: 35px; border-radius: 50%; display: inline-block; line-height: 35px; font-weight: bold; margin-bottom: 10px;">4</div><br>
+            <strong>Pay</strong><br>
+            <span style="font-size: 0.9em;">Process payments</span>
+        </td>
+    </tr>
+</table>
+
+<!-- COMMISSION HISTORY -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Commission History (NEW in v1.1.0)</h2>
+<p style="margin-bottom: 15px;">Reference and reuse historical commission calculations:</p>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #DC143C;">
+    <tr>
+        <td style="padding: 15px; vertical-align: top; width: 50%; border-right: 1px solid #DC143C;">
+            <strong style="color: #DC143C;">Historical Reference</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Past MOs:</strong> View historical base amounts from previous MOs for same product</li>
+                <li><strong>Compare:</strong> Compare current vs. historical commission calculations</li>
+                <li><strong>Product-Specific:</strong> Smart detection shows only relevant product history</li>
+                <li><strong>Quick Access:</strong> Commission History tab on commission form</li>
+            </ul>
+        </td>
+        <td style="padding: 15px; vertical-align: top; width: 50%;">
+            <strong style="color: #DC143C;">Override &amp; Audit</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Override:</strong> Use historical base amount with single click</li>
+                <li><strong>Audit Trail:</strong> Track which historical value was used</li>
+                <li><strong>Reference MO:</strong> Link to original MO for verification</li>
+                <li><strong>Date Tracking:</strong> See when historical commission was created</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<!-- TECHNICAL SPECS -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Technical Specifications</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #DC143C;">
+    <tr style="background: #DC143C; color: white;">
+        <th style="padding: 12px 15px; text-align: left; width: 35%; color: white;">Specification</th>
+        <th style="padding: 12px 15px; text-align: left; color: white;">Details</th>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Module Name</td>
+        <td style="padding: 12px 15px;">VPA Production Commission</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Technical Name</td>
+        <td style="padding: 12px 15px;">vpa_sales_commission</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Version</td>
+        <td style="padding: 12px 15px;">19.0.1.1.0</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">License</td>
+        <td style="padding: 12px 15px;">OPL-1 (Proprietary)</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Author</td>
+        <td style="padding: 12px 15px;">VPA Solutions Limited</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Category</td>
+        <td style="padding: 12px 15px;">Manufacturing/Commission</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Odoo Versions</td>
+        <td style="padding: 12px 15px;">19.0 Enterprise</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #DC143C;">
+        <td style="padding: 12px 15px; font-weight: bold;">Dependencies</td>
+        <td style="padding: 12px 15px;">mrp, hr, sale, sale_mrp, account</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px 15px; font-weight: bold;">Multi-Company</td>
+        <td style="padding: 12px 15px;">Full support with company-based rules</td>
+    </tr>
+</table>
+
+<!-- WHAT'S INCLUDED -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">What's Included</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #28a745;">
+    <tr>
+        <td style="vertical-align: top; width: 50%; padding: 15px; border-right: 1px solid #28a745;">
+            <ul style="margin: 0; padding-left: 20px; line-height: 2;">
+                <li>Per-Employee Commission Schemes</li>
+                <li>MO-Based Auto-Calculation</li>
+                <li>Commission History Tracking</li>
+                <li>Historical Base Amount Override</li>
+                <li>Commissionable Product Flag</li>
+                <li>Flexible MO Filtering</li>
+                <li>Minimum Guarantee System</li>
+                <li>Approval Workflow</li>
+            </ul>
+        </td>
+        <td style="vertical-align: top; width: 50%; padding: 15px;">
+            <ul style="margin: 0; padding-left: 20px; line-height: 2;">
+                <li>Search Panel with Filters</li>
+                <li>Pivot &amp; Graph Views</li>
+                <li>Excel Export</li>
+                <li>Payment Wizard</li>
+                <li>Journal Entry Creation</li>
+                <li>User Access Rights</li>
+                <li>Free Lifetime Updates</li>
+                <li>Professional Support</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<!-- PRICING -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Pricing</h2>
+
+<div style="text-align: center; border: 3px solid #DC143C; border-radius: 10px; padding: 30px; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">
+    <h3 style="margin: 0 0 10px 0;">Enterprise Edition</h3>
+    <div style="font-size: 3em; font-weight: bold; color: #DC143C; margin: 20px 0;">
+        $299 <span style="font-size: 0.4em; font-weight: normal;">USD</span>
+    </div>
+    <p style="color: #28a745; font-weight: bold; margin: 10px 0;">One-Time Purchase!</p>
+    <hr style="border: none; border-top: 1px solid #DC143C; margin: 20px 0;">
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; One-time purchase per Odoo version</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Lifetime updates for purchased version</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; Professional support included</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; No monthly fees</p>
+    <p style="text-align: left; margin: 5px 0; font-size: 0.95em;">&#10003; No user limits</p>
+</div>
+
+<!-- VERSION HISTORY -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Version History</h2>
+
+<div style="border-left: 4px solid #DC143C; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #DC143C; margin-bottom: 5px;">Version 19.0.1.1.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: February 11, 2026 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Enhancement release with Commission History feature</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li><strong>New:</strong> Commission History - View historical base amounts from past MOs for same product</li>
+        <li><strong>New:</strong> Historical Override - Use previous commission calculations with single click</li>
+        <li><strong>New:</strong> Product-Specific History - Smart detection shows only relevant product history</li>
+        <li><strong>New:</strong> Audit Trail - Track which historical base amount was used</li>
+        <li><strong>New:</strong> Commission History Tab - Quick access to past calculations on commission form</li>
+        <li><strong>Improved:</strong> Commission comparison - Compare current vs. historical calculations</li>
+        <li><strong>Improved:</strong> Reference tracking - Link to original MO for verification</li>
+    </ul>
+</div>
+
+<div style="border-left: 4px solid #B22222; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #B22222; margin-bottom: 5px;">Version 19.0.1.0.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: February 6, 2026 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Initial release with comprehensive commission management</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Per-employee commission schemes with configurable rates</li>
+        <li>MO-based commission calculation on completion</li>
+        <li>Commissionable product flag on raw materials</li>
+        <li>Flexible MO filters (workcenter, category, products)</li>
+        <li>Minimum guarantee system with annual tracking</li>
+        <li>Approval workflow (Pending → Confirmed → Paid)</li>
+        <li>Search panel with Status and Employee filters</li>
+        <li>Pivot view for commission analysis with Excel export</li>
+        <li>Graph view for visual reporting</li>
+        <li>Privilege-based user access in User form</li>
+        <li>Date filter with year/month/quarter selection</li>
+        <li>Payment wizard with journal entry creation</li>
+        <li>Employee smart button for commission history</li>
+        <li>Dedicated Settings section for default accounts</li>
+    </ul>
+</div>
+
+<!-- CONTACT -->
+<h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Support &amp; Contact</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 2px solid #DC143C;">
+    <tr>
+        <td style="padding: 20px;">
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Email:</strong> <a href="mailto:info@vpa.co.tz" style="color: #DC143C;">info@vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0; font-size: 1.1em;">
+                <strong>Website:</strong> <a href="https://www.vpa.co.tz" style="color: #DC143C;" target="_blank">www.vpa.co.tz</a>
+            </p>
+            <p style="margin: 10px 0;">
+                <strong>Response Time:</strong> Within 24-48 hours on business days
+            </p>
+            <p style="margin: 10px 0;">
+                <strong>Documentation:</strong> Comprehensive user guide included with module
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- FOOTER -->
+<div style="text-align: center; padding: 20px; background: #DC143C; color: white; border-radius: 10px; margin-top: 30px;">
+    <p style="margin: 5px 0; font-size: 1.1em; color: white;"><strong>VPA Production Commission</strong> - Manufacturing Commission Management</p>
+    <p style="margin: 10px 0; color: white;">Copyright 2026 <a href="https://www.vpa.co.tz" style="color: #FFD700;">VPA Solutions Limited</a>. All rights reserved.</p>
+    <p style="margin: 10px 0; color: rgba(255,255,255,0.8); font-size: 0.9em;">Developed with care for the Odoo community</p>
+</div>
+
+</body>
+</html>

@@ -53,6 +53,9 @@ Support: info@vpa.co.tz
         'views/mrp_production_views.xml',
         'views/sale_order_views.xml',
     ],
+    'images': [
+        'static/description/icon.png',
+    ],
     'installable': True,
     'application': False,
     'auto_install': False,

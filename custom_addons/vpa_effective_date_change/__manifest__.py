@@ -4,8 +4,8 @@
 {
     'name': 'VPA Effective Date Change',
     'author': 'VPA Solutions Limited',
-    'version': '19.0.1.2.0',
-    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.2.0)',
+    'version': '19.0.1.2.1',
+    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.2.1)',
     'license': 'OPL-1',
     'sequence': 10,
     'description': """
@@ -34,6 +34,10 @@ Key Features
 
 Version History
 ---------------
+* **19.0.1.2.1** - Bug fix: Remove duplicate "Change Effective Date" button
+  - Added migration script to clean up orphaned views from old module
+  - Fixes duplicate button issue caused by module rename
+
 * **19.0.1.2.0** - Privilege-based security & bug fixes
   - Added privilege section in Settings > Users > Access Rights
   - Fixed journal entry sequence handling for multiple entries

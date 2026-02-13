@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menu under Manufacturing > Configuration -->
+    <menuitem id="menu_vpa_dimension_template"
+              name="Dimension Templates"
+              action="action_vpa_dimension_template"
+              parent="mrp.menu_mrp_configuration"
+              sequence="50"
+              groups="vpa_production_base.group_bom_manager"/>
+
+</odoo>

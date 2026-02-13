@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Dimension Template Form View -->
+    <record id="vpa_dimension_template_form" model="ir.ui.view">
+        <field name="name">vpa.dimension.template.form</field>
+        <field name="model">vpa.dimension.template</field>
+        <field name="arch" type="xml">
+            <form string="Dimension Template">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_products" type="object"
+                                class="oe_stat_button" icon="fa-cube">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g., Veneer Internal Door"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" placeholder="e.g., DOOR_VENEER"/>
+                            <field name="calculation_type"/>
+                            <field name="default_rate"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="quantity_formula" placeholder="e.g., w_m * h_m"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Template description..."/>
+                    <notebook>
+                        <page string="Dimensions" name="dimensions">
+                            <field name="dimension_line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="field_code"/>
+                                    <field name="uom_type"/>
+                                    <field name="default_value"/>
+                                    <field name="min_value"/>
+                                    <field name="max_value"/>
+                                    <field name="required"/>
+                                    <field name="show_on_quotation"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Display Groups" name="display_groups">
+                            <field name="display_group_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="show_dimensions"/>
+                                    <field name="note_format" optional="hide"/>
+                                    <field name="extra_dimension_ids" widget="many2many_tags"
+                                           domain="[('template_id', '=', parent.id)]"
+                                           optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Configuration Variables" name="variables">
+                            <field name="variable_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="display_group_id"
+                                           domain="[('template_id', '=', parent.id)]"/>
+                                    <field name="variable_type"/>
+                                    <field name="affects_price"/>
+                                    <field name="required"/>
+                                </list>
+                            </field>
+                            <p class="text-muted" colspan="2">
+                                Click a variable to configure its options and linked products.
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Config Variable Form (for editing options inline) -->
+    <record id="vpa_config_variable_form" model="ir.ui.view">
+        <field name="name">vpa.config.variable.form</field>
+        <field name="model">vpa.config.variable</field>
+        <field name="arch" type="xml">
+            <form string="Configuration Variable">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="variable_type"/>
+                            <field name="display_group_id"
+                                   domain="[('template_id', '=', template_id)]"/>
+                            <field name="bom_category_id"
+                                   invisible="variable_type != 'product'"/>
+                        </group>
+                        <group>
+                            <field name="affects_price"/>
+                            <field name="required"/>
+                            <field name="sequence"/>
+                            <field name="template_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="option_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="product_id"
+                                   invisible="parent.variable_type != 'product'"/>
+                            <field name="surcharge_type"
+                                   invisible="not parent.affects_price"/>
+                            <field name="surcharge_amount"
+                                   invisible="not parent.affects_price or surcharge_type == 'none'"/>
+                            <field name="qty_override"
+                                   invisible="parent.variable_type != 'product'"/>
+                            <field name="is_default"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dimension Template List View -->
+    <record id="vpa_dimension_template_list" model="ir.ui.view">
+        <field name="name">vpa.dimension.template.list</field>
+        <field name="model">vpa.dimension.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="calculation_type"/>
+                <field name="default_rate"/>
+                <field name="product_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Dimension Template Search View -->
+    <record id="vpa_dimension_template_search" model="ir.ui.view">
+        <field name="name">vpa.dimension.template.search</field>
+        <field name="model">vpa.dimension.template</field>
+        <field name="arch" type="xml">
+            <search string="Dimension Templates">
+                <field name="name"/>
+                <field name="code"/>
+                <filter string="Square Meters" name="m2"
+                        domain="[('calculation_type', '=', 'm2')]"/>
+                <filter string="Cubic Meters" name="m3"
+                        domain="[('calculation_type', '=', 'm3')]"/>
+                <filter string="Linear Meters" name="linear_m"
+                        domain="[('calculation_type', '=', 'linear_m')]"/>
+                <separator/>
+                <filter string="Archived" name="inactive"
+                        domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Calculation Type" name="group_calc_type"
+                            domain="[]" context="{'group_by': 'calculation_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vpa_dimension_template" model="ir.actions.act_window">
+        <field name="name">Dimension Templates</field>
+        <field name="res_model">vpa.dimension.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Dimension Template
+            </p>
+            <p>
+                Templates define dimensions (Width, Height, Depth), configuration variables
+                (veneer type, hinge selection), and pricing formulas for variable-sized products.
+            </p>
+        </field>
+    </record>
+
+</odoo>

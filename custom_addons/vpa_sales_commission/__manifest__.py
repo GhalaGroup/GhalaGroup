@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Manufacturing/Commission',
-    'summary': 'Production commission based on Manufacturing Orders (v1.0.0)',
+    'summary': 'Production commission based on Manufacturing Orders (v1.1.0)',
     'description': """
 VPA Production Commission
 =========================
@@ -17,6 +17,7 @@ Key Features
 ------------
 * **Per-Employee Schemes**: Each employee has individual commission rates and minimum guarantees
 * **MO-Based Commission**: Automatic calculation when Manufacturing Orders are completed
+* **Commission History**: View and use historical base amounts from previous MOs for same product
 * **Commissionable Products**: Mark specific raw materials to be included in commission calculation
 * **MO Filtering**: Configure which MOs apply per scheme (all, workcenter, category, products)
 * **Minimum Guarantee**: Annual minimum with monthly/quarterly tracking
@@ -28,6 +29,13 @@ Key Features
 
 Version History
 ---------------
+* **19.0.1.1.0** - Commission History Feature
+  - Historical base amounts from past MOs for same product
+  - Compare and use previous commission calculations
+  - Override base amount with historical values
+  - Audit trail for historical base amount usage
+  - Smart detection of product-specific history
+
 * **19.0.1.0.0** - Initial release for Odoo 19
   - Per-employee commission schemes
   - Production commission on MO completion

@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- ========================================= -->
+    <!-- Template 1: Veneer Internal Door (W×H)    -->
+    <!-- ========================================= -->
+    <record id="template_veneer_door" model="vpa.dimension.template">
+        <field name="name">Veneer Internal Door</field>
+        <field name="code">DOOR_VENEER</field>
+        <field name="calculation_type">m2</field>
+        <field name="quantity_formula">w_m * h_m</field>
+        <field name="default_rate">0</field>
+        <field name="description">Standard veneer internal door with configurable dimensions, veneer type, frame, and hardware.</field>
+    </record>
+
+    <!-- Door Dimensions -->
+    <record id="door_dim_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Width</field>
+        <field name="field_code">w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">10</field>
+        <field name="default_value">900</field>
+        <field name="min_value">400</field>
+        <field name="max_value">1200</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="door_dim_height" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Height</field>
+        <field name="field_code">h</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">20</field>
+        <field name="default_value">2100</field>
+        <field name="min_value">1800</field>
+        <field name="max_value">2700</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="door_dim_frame_depth" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Frame Depth</field>
+        <field name="field_code">frame_depth</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">30</field>
+        <field name="default_value">140</field>
+        <field name="min_value">70</field>
+        <field name="max_value">200</field>
+        <field name="required" eval="True"/>
+        <field name="show_on_quotation" eval="False"/>
+    </record>
+    <record id="door_dim_casing_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Casing Width</field>
+        <field name="field_code">casing_w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">40</field>
+        <field name="default_value">70</field>
+        <field name="min_value">40</field>
+        <field name="max_value">100</field>
+        <field name="required" eval="False"/>
+        <field name="show_on_quotation" eval="False"/>
+    </record>
+
+    <!-- Door Display Groups -->
+    <record id="door_group_size" model="vpa.display.group">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Size</field>
+        <field name="code">size</field>
+        <field name="sequence">10</field>
+        <field name="show_dimensions" eval="True"/>
+    </record>
+    <record id="door_group_leaf" model="vpa.display.group">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Door Leaf</field>
+        <field name="code">leaf</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="door_group_frame" model="vpa.display.group">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Frame</field>
+        <field name="code">frame</field>
+        <field name="sequence">30</field>
+        <field name="extra_dimension_ids" eval="[(4, ref('door_dim_frame_depth'))]"/>
+    </record>
+    <record id="door_group_casing" model="vpa.display.group">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Casing</field>
+        <field name="code">casing</field>
+        <field name="sequence">40</field>
+        <field name="extra_dimension_ids" eval="[(4, ref('door_dim_casing_width'))]"/>
+    </record>
+    <record id="door_group_hardware" model="vpa.display.group">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="name">Hardware</field>
+        <field name="code">hardware</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- Door Variables -->
+    <record id="door_var_veneer" model="vpa.config.variable">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="display_group_id" ref="door_group_leaf"/>
+        <field name="name">Veneer Type</field>
+        <field name="sequence">10</field>
+        <field name="variable_type">product</field>
+        <field name="affects_price" eval="True"/>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="door_var_opening" model="vpa.config.variable">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="display_group_id" ref="door_group_leaf"/>
+        <field name="name">Door Opening</field>
+        <field name="sequence">20</field>
+        <field name="variable_type">simple</field>
+        <field name="affects_price" eval="False"/>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="door_var_hinge" model="vpa.config.variable">
+        <field name="template_id" ref="template_veneer_door"/>
+        <field name="display_group_id" ref="door_group_hardware"/>
+        <field name="name">Hinge Type</field>
+        <field name="sequence">10</field>
+        <field name="variable_type">product</field>
+        <field name="affects_price" eval="True"/>
+        <field name="required" eval="True"/>
+    </record>
+
+    <!-- Door Opening Options (simple) -->
+    <record id="door_opt_left" model="vpa.config.variable.option">
+        <field name="variable_id" ref="door_var_opening"/>
+        <field name="name">Left</field>
+        <field name="sequence">10</field>
+        <field name="surcharge_type">none</field>
+        <field name="is_default" eval="True"/>
+    </record>
+    <record id="door_opt_right" model="vpa.config.variable.option">
+        <field name="variable_id" ref="door_var_opening"/>
+        <field name="name">Right</field>
+        <field name="sequence">20</field>
+        <field name="surcharge_type">none</field>
+    </record>
+
+    <!-- ========================================= -->
+    <!-- Template 2: Cabinet (W×H×D)               -->
+    <!-- ========================================= -->
+    <record id="template_cabinet" model="vpa.dimension.template">
+        <field name="name">Cabinet</field>
+        <field name="code">CABINET</field>
+        <field name="calculation_type">m3</field>
+        <field name="quantity_formula">w_m * h_m * d_m</field>
+        <field name="default_rate">0</field>
+        <field name="description">Cabinet with configurable width, height, and depth.</field>
+    </record>
+
+    <record id="cabinet_dim_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_cabinet"/>
+        <field name="name">Width</field>
+        <field name="field_code">w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">10</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="cabinet_dim_height" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_cabinet"/>
+        <field name="name">Height</field>
+        <field name="field_code">h</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">20</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="cabinet_dim_depth" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_cabinet"/>
+        <field name="name">Depth</field>
+        <field name="field_code">d</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">30</field>
+        <field name="required" eval="True"/>
+    </record>
+
+    <record id="cabinet_group_size" model="vpa.display.group">
+        <field name="template_id" ref="template_cabinet"/>
+        <field name="name">Size</field>
+        <field name="code">size</field>
+        <field name="sequence">10</field>
+        <field name="show_dimensions" eval="True"/>
+    </record>
+    <record id="cabinet_group_material" model="vpa.display.group">
+        <field name="template_id" ref="template_cabinet"/>
+        <field name="name">Material</field>
+        <field name="code">material</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- ========================================= -->
+    <!-- Template 3: Door Frame (W×H×Depth)        -->
+    <!-- ========================================= -->
+    <record id="template_door_frame" model="vpa.dimension.template">
+        <field name="name">Door Frame</field>
+        <field name="code">DOOR_FRAME</field>
+        <field name="calculation_type">linear_m</field>
+        <field name="quantity_formula">2 * h_m + w_m</field>
+        <field name="default_rate">0</field>
+        <field name="description">Door frame priced by linear meter (2×height + width).</field>
+    </record>
+
+    <record id="frame_dim_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_door_frame"/>
+        <field name="name">Width</field>
+        <field name="field_code">w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">10</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="frame_dim_height" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_door_frame"/>
+        <field name="name">Height</field>
+        <field name="field_code">h</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">20</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="frame_dim_depth" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_door_frame"/>
+        <field name="name">Frame Depth</field>
+        <field name="field_code">d</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">30</field>
+        <field name="required" eval="True"/>
+    </record>
+
+    <record id="frame_group_size" model="vpa.display.group">
+        <field name="template_id" ref="template_door_frame"/>
+        <field name="name">Size</field>
+        <field name="code">size</field>
+        <field name="sequence">10</field>
+        <field name="show_dimensions" eval="True"/>
+    </record>
+    <record id="frame_group_material" model="vpa.display.group">
+        <field name="template_id" ref="template_door_frame"/>
+        <field name="name">Material</field>
+        <field name="code">material</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- ========================================= -->
+    <!-- Template 4: Glass Panel (W×H)             -->
+    <!-- ========================================= -->
+    <record id="template_glass_panel" model="vpa.dimension.template">
+        <field name="name">Glass Panel</field>
+        <field name="code">GLASS</field>
+        <field name="calculation_type">m2</field>
+        <field name="quantity_formula">w_m * h_m</field>
+        <field name="default_rate">0</field>
+        <field name="description">Glass panel priced by square meter.</field>
+    </record>
+
+    <record id="glass_dim_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_glass_panel"/>
+        <field name="name">Width</field>
+        <field name="field_code">w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">10</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="glass_dim_height" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_glass_panel"/>
+        <field name="name">Height</field>
+        <field name="field_code">h</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">20</field>
+        <field name="required" eval="True"/>
+    </record>
+
+    <record id="glass_group_size" model="vpa.display.group">
+        <field name="template_id" ref="template_glass_panel"/>
+        <field name="name">Size</field>
+        <field name="code">size</field>
+        <field name="sequence">10</field>
+        <field name="show_dimensions" eval="True"/>
+    </record>
+    <record id="glass_group_type" model="vpa.display.group">
+        <field name="template_id" ref="template_glass_panel"/>
+        <field name="name">Glass Type</field>
+        <field name="code">glass_type</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- ========================================= -->
+    <!-- Template 5: Wall Cladding (W×H)           -->
+    <!-- ========================================= -->
+    <record id="template_wall_cladding" model="vpa.dimension.template">
+        <field name="name">Wall Cladding</field>
+        <field name="code">WALL_CLAD</field>
+        <field name="calculation_type">m2</field>
+        <field name="quantity_formula">w_m * h_m</field>
+        <field name="default_rate">0</field>
+        <field name="description">Wall cladding with configurable board type and structure.</field>
+    </record>
+
+    <record id="clad_dim_width" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_wall_cladding"/>
+        <field name="name">Width</field>
+        <field name="field_code">w</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">10</field>
+        <field name="required" eval="True"/>
+    </record>
+    <record id="clad_dim_height" model="vpa.dimension.template.line">
+        <field name="template_id" ref="template_wall_cladding"/>
+        <field name="name">Height</field>
+        <field name="field_code">h</field>
+        <field name="uom_type">mm</field>
+        <field name="sequence">20</field>
+        <field name="required" eval="True"/>
+    </record>
+
+    <record id="clad_group_size" model="vpa.display.group">
+        <field name="template_id" ref="template_wall_cladding"/>
+        <field name="name">Size</field>
+        <field name="code">size</field>
+        <field name="sequence">10</field>
+        <field name="show_dimensions" eval="True"/>
+    </record>
+    <record id="clad_group_board" model="vpa.display.group">
+        <field name="template_id" ref="template_wall_cladding"/>
+        <field name="name">Board</field>
+        <field name="code">board</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="clad_group_structure" model="vpa.display.group">
+        <field name="template_id" ref="template_wall_cladding"/>
+        <field name="name">Structure</field>
+        <field name="code">structure</field>
+        <field name="sequence">30</field>
+    </record>
+
+</odoo>
