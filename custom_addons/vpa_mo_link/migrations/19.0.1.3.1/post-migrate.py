@@ -15,8 +15,9 @@ def migrate(cr, version):
     cr.execute("""
         SELECT sp.id, sp.name, sp.origin
         FROM stock_picking sp
+        JOIN stock_picking_type spt ON sp.picking_type_id = spt.id
         WHERE sp.state NOT IN ('done', 'cancel')
-          AND sp.picking_type_code = 'outgoing'
+          AND spt.code = 'outgoing'
           AND sp.origin IS NOT NULL
           AND sp.origin LIKE 'S%%'
     """)
