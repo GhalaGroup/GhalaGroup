@@ -22,17 +22,16 @@ class StockRule(models.Model):
 
     def _prepare_mo_vals(self, product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, bom):
         """
-        Override to allow MO creation even when BOM is not found.
+        Override to allow MO creation even when BOM is not found, and to
+        prevent MTO chain linking for draft MOs.
 
-        Standard Odoo fails or skips MO creation if no BOM exists.
-        This override creates a basic MO structure without BOM,
-        allowing users to manually set the BOM later.
+        Since all MOs created by this module stay in DRAFT state, we must
+        NOT set move_dest_ids. Otherwise the delivery moves get linked to
+        the draft MO's finished moves, putting the delivery in "Waiting
+        Another Operation" state and blocking stock reservation.
 
-        Args:
-            bom: Bill of Materials (can be False if not found)
-
-        Returns:
-            dict: MO values for creation
+        The MO is still linked to the SO via the origin field and appears
+        in the smart button via _compute_mrp_production_ids.
         """
         if not bom:
             # No BOM found - create basic MO structure
@@ -54,9 +53,11 @@ class StockRule(models.Model):
                 'reference_ids': [Command.set(values.get('reference_ids', self.env['stock.reference']).ids)],
                 'picking_type_id': picking_type.id if picking_type else values.get('warehouse_id') and values['warehouse_id'].manu_type_id.id,
                 'company_id': company_id.id,
-                'move_dest_ids': values.get('move_dest_ids') and [(4, x.id) for x in values['move_dest_ids']] or False,
+                'move_dest_ids': False,
                 'user_id': False,
             }
 
-        # Call parent method if BOM exists
-        return super()._prepare_mo_vals(product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, bom)
+        # Call parent method if BOM exists, then remove move_dest_ids
+        vals = super()._prepare_mo_vals(product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, bom)
+        vals['move_dest_ids'] = False
+        return vals
