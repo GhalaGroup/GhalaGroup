@@ -225,7 +225,7 @@ class MrpProduction(models.Model):
                     if production.id in preserved_data and bom_line_id in preserved_data[production.id]:
                         preserved = preserved_data[production.id][bom_line_id]
                         if preserved['bom_category_id']:
-                            move.write({
+                            move.with_context(skip_component_tracking=True).write({
                                 'bom_category_id': preserved['bom_category_id'],
                                 'template_line_description': preserved['template_line_description'],
                                 'master_bom_qty': preserved['master_bom_qty'],
@@ -236,7 +236,7 @@ class MrpProduction(models.Model):
 
                     # If BOM line is a template line, populate data from it
                     if hasattr(bom_line, 'is_template_line') and bom_line.is_template_line and bom_line.bom_category_id:
-                        move.write({
+                        move.with_context(skip_component_tracking=True).write({
                             'bom_category_id': bom_line.bom_category_id.id,
                             'template_line_description': bom_line.line_description or '',
                             'master_bom_qty': move.product_uom_qty,
@@ -327,6 +327,14 @@ class MrpProduction(models.Model):
                         issues.append((order, product, quantity, qty_to_consume))
 
         return issues
+
+    def action_confirm(self):
+        """Override to suppress component tracking during MO confirmation.
+
+        When confirming an MO, Odoo auto-creates all component moves from BOM
+        explosion. These system-generated moves should not flood the chatter.
+        """
+        return super(MrpProduction, self.with_context(skip_component_tracking=True)).action_confirm()
 
     def button_mark_done(self):
         """Override to validate all template moves have real products before completion."""

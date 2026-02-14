@@ -2,6 +2,7 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
+from markupsafe import Markup
 from odoo import api, fields, models, _
 
 
@@ -174,8 +175,108 @@ class StockMove(models.Model):
             return self.product_id.product_tmpl_id.is_template_placeholder
         return False
 
+    # =========================================================================
+    # COMPONENT AUDIT TRAIL - Track changes to MO chatter
+    # =========================================================================
+    def _get_mo_tracked_fields(self):
+        """Return dict of fields to track for MO component changes."""
+        return {
+            'product_id': 'Product',
+            'product_uom_qty': 'Quantity',
+            'product_uom': 'UoM',
+            'physical_qty_used': 'Physical Qty Used',
+        }
+
+    def _format_mo_field_value(self, field_name, value):
+        """Format field value for display in MO tracking message."""
+        if value is False or value is None:
+            return _("(empty)")
+        if field_name in ('product_id', 'product_uom'):
+            return value.display_name if value else _("(empty)")
+        if field_name in ('product_uom_qty', 'physical_qty_used'):
+            return f"{value:.2f}" if value else "0.00"
+        return str(value) if value else _("(empty)")
+
+    def _should_track_component(self):
+        """Check if this move should be tracked as an MO component change."""
+        return (
+            self.raw_material_production_id
+            and not self.env.context.get('skip_component_tracking')
+        )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Track component additions to MO chatter."""
+        moves = super().create(vals_list)
+
+        if self.env.context.get('skip_component_tracking'):
+            return moves
+
+        # Group added components by MO
+        moves_by_mo = {}
+        for move in moves:
+            if move.raw_material_production_id and move.product_id:
+                mo_id = move.raw_material_production_id.id
+                if mo_id not in moves_by_mo:
+                    moves_by_mo[mo_id] = {
+                        'mo': move.raw_material_production_id,
+                        'components': [],
+                    }
+                uom_name = move.product_uom.name if move.product_uom else ''
+                qty = move.product_uom_qty or 0
+                moves_by_mo[mo_id]['components'].append(
+                    f"{move.product_id.display_name} ({qty:.2f} {uom_name})"
+                )
+
+        # Post messages
+        for mo_id, data in moves_by_mo.items():
+            mo = data['mo']
+            if mo.exists() and data['components']:
+                msg = "<strong>Component Added:</strong><ul>"
+                for comp in data['components']:
+                    msg += f"<li>{comp}</li>"
+                msg += "</ul>"
+                mo.message_post(body=Markup(msg), message_type='notification')
+
+        return moves
+
+    def unlink(self):
+        """Track component removals from MO chatter."""
+        if self.env.context.get('skip_component_tracking'):
+            return super().unlink()
+
+        # Capture component info BEFORE deletion
+        moves_by_mo = {}
+        for move in self:
+            if move.raw_material_production_id and move.product_id:
+                mo_id = move.raw_material_production_id.id
+                if mo_id not in moves_by_mo:
+                    moves_by_mo[mo_id] = {
+                        'mo': move.raw_material_production_id,
+                        'components': [],
+                    }
+                uom_name = move.product_uom.name if move.product_uom else ''
+                qty = move.product_uom_qty or 0
+                moves_by_mo[mo_id]['components'].append(
+                    f"{move.product_id.display_name} ({qty:.2f} {uom_name})"
+                )
+
+        result = super().unlink()
+
+        # Post messages after successful deletion
+        for mo_id, data in moves_by_mo.items():
+            mo = data['mo']
+            if mo.exists() and data['components']:
+                msg = "<strong>Component Removed:</strong><ul>"
+                for comp in data['components']:
+                    msg += f"<li>{comp}</li>"
+                msg += "</ul>"
+                mo.message_post(body=Markup(msg), message_type='notification')
+
+        return result
+
     def write(self, vals):
-        """Override to handle product changes on template moves safely.
+        """Override to handle template moves and track component changes.
 
         When changing product on a confirmed/assigned template move:
         1. Delete existing move_lines (they reference old product)
@@ -183,11 +284,53 @@ class StockMove(models.Model):
         3. Sync product_uom_qty with physical_qty_used
         4. Re-create move_lines for the new product if needed
 
-        This prevents:
-        - Orphaned move_lines referencing wrong products
-        - Stock quant inconsistencies
-        - Reservation mismatches
+        Also tracks all component field changes to the MO chatter.
         """
+        # -----------------------------------------------------------------
+        # 1. CAPTURE old values for tracking BEFORE any changes
+        # -----------------------------------------------------------------
+        tracked_fields = self._get_mo_tracked_fields()
+        changes_by_mo = {}  # {mo_id: {'mo': record, 'changes': [...]}}
+        skip_tracking = self.env.context.get('skip_component_tracking')
+
+        if not skip_tracking:
+            for move in self:
+                if not move.raw_material_production_id:
+                    continue
+                mo_id = move.raw_material_production_id.id
+
+                for field_name, label in tracked_fields.items():
+                    if field_name in vals:
+                        old_value = getattr(move, field_name)
+                        new_value = vals[field_name]
+
+                        # For Many2one fields, resolve the new record
+                        if field_name in ('product_id', 'product_uom') and new_value:
+                            field_obj = self._fields[field_name]
+                            new_record = self.env[field_obj.comodel_name].browse(new_value)
+                        else:
+                            new_record = new_value
+
+                        old_formatted = move._format_mo_field_value(field_name, old_value)
+                        new_formatted = move._format_mo_field_value(field_name, new_record)
+
+                        if old_formatted != new_formatted:
+                            if mo_id not in changes_by_mo:
+                                changes_by_mo[mo_id] = {
+                                    'mo': move.raw_material_production_id,
+                                    'changes': [],
+                                }
+                            line_ref = move.product_id.display_name if move.product_id else f"Move #{move.id}"
+                            changes_by_mo[mo_id]['changes'].append({
+                                'line_ref': line_ref,
+                                'field_label': label,
+                                'old_value': old_formatted,
+                                'new_value': new_formatted,
+                            })
+
+        # -----------------------------------------------------------------
+        # 2. TEMPLATE MOVE PRODUCT CHANGE HANDLING (existing logic)
+        # -----------------------------------------------------------------
         template_moves_changing_product = self.env['stock.move']
 
         if 'product_id' in vals:
@@ -203,42 +346,60 @@ class StockMove(models.Model):
 
                     template_moves_changing_product |= move
 
-                    # Step 1: Delete existing move_lines (they reference old product)
-                    # This is safe because placeholders are consumables with no real reservations
+                    # Delete existing move_lines (they reference old product)
                     if move.move_line_ids:
                         move.move_line_ids.unlink()
 
-                    # Step 2: Set state to 'confirmed' so it can be re-assigned
-                    # Note: we bypass super() here to avoid constraint issues
-                    move.with_context(bypass_reservation_update=True).write({'state': 'confirmed'})
+                    # Set state to 'confirmed' so it can be re-assigned
+                    move.with_context(
+                        bypass_reservation_update=True,
+                        skip_component_tracking=True,
+                    ).write({'state': 'confirmed'})
 
-        # Step 3: Ensure product_uom_qty is set from physical_qty_used for template moves
-        # This is critical - without it, "To Consume" shows 0.00
+        # Ensure product_uom_qty is set from physical_qty_used for template moves
         if 'product_id' in vals and template_moves_changing_product:
-            # Get the quantity to use - physical_qty_used takes priority, then master_bom_qty
-            # We need to get the qty before the vals dict potentially changes it
             for move in template_moves_changing_product:
                 qty = vals.get('physical_qty_used') or move.physical_qty_used or move.master_bom_qty or 1.0
-                # Always set product_uom_qty to match the intended consumption
-                vals = dict(vals)  # Make a copy to avoid modifying original
+                vals = dict(vals)
                 vals['product_uom_qty'] = qty
-                # Also ensure physical_qty_used is set if it wasn't
                 if not vals.get('physical_qty_used') and not move.physical_qty_used:
                     vals['physical_qty_used'] = qty
 
+        # -----------------------------------------------------------------
+        # 3. PERFORM THE WRITE
+        # -----------------------------------------------------------------
         result = super().write(vals)
 
-        # Step 4: Re-assign the moves to create new move_lines for the new product
+        # -----------------------------------------------------------------
+        # 4. RE-ASSIGN template moves for new product
+        # -----------------------------------------------------------------
         if 'product_id' in vals:
             for move in template_moves_changing_product:
                 if move.state == 'confirmed':
-                    # Try to assign (create move_lines) for the new product
                     try:
                         move._action_assign()
                     except Exception:
-                        # If assignment fails, that's okay - product might not have stock
-                        # The move will stay in 'confirmed' state (waiting for stock)
                         pass
 
-        return result
+        # -----------------------------------------------------------------
+        # 5. POST TRACKING MESSAGES to MO chatter
+        # -----------------------------------------------------------------
+        if not skip_tracking:
+            for mo_id, data in changes_by_mo.items():
+                if data['changes']:
+                    mo = data['mo']
+                    if mo.exists():
+                        msg_lines = ["<strong>Component Changes:</strong><ul>"]
+                        for change in data['changes']:
+                            msg_lines.append(
+                                f"<li><b>{change['line_ref']}</b>: {change['field_label']} "
+                                f"changed from <i>{change['old_value']}</i> "
+                                f"to <i>{change['new_value']}</i></li>"
+                            )
+                        msg_lines.append("</ul>")
+                        mo.message_post(
+                            body=Markup(''.join(msg_lines)),
+                            message_type='notification',
+                        )
 
+        return result
