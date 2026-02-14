@@ -26,6 +26,17 @@ class VpaDimensionTemplateLine(models.Model):
     show_on_quotation = fields.Boolean(string='Show on Quotation', default=True,
                                        help='Whether to display this dimension on the customer quotation')
 
+    @api.onchange('name')
+    def _onchange_name(self):
+        """Auto-generate field_code from name if not already set."""
+        if self.name and not self.field_code:
+            code = self.name.strip().lower().replace(' ', '_')
+            # Keep only valid identifier characters
+            code = ''.join(c for c in code if c.isalnum() or c == '_')
+            if code and not code[0].isalpha():
+                code = 'd_' + code
+            self.field_code = code
+
     @api.constrains('field_code')
     def _check_field_code(self):
         for rec in self:

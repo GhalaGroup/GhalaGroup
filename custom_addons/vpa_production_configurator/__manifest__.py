@@ -56,6 +56,7 @@ Support: info@vpa.co.tz
         'views/menu_views.xml',
         'wizard/product_configurator_wizard_views.xml',
         'wizard/dimension_import_wizard_views.xml',
+        'report/dimension_template_report.xml',
         'data/vpa_dimension_template_data.xml',
     ],
     'images': [

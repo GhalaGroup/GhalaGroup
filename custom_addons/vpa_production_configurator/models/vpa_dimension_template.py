@@ -27,8 +27,35 @@ class VpaDimensionTemplate(models.Model):
         help='Python expression to compute quantity. Available variables: dimension codes '
              '(e.g., w, h, d) in original units and with _m suffix for meters (e.g., w_m, h_m).',
     )
+    formula_display = fields.Char(
+        string='Formula',
+        compute='_compute_formula_display',
+    )
     default_rate = fields.Float(string='Default Rate', digits='Product Price',
                                 help='Default base rate per computed unit (m\u00b2/m\u00b3/m). Can be overridden per product.')
+
+    @api.depends('calculation_type', 'quantity_formula')
+    def _compute_formula_display(self):
+        labels = {
+            'm2': 'Width \u00d7 Height (m\u00b2)',
+            'm3': 'Width \u00d7 Height \u00d7 Depth (m\u00b3)',
+            'linear_m': 'Length (m)',
+        }
+        for rec in self:
+            if rec.calculation_type in labels:
+                rec.formula_display = labels[rec.calculation_type]
+            else:
+                rec.formula_display = rec.quantity_formula or ''
+
+    @api.onchange('calculation_type')
+    def _onchange_calculation_type(self):
+        formulas = {
+            'm2': 'w_m * h_m',
+            'm3': 'w_m * h_m * d_m',
+            'linear_m': 'w_m',
+        }
+        if self.calculation_type in formulas:
+            self.quantity_formula = formulas[self.calculation_type]
 
     dimension_line_ids = fields.One2many('vpa.dimension.template.line', 'template_id', string='Dimensions', copy=True)
     display_group_ids = fields.One2many('vpa.display.group', 'template_id', string='Display Groups', copy=True)

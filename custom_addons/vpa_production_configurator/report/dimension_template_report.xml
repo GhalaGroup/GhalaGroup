@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_dimension_template" model="ir.actions.report">
+        <field name="name">Dimension Template</field>
+        <field name="model">vpa.dimension.template</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_production_configurator.report_dimension_template</field>
+        <field name="report_file">vpa_production_configurator.report_dimension_template</field>
+        <field name="print_report_name">'%s' % (object.name,)</field>
+        <field name="binding_model_id" ref="model_vpa_dimension_template"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_dimension_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Segoe UI', Tahoma, sans-serif;">
+
+                        <!-- Header -->
+                        <div style="border-bottom: 3px solid #875A7B; padding-bottom: 15px; margin-bottom: 20px;">
+                            <h1 style="color: #875A7B; margin: 0; font-size: 24px;">
+                                <t t-esc="doc.name"/>
+                            </h1>
+                            <div style="margin-top: 8px; color: #666; font-size: 13px;">
+                                <span t-if="doc.code" style="background: #875A7B; color: white; padding: 2px 10px; border-radius: 4px; margin-right: 10px;">
+                                    <t t-esc="doc.code"/>
+                                </span>
+                                <span style="margin-right: 15px;">
+                                    <strong>Type:</strong>
+                                    <t t-if="doc.calculation_type == 'm2'">Square Meters (m&#178;)</t>
+                                    <t t-if="doc.calculation_type == 'm3'">Cubic Meters (m&#179;)</t>
+                                    <t t-if="doc.calculation_type == 'linear_m'">Linear Meters (m)</t>
+                                    <t t-if="doc.calculation_type == 'custom'">Custom Formula</t>
+                                </span>
+                                <span t-if="doc.default_rate">
+                                    <strong>Rate:</strong>
+                                    <t t-esc="'{:,.0f}'.format(doc.default_rate)"/>
+                                    <t t-esc="doc.company_id.currency_id.symbol or ''"/>
+                                </span>
+                            </div>
+                            <p t-if="doc.description" style="margin-top: 8px; color: #555; font-size: 12px; font-style: italic;">
+                                <t t-esc="doc.description"/>
+                            </p>
+                        </div>
+
+                        <!-- Dimensions Table -->
+                        <t t-if="doc.dimension_line_ids">
+                            <h3 style="color: #875A7B; font-size: 15px; margin-bottom: 8px;">Dimensions</h3>
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+                                <thead>
+                                    <tr style="background: #875A7B; color: white;">
+                                        <th style="padding: 8px 12px; text-align: left;">Dimension</th>
+                                        <th style="padding: 8px 12px; text-align: left;">Unit</th>
+                                        <th style="padding: 8px 12px; text-align: right;">Default</th>
+                                        <th style="padding: 8px 12px; text-align: right;">Min</th>
+                                        <th style="padding: 8px 12px; text-align: right;">Max</th>
+                                        <th style="padding: 8px 12px; text-align: center;">Required</th>
+                                        <th style="padding: 8px 12px; text-align: center;">On Quote</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.dimension_line_ids" t-as="dim">
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 6px 12px;">
+                                                <t t-esc="dim.name"/>
+                                            </td>
+                                            <td style="padding: 6px 12px; color: #666;">
+                                                <t t-if="dim.uom_type == 'mm'">mm</t>
+                                                <t t-if="dim.uom_type == 'cm'">cm</t>
+                                                <t t-if="dim.uom_type == 'm'">m</t>
+                                            </td>
+                                            <td style="padding: 6px 12px; text-align: right;">
+                                                <t t-esc="'{:,.0f}'.format(dim.default_value)"/>
+                                            </td>
+                                            <td style="padding: 6px 12px; text-align: right; color: #666;">
+                                                <t t-esc="'{:,.0f}'.format(dim.min_value)"/>
+                                            </td>
+                                            <td style="padding: 6px 12px; text-align: right; color: #666;">
+                                                <t t-if="dim.max_value" t-esc="'{:,.0f}'.format(dim.max_value)"/>
+                                                <t t-else="">-</t>
+                                            </td>
+                                            <td style="padding: 6px 12px; text-align: center;">
+                                                <t t-if="dim.required">&#10003;</t>
+                                            </td>
+                                            <td style="padding: 6px 12px; text-align: center;">
+                                                <t t-if="dim.show_on_quotation">&#10003;</t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- Configuration Variables grouped by Display Group -->
+                        <t t-if="doc.variable_ids">
+                            <h3 style="color: #875A7B; font-size: 15px; margin-bottom: 12px;">Configuration Variables</h3>
+
+                            <!-- Group variables by display group -->
+                            <t t-foreach="doc.display_group_ids" t-as="group">
+                                <t t-set="group_vars" t-value="doc.variable_ids.filtered(lambda v: v.display_group_id.id == group.id)"/>
+                                <t t-if="group_vars">
+                                    <div style="margin-bottom: 18px;">
+                                        <h4 style="color: #333; font-size: 13px; margin-bottom: 6px; padding: 5px 10px; background: #f0f0f0; border-left: 3px solid #875A7B;">
+                                            <t t-esc="group.name"/>
+                                        </h4>
+
+                                        <t t-foreach="group_vars" t-as="var">
+                                            <div style="margin-left: 10px; margin-bottom: 12px;">
+                                                <div style="font-size: 12px; margin-bottom: 4px;">
+                                                    <strong><t t-esc="var.name"/></strong>
+                                                    <span style="color: #888; margin-left: 8px; font-size: 11px;">
+                                                        <t t-if="var.variable_type == 'simple'">Simple Selection</t>
+                                                        <t t-if="var.variable_type == 'product'">Product Selection</t>
+                                                    </span>
+                                                    <t t-if="var.required">
+                                                        <span style="color: #DC143C; font-size: 11px; margin-left: 5px;">Required</span>
+                                                    </t>
+                                                    <t t-if="var.affects_price">
+                                                        <span style="color: #28a745; font-size: 11px; margin-left: 5px;">Affects Price</span>
+                                                    </t>
+                                                </div>
+
+                                                <!-- Options table -->
+                                                <t t-if="var.option_ids">
+                                                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-left: 5px;">
+                                                        <thead>
+                                                            <tr style="background: #f8f8f8; border-bottom: 1px solid #ddd;">
+                                                                <th style="padding: 4px 10px; text-align: left;">Option</th>
+                                                                <th t-if="var.variable_type == 'product'" style="padding: 4px 10px; text-align: left;">Linked Product</th>
+                                                                <th t-if="var.affects_price" style="padding: 4px 10px; text-align: left;">Surcharge</th>
+                                                                <th t-if="var.affects_price" style="padding: 4px 10px; text-align: right;">Amount</th>
+                                                                <th style="padding: 4px 10px; text-align: center;">Default</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <t t-foreach="var.option_ids" t-as="opt">
+                                                                <tr style="border-bottom: 1px solid #eee;">
+                                                                    <td style="padding: 4px 10px;">
+                                                                        <t t-esc="opt.name"/>
+                                                                    </td>
+                                                                    <td t-if="var.variable_type == 'product'" style="padding: 4px 10px; color: #666;">
+                                                                        <t t-if="opt.product_id" t-esc="opt.product_id.display_name"/>
+                                                                    </td>
+                                                                    <td t-if="var.affects_price" style="padding: 4px 10px; color: #666;">
+                                                                        <t t-if="opt.surcharge_type == 'per_unit'">Per m&#178;/m&#179;</t>
+                                                                        <t t-if="opt.surcharge_type == 'fixed'">Fixed</t>
+                                                                        <t t-if="opt.surcharge_type == 'none'">-</t>
+                                                                    </td>
+                                                                    <td t-if="var.affects_price" style="padding: 4px 10px; text-align: right;">
+                                                                        <t t-if="opt.surcharge_amount" t-esc="'{:,.0f}'.format(opt.surcharge_amount)"/>
+                                                                    </td>
+                                                                    <td style="padding: 4px 10px; text-align: center;">
+                                                                        <t t-if="opt.is_default">&#10003;</t>
+                                                                    </td>
+                                                                </tr>
+                                                            </t>
+                                                        </tbody>
+                                                    </table>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </t>
+
+                            <!-- Variables without a display group -->
+                            <t t-set="ungrouped_vars" t-value="doc.variable_ids.filtered(lambda v: not v.display_group_id)"/>
+                            <t t-if="ungrouped_vars">
+                                <div style="margin-bottom: 18px;">
+                                    <h4 style="color: #333; font-size: 13px; margin-bottom: 6px; padding: 5px 10px; background: #f0f0f0; border-left: 3px solid #888;">
+                                        Other Variables
+                                    </h4>
+                                    <t t-foreach="ungrouped_vars" t-as="var">
+                                        <div style="margin-left: 10px; margin-bottom: 12px;">
+                                            <div style="font-size: 12px; margin-bottom: 4px;">
+                                                <strong><t t-esc="var.name"/></strong>
+                                                <span style="color: #888; margin-left: 8px; font-size: 11px;">
+                                                    <t t-if="var.variable_type == 'simple'">Simple Selection</t>
+                                                    <t t-if="var.variable_type == 'product'">Product Selection</t>
+                                                </span>
+                                            </div>
+                                            <t t-if="var.option_ids">
+                                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-left: 5px;">
+                                                    <thead>
+                                                        <tr style="background: #f8f8f8; border-bottom: 1px solid #ddd;">
+                                                            <th style="padding: 4px 10px; text-align: left;">Option</th>
+                                                            <th style="padding: 4px 10px; text-align: center;">Default</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <t t-foreach="var.option_ids" t-as="opt">
+                                                            <tr style="border-bottom: 1px solid #eee;">
+                                                                <td style="padding: 4px 10px;"><t t-esc="opt.name"/></td>
+                                                                <td style="padding: 4px 10px; text-align: center;">
+                                                                    <t t-if="opt.is_default">&#10003;</t>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                    </tbody>
+                                                </table>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Footer info -->
+                        <div style="margin-top: 25px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10px; color: #999;">
+                            <t t-esc="doc.company_id.name or ''"/>
+                            &#8226; Template: <t t-esc="doc.name"/>
+                            <t t-if="doc.code"> (<t t-esc="doc.code"/>)</t>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
