@@ -574,6 +574,23 @@ class VPADocumentTemplate(models.Model):
         """Create template and generate corresponding report action"""
         template = super(VPADocumentTemplate, self).create(vals)
         template._create_report_action()
+
+        # Ensure only one default per company/document_type
+        if template.is_default_print:
+            self.search([
+                ('id', '!=', template.id),
+                ('company_id', '=', template.company_id.id),
+                ('document_type', '=', template.document_type),
+                ('is_default_print', '=', True),
+            ]).write({'is_default_print': False})
+        if template.is_default_email:
+            self.search([
+                ('id', '!=', template.id),
+                ('company_id', '=', template.company_id.id),
+                ('document_type', '=', template.document_type),
+                ('is_default_email', '=', True),
+            ]).write({'is_default_email': False})
+
         return template
 
     def write(self, vals):
