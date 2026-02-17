@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class VpaDisplayGroup(models.Model):
@@ -27,3 +27,8 @@ class VpaDisplayGroup(models.Model):
         help='Additional dimensions shown in this group only (e.g., Frame Depth in Frame group)',
     )
     variable_ids = fields.One2many('vpa.config.variable', 'display_group_id', string='Variables')
+
+    @api.onchange('name')
+    def _onchange_name(self):
+        if self.name and not self.code:
+            self.code = self.name.strip().lower().replace(' ', '_')

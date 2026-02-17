@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Copy from Previous BOM Wizard                                -->
+    <!-- VPA Production Base                                          -->
+    <!-- ============================================================ -->
+
+    <!-- Wizard Form View -->
+    <record id="bom_copy_from_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.bom.copy.from.wizard.form</field>
+        <field name="model">vpa.bom.copy.from.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Copy from Previous BOM">
+                <group>
+                    <field name="target_bom_id" invisible="1"/>
+                    <field name="product_tmpl_id" invisible="1"/>
+                    <field name="source_bom_id"
+                           domain="[('product_tmpl_id', '=', product_tmpl_id),
+                                    ('is_master_bom', '=', False),
+                                    ('id', '!=', target_bom_id)]"
+                           context="{'sale_show_partner_name': True}"
+                           options="{'no_create': True}"
+                           placeholder="Select a previous BOM..."/>
+                    <field name="replace_lines"/>
+                </group>
+                <group string="Source BOM Info" invisible="not source_bom_id">
+                    <field name="source_bom_reference" string="Reference"/>
+                    <field name="source_bom_line_count" string="Component Lines"/>
+                    <field name="source_bom_date" string="Created"/>
+                </group>
+                <footer>
+                    <button name="action_copy_lines" string="Copy Lines"
+                            type="object" class="btn-primary"
+                            invisible="not source_bom_id"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_bom_copy_from_wizard" model="ir.actions.act_window">
+        <field name="name">Copy from Previous BOM</field>
+        <field name="res_model">vpa.bom.copy.from.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

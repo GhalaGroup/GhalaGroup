@@ -57,6 +57,24 @@ class MrpBom(models.Model):
     active = fields.Boolean(tracking=True)
 
     # =========================================================================
+    # ORDER-SPECIFIC BOM LINKING
+    # =========================================================================
+    sale_order_id = fields.Many2one(
+        'sale.order',
+        string='Sales Order',
+        copy=False,
+        help="Link this BOM to a specific Sales Order. "
+             "When set, the reference will be prefixed with the SO number.",
+    )
+    lot_number = fields.Integer(
+        string='Lot',
+        copy=False,
+        readonly=True,
+        help="Auto-assigned lot number (1, 2, 3...). "
+             "Matches the LOT X/Y convention from MO splitting.",
+    )
+
+    # =========================================================================
     # REVISION CONTROL
     # =========================================================================
     revision = fields.Char(
@@ -206,18 +224,35 @@ class MrpBom(models.Model):
                 and bool(bom.bom_line_ids.filtered(lambda l: l.product_id and not l.display_type))
             )
 
-    @api.depends('code', 'revision')
+    @api.depends('code', 'revision', 'sale_order_id', 'lot_number')
     def _compute_code_with_revision(self):
-        """Compute BOM code with revision number."""
+        """Compute BOM code with revision number, SO prefix, and Lot."""
         import re
         for bom in self:
             if bom.code:
                 # Clean the code by removing Odoo's automatic "(new) X" suffix
                 clean_code = re.sub(r'\s*\(new\)\s*\d*', '', bom.code).strip()
-                if bom.revision:
-                    bom.code_with_revision = f"{clean_code} (Rev {bom.revision})"
+
+                # Build prefix from SO and Lot
+                prefix_parts = []
+                if bom.sale_order_id:
+                    so_part = bom.sale_order_id.name
+                    if bom.lot_number:
+                        so_part = f"{so_part}/{bom.lot_number}"
+                    prefix_parts.append(so_part)
+                elif bom.lot_number:
+                    prefix_parts.append(str(bom.lot_number))
+
+                if prefix_parts:
+                    prefix = '/'.join(prefix_parts)
+                    display_code = f"{prefix} - {clean_code}"
                 else:
-                    bom.code_with_revision = clean_code
+                    display_code = clean_code
+
+                if bom.revision:
+                    bom.code_with_revision = f"{display_code} (Rev {bom.revision})"
+                else:
+                    bom.code_with_revision = display_code
             else:
                 bom.code_with_revision = False
 
@@ -318,18 +353,87 @@ class MrpBom(models.Model):
 
             bom.revision_history_html = html
 
-    @api.depends('code', 'revision', 'product_tmpl_id', 'is_master_bom', 'master_bom_status')
+    @api.onchange('sale_order_id')
+    def _onchange_sale_order_id(self):
+        """Auto-suggest BOM code and auto-assign lot letter when SO is selected."""
+        if not self.sale_order_id:
+            self.lot_number = 0
+            return
+
+        # Auto-suggest BOM code if empty
+        if not self.code:
+            product_code = ''
+            if self.product_id and self.product_id.default_code:
+                product_code = self.product_id.default_code
+            elif self.product_tmpl_id and self.product_tmpl_id.default_code:
+                product_code = self.product_tmpl_id.default_code
+            elif self.product_tmpl_id:
+                product_code = self.product_tmpl_id.name
+            if product_code:
+                self.code = product_code
+
+        # Auto-assign lot number (1, 2, 3...)
+        if self.product_tmpl_id and self.sale_order_id:
+            self.lot_number = self._get_next_lot_number(
+                self.sale_order_id.id,
+                self.product_tmpl_id.id,
+            )
+
+    def _get_next_lot_number(self, sale_order_id, product_tmpl_id):
+        """Calculate the next lot number for this product + SO combination.
+
+        Returns 1 for the first BOM, 2 for the second, etc.
+        Uses the same LOT numbering convention as MO splitting.
+        """
+        # Find existing BOMs for same product template + same SO
+        domain = [
+            ('sale_order_id', '=', sale_order_id),
+            ('product_tmpl_id', '=', product_tmpl_id),
+            ('lot_number', '>', 0),
+        ]
+        # Exclude current record if it exists in DB
+        if self._origin and self._origin.id:
+            domain.append(('id', '!=', self._origin.id))
+
+        existing_boms = self.env['mrp.bom'].search(domain)
+        used_numbers = set(b.lot_number for b in existing_boms if b.lot_number)
+
+        # Find the next available number (fill gaps)
+        num = 1
+        while num in used_numbers:
+            num += 1
+        return num
+
+    @api.depends('code', 'revision', 'product_tmpl_id', 'is_master_bom', 'master_bom_status',
+                 'sale_order_id', 'lot_number')
     def _compute_display_name(self):
-        """Override display name to use cleaned code with revision and Master BOM indicator."""
+        """Override display name to use cleaned code with revision, SO/Lot prefix, and Master BOM indicator."""
         import re
         for bom in self:
             if bom.code:
                 # Clean the code by removing Odoo's automatic "(new) X" suffix
                 clean_code = re.sub(r'\s*\(new\)\s*\d*', '', bom.code).strip()
-                if bom.revision:
-                    name = f"{clean_code} (Rev {bom.revision})"
+
+                # Build prefix from SO and Lot
+                prefix_parts = []
+                if bom.sale_order_id:
+                    so_part = bom.sale_order_id.name
+                    if bom.lot_number:
+                        so_part = f"{so_part}/{bom.lot_number}"
+                    prefix_parts.append(so_part)
+                elif bom.lot_number:
+                    prefix_parts.append(str(bom.lot_number))
+
+                if prefix_parts:
+                    prefix = '/'.join(prefix_parts)
+                    display_code = f"{prefix} - {clean_code}"
                 else:
-                    name = clean_code
+                    display_code = clean_code
+
+                if bom.revision:
+                    name = f"{display_code} (Rev {bom.revision})"
+                else:
+                    name = display_code
                 # Add Master BOM indicator if this is a Master BOM
                 if bom.is_master_bom:
                     bom.display_name = f"⭐ {name} [Master BOM]"
@@ -489,12 +593,43 @@ class MrpBom(models.Model):
             if 'code' in vals and vals['code']:
                 vals['code'] = re.sub(r'\s*\(new\)\s*\d*', '', vals['code']).strip()
 
+            # Auto-assign lot letter if SO is set but lot_number is not
+            if vals.get('sale_order_id') and vals.get('product_tmpl_id') and not vals.get('lot_number'):
+                vals['lot_number'] = self._get_next_lot_number(
+                    vals['sale_order_id'],
+                    vals['product_tmpl_id'],
+                )
+
             # Initialize revision history
             revision = vals.get('revision', '1.0')
             user = self.env.user.name
             date = fields.Datetime.now().strftime('%Y-%m-%d %H:%M')
             vals['revision_history'] = f"Rev {revision} - {date} by {user}\n"
         return super().create(vals_list)
+
+    def action_open_copy_from_bom(self):
+        """Open wizard to copy BOM lines from a previous BOM for the same product.
+
+        Only available for non-Master BOMs. Shows previous BOMs
+        (excluding Master BOMs) for the same product template.
+        """
+        self.ensure_one()
+
+        if self.is_master_bom:
+            from odoo.exceptions import UserError
+            raise UserError(_("This action is not available for Master BOMs."))
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Copy from Previous BOM'),
+            'res_model': 'vpa.bom.copy.from.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_id': self.id,
+                'active_model': 'mrp.bom',
+            },
+        }
 
     def action_create_new_revision(self):
         """Create a new revision of this BOM."""

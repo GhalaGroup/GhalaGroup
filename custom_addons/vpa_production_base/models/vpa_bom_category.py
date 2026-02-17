@@ -127,21 +127,23 @@ class VpaBomCategory(models.Model):
             'name': _('Products: %s') % self.name,
             'type': 'ir.actions.act_window',
             'res_model': 'product.template',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('bom_category_id', '=', self.id)],
             'context': {'default_bom_category_id': self.id, 'default_is_raw_material': True},
         }
 
     def action_view_bom_lines(self):
-        """Open list of BOM lines using this category."""
+        """Open BOMs that have lines using this category."""
         self.ensure_one()
+        bom_ids = self.env['mrp.bom.line'].search([
+            ('bom_category_id', '=', self.id),
+        ]).mapped('bom_id').ids
         return {
-            'name': _('BOM Lines: %s') % self.name,
+            'name': _('BOMs using: %s') % self.name,
             'type': 'ir.actions.act_window',
-            'res_model': 'mrp.bom.line',
-            'view_mode': 'tree,form',
-            'domain': [('bom_category_id', '=', self.id)],
-            'context': {'default_bom_category_id': self.id},
+            'res_model': 'mrp.bom',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', bom_ids)],
         }
 
     # =========================================================================

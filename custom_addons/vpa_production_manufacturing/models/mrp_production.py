@@ -2,8 +2,14 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
+from markupsafe import Markup
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class MrpProduction(models.Model):
@@ -183,8 +189,112 @@ class MrpProduction(models.Model):
 
         return values
 
+    # =========================================================================
+    # MO-LEVEL AUDIT TRAIL
+    # =========================================================================
+    def _get_mo_tracked_fields(self):
+        """Return dict of fields to track on MO with their labels and format type.
+
+        Format types:
+        - 'many2one': display_name of related record
+        - 'float': numeric value
+        - 'char': string value
+        - 'datetime': formatted datetime
+        - 'selection': selection label
+        """
+        return {
+            'product_id': {'label': 'Product', 'type': 'many2one'},
+            'bom_id': {'label': 'Bill of Materials', 'type': 'many2one'},
+            'product_uom_id': {'label': 'Unit of Measure', 'type': 'many2one'},
+            'user_id': {'label': 'Responsible', 'type': 'many2one'},
+            'date_start': {'label': 'Planned Start', 'type': 'datetime'},
+            'date_finished': {'label': 'Planned End', 'type': 'datetime'},
+            'date_deadline': {'label': 'Deadline', 'type': 'datetime'},
+            'origin': {'label': 'Source', 'type': 'char'},
+            'location_src_id': {'label': 'Components Location', 'type': 'many2one'},
+            'location_dest_id': {'label': 'Finished Products Location', 'type': 'many2one'},
+            'picking_type_id': {'label': 'Operation Type', 'type': 'many2one'},
+        }
+
+    def _format_mo_tracked_value(self, field_name, field_info, value):
+        """Format a field value for display in audit trail message."""
+        if not value:
+            return _('(empty)')
+        ftype = field_info['type']
+        if ftype == 'many2one':
+            return value.display_name if hasattr(value, 'display_name') else str(value)
+        elif ftype == 'float':
+            return f"{value:,.2f}"
+        elif ftype == 'datetime':
+            if hasattr(value, 'strftime'):
+                return value.strftime('%Y-%m-%d %H:%M')
+            return str(value)
+        elif ftype == 'selection':
+            # Get selection label
+            selection = dict(self._fields[field_name].selection)
+            return selection.get(value, str(value))
+        return str(value)
+
+    def _track_mo_field_changes(self, vals, old_values):
+        """Compare old vs new values and post audit messages to chatter."""
+        tracked_fields = self._get_mo_tracked_fields()
+        fields_in_vals = set(vals.keys()) & set(tracked_fields.keys())
+
+        if not fields_in_vals:
+            return
+
+        for production in self:
+            if production.id not in old_values:
+                continue
+
+            changes = []
+            old = old_values[production.id]
+
+            for field_name in fields_in_vals:
+                field_info = tracked_fields[field_name]
+                old_val = old.get(field_name)
+                new_val = getattr(production, field_name)
+
+                # Compare: for Many2one compare IDs, for others compare values
+                if field_info['type'] == 'many2one':
+                    old_id = old_val.id if old_val else False
+                    new_id = new_val.id if new_val else False
+                    if old_id == new_id:
+                        continue
+                elif field_info['type'] == 'datetime':
+                    # Compare datetime values directly
+                    if old_val == new_val:
+                        continue
+                else:
+                    if old_val == new_val:
+                        continue
+
+                old_display = self._format_mo_tracked_value(field_name, field_info, old_val)
+                new_display = self._format_mo_tracked_value(field_name, field_info, new_val)
+
+                changes.append({
+                    'label': field_info['label'],
+                    'old_value': old_display,
+                    'new_value': new_display,
+                })
+
+            if changes:
+                msg_lines = ["<b>Manufacturing Order Changes:</b><ul>"]
+                for change in changes:
+                    msg_lines.append(
+                        f"<li><b>{change['label']}</b>: "
+                        f"<i>{change['old_value']}</i> → "
+                        f"<i>{change['new_value']}</i></li>"
+                    )
+                msg_lines.append("</ul>")
+                production.message_post(
+                    body=Markup(''.join(msg_lines)),
+                    message_type='notification',
+                )
+
     def write(self, vals):
-        """Override to preserve template move custom fields during UI saves.
+        """Override to preserve template move custom fields during UI saves
+        and track MO-level field changes for audit trail.
 
         When the UI saves an MO, it sends move_raw_ids data without our custom fields.
         This would wipe out bom_category_id, master_bom_qty, etc.
@@ -193,6 +303,16 @@ class MrpProduction(models.Model):
         Additionally, if moves are missing template data but their BOM line is a template
         line, we populate the data from the BOM line.
         """
+        # --- MO-level audit trail: capture old values ---
+        tracked_fields = self._get_mo_tracked_fields()
+        fields_to_track = set(vals.keys()) & set(tracked_fields.keys())
+        old_values = {}
+        if fields_to_track and not self.env.context.get('skip_mo_tracking'):
+            for production in self:
+                old_values[production.id] = {
+                    f: getattr(production, f) for f in fields_to_track
+                }
+
         # Preserve template move data before write
         preserved_data = {}
         if 'move_raw_ids' in vals:
@@ -210,6 +330,10 @@ class MrpProduction(models.Model):
 
         result = super().write(vals)
 
+        # --- MO-level audit trail: post changes ---
+        if old_values and not self.env.context.get('skip_mo_tracking'):
+            self._track_mo_field_changes(vals, old_values)
+
         # Restore or populate template move data after write
         if 'move_raw_ids' in vals:
             for production in self:
@@ -225,7 +349,7 @@ class MrpProduction(models.Model):
                     if production.id in preserved_data and bom_line_id in preserved_data[production.id]:
                         preserved = preserved_data[production.id][bom_line_id]
                         if preserved['bom_category_id']:
-                            move.write({
+                            move.with_context(skip_component_tracking=True).write({
                                 'bom_category_id': preserved['bom_category_id'],
                                 'template_line_description': preserved['template_line_description'],
                                 'master_bom_qty': preserved['master_bom_qty'],
@@ -236,7 +360,7 @@ class MrpProduction(models.Model):
 
                     # If BOM line is a template line, populate data from it
                     if hasattr(bom_line, 'is_template_line') and bom_line.is_template_line and bom_line.bom_category_id:
-                        move.write({
+                        move.with_context(skip_component_tracking=True).write({
                             'bom_category_id': bom_line.bom_category_id.id,
                             'template_line_description': bom_line.line_description or '',
                             'master_bom_qty': move.product_uom_qty,
@@ -327,6 +451,14 @@ class MrpProduction(models.Model):
                         issues.append((order, product, quantity, qty_to_consume))
 
         return issues
+
+    def action_confirm(self):
+        """Override to suppress component tracking during MO confirmation.
+
+        When confirming an MO, Odoo auto-creates all component moves from BOM
+        explosion. These system-generated moves should not flood the chatter.
+        """
+        return super(MrpProduction, self.with_context(skip_component_tracking=True)).action_confirm()
 
     def button_mark_done(self):
         """Override to validate all template moves have real products before completion."""

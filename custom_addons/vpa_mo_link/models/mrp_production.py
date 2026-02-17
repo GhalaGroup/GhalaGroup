@@ -30,16 +30,15 @@ class MrpProduction(models.Model):
     @api.depends('bom_id')
     def _compute_product_qty(self):
         """
-        Override to preserve explicitly set product_qty when creating MOs.
+        Override to preserve product_qty when BOM changes on existing MOs.
 
-        Standard Odoo 19 behavior: When a BOM is assigned, the MO's product_qty
-        is automatically set to the BOM's product_qty. This causes issues when
-        creating MOs from Sales Orders where the quantity should match the SO line,
-        not the BOM default.
+        Standard Odoo 19 behavior: When a BOM is assigned/changed, the MO's
+        product_qty is set to the BOM's product_qty. This causes issues when:
+        1. Creating MOs from Sales Orders (qty should match SO line, not BOM default)
+        2. Manually switching BOMs on existing MOs (qty should stay as-is)
 
-        This override preserves the product_qty if:
-        1. It was explicitly set during creation (in context)
-        2. The MO is being created (not modified)
+        This override preserves the product_qty so only the components
+        change, not the output quantity.
         """
         for production in self:
             if production.state != 'draft':
@@ -51,12 +50,21 @@ class MrpProduction(models.Model):
             if explicit_qty and not production._origin.id:
                 # New record with explicit quantity - preserve it
                 production.product_qty = explicit_qty
-            elif production.bom_id and production._origin.bom_id != production.bom_id:
-                # BOM changed - use BOM's quantity (standard behavior)
-                production.product_qty = production.bom_id.product_qty
             elif not production.bom_id:
                 # No BOM - default to 1
                 production.product_qty = 1.0
+            elif production._origin.id:
+                # Existing MO - always preserve the stored quantity
+                # regardless of which BOM is selected. The user controls
+                # the output quantity; BOM only affects components.
+                stored_qty = production._origin.product_qty
+                if stored_qty:
+                    production.product_qty = stored_qty
+                else:
+                    production.product_qty = production.bom_id.product_qty
+            else:
+                # New record without explicit context - use BOM default
+                production.product_qty = production.bom_id.product_qty
 
     def _post_run_manufacture(self, post_production_values):
         """

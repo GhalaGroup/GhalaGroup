@@ -30,7 +30,11 @@
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group>
-                            <field name="quantity_formula" placeholder="e.g., w_m * h_m"/>
+                            <field name="formula_display" string="Formula"
+                                   invisible="calculation_type == 'custom'"/>
+                            <field name="quantity_formula" string="Custom Formula"
+                                   invisible="calculation_type != 'custom'"
+                                   placeholder="e.g., w_m * h_m * 2"/>
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
@@ -40,14 +44,14 @@
                             <field name="dimension_line_ids">
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="name"/>
-                                    <field name="field_code"/>
-                                    <field name="uom_type"/>
-                                    <field name="default_value"/>
-                                    <field name="min_value"/>
-                                    <field name="max_value"/>
+                                    <field name="name" string="Dimension"/>
+                                    <field name="field_code" column_invisible="1"/>
+                                    <field name="uom_type" string="Unit"/>
+                                    <field name="default_value" string="Default"/>
+                                    <field name="min_value" string="Min"/>
+                                    <field name="max_value" string="Max"/>
                                     <field name="required"/>
-                                    <field name="show_on_quotation"/>
+                                    <field name="show_on_quotation" string="On Quote"/>
                                 </list>
                             </field>
                         </page>
@@ -56,8 +60,8 @@
                                 <list editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
-                                    <field name="code"/>
-                                    <field name="show_dimensions"/>
+                                    <field name="code" column_invisible="1"/>
+                                    <field name="show_dimensions" string="Show Dims"/>
                                     <field name="note_format" optional="hide"/>
                                     <field name="extra_dimension_ids" widget="many2many_tags"
                                            domain="[('template_id', '=', parent.id)]"

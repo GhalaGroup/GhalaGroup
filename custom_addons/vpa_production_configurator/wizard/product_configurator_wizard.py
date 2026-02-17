@@ -17,11 +17,30 @@ class VpaProductConfiguratorWizard(models.TransientModel):
     config_line_ids = fields.One2many('vpa.configurator.config.line', 'wizard_id',
                                       string='Configuration')
 
-    preview_qty = fields.Float(string='Computed Quantity', digits=(16, 4))
+    preview_qty = fields.Float(string='Computed Quantity', digits=(16, 2))
     preview_qty_label = fields.Char(string='Qty Label')
     preview_base_price = fields.Float(string='Base Price', digits='Product Price')
+    preview_base_price_display = fields.Char(string='Base Price', compute='_compute_price_displays')
     preview_surcharges_display = fields.Text(string='Surcharges')
     preview_total_price = fields.Float(string='Unit Price', digits='Product Price')
+    preview_total_price_display = fields.Char(string='Unit Price', compute='_compute_price_displays')
+    rate_display = fields.Char(string='Rate', compute='_compute_rate_display')
+
+    @api.depends('rate', 'template_id')
+    def _compute_rate_display(self):
+        unit_labels = {'m2': '/m\u00b2', 'm3': '/m\u00b3', 'linear_m': '/m', 'custom': ''}
+        for rec in self:
+            if rec.rate:
+                label = unit_labels.get(rec.template_id.calculation_type, '') if rec.template_id else ''
+                rec.rate_display = f"{rec.rate:,.0f}{label}"
+            else:
+                rec.rate_display = ''
+
+    @api.depends('preview_base_price', 'preview_total_price')
+    def _compute_price_displays(self):
+        for rec in self:
+            rec.preview_base_price_display = f"{rec.preview_base_price:,.0f}" if rec.preview_base_price else '0'
+            rec.preview_total_price_display = f"{rec.preview_total_price:,.0f}" if rec.preview_total_price else '0'
 
     @api.model
     def default_get(self, fields_list):
@@ -112,8 +131,8 @@ class VpaProductConfiguratorWizard(models.TransientModel):
                     amount = opt.surcharge_amount * computed_qty
                     per_unit_total += opt.surcharge_amount
                     surcharge_lines.append(
-                        f"{var_name}: +{opt.surcharge_amount:,.2f}{result['preview_qty_label']} "
-                        f"\u00d7 {computed_qty:.4f} = +{amount:,.2f}"
+                        f"{var_name}: +{opt.surcharge_amount:,.0f}{result['preview_qty_label']} "
+                        f"\u00d7 {computed_qty:.2f} = +{amount:,.0f}"
                     )
                 elif opt.surcharge_type == 'fixed':
                     qty = opt.qty_override or 1
@@ -121,10 +140,10 @@ class VpaProductConfiguratorWizard(models.TransientModel):
                     fixed_total += amount
                     if qty > 1:
                         surcharge_lines.append(
-                            f"{var_name}: +{opt.surcharge_amount:,.2f} \u00d7 {int(qty)}pcs = +{amount:,.2f}"
+                            f"{var_name}: +{opt.surcharge_amount:,.0f} \u00d7 {int(qty)}pcs = +{amount:,.0f}"
                         )
                     else:
-                        surcharge_lines.append(f"{var_name}: +{amount:,.2f}")
+                        surcharge_lines.append(f"{var_name}: +{amount:,.0f}")
 
         result['preview_surcharges_display'] = '\n'.join(surcharge_lines) if surcharge_lines else ''
         result['preview_total_price'] = computed_qty * (rate + per_unit_total) + fixed_total
@@ -247,11 +266,17 @@ class VpaConfiguratorDimensionLine(models.TransientModel):
     name = fields.Char(string='Label', related='dimension_line_id.name', readonly=True)
     field_code = fields.Char(string='Code', related='dimension_line_id.field_code', readonly=True)
     uom_type = fields.Selection(related='dimension_line_id.uom_type', string='Unit', readonly=True)
-    value = fields.Float(string='Value')
+    uom_label = fields.Char(string='Unit', compute='_compute_uom_label')
+    value = fields.Float(string='Value', digits=(16, 0))
     min_value = fields.Float(string='Min', related='dimension_line_id.min_value', readonly=True)
     max_value = fields.Float(string='Max', related='dimension_line_id.max_value', readonly=True)
     required = fields.Boolean(string='Required', related='dimension_line_id.required', readonly=True)
     sequence = fields.Integer(string='Sequence', related='dimension_line_id.sequence', readonly=True)
+
+    @api.depends('uom_type')
+    def _compute_uom_label(self):
+        for line in self:
+            line.uom_label = line.uom_type or ''
 
 
 class VpaConfiguratorConfigLine(models.TransientModel):
@@ -282,10 +307,10 @@ class VpaConfiguratorConfigLine(models.TransientModel):
             if opt.surcharge_type == 'per_unit':
                 template = line.wizard_id.template_id
                 label = unit_labels.get(template.calculation_type, '') if template else ''
-                line.surcharge_display = f"+{opt.surcharge_amount:,.2f}{label}"
+                line.surcharge_display = f"+{opt.surcharge_amount:,.0f}{label}"
             elif opt.surcharge_type == 'fixed':
                 qty = opt.qty_override or 1
                 if qty > 1:
-                    line.surcharge_display = f"+{opt.surcharge_amount:,.2f} \u00d7{int(qty)}pcs"
+                    line.surcharge_display = f"+{opt.surcharge_amount:,.0f} \u00d7{int(qty)}pcs"
                 else:
-                    line.surcharge_display = f"+{opt.surcharge_amount:,.2f}"
+                    line.surcharge_display = f"+{opt.surcharge_amount:,.0f}"

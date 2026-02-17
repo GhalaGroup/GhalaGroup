@@ -3,3 +3,4 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 from . import product_assign_bom_category
+from . import bom_copy_from_wizard
