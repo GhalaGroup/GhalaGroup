@@ -6,3 +6,4 @@ from . import vpa_bom_category
 from . import product_template
 from . import mrp_bom
 from . import mrp_bom_line
+from . import sale_order

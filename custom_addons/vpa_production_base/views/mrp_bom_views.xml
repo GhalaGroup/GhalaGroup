@@ -17,6 +17,10 @@
                     <button name="action_create_new_revision" string="Create New Revision"
                             type="object" class="btn-secondary"
                             groups="vpa_production_base.group_bom_manager"/>
+                    <button name="action_open_copy_from_bom" string="Copy from Previous BOM"
+                            type="object" class="btn-secondary"
+                            invisible="is_master_bom"
+                            groups="vpa_production_base.group_bom_manager"/>
                     <button name="%(action_report_master_bom_overview)d" string="Master BOM Preview"
                             type="action" class="btn-primary"
                             invisible="not is_master_bom or master_bom_status != 'active'"
@@ -75,13 +79,28 @@
                 <field name="can_convert_to_master" invisible="1"/>
             </xpath>
 
-            <!-- Replace BOM Reference with version including revision -->
+            <!-- Replace BOM Reference: show editable code + computed full reference + revision + SO/Lot -->
             <xpath expr="//field[@name='code']" position="replace">
                 <field name="code" invisible="1"/>
-                <field name="code_with_revision" string="Reference" readonly="1"/>
+                <field name="code_with_revision" string="Reference" readonly="1"
+                       help="Full reference including SO number, Lot, and revision."/>
                 <field name="revision" string="Revision"
                        readonly="master_bom_status not in ('draft', 'pending') or not is_master_bom"
                        help="Auto-suggested revision number. You can edit this before activating the Master BOM."/>
+                <field name="sale_order_id" string="Sales Order"
+                       domain="[('state', '!=', 'cancel'), ('order_line.product_template_id', '=', product_tmpl_id)]"
+                       context="{'sale_show_partner_name': True}"
+                       help="Shows Sales Orders that contain this product (excludes cancelled)."/>
+                <field name="lot_number" string="Lot" readonly="1"
+                       help="Auto-assigned lot number (1, 2, 3...). Matches the LOT numbering from MO splitting."/>
+            </xpath>
+
+            <!-- Add editable BOM Code to Miscellaneous tab -->
+            <xpath expr="//page[@name='miscellaneous']" position="inside">
+                <group string="BOM Reference">
+                    <field name="code" string="BOM Code"
+                           help="Base reference code. The full reference (with SO, Lot, Revision) is computed automatically."/>
+                </group>
             </xpath>
 
             <!-- Add audit info at the end of notebook -->
@@ -132,6 +151,9 @@
                        widget="badge"/>
             </xpath>
             <xpath expr="//field[@name='product_qty']" position="after">
+                <field name="sale_order_id" string="Sales Order" optional="hide"
+                       context="{'sale_show_partner_name': True}"/>
+                <field name="lot_number" string="Lot" optional="hide"/>
                 <field name="source_bom_id" optional="hide"/>
                 <field name="created_by_id" optional="hide"/>
                 <field name="last_modified_date" optional="hide"/>
@@ -154,8 +176,12 @@
                         domain="[('master_bom_status', '=', 'pending')]"/>
                 <filter string="Active Master BOMs" name="active_master_boms"
                         domain="[('is_master_bom', '=', True), ('master_bom_status', '=', 'active')]"/>
+                <separator/>
+                <filter string="Order-Specific" name="order_specific_boms"
+                        domain="[('sale_order_id', '!=', False)]"/>
             </xpath>
             <xpath expr="//group" position="inside">
+                <filter string="Sales Order" name="group_sale_order" context="{'group_by': 'sale_order_id'}"/>
                 <filter string="Created By" name="group_created_by" context="{'group_by': 'created_by_id'}"/>
             </xpath>
         </field>

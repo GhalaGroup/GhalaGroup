@@ -56,6 +56,7 @@ Support: info@vpa.co.tz
         'mrp',
         'product',
         'stock',
+        'sale',
         'account',
         'purchase',
         'vpa_uom',  # For allowed_uom_ids field used in Manufacturing UoM dropdown
@@ -77,6 +78,7 @@ Support: info@vpa.co.tz
         'views/purchase_views.xml',
         # Wizards
         'wizard/product_assign_bom_category_views.xml',
+        'wizard/bom_copy_from_wizard_views.xml',
     ],
     'images': [
         'static/description/icon.png',

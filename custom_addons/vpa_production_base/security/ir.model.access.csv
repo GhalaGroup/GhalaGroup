@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_vpa_bom_category_mrp_user,vpa.bom.category mrp user,model_vpa_bom_category,mrp.group_mrp_user,1,0,0,0
 access_vpa_bom_category_bom_manager,vpa.bom.category bom manager,model_vpa_bom_category,vpa_production_base.group_bom_manager,1,1,1,1
 access_product_assign_bom_category_mrp_user,product.assign.bom.category mrp user,model_product_assign_bom_category,mrp.group_mrp_user,1,1,1,1
+access_vpa_bom_copy_from_wizard_bom_manager,vpa.bom.copy.from.wizard bom manager,model_vpa_bom_copy_from_wizard,vpa_production_base.group_bom_manager,1,1,1,1
