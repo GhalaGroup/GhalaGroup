@@ -143,7 +143,7 @@ class MrpProduction(models.Model):
         wizard = self.env['vpa.commission.generate.wizard'].create({
             'production_id': self.id,
             'commission_date': (
-                self.date_start.date() if self.date_start else fields.Date.today()
+                self.date_finished.date() if self.date_finished else fields.Date.today()
             ),
             'material_line_ids': material_lines,
             'scheme_line_ids': scheme_lines,
