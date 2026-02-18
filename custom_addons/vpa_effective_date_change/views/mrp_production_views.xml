@@ -15,6 +15,20 @@
             </field>
         </record>
 
+        <!-- Show Completion Date on done MOs -->
+        <record model="ir.ui.view" id="mrp_production_show_date_finished">
+            <field name="name">mrp.production.show.date.finished</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='group_extra_info']" position="inside">
+                    <field name="date_finished" string="Completion Date"
+                           readonly="1"
+                           invisible="state != 'done'"/>
+                </xpath>
+            </field>
+        </record>
+
         <!-- Add Change Effective Date button (after validation) -->
         <record model="ir.ui.view" id="mrp_production_effective_date_button">
             <field name="name">mrp.production.effective.date.button</field>
@@ -25,7 +39,7 @@
                     <button name="wiz_open_mo"
                             groups="vpa_effective_date_change.vpa_effective_date_change_group"
                             type="object"
-                            string="Change Effective Date"
+                            string="Change Completion Date"
                             invisible="state != 'done'"/>
                 </xpath>
             </field>
