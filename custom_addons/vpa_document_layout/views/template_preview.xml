@@ -243,6 +243,27 @@
                 </div>
             </t>
         </t>
+        <t t-elif="template.document_type in ['delivery', 'picking']">
+            <t t-set="layout_document_title" t-value="(template.report_title or 'Delivery Note') + ' - WH/OUT/00078'"/>
+            <t t-set="address">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">DELIVERY TO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Reliance Resorts &amp; Tourism Ltd</strong></div>
+                    <div>Plot 45, Bagamoyo Road</div>
+                    <div>Dar es Salaam</div>
+                    <div>Tanzania</div>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-attf-style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: {{primary_color}}">DELIVERY INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div><strong>Source Order:</strong> S01119</div>
+                    <div style="margin-top: 4px;"><strong>Scheduled Date:</strong> 02/18/2026</div>
+                    <div style="margin-top: 4px;"><strong>Warehouse:</strong> Main Warehouse</div>
+                    <div style="margin-top: 4px;"><strong>Status:</strong> <span style="color: #28a745;">Ready</span></div>
+                </div>
+            </t>
+        </t>
         <t t-elif="template.document_type in ['internal_transfer', 'internal_transfer_pictures']">
             <t t-set="layout_document_title" t-value="'Internal Transfer - WH/INT/00045'"/>
             <t t-set="address">
@@ -498,6 +519,98 @@
                                 <strong>MO/00045</strong> - Three-Seat Sofa (5.0 Units) | PO-2025-001
                             </li>
                         </ul>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Delivery Order Preview Content -->
+            <t t-elif="template.document_type in ['delivery', 'picking']">
+                <div class="vpa-quote-order">
+                    <!-- Delivery Items Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">DELIVERY ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">NO.</th>
+                                    <th style="width: 50%;">PRODUCT</th>
+                                    <th style="width: 15%; text-align: center;">QTY</th>
+                                    <th style="width: 10%; text-align: center;">UNIT</th>
+                                    <th style="width: 10%; text-align: center;">✓</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">1</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FURN_8999]</span> Three-Seat Sofa<br/>
+                                        <small style="color: #666; font-size: 10px;">Three Seater Sofa with Lounger in Steel Grey Color</small>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">2</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[FURN_8220]</span> Four Person Desk<br/>
+                                        <small style="color: #666; font-size: 10px;">Four person modern office workstation</small>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">5</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Units</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">3</td>
+                                    <td style="text-align: left; vertical-align: middle;">
+                                        <span class="vpa-product-code">[COMP_001]</span> Steel Frame Component<br/>
+                                        <small style="color: #666; font-size: 10px;">Heavy duty steel frame</small>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;"><span class="vpa-qty-badge">20</span></td>
+                                    <td style="text-align: center; vertical-align: middle;">Pcs</td>
+                                    <td style="text-align: center; vertical-align: middle;"><div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Goods Received Confirmation Section -->
+                    <div t-attf-style="margin-top: 20px; padding: 15px 18px; border: 1.5px solid {{primary_color}}; border-radius: 5px; background: #fffafa;">
+                        <div t-attf-style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; color: {{primary_color}};">GOODS RECEIVED CONFIRMATION</div>
+                        <p style="font-size: 10px; color: #333; margin-bottom: 15px; line-height: 1.6;">
+                            I, the undersigned, hereby acknowledge receipt of the goods described above. All items
+                            have been inspected and verified against this delivery note. The goods have been received
+                            in satisfactory condition and the quantities confirmed as stated. This document serves
+                            as confirmation of delivery in accordance with the agreed terms of the purchase order.
+                        </p>
+
+                        <!-- Signature Block -->
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <tr>
+                                <td style="width: 48%; vertical-align: bottom; padding-right: 15px;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">RECEIVED BY (CLIENT)</div>
+                                    <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
+                                    <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
+                                </td>
+                                <td style="width: 4%;"></td>
+                                <td style="width: 48%; vertical-align: bottom; padding-left: 15px;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DELIVERED BY</div>
+                                    <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
+                                    <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 12px; padding-right: 15px;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE RECEIVED</div>
+                                    <div style="border-bottom: 1px solid #333; width: 60%; height: 18px;"></div>
+                                </td>
+                                <td></td>
+                                <td style="padding-top: 12px; padding-left: 15px;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE DELIVERED</div>
+                                    <div style="border-bottom: 1px solid #333; width: 60%; height: 18px;"></div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </t>
