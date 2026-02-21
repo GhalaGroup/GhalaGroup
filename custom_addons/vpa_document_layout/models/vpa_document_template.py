@@ -18,8 +18,16 @@ class VPADocumentTemplate(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     # PDF Filename Configuration
-    print_name_pattern = fields.Selection(
-        selection='_get_print_name_pattern_selection',
+    print_name_pattern = fields.Selection([
+        ('doc_name', 'Basic (Document + Abbreviation)'),
+        ('doc_name_product', 'With Client Ref (Document + Customer + Client Ref)'),
+        ('doc_customer', 'With Customer (Document + Customer Name)'),
+        ('doc_customer_ref', 'With Reference (Document + Customer + Ref)'),
+        ('doc_customer_ref_date', 'Full (Document + Customer + Ref + Date)'),
+        ('customer_doc', 'Customer First (Customer + Document)'),
+        ('doc_date', 'With Date (Document + Date)'),
+        ('custom', 'Custom Expression'),
+    ],
         string='Filename Format',
         default='doc_name',
         required=True,
@@ -222,6 +230,8 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = f'Deco Addict - S00001-{abbrev}.pdf'
                 elif record.print_name_pattern == 'doc_date':
                     record.print_name_preview = f'S00001-{abbrev} - 2025-01-15.pdf'
+                elif record.print_name_pattern == 'doc_name_product':
+                    record.print_name_preview = f'S00001-{abbrev} - Deco Addict (PO-2026-045).pdf'
                 elif record.print_name_pattern == 'custom':
                     record.print_name_preview = 'Custom expression...'
                 else:
@@ -338,8 +348,8 @@ class VPADocumentTemplate(models.Model):
             # S00001-SQ
             return f"(object.name or 'Document') + '-{abbrev}'"
         elif self.print_name_pattern == 'doc_name_product':
-            # S00001-SQ-Customer Name (for standard docs, uses partner name)
-            return f"(object.name or 'Document') + '-{abbrev}-' + (object.partner_id.name or 'Customer')"
+            # With Client Reference: S00001-SQ - Customer Name (ClientRef)
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
         elif self.print_name_pattern == 'doc_customer':
             # S00001-SQ - Customer Name
             return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer')"
