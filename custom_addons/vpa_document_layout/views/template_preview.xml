@@ -608,25 +608,25 @@
                         <!-- Signature Block -->
                         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                             <tr>
-                                <td style="width: 48%; vertical-align: bottom; padding-right: 15px;">
+                                <td style="width: 48%; vertical-align: bottom; padding-right: 15px; border: none !important;">
                                     <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">RECEIVED BY (CLIENT)</div>
                                     <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
                                     <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
                                 </td>
-                                <td style="width: 4%;"></td>
-                                <td style="width: 48%; vertical-align: bottom; padding-left: 15px;">
+                                <td style="width: 4%; border: none !important;"></td>
+                                <td style="width: 48%; vertical-align: bottom; padding-left: 15px; border: none !important;">
                                     <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DELIVERED BY</div>
                                     <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
                                     <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="padding-top: 12px; padding-right: 15px;">
+                                <td style="padding-top: 12px; padding-right: 15px; border: none !important;">
                                     <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE RECEIVED</div>
                                     <div style="border-bottom: 1px solid #333; width: 60%; height: 18px;"></div>
                                 </td>
-                                <td></td>
-                                <td style="padding-top: 12px; padding-left: 15px;">
+                                <td style="border: none !important;"></td>
+                                <td style="padding-top: 12px; padding-left: 15px; border: none !important;">
                                     <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE DELIVERED</div>
                                     <div style="border-bottom: 1px solid #333; width: 60%; height: 18px;"></div>
                                 </td>
