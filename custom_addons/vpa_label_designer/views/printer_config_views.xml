@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Printer Config Form View -->
+    <record id="vpa_printer_config_form" model="ir.ui.view">
+        <field name="name">vpa.printer.config.form</field>
+        <field name="model">vpa.printer.config</field>
+        <field name="arch" type="xml">
+            <form string="Printer Configuration">
+                <header>
+                    <button name="action_test_connection"
+                            string="Test Connection"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-plug"
+                            invisible="print_method != 'network'"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-star"
+                                name="toggle_active" type="object"
+                                invisible="not is_default">
+                            <span class="o_stat_text">Default</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g., Warehouse Zebra ZT411"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="print_method" widget="radio"/>
+                            <field name="default_dpi"/>
+                            <field name="is_default"/>
+                        </group>
+                        <group string="Company">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Network Settings" invisible="print_method != 'network'">
+                        <field name="printer_ip" placeholder="192.168.1.100"/>
+                        <field name="printer_port"/>
+                    </group>
+                    <group string="Browser Print Settings" invisible="print_method != 'browser_print'">
+                        <field name="browser_print_url"/>
+                        <field name="browser_print_device"
+                               placeholder="Leave empty for default printer"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Printer Config List View -->
+    <record id="vpa_printer_config_list" model="ir.ui.view">
+        <field name="name">vpa.printer.config.list</field>
+        <field name="model">vpa.printer.config</field>
+        <field name="arch" type="xml">
+            <list string="Printers">
+                <field name="name"/>
+                <field name="print_method"/>
+                <field name="printer_ip"/>
+                <field name="printer_port"/>
+                <field name="default_dpi"/>
+                <field name="is_default"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Printer Config Action -->
+    <record id="action_printer_config" model="ir.actions.act_window">
+        <field name="name">Printers</field>
+        <field name="res_model">vpa.printer.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure your first Zebra printer
+            </p>
+            <p>
+                Set up your Zebra printers for direct network printing (TCP/IP)
+                or via the Zebra Browser Print SDK.
+            </p>
+        </field>
+    </record>
+
+</odoo>

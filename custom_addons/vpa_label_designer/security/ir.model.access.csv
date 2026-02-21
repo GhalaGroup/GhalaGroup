@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_label_size_user,vpa.label.size.user,model_vpa_label_size,group_label_user,1,1,1,0
+access_label_size_manager,vpa.label.size.manager,model_vpa_label_size,group_label_manager,1,1,1,1
+access_label_variable_user,vpa.label.variable.user,model_vpa_label_variable,group_label_user,1,0,0,0
+access_label_variable_manager,vpa.label.variable.manager,model_vpa_label_variable,group_label_manager,1,1,1,1
+access_label_element_user,vpa.label.element.user,model_vpa_label_element,group_label_user,1,1,1,1
+access_label_element_manager,vpa.label.element.manager,model_vpa_label_element,group_label_manager,1,1,1,1
+access_label_template_user,vpa.label.template.user,model_vpa_label_template,group_label_user,1,1,1,0
+access_label_template_manager,vpa.label.template.manager,model_vpa_label_template,group_label_manager,1,1,1,1
+access_printer_config_user,vpa.printer.config.user,model_vpa_printer_config,group_label_user,1,0,0,0
+access_printer_config_manager,vpa.printer.config.manager,model_vpa_printer_config,group_label_manager,1,1,1,1
+access_print_wizard_user,vpa.print.label.wizard.user,model_vpa_print_label_wizard,group_label_user,1,1,1,1
+access_print_wizard_line_user,vpa.print.label.wizard.line.user,model_vpa_print_label_wizard_line,group_label_user,1,1,1,1

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Print Label Wizard Form View -->
+    <record id="vpa_print_label_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.print.label.wizard.form</field>
+        <field name="model">vpa.print.label.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print ZPL Labels">
+                <field name="state" invisible="1"/>
+                <field name="is_quantity_mode" invisible="1"/>
+                <field name="source_model" invisible="1"/>
+                <field name="source_ids" invisible="1"/>
+
+                <header>
+                    <div class="d-flex gap-2 align-items-center w-100" style="padding: 4px 0;">
+                        <span class="badge rounded-pill"
+                              style="font-size: 13px;"
+                              invisible="state != 'select'"
+                              title="Step 1: Configure template and printer">
+                            Step 1: Select Template &amp; Printer
+                        </span>
+                        <span class="badge rounded-pill bg-info"
+                              style="font-size: 13px;"
+                              invisible="state != 'preview'"
+                              title="Step 2: Review the ZPL preview">
+                            Step 2: Preview ZPL
+                        </span>
+                        <span class="badge rounded-pill bg-success"
+                              style="font-size: 13px;"
+                              invisible="state != 'done'"
+                              title="Print job completed">
+                            Done
+                        </span>
+                    </div>
+                </header>
+
+                <!-- SELECT STATE -->
+                <div invisible="state != 'select'">
+                    <group>
+                        <group string="Label Settings">
+                            <field name="template_id"
+                                   domain="[('company_id', 'in', [False, allowed_company_ids[0]])]"/>
+                            <field name="printer_id"
+                                   domain="[('company_id', 'in', [False, allowed_company_ids[0]])]"/>
+                            <field name="copies" invisible="is_quantity_mode"/>
+                        </group>
+                        <group string="Print Summary">
+                            <field name="total_labels" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Quantity mode: per-line detail -->
+                    <div invisible="not is_quantity_mode">
+                        <separator string="Labels to Print (per line)"/>
+                        <field name="line_ids">
+                            <list editable="bottom">
+                                <field name="product_id" readonly="1"/>
+                                <field name="product_sku" optional="show"/>
+                                <field name="ordered_qty" readonly="1"/>
+                                <field name="product_uom_id" readonly="1"/>
+                                <field name="alt_uom_id"
+                                       domain="[('id', 'in', available_alt_uom_ids)]"
+                                       optional="show"/>
+                                <field name="available_alt_uom_ids" column_invisible="1"/>
+                                <field name="alt_uom_barcode" optional="show"/>
+                                <field name="label_qty"/>
+                                <field name="source_document" optional="hide"/>
+                            </list>
+                        </field>
+                    </div>
+                </div>
+
+                <!-- PREVIEW STATE -->
+                <div invisible="state != 'preview'">
+                    <group string="ZPL Preview (first record)">
+                        <field name="preview_zpl" readonly="1" widget="text" nolabel="1"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Tip:</strong> To see a visual render of this ZPL, paste it into the
+                        <a href="http://labelary.com/viewer.html" target="_blank">Labelary Online Viewer</a>.
+                    </div>
+                </div>
+
+                <!-- DONE STATE -->
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success text-center" role="alert" style="font-size: 16px;">
+                        <i class="fa fa-check-circle"/> Print job sent successfully!
+                    </div>
+                </div>
+
+                <footer>
+                    <button string="Preview" name="action_preview" type="object"
+                            class="btn-primary" icon="fa-eye"
+                            invisible="state != 'select'"/>
+                    <button string="Print" name="action_print" type="object"
+                            class="btn-success" icon="fa-print"
+                            invisible="state not in ('select', 'preview')"/>
+                    <button string="Back" name="action_back" type="object"
+                            class="btn-secondary"
+                            invisible="state != 'preview'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================= -->
+    <!-- BINDING ACTIONS           -->
+    <!-- ========================= -->
+
+    <!-- Binding: Product (product.product) -->
+    <record id="action_print_labels_product" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_product"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+    <!-- Binding: Product Template (product.template) -->
+    <record id="action_print_labels_product_tmpl" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+    <!-- Binding: Purchase Order -->
+    <record id="action_print_labels_purchase" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+    <!-- Binding: Stock Picking -->
+    <record id="action_print_labels_picking" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+    <!-- Binding: Manufacturing Order -->
+    <record id="action_print_labels_mrp" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+    <!-- Binding: Lot/Serial -->
+    <record id="action_print_labels_lot" model="ir.actions.act_window">
+        <field name="name">Print ZPL Labels</field>
+        <field name="res_model">vpa.print.label.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock.model_stock_lot"/>
+        <field name="binding_view_types">list,form</field>
+    </record>
+
+</odoo>

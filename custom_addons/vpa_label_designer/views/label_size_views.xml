@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Label Size Form View -->
+    <record id="vpa_label_size_form" model="ir.ui.view">
+        <field name="name">vpa.label.size.form</field>
+        <field name="model">vpa.label.size</field>
+        <field name="arch" type="xml">
+            <form string="Label Size">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g., Standard Product Label"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Dimensions">
+                            <field name="width_mm"/>
+                            <field name="height_mm"/>
+                            <field name="dpi"/>
+                        </group>
+                        <group string="Computed Size">
+                            <field name="width_dots" readonly="1"/>
+                            <field name="height_dots" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="RFID Settings">
+                        <field name="has_rfid"/>
+                        <field name="rfid_position" invisible="not has_rfid"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Label Size List View -->
+    <record id="vpa_label_size_list" model="ir.ui.view">
+        <field name="name">vpa.label.size.list</field>
+        <field name="model">vpa.label.size</field>
+        <field name="arch" type="xml">
+            <list string="Label Sizes">
+                <field name="name"/>
+                <field name="width_mm"/>
+                <field name="height_mm"/>
+                <field name="dpi"/>
+                <field name="width_dots"/>
+                <field name="height_dots"/>
+                <field name="has_rfid"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Label Size Action -->
+    <record id="action_label_size" model="ir.actions.act_window">
+        <field name="name">Label Sizes</field>
+        <field name="res_model">vpa.label.size</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first label size
+            </p>
+            <p>
+                Define the paper size for your Zebra labels in millimeters.
+                The system will automatically compute the size in dots based on your printer DPI.
+            </p>
+        </field>
+    </record>
+
+</odoo>

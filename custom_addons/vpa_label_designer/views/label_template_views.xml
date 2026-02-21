@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Label Template Form View -->
+    <record id="vpa_label_template_form" model="ir.ui.view">
+        <field name="name">vpa.label.template.form</field>
+        <field name="model">vpa.label.template</field>
+        <field name="arch" type="xml">
+            <form string="Label Template">
+                <header>
+                    <button name="action_copy_zpl" string="Copy ZPL" type="object"
+                            class="btn-secondary" icon="fa-clipboard"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g., Raw Material - Product Label"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Label Configuration">
+                            <field name="label_size_id"/>
+                            <field name="model_name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="RFID Settings" invisible="not has_rfid">
+                            <field name="has_rfid" invisible="1"/>
+                            <field name="rfid_data_variable_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Visual Designer Tab (Primary) -->
+                        <page string="Visual Designer" name="designer">
+                            <field name="label_width_dots" invisible="1"/>
+                            <field name="label_height_dots" invisible="1"/>
+                            <field name="label_dpi" invisible="1"/>
+                            <field name="element_ids" widget="label_canvas_editor"/>
+                        </page>
+
+                        <!-- Element List Tab -->
+                        <page string="Element List" name="elements">
+                            <field name="element_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="element_type"/>
+                                    <field name="content"
+                                           invisible="element_type in ('line', 'v_line', 'box', 'image', 'company_logo', 'variable')"/>
+                                    <field name="variable_id"
+                                           invisible="element_type != 'variable'"/>
+                                    <field name="pos_x"/>
+                                    <field name="pos_y"/>
+                                    <field name="name" optional="hide"/>
+                                    <field name="font_id" invisible="element_type not in ('text', 'variable')" optional="hide"/>
+                                    <field name="font_height" invisible="element_type not in ('text', 'variable')" optional="show"/>
+                                    <field name="rotation" invisible="element_type not in ('text', 'variable', 'barcode')" optional="hide"/>
+                                    <field name="barcode_type" invisible="element_type != 'barcode'" optional="show"/>
+                                    <field name="barcode_height" invisible="element_type != 'barcode'" optional="show"/>
+                                    <field name="barcode_module_width" invisible="element_type != 'barcode'" optional="hide"/>
+                                    <field name="show_text_below" invisible="element_type != 'barcode'" optional="hide"/>
+                                    <field name="qr_magnification" invisible="element_type != 'qr_code'" optional="show"/>
+                                    <field name="qr_error_correction" invisible="element_type != 'qr_code'" optional="hide"/>
+                                    <field name="shape_width" invisible="element_type not in ('line', 'box')" optional="show"/>
+                                    <field name="shape_height" invisible="element_type not in ('v_line', 'box')" optional="show"/>
+                                    <field name="border_thickness" invisible="element_type not in ('line', 'v_line', 'box')" optional="hide"/>
+                                    <field name="image_width" invisible="element_type not in ('image', 'company_logo')" optional="show"/>
+                                    <field name="image_data" invisible="element_type != 'image'" optional="hide"/>
+                                    <field name="zpl_snippet" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- ZPL Code Tab -->
+                        <page string="ZPL Code" name="zpl_code">
+                            <group string="Generated ZPL (with variable placeholders)">
+                                <field name="zpl_code" readonly="1" widget="text" nolabel="1"/>
+                            </group>
+                        </page>
+
+                        <!-- ZPL Preview Tab -->
+                        <page string="ZPL Preview" name="zpl_preview">
+                            <div class="mb-3">
+                                <button name="action_generate_preview" string="Generate Preview"
+                                        type="object" class="btn-primary" icon="fa-eye"/>
+                                <span class="text-muted ms-2">Click to render this label visually via Labelary API</span>
+                            </div>
+                            <div class="mb-3 p-3 bg-white border rounded d-inline-block">
+                                <field name="preview_image" widget="image" readonly="1"
+                                       options="{'size': [600, 600]}"/>
+                            </div>
+                            <group string="ZPL Code (with sample values)">
+                                <field name="zpl_preview" readonly="1" widget="text" nolabel="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Label Template List View -->
+    <record id="vpa_label_template_list" model="ir.ui.view">
+        <field name="name">vpa.label.template.list</field>
+        <field name="model">vpa.label.template</field>
+        <field name="arch" type="xml">
+            <list string="Label Templates">
+                <field name="name"/>
+                <field name="label_size_id"/>
+                <field name="model_name"/>
+                <field name="has_rfid"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Label Template Search View -->
+    <record id="vpa_label_template_search" model="ir.ui.view">
+        <field name="name">vpa.label.template.search</field>
+        <field name="model">vpa.label.template</field>
+        <field name="arch" type="xml">
+            <search string="Label Templates">
+                <field name="name"/>
+                <field name="label_size_id"/>
+                <separator/>
+                <filter string="Product Templates" name="filter_product"
+                        domain="[('model_name', '=', 'product.product')]"/>
+                <filter string="Purchase Order Templates" name="filter_purchase"
+                        domain="[('model_name', '=', 'purchase.order')]"/>
+                <filter string="Manufacturing Templates" name="filter_mrp"
+                        domain="[('model_name', '=', 'mrp.production')]"/>
+                <filter string="Stock Picking Templates" name="filter_picking"
+                        domain="[('model_name', '=', 'stock.picking')]"/>
+                <separator/>
+                <filter string="RFID Labels" name="filter_rfid"
+                        domain="[('has_rfid', '=', True)]"/>
+                <group>
+                    <filter string="Source Model" name="group_model"
+                            context="{'group_by': 'model_name'}"/>
+                    <filter string="Label Size" name="group_size"
+                            context="{'group_by': 'label_size_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Label Template Action -->
+    <record id="action_label_template" model="ir.actions.act_window">
+        <field name="name">Label Templates</field>
+        <field name="res_model">vpa.label.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="vpa_label_template_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Design your first label template
+            </p>
+            <p>
+                Create label templates with text, barcodes, QR codes, variable fields, and shapes.
+                Each element generates ZPL code automatically.
+            </p>
+        </field>
+    </record>
+
+    <!-- Label Variable List View (for Configuration menu) -->
+    <record id="vpa_label_variable_list" model="ir.ui.view">
+        <field name="name">vpa.label.variable.list</field>
+        <field name="model">vpa.label.variable</field>
+        <field name="arch" type="xml">
+            <list string="Label Variables" editable="bottom">
+                <field name="name"/>
+                <field name="display_name_custom"/>
+                <field name="category"/>
+                <field name="model_name"/>
+                <field name="field_path"/>
+                <field name="sample_value"/>
+                <field name="is_system" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Label Variable Form View -->
+    <record id="vpa_label_variable_form" model="ir.ui.view">
+        <field name="name">vpa.label.variable.form</field>
+        <field name="model">vpa.label.variable</field>
+        <field name="arch" type="xml">
+            <form string="Label Variable">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="display_name_custom"/>
+                            <field name="category"/>
+                        </group>
+                        <group>
+                            <field name="model_name"/>
+                            <field name="field_path"/>
+                            <field name="sample_value"/>
+                            <field name="is_system" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Label Variable Action -->
+    <record id="action_label_variable" model="ir.actions.act_window">
+        <field name="name">Label Variables</field>
+        <field name="res_model">vpa.label.variable</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a custom label variable
+            </p>
+            <p>
+                Variables are dynamic fields that get resolved at print time.
+                Use them in label templates with the {{VARIABLE_NAME}} syntax.
+            </p>
+        </field>
+    </record>
+
+</odoo>
