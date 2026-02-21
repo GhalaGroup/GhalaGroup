@@ -169,6 +169,29 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = 'Custom expression...'
                 else:
                     record.print_name_preview = ''
+            elif record.document_type in ['delivery', 'picking']:
+                # Delivery / Picking filename formats
+                # Format: DocName-ABBREV - Customer Name (Source).pdf
+                doc_num = 'P01M_OUT_00177'
+                customer = 'Reliance Resorts'
+                origin_example = 'S01320'
+                date_example = '2026-02-21'
+                if record.print_name_pattern == 'doc_name':
+                    record.print_name_preview = f'{doc_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_customer':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer}.pdf'
+                elif record.print_name_pattern == 'doc_customer_ref':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({origin_example}).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref_date':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({origin_example}) - {date_example}.pdf'
+                elif record.print_name_pattern == 'customer_doc':
+                    record.print_name_preview = f'{customer} - {doc_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_date':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {date_example}.pdf'
+                elif record.print_name_pattern == 'custom':
+                    record.print_name_preview = 'Custom expression...'
+                else:
+                    record.print_name_preview = ''
             else:
                 # Standard format for sale orders, invoices, etc.
                 # Format: S00001-SQ - Customer Name (Ref).pdf
@@ -265,6 +288,30 @@ class VPADocumentTemplate(models.Model):
             else:
                 # Default: W03-INT-00045-W02 Transfer Request
                 return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
+
+        # Delivery / Picking uses stock.picking fields
+        # Format: DocName-ABBREV - Customer (Source).pdf
+        if self.document_type in ['delivery', 'picking']:
+            # Replace / with _ for clean filenames
+            doc_name = "(object.name or 'Delivery').replace('/', '_')"
+            customer = "(object.partner_id.name or 'Customer')"
+            if self.print_name_pattern == 'doc_name':
+                return f"{doc_name} + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_customer':
+                return f"{doc_name} + '-{abbrev} - ' + {customer}"
+            elif self.print_name_pattern == 'doc_customer_ref':
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else ''))"
+            elif self.print_name_pattern == 'doc_customer_ref_date':
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'customer_doc':
+                return f"{customer} + ' - ' + {doc_name} + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_date':
+                return f"{doc_name} + '-{abbrev}' + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'custom':
+                return self.print_name_expression or f"{doc_name} + '-{abbrev} - ' + {customer}"
+            else:
+                # Default: DocName-ABBREV - Customer (Source)
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else ''))"
 
         # Standard expressions for sale orders, invoices, etc.
         if self.print_name_pattern == 'doc_name':
