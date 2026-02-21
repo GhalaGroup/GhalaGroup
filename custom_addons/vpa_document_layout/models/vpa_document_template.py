@@ -2915,6 +2915,15 @@ class VPADocumentTemplate(models.Model):
                         page-break-inside: avoid;
                         page-break-before: auto;
                     }}
+                    .vpa-confirmation-section table {{
+                        border: none !important;
+                    }}
+                    .vpa-confirmation-section table td {{
+                        border: none !important;
+                    }}
+                    .vpa-confirmation-section table tr {{
+                        border: none !important;
+                    }}
                     .vpa-table-card tbody tr {{
                         page-break-inside: avoid;
                     }}
