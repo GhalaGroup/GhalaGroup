@@ -88,6 +88,19 @@ class VPADocumentTemplate(models.Model):
                 ('custom', 'Custom Expression'),
             ]
 
+        # Delivery / Picking specific labels
+        elif doc_type in ['delivery', 'picking']:
+            return [
+                ('doc_name', 'Basic (Document + Abbreviation)'),
+                ('doc_customer', 'With Customer (Document + Customer Name)'),
+                ('doc_customer_ref', 'With SO Reference (Document + Customer + SO)'),
+                ('doc_customer_ref_date', 'Full (Document + Customer + SO + Date)'),
+                ('customer_doc', 'Customer First (Customer + Document)'),
+                ('doc_date', 'With Date (Document + Date)'),
+                ('doc_name_product', 'With Client Ref (Document + Customer + Client Ref)'),
+                ('custom', 'Custom Expression'),
+            ]
+
         # Standard labels for Sale/Invoice/etc
         else:
             return [
@@ -171,10 +184,10 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = ''
             elif record.document_type in ['delivery', 'picking']:
                 # Delivery / Picking filename formats
-                # Format: DocName-ABBREV - Customer Name (Source).pdf
                 doc_num = 'P01M_OUT_00177'
                 customer = 'Reliance Resorts'
                 origin_example = 'S01320'
+                client_ref_example = 'PO-2026-045'
                 date_example = '2026-02-21'
                 if record.print_name_pattern == 'doc_name':
                     record.print_name_preview = f'{doc_num}-{abbrev}.pdf'
@@ -188,6 +201,8 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = f'{customer} - {doc_num}-{abbrev}.pdf'
                 elif record.print_name_pattern == 'doc_date':
                     record.print_name_preview = f'{doc_num}-{abbrev} - {date_example}.pdf'
+                elif record.print_name_pattern == 'doc_name_product':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({client_ref_example}).pdf'
                 elif record.print_name_pattern == 'custom':
                     record.print_name_preview = 'Custom expression...'
                 else:
@@ -291,10 +306,12 @@ class VPADocumentTemplate(models.Model):
 
         # Delivery / Picking uses stock.picking fields
         # Format: DocName-ABBREV - Customer (Source).pdf
+        # Client ref accessed via sale_id.client_order_ref (from sale_stock module)
         if self.document_type in ['delivery', 'picking']:
             # Replace / with _ for clean filenames
             doc_name = "(object.name or 'Delivery').replace('/', '_')"
             customer = "(object.partner_id.name or 'Customer')"
+            client_ref = "(((' (' + object.sale_id.client_order_ref + ')') if object.sale_id and object.sale_id.client_order_ref else ''))"
             if self.print_name_pattern == 'doc_name':
                 return f"{doc_name} + '-{abbrev}'"
             elif self.print_name_pattern == 'doc_customer':
@@ -307,6 +324,9 @@ class VPADocumentTemplate(models.Model):
                 return f"{customer} + ' - ' + {doc_name} + '-{abbrev}'"
             elif self.print_name_pattern == 'doc_date':
                 return f"{doc_name} + '-{abbrev}' + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'doc_name_product':
+                # With Client Reference from Sale Order
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + {client_ref}"
             elif self.print_name_pattern == 'custom':
                 return self.print_name_expression or f"{doc_name} + '-{abbrev} - ' + {customer}"
             else:
