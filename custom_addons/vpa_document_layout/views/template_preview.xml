@@ -577,6 +577,27 @@
                     <!-- Goods Received Confirmation Section -->
                     <div t-attf-style="margin-top: 20px; padding: 15px 18px; border: 1.5px solid {{primary_color}}; border-radius: 5px; background: #fffafa;">
                         <div t-attf-style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; color: {{primary_color}};">GOODS RECEIVED CONFIRMATION</div>
+
+                        <!-- Delivery Summary -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px;">
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important; width: 50%;">
+                                    <strong>Delivery No.:</strong> WH/OUT/00078
+                                </td>
+                                <td style="padding: 3px 0; border: none !important; width: 50%;">
+                                    <strong>Sales Order:</strong> S01119
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Items:</strong> 3
+                                </td>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Quantity:</strong> 30
+                                </td>
+                            </tr>
+                        </table>
+
                         <p style="font-size: 10px; color: #333; margin-bottom: 15px; line-height: 1.6;">
                             I, the undersigned, hereby acknowledge receipt of the goods described above. All items
                             have been inspected and verified against this delivery note. The goods have been received

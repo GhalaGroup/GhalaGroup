@@ -2931,6 +2931,30 @@ class VPADocumentTemplate(models.Model):
                     <!-- Goods Received Confirmation Section -->
                     <div class="vpa-confirmation-section" t-att-style="'margin-top: 20px; padding: 15px 18px; border: 1.5px solid ' + primary_color + '; border-radius: 5px; background: #fffafa;'">
                         <div t-att-style="'font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; color: ' + primary_color + ';'">GOODS RECEIVED CONFIRMATION</div>
+
+                        <!-- Delivery Summary -->
+                        <t t-set="active_moves" t-value="doc.move_ids.filtered(lambda m: m.state != 'cancel')"/>
+                        <table style="width: 100%%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px;">
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important; width: 50%%;">
+                                    <strong>Delivery No.:</strong> <span t-field="doc.name"/>
+                                </td>
+                                <td style="padding: 3px 0; border: none !important; width: 50%%;">
+                                    <t t-if="doc.origin">
+                                        <strong>Sales Order:</strong> <span t-field="doc.origin"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Items:</strong> <t t-out="len(active_moves)"/>
+                                </td>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Quantity:</strong> <t t-out="round(sum(active_moves.mapped('product_uom_qty')), 2)"/>
+                                </td>
+                            </tr>
+                        </table>
+
                         <p style="font-size: 10px; color: #333; margin-bottom: 15px; line-height: 1.6;">
                             I, the undersigned, hereby acknowledge receipt of the goods described above. All items
                             have been inspected and verified against this delivery note. The goods have been received
