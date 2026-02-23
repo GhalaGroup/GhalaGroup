@@ -2,10 +2,16 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
+import base64
 import json
+import logging
+
+import requests
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class PrintLabelWizard(models.TransientModel):
@@ -20,8 +26,7 @@ class PrintLabelWizard(models.TransientModel):
 
     template_id = fields.Many2one('vpa.label.template', string='Label Template',
                                   required=True)
-    printer_id = fields.Many2one('vpa.printer.config', string='Printer',
-                                 required=True)
+    printer_id = fields.Many2one('vpa.printer.config', string='Printer')
     copies = fields.Integer(string='Copies per Record', default=1,
                             help='Number of label copies per record (for standard flow)')
 
@@ -80,10 +85,19 @@ class PrintLabelWizard(models.TransientModel):
                 'purchase.order': 'purchase.order',
             }
             template_model = model_map.get(active_model, active_model)
+
+            # Find default template: prefer is_default, then first match
             default_template = self.env['vpa.label.template'].search([
                 ('model_name', '=', template_model),
                 ('company_id', 'in', [False, self.env.company.id]),
+                ('is_default', '=', True),
             ], limit=1)
+            if not default_template:
+                default_template = self.env['vpa.label.template'].search([
+                    ('model_name', '=', template_model),
+                    ('company_id', 'in', [False, self.env.company.id]),
+                ], limit=1)
+
             if default_template:
                 res['template_id'] = default_template.id
 
@@ -202,6 +216,80 @@ class PrintLabelWizard(models.TransientModel):
         self.write({'state': 'done'})
 
         return result
+
+    def action_download_pdf(self):
+        """Generate PDF of all labels via Labelary API and trigger download."""
+        self.ensure_one()
+        if not self.template_id:
+            raise UserError('Please select a label template.')
+
+        # Build the list of ZPL labels (same logic as action_print)
+        zpl_list = []
+        if self.is_quantity_mode:
+            for line in self.line_ids:
+                if line.label_qty <= 0:
+                    continue
+                extra_values = line._get_extra_values()
+                zpl = self.template_id.resolve_zpl_for_record(
+                    line.product_id, extra_values)
+                for _i in range(line.label_qty):
+                    zpl_list.append(zpl)
+        else:
+            source_ids = json.loads(self.source_ids or '[]')
+            if source_ids and self.source_model:
+                records = self.env[self.source_model].browse(source_ids)
+                for record in records:
+                    zpl = self.template_id.resolve_zpl_for_record(record)
+                    for _i in range(self.copies or 1):
+                        zpl_list.append(zpl)
+
+        if not zpl_list:
+            raise UserError('No labels to export. Please check your selection.')
+
+        # Combine all labels into one ZPL string
+        combined_zpl = '\n'.join(zpl_list)
+
+        # Call Labelary API for PDF
+        tmpl = self.template_id
+        try:
+            url = (
+                f'http://api.labelary.com/v1/printers/{tmpl.label_dpmm}dpmm'
+                f'/labels/{tmpl.label_width_inch}x{tmpl.label_height_inch}/0/'
+            )
+            response = requests.post(
+                url,
+                data=combined_zpl.encode('utf-8'),
+                headers={'Accept': 'application/pdf'},
+                timeout=30,
+            )
+
+            if response.status_code != 200:
+                raise UserError(
+                    f'Labelary API returned status {response.status_code}. '
+                    'Please try again or check your label design.'
+                )
+        except requests.Timeout:
+            raise UserError('Labelary API request timed out. Please try again.')
+        except requests.ConnectionError:
+            raise UserError(
+                'Could not connect to Labelary API. '
+                'Please check your internet connection.'
+            )
+
+        pdf_b64 = base64.b64encode(response.content)
+        filename = f'{tmpl.name or "labels"}.pdf'
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'datas': pdf_b64,
+            'mimetype': 'application/pdf',
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'new',
+        }
 
     def action_back(self):
         """Go back to select state."""

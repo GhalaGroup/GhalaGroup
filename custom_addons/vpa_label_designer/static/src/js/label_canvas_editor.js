@@ -205,6 +205,24 @@ class LabelCanvasEditor extends Component {
         }
     }
 
+    /**
+     * Known variable placeholders for barcode/QR content source dropdown.
+     * If the current content matches one of these, the dropdown shows that option;
+     * otherwise it shows "Custom Value".
+     */
+    static CONTENT_SOURCE_VARS = [
+        '{{PRODUCT_BARCODE}}', '{{PRODUCT_SKU}}', '{{PRODUCT_NAME}}',
+        '{{PRODUCT_PRICE}}', '{{LOT_NUMBER}}', '{{COMPANY_WEBSITE}}',
+    ];
+
+    get contentSource() {
+        const content = (this.state.selectedData && this.state.selectedData.content) || '';
+        if (LabelCanvasEditor.CONTENT_SOURCE_VARS.includes(content)) {
+            return content;
+        }
+        return '__custom__';
+    }
+
     get selectedVariableId() {
         try {
             if (!this.state.selectedData || !this.state.selectedData.variable_id) return "";
@@ -402,8 +420,13 @@ class LabelCanvasEditor extends Component {
         const records = list.records || [];
         const currentKeys = new Set(records.map(r => this._recordKey(r)));
 
+        // Detach transformer before destroying nodes to avoid stale references
+        const selectedNodes = this.transformer ? this.transformer.nodes() : [];
+        let needReattach = false;
+
         for (const [key, node] of this.nodeMap.entries()) {
             if (!currentKeys.has(key)) {
+                if (selectedNodes.includes(node)) needReattach = true;
                 node.destroy();
                 this.nodeMap.delete(key);
             }
@@ -416,6 +439,7 @@ class LabelCanvasEditor extends Component {
                 const result = this.factory.updateNode(existing, record.data);
                 if (!result) {
                     // Node type mismatch — destroy old and recreate
+                    if (selectedNodes.includes(existing)) needReattach = true;
                     existing.destroy();
                     this.nodeMap.delete(key);
                     this._addNodeForRecord(record);
@@ -424,6 +448,14 @@ class LabelCanvasEditor extends Component {
                 this._addNodeForRecord(record);
             }
         }
+
+        // Re-attach transformer to the current selected node(s)
+        if (needReattach && this.transformer) {
+            const selKey = this.state.selectedElementId;
+            const newNode = selKey ? this.nodeMap.get(selKey) : null;
+            this.transformer.nodes(newNode ? [newNode] : []);
+        }
+
         this.elementLayer.draw();
     }
 
@@ -476,8 +508,20 @@ class LabelCanvasEditor extends Component {
             this.transformer.enabledAnchors(["middle-left", "middle-right"]);
         } else if (elemType === "v_line") {
             this.transformer.enabledAnchors(["top-center", "bottom-center"]);
+        } else if (elemType === "barcode") {
+            this.transformer.enabledAnchors(["bottom-center"]);
+        } else if (elemType === "qr_code") {
+            this.transformer.enabledAnchors([]);
         } else if (elemType === "text" || elemType === "variable") {
-            this.transformer.enabledAnchors(["top-left", "top-right", "bottom-left", "bottom-right"]);
+            const record = this._findRecord(key);
+            const hasMaxWidth = record && record.data.max_width > 0;
+            if (hasMaxWidth) {
+                this.transformer.enabledAnchors([
+                    "middle-left", "middle-right",
+                ]);
+            } else {
+                this.transformer.enabledAnchors(["top-left", "top-right", "bottom-left", "bottom-right"]);
+            }
         } else if (elemType === "image" || elemType === "company_logo") {
             this.transformer.enabledAnchors(["top-left", "top-right", "bottom-left", "bottom-right"]);
         } else {
@@ -619,6 +663,10 @@ class LabelCanvasEditor extends Component {
         } else if (elemType === "box") {
             updates.shape_width = Math.max(1, Math.round(node.width() * scaleX));
             updates.shape_height = Math.max(1, Math.round(node.height() * scaleY));
+        } else if (elemType === "barcode") {
+            const record = this._findRecord(key);
+            const currentH = (record && record.data.barcode_height) || 100;
+            updates.barcode_height = Math.max(20, Math.round(currentH * scaleY));
         } else if (elemType === "image" || elemType === "company_logo") {
             // For image groups, compute new width from the group's first child or scale
             const children = node.getChildren ? node.getChildren() : [];
@@ -626,8 +674,21 @@ class LabelCanvasEditor extends Component {
             const childW = firstChild ? (firstChild.width ? firstChild.width() : 100) : 100;
             updates.image_width = Math.max(10, Math.round(childW * scaleX));
         } else if (elemType === "text" || elemType === "variable") {
-            const fontSize = node.fontSize ? node.fontSize() : 30;
-            updates.font_height = Math.max(10, Math.round(fontSize * scaleY / 0.75));
+            // Resize only changes max_width (box size), never font size
+            const isTextGroup = typeof node.getChildren === 'function' && !(node instanceof Konva.Text);
+            if (isTextGroup) {
+                const children = node.getChildren();
+                const rectChild = children[0];
+                const currentMaxW = rectChild ? rectChild.width() : 0;
+                if (currentMaxW > 0 && scaleX !== 1) {
+                    updates.max_width = Math.max(20, Math.round(currentMaxW * scaleX));
+                }
+            } else if (scaleX !== 1) {
+                const currentMaxW = node.width() || 0;
+                if (currentMaxW > 0) {
+                    updates.max_width = Math.max(20, Math.round(currentMaxW * scaleX));
+                }
+            }
         }
 
         node.scaleX(1);
@@ -707,9 +768,9 @@ class LabelCanvasEditor extends Component {
             case "variable":
                 return Object.assign(base, { name: "Variable" });
             case "barcode":
-                return Object.assign(base, { content: "12345678", name: "Barcode", barcode_type: "C", barcode_height: 100 });
+                return Object.assign(base, { content: "{{PRODUCT_BARCODE}}", name: "Barcode", barcode_type: "C", barcode_height: 80, barcode_module_width: 1 });
             case "qr_code":
-                return Object.assign(base, { content: "https://example.com", name: "QR Code", qr_magnification: 5 });
+                return Object.assign(base, { content: "{{PRODUCT_BARCODE}}", name: "QR Code", qr_magnification: 5 });
             case "line":
                 return Object.assign(base, { name: "Horizontal Line", shape_width: 200, border_thickness: 3 });
             case "v_line":
@@ -747,31 +808,29 @@ class LabelCanvasEditor extends Component {
         const record = this._findRecord(this.state.selectedElementId);
         if (!record) return;
 
-        const src = record.data;
-        const copyFields = {
-            element_type: src.element_type,
-            pos_x: (src.pos_x || 0) + 20, pos_y: (src.pos_y || 0) + 20,
-            name: (src.name || "Element") + " (copy)",
-            sequence: (src.sequence || 0) + 1, content: src.content,
-            font_id: src.font_id, font_height: src.font_height, font_width: src.font_width,
-            rotation: src.rotation, barcode_type: src.barcode_type,
-            barcode_height: src.barcode_height, barcode_module_width: src.barcode_module_width,
-            show_text_below: src.show_text_below, qr_magnification: src.qr_magnification,
-            qr_error_correction: src.qr_error_correction, shape_width: src.shape_width,
-            shape_height: src.shape_height, border_thickness: src.border_thickness,
-            shape_color: src.shape_color, image_width: src.image_width,
-        };
-
         try {
-            const newRecord = await list.addNewRecord({ position: "bottom" });
-            if (newRecord) {
-                await newRecord.update(copyFields);
-                const key = this._recordKey(newRecord);
-                setTimeout(() => {
-                    const node = this.nodeMap.get(key);
-                    if (node) this._selectNode(node);
-                }, 50);
+            // Use server-side copy() to duplicate with all fields properly
+            const srcId = record.resId;
+            if (!srcId) {
+                console.warn("[VPA Canvas] Cannot duplicate unsaved element");
+                return;
             }
+            const newId = await this.orm.call("vpa.label.element", "copy", [srcId], {
+                default: {
+                    pos_x: (record.data.pos_x || 0) + 20,
+                    pos_y: (record.data.pos_y || 0) + 20,
+                    name: (record.data.name || "Element") + " (copy)",
+                    sequence: (record.data.sequence || 0) + 1,
+                },
+            });
+            // Reload the parent record to pick up the new element
+            await this.props.record.load();
+            this.props.record.model.notify();
+            // Select the new element after re-render
+            setTimeout(() => {
+                const node = this.nodeMap.get(String(newId));
+                if (node) this._selectNode(node);
+            }, 100);
         } catch (e) {
             console.error("[VPA Canvas] Duplicate error:", e);
         }
@@ -842,11 +901,22 @@ class LabelCanvasEditor extends Component {
         const intFields = [
             "pos_x", "pos_y", "font_height", "font_width",
             "barcode_height", "barcode_module_width", "qr_magnification",
-            "shape_width", "shape_height", "border_thickness", "image_width", "sequence",
+            "shape_width", "shape_height", "border_thickness", "image_width", "max_width", "sequence",
         ];
         if (intFields.includes(fieldName)) value = parseInt(value) || 0;
         if (fieldName === "show_text_below") value = ev.target.checked;
         this._updateRecordField(this.state.selectedElementId, fieldName, value);
+    }
+
+    onContentSourceChange(ev) {
+        if (!this.state.selectedElementId) return;
+        const source = ev.target.value;
+        if (source === '__custom__') {
+            // Keep existing content — user will type their own value
+            return;
+        }
+        // Set content to the selected variable placeholder
+        this._updateRecordField(this.state.selectedElementId, 'content', source);
     }
 
     async onVariableChange(ev) {

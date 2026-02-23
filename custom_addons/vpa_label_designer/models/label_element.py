@@ -63,6 +63,20 @@ class LabelElement(models.Model):
         ('I', 'Inverted 180°'),
         ('B', 'Bottom-up 270° CW'),
     ], string='Rotation', default='N')
+    max_width = fields.Integer(
+        string='Max Width (dots)', default=0,
+        help='Maximum text width in dots. 0 = no limit.')
+    max_lines = fields.Selection([
+        ('1', '1 line (truncate)'),
+        ('2', '2 lines'),
+        ('3', '3 lines'),
+        ('4', '4 lines'),
+    ], string='Max Lines', default='1')
+    text_alignment = fields.Selection([
+        ('L', 'Left'),
+        ('C', 'Center'),
+        ('R', 'Right'),
+    ], string='Alignment', default='L')
 
     # Variable settings
     variable_id = fields.Many2one('vpa.label.variable', string='Variable',
@@ -138,14 +152,21 @@ class LabelElement(models.Model):
                  'barcode_type', 'barcode_height', 'barcode_module_width',
                  'show_text_below', 'qr_magnification', 'qr_error_correction',
                  'shape_width', 'shape_height', 'border_thickness', 'shape_color',
-                 'image_data', 'image_width')
+                 'image_data', 'image_width', 'max_width', 'max_lines',
+                 'text_alignment')
     def _compute_zpl_snippet(self):
         for rec in self:
             if rec.element_type == 'text':
                 rec.zpl_snippet = rec._zpl_text(rec.content or '')
             elif rec.element_type == 'variable':
                 var_name = rec.variable_id.name if rec.variable_id else 'UNKNOWN'
-                rec.zpl_snippet = rec._zpl_text('{{%s}}' % var_name)
+                zpl = rec._zpl_text('{{%s}}' % var_name)
+                # Add VAT note below price variables in smaller font
+                if var_name == 'PRODUCT_PRICE':
+                    zpl += rec._zpl_vat_note('Excl. VAT')
+                elif var_name == 'PRODUCT_PRICE_INCL':
+                    zpl += rec._zpl_vat_note('Incl. VAT')
+                rec.zpl_snippet = zpl
             elif rec.element_type == 'barcode':
                 rec.zpl_snippet = rec._zpl_barcode(rec.content or '{{PRODUCT_BARCODE}}')
             elif rec.element_type == 'qr_code':
@@ -169,8 +190,33 @@ class LabelElement(models.Model):
         rot = self.rotation or 'N'
         height = self.font_height or 30
         width = self.font_width or 0
-        # ^FO{x},{y}^A{font}{rotation},{height},{width}^FD{content}^FS
-        return f'^FO{self.pos_x},{self.pos_y}^A{font}{rot},{height},{width}^FD{content}^FS'
+        lines = int(self.max_lines or '1')
+        align = self.text_alignment or 'L'
+        zpl = f'^FO{self.pos_x},{self.pos_y}^A{font}{rot},{height},{width}'
+        if self.max_width and self.max_width > 0:
+            # ^FB{width},{max_lines},{line_spacing},{justification}
+            zpl += f'^FB{self.max_width},{lines},0,{align}'
+        zpl += f'^FD{content}^FS'
+        return zpl
+
+    def _zpl_vat_note(self, note_text):
+        """Generate a smaller ZPL text line below the current element for VAT indication.
+        Inherits alignment from the price element (via max_width + text_alignment).
+        """
+        height = self.font_height or 30
+        # VAT note is ~60% of the price font size, minimum 16 dots
+        note_height = max(16, int(height * 0.6))
+        # Position below the price text
+        note_y = self.pos_y + height + 4
+        font = self.font_id or '0'
+        rot = self.rotation or 'N'
+        align = self.text_alignment or 'L'
+        zpl = f'\n^FO{self.pos_x},{note_y}^A{font}{rot},{note_height},0'
+        # Use ^FB to match alignment when max_width is set
+        if self.max_width and self.max_width > 0:
+            zpl += f'^FB{self.max_width},1,0,{align}'
+        zpl += f'^FD({note_text})^FS'
+        return zpl
 
     def _zpl_barcode(self, content):
         """Generate ZPL for barcode element."""
@@ -250,8 +296,14 @@ class LabelElement(models.Model):
                 new_h = max(1, int(img.height * ratio))
                 img = img.resize((target_width, new_h), Image.LANCZOS)
 
-            # Convert to monochrome (threshold at 128)
-            img = img.point(lambda p: 0 if p < 128 else 255, '1')
+            # Sharpen and boost contrast for cleaner output
+            from PIL import ImageEnhance, ImageFilter
+            img = img.filter(ImageFilter.SHARPEN)
+            img = ImageEnhance.Contrast(img).enhance(2.0)
+
+            # Convert to monochrome — use hard threshold for crisp logos
+            # (no dithering, which would introduce stipple patterns)
+            img = img.point(lambda p: 0 if p < 100 else 255, '1')
 
             width_px = img.width
             height_px = img.height

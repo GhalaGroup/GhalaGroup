@@ -57,9 +57,44 @@ class LabelTemplate(models.Model):
     label_height_dots = fields.Integer(related='label_size_id.height_dots', string='Label Height (dots)')
     label_dpi = fields.Integer(compute='_compute_label_dpi', string='Label DPI')
 
+    is_default = fields.Boolean(
+        string='Default Template',
+        help='When checked, this template is used by default when printing '
+             'labels for the selected Source Model.')
+
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company)
     active = fields.Boolean(default=True)
+
+    def write(self, vals):
+        res = super().write(vals)
+        if vals.get('is_default'):
+            # Unset other defaults for same model_name + company
+            for rec in self:
+                others = self.search([
+                    ('id', '!=', rec.id),
+                    ('model_name', '=', rec.model_name),
+                    ('company_id', 'in', [False, rec.company_id.id]),
+                    ('is_default', '=', True),
+                ])
+                if others:
+                    others.write({'is_default': False})
+        return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.is_default:
+                others = self.search([
+                    ('id', '!=', rec.id),
+                    ('model_name', '=', rec.model_name),
+                    ('company_id', 'in', [False, rec.company_id.id]),
+                    ('is_default', '=', True),
+                ])
+                if others:
+                    others.write({'is_default': False})
+        return records
 
     @api.depends('label_size_id', 'label_size_id.dpi')
     def _compute_label_dpi(self):
@@ -256,6 +291,82 @@ class LabelTemplate(models.Model):
                 'tag': 'display_notification',
                 'params': {
                     'title': 'Preview Error',
+                    'message': str(e),
+                    'type': 'danger',
+                    'sticky': False,
+                }
+            }
+
+    def action_download_pdf(self):
+        """Generate a PDF of the label via Labelary API and trigger download."""
+        self.ensure_one()
+        zpl = self.zpl_preview
+        if not zpl:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'PDF Export',
+                    'message': 'No ZPL code to export. Add some label elements first.',
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
+
+        try:
+            url = f'http://api.labelary.com/v1/printers/{self.label_dpmm}dpmm/labels/{self.label_width_inch}x{self.label_height_inch}/0/'
+            response = requests.post(
+                url,
+                data=zpl.encode('utf-8'),
+                headers={'Accept': 'application/pdf'},
+                timeout=15,
+            )
+
+            if response.status_code == 200:
+                pdf_b64 = base64.b64encode(response.content)
+                # Create an ir.attachment for download
+                filename = f'{self.name or "label"}.pdf'
+                attachment = self.env['ir.attachment'].create({
+                    'name': filename,
+                    'type': 'binary',
+                    'datas': pdf_b64,
+                    'mimetype': 'application/pdf',
+                })
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': f'/web/content/{attachment.id}?download=true',
+                    'target': 'new',
+                }
+            else:
+                _logger.warning('Labelary API returned status %s for PDF', response.status_code)
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'PDF Error',
+                        'message': f'Labelary API returned status {response.status_code}',
+                        'type': 'danger',
+                        'sticky': False,
+                    }
+                }
+        except requests.Timeout:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'PDF Error',
+                    'message': 'Labelary API request timed out. Please try again.',
+                    'type': 'danger',
+                    'sticky': False,
+                }
+            }
+        except Exception as e:
+            _logger.exception('Error generating label PDF')
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'PDF Error',
                     'message': str(e),
                     'type': 'danger',
                     'sticky': False,

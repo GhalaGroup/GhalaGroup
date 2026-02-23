@@ -8,6 +8,8 @@
         <field name="arch" type="xml">
             <form string="Label Template">
                 <header>
+                    <button name="action_download_pdf" string="Download PDF" type="object"
+                            class="btn-primary" icon="fa-file-pdf-o"/>
                     <button name="action_copy_zpl" string="Copy ZPL" type="object"
                             class="btn-secondary" icon="fa-clipboard"/>
                 </header>
@@ -21,6 +23,7 @@
                         <group string="Label Configuration">
                             <field name="label_size_id"/>
                             <field name="model_name"/>
+                            <field name="is_default"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group string="RFID Settings" invisible="not has_rfid">
@@ -53,6 +56,7 @@
                                     <field name="name" optional="hide"/>
                                     <field name="font_id" invisible="element_type not in ('text', 'variable')" optional="hide"/>
                                     <field name="font_height" invisible="element_type not in ('text', 'variable')" optional="show"/>
+                                    <field name="max_width" invisible="element_type not in ('text', 'variable')" optional="show"/>
                                     <field name="rotation" invisible="element_type not in ('text', 'variable', 'barcode')" optional="hide"/>
                                     <field name="barcode_type" invisible="element_type != 'barcode'" optional="show"/>
                                     <field name="barcode_height" invisible="element_type != 'barcode'" optional="show"/>
@@ -65,6 +69,10 @@
                                     <field name="border_thickness" invisible="element_type not in ('line', 'v_line', 'box')" optional="hide"/>
                                     <field name="image_width" invisible="element_type not in ('image', 'company_logo')" optional="show"/>
                                     <field name="image_data" invisible="element_type != 'image'" optional="hide"/>
+                                    <field name="font_width" invisible="1"/>
+                                    <field name="max_lines" invisible="1"/>
+                                    <field name="text_alignment" invisible="1"/>
+                                    <field name="shape_color" invisible="1"/>
                                     <field name="zpl_snippet" optional="hide"/>
                                 </list>
                             </field>
@@ -108,6 +116,7 @@
                 <field name="name"/>
                 <field name="label_size_id"/>
                 <field name="model_name"/>
+                <field name="is_default"/>
                 <field name="has_rfid"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </list>

@@ -79,9 +79,35 @@ class LabelVariable(models.Model):
                     return self.sample_value or ''
             if obj is False or obj is None:
                 return ''
+            # Format price fields with currency
+            if self.name in ('PRODUCT_PRICE', 'PRODUCT_PRICE_INCL'):
+                return self._format_price(obj, record)
             return str(obj)
         except Exception:
             return self.sample_value or ''
+
+    def _format_price(self, amount, record):
+        """Format a numeric amount with thousand separators and currency symbol."""
+        try:
+            amount = float(amount)
+        except (ValueError, TypeError):
+            return str(amount)
+        # Get currency from product or company
+        currency = None
+        if hasattr(record, 'currency_id') and record.currency_id:
+            currency = record.currency_id
+        elif hasattr(record, 'product_id') and record.product_id and record.product_id.currency_id:
+            currency = record.product_id.currency_id
+        if not currency:
+            currency = self.env.company.currency_id
+        # Format: 45,000.00 TZS
+        formatted = '{:,.{prec}f}'.format(amount, prec=currency.decimal_places if currency else 2)
+        symbol = currency.symbol if currency else ''
+        if currency and currency.position == 'before':
+            price_str = f'{symbol} {formatted}'
+        else:
+            price_str = f'{formatted} {symbol}'.strip()
+        return price_str
 
     def _resolve_computed(self, record, extra_values=None):
         """Resolve specially computed variables that can't use simple field paths."""
@@ -89,26 +115,62 @@ class LabelVariable(models.Model):
         try:
             if self.field_path == '__compute_price_incl__':
                 return self._compute_price_incl(record)
+            if self.field_path == '__compute_variant__':
+                return self._compute_variant(record)
+            if self.field_path == '__compute_variant_full__':
+                return self._compute_variant_full(record)
         except Exception:
             pass
         return self.sample_value or ''
 
+    def _get_product(self, record):
+        """Get the product.product record from any supported source record."""
+        if record._name == 'product.product':
+            return record
+        if hasattr(record, 'product_id') and record.product_id:
+            return record.product_id
+        return None
+
+    def _compute_variant(self, record):
+        """Get variant attribute values like 'Large, Red'."""
+        product = self._get_product(record)
+        if not product:
+            return self.sample_value or ''
+        if hasattr(product, 'product_template_attribute_value_ids'):
+            ptavs = product.product_template_attribute_value_ids
+            if ptavs:
+                return ptavs._get_combination_name() or ''
+        return ''
+
+    def _compute_variant_full(self, record):
+        """Get full product name with variant like 'Office Chair (Large, Red)'."""
+        product = self._get_product(record)
+        if not product:
+            return self.sample_value or ''
+        variant = ''
+        if hasattr(product, 'product_template_attribute_value_ids'):
+            ptavs = product.product_template_attribute_value_ids
+            if ptavs:
+                variant = ptavs._get_combination_name()
+        name = product.name or ''
+        if variant:
+            return f'{name} ({variant})'
+        return name
+
     def _compute_price_incl(self, record):
         """Compute tax-inclusive sales price for a product."""
-        product = record
-        if record._name != 'product.product':
-            if hasattr(record, 'product_id') and record.product_id:
-                product = record.product_id
-            else:
-                return self.sample_value or ''
+        product = self._get_product(record)
+        if not product:
+            return self.sample_value or ''
 
         price = product.lst_price
         if not product.taxes_id:
-            return str(price)
+            return self._format_price(price, product)
 
         tax_result = product.taxes_id.compute_all(
             price_unit=price,
             currency=product.currency_id,
             product=product,
         )
-        return str(tax_result.get('total_included', price))
+        amount = tax_result.get('total_included', price)
+        return self._format_price(amount, product)

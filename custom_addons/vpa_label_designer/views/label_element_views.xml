@@ -32,6 +32,9 @@
                         <group>
                             <field name="font_height"/>
                             <field name="font_width"/>
+                            <field name="max_width"/>
+                            <field name="max_lines"/>
+                            <field name="text_alignment"/>
                         </group>
                     </group>
 

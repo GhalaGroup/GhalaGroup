@@ -96,6 +96,9 @@
                     <button string="Print" name="action_print" type="object"
                             class="btn-success" icon="fa-print"
                             invisible="state not in ('select', 'preview')"/>
+                    <button string="Download PDF" name="action_download_pdf" type="object"
+                            class="btn-primary" icon="fa-file-pdf-o"
+                            invisible="state not in ('select', 'preview')"/>
                     <button string="Back" name="action_back" type="object"
                             class="btn-secondary"
                             invisible="state != 'preview'"/>

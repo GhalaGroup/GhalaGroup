@@ -39,22 +39,65 @@
 
         <record id="var_product_price" model="vpa.label.variable">
             <field name="name">PRODUCT_PRICE</field>
-            <field name="display_name_custom">Sales Price</field>
+            <field name="display_name_custom">Sales Price (Excl. VAT)</field>
             <field name="category">product</field>
             <field name="model_name">product.product</field>
             <field name="field_path">list_price</field>
-            <field name="sample_value">45000.00</field>
+            <field name="sample_value">45,000.00 TZS</field>
             <field name="is_system" eval="True"/>
             <field name="company_id" eval="False"/>
         </record>
 
         <record id="var_product_price_incl" model="vpa.label.variable">
             <field name="name">PRODUCT_PRICE_INCL</field>
-            <field name="display_name_custom">Sales Price (incl. VAT)</field>
+            <field name="display_name_custom">Sales Price (Incl. VAT)</field>
             <field name="category">product</field>
             <field name="model_name">product.product</field>
             <field name="field_path">__compute_price_incl__</field>
-            <field name="sample_value">53100.00</field>
+            <field name="sample_value">53,100.00 TZS</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_price_excl_vat_note" model="vpa.label.variable">
+            <field name="name">PRICE_EXCL_VAT_NOTE</field>
+            <field name="display_name_custom">Price Note (Excl. VAT)</field>
+            <field name="category">product</field>
+            <field name="sample_value">Excl. VAT</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_price_incl_vat_note" model="vpa.label.variable">
+            <field name="name">PRICE_INCL_VAT_NOTE</field>
+            <field name="display_name_custom">Price Note (Incl. VAT)</field>
+            <field name="category">product</field>
+            <field name="sample_value">Incl. VAT</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ======================= -->
+        <!-- VARIANT VARIABLES       -->
+        <!-- ======================= -->
+        <record id="var_product_variant" model="vpa.label.variable">
+            <field name="name">PRODUCT_VARIANT</field>
+            <field name="display_name_custom">Variant Attributes</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">__compute_variant__</field>
+            <field name="sample_value">Large, Red</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_variant_full" model="vpa.label.variable">
+            <field name="name">PRODUCT_VARIANT_FULL</field>
+            <field name="display_name_custom">Product Name + Variant</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">__compute_variant_full__</field>
+            <field name="sample_value">Office Chair (Large, Red)</field>
             <field name="is_system" eval="True"/>
             <field name="company_id" eval="False"/>
         </record>
@@ -88,6 +131,17 @@
             <field name="model_name">product.product</field>
             <field name="field_path">uom_id.name</field>
             <field name="sample_value">Units</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_sale_description" model="vpa.label.variable">
+            <field name="name">PRODUCT_SALE_DESCRIPTION</field>
+            <field name="display_name_custom">Sales Description</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">description_sale</field>
+            <field name="sample_value">High-quality office chair with ergonomic support</field>
             <field name="is_system" eval="True"/>
             <field name="company_id" eval="False"/>
         </record>

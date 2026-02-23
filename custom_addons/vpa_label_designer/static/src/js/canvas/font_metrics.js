@@ -42,9 +42,11 @@ export function dotsToPoints(dots, dpi = 203) {
 }
 
 /**
- * Approximate conversion from ZPL dot height to screen pixel font size
- * for Konva.js text rendering. This is visual approximation only.
+ * Convert ZPL dot height to screen pixel font size for Konva.js text
+ * rendering. Uses 1:1 mapping so the canvas matches the actual ZPL
+ * output (Labelary PDF / printer). The element layer zoom handles
+ * visual scaling to fit the screen.
  */
 export function dotsToScreenPx(dots) {
-    return Math.max(8, Math.round(dots * 0.75));
+    return Math.max(8, Math.round(dots));
 }
