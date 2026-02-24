@@ -84,6 +84,9 @@
                         <field name="estimated_amount" string="Commission"
                                widget="monetary"
                                options="{'currency_field': 'currency_id'}"/>
+                        <field name="commission_per_unit" string="Per Unit"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
                         <field name="currency_id" column_invisible="1"/>
                         <field name="already_generated" column_invisible="1"/>
                         <field name="scheme_id" column_invisible="1"/>

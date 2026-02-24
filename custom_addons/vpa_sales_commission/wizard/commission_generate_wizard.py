@@ -276,6 +276,11 @@ class CommissionGenerateWizardScheme(models.TransientModel):
         compute='_compute_estimated_amount',
         digits=(12, 2),
     )
+    commission_per_unit = fields.Float(
+        string='Per Unit',
+        compute='_compute_estimated_amount',
+        digits=(12, 2),
+    )
     currency_id = fields.Many2one(
         'res.currency',
         string='Currency',
@@ -291,10 +296,14 @@ class CommissionGenerateWizardScheme(models.TransientModel):
         help='Commission has already been generated for this employee on this MO',
     )
 
-    @api.depends('rate', 'wizard_id.total_base_amount')
+    @api.depends('rate', 'wizard_id.total_base_amount', 'wizard_id.product_qty')
     def _compute_estimated_amount(self):
         for line in self:
             line.estimated_amount = line.wizard_id.total_base_amount * line.rate / 100.0
+            if line.wizard_id.product_qty:
+                line.commission_per_unit = line.estimated_amount / line.wizard_id.product_qty
+            else:
+                line.commission_per_unit = 0.0
 
 
 class CommissionGenerateWizardHistory(models.TransientModel):
