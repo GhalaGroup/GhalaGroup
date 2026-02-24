@@ -165,6 +165,7 @@ class MrpProduction(models.Model):
                     'production_name': cl.production_id.name,
                     'date': cl.date,
                     'product_qty': cl.production_id.product_qty,
+                    'product_uom_id': cl.production_id.product_uom_id.id,
                     'base_amount': cl.base_amount,
                     'commission_amount': cl.amount,
                     'currency_id': cl.currency_id.id,
