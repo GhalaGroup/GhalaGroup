@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="vpa_label_designer.LabelCanvasEditor">
+        <div class="vpa_canvas_editor d-flex">
+
+            <!-- LEFT: Toolbar -->
+            <div class="vpa_canvas_toolbar">
+                <div class="toolbar-section">
+                    <div class="toolbar-title">Elements</div>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('text')"
+                            title="Add static text">
+                        <i class="fa fa-font"/> Text
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('variable')"
+                            title="Add variable field">
+                        <i class="fa fa-code"/> Variable
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('barcode')"
+                            title="Add barcode">
+                        <i class="fa fa-barcode"/> Barcode
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('qr_code')"
+                            title="Add QR code">
+                        <i class="fa fa-qrcode"/> QR Code
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('image')"
+                            title="Add uploaded image">
+                        <i class="fa fa-picture-o"/> Image
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('company_logo')"
+                            title="Add company logo">
+                        <i class="fa fa-building"/> Logo
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"/>
+
+                <div class="toolbar-section">
+                    <div class="toolbar-title">Shapes</div>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('line')"
+                            title="Add horizontal line">
+                        <i class="fa fa-minus"/> H-Line
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('v_line')"
+                            title="Add vertical line">
+                        <span style="display:inline-block;width:16px;text-align:center;font-weight:bold;">|</span> V-Line
+                    </button>
+                    <button class="toolbar-btn" t-on-click="() => this.onAddElement('box')"
+                            title="Add rectangle / box">
+                        <i class="fa fa-square-o"/> Box
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"/>
+
+                <div class="toolbar-section">
+                    <div class="toolbar-title">View</div>
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" t-on-click="onZoomOut" title="Zoom out">
+                            <i class="fa fa-minus"/>
+                        </button>
+                        <span class="zoom-label" t-on-click="onZoomFit"
+                              title="Click to fit">
+                            <t t-esc="state.zoom"/>%
+                        </span>
+                        <button class="zoom-btn" t-on-click="onZoomIn" title="Zoom in">
+                            <i class="fa fa-plus"/>
+                        </button>
+                    </div>
+                    <label class="toolbar-check">
+                        <input type="checkbox" t-att-checked="state.gridVisible"
+                               t-on-change="onToggleGrid"/>
+                        Grid
+                    </label>
+                    <label class="toolbar-check">
+                        <input type="checkbox" t-att-checked="state.snapEnabled"
+                               t-on-change="onToggleSnap"/>
+                        Snap
+                    </label>
+                </div>
+            </div>
+
+            <!-- CENTER: Canvas -->
+            <div class="vpa_canvas_area">
+                <div class="vpa_canvas_container" t-ref="canvasContainer"/>
+            </div>
+
+            <!-- RIGHT: Properties Panel -->
+            <div class="vpa_canvas_props">
+                <t t-if="state.selectedData">
+                    <div class="props-header">
+                        <t t-if="state.multiSelectCount >= 2">
+                            <span class="props-type-badge"><t t-esc="state.multiSelectCount"/> selected</span>
+                            <span class="props-title">Alignment</span>
+                        </t>
+                        <t t-else="">
+                            <span class="props-type-badge" t-esc="state.selectedData.element_type"/>
+                            <span class="props-title">Properties</span>
+                        </t>
+                    </div>
+
+                    <!-- Multi-select alignment tools -->
+                    <t t-if="state.multiSelectCount >= 2">
+                        <div class="props-section">
+                            <div class="props-section-title">Align</div>
+                            <div class="props-align-row">
+                                <button class="props-align-btn" t-on-click="onAlignLeft" title="Align Left">
+                                    <i class="fa fa-align-left"/>
+                                </button>
+                                <button class="props-align-btn" t-on-click="onAlignCenterH" title="Align Center Horizontally">
+                                    <i class="fa fa-align-center"/>
+                                </button>
+                                <button class="props-align-btn" t-on-click="onAlignRight" title="Align Right">
+                                    <i class="fa fa-align-right"/>
+                                </button>
+                            </div>
+                            <div class="props-align-row">
+                                <button class="props-align-btn" t-on-click="onAlignTop" title="Align Top">
+                                    <i class="fa fa-long-arrow-up"/>
+                                </button>
+                                <button class="props-align-btn" t-on-click="onAlignCenterV" title="Align Center Vertically">
+                                    <i class="fa fa-arrows-v"/>
+                                </button>
+                                <button class="props-align-btn" t-on-click="onAlignBottom" title="Align Bottom">
+                                    <i class="fa fa-long-arrow-down"/>
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Position -->
+                    <div class="props-section">
+                        <div class="props-section-title">Position (dots)</div>
+                        <div class="props-row">
+                            <label>X:</label>
+                            <input type="number" class="props-input"
+                                   t-att-value="state.selectedData.pos_x"
+                                   t-on-change="(ev) => this.onPropertyChange('pos_x', ev)"/>
+                        </div>
+                        <div class="props-row">
+                            <label>Y:</label>
+                            <input type="number" class="props-input"
+                                   t-att-value="state.selectedData.pos_y"
+                                   t-on-change="(ev) => this.onPropertyChange('pos_y', ev)"/>
+                        </div>
+                    </div>
+
+                    <!-- Text / Variable properties -->
+                    <t t-if="state.selectedData.element_type === 'text' || state.selectedData.element_type === 'variable'">
+                        <div class="props-section">
+                            <div class="props-section-title">Font</div>
+                            <div class="props-row">
+                                <label>Font:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('font_id', ev)">
+                                    <t t-foreach="fontOptions" t-as="opt" t-key="opt.value">
+                                        <option t-att-value="opt.value"
+                                                t-att-selected="opt.value === (state.selectedData.font_id || '0')">
+                                            <t t-esc="opt.label"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="props-row">
+                                <label>Preset:</label>
+                                <select class="props-select" t-on-change="onFontPresetChange">
+                                    <t t-foreach="fontPresetOptions" t-as="opt" t-key="opt.value">
+                                        <option t-att-value="opt.value">
+                                            <t t-esc="opt.label"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="props-row">
+                                <label>Height:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.font_height"
+                                       t-on-change="(ev) => this.onPropertyChange('font_height', ev)"/>
+                                <span class="props-hint" t-esc="fontPointSize"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Rotation:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('rotation', ev)">
+                                    <option value="N" t-att-selected="(state.selectedData.rotation || 'N') === 'N'">Normal (0&#176;)</option>
+                                    <option value="R" t-att-selected="state.selectedData.rotation === 'R'">90&#176; CW</option>
+                                    <option value="I" t-att-selected="state.selectedData.rotation === 'I'">180&#176;</option>
+                                    <option value="B" t-att-selected="state.selectedData.rotation === 'B'">270&#176; CW</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Text Layout -->
+                        <div class="props-section">
+                            <div class="props-section-title">Text Layout</div>
+                            <div class="props-row">
+                                <label>Max Width:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.max_width || 0"
+                                       t-on-change="(ev) => this.onPropertyChange('max_width', ev)"
+                                       min="0" step="10"/>
+                                <span class="props-hint">0 = no limit</span>
+                            </div>
+                            <div class="props-row">
+                                <label>Max Lines:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('max_lines', ev)">
+                                    <option value="1"
+                                            t-att-selected="(state.selectedData.max_lines || '1') === '1'">1 line (truncate)</option>
+                                    <option value="2"
+                                            t-att-selected="state.selectedData.max_lines === '2'">2 lines</option>
+                                    <option value="3"
+                                            t-att-selected="state.selectedData.max_lines === '3'">3 lines</option>
+                                    <option value="4"
+                                            t-att-selected="state.selectedData.max_lines === '4'">4 lines</option>
+                                </select>
+                            </div>
+                            <div class="props-row">
+                                <label>Align:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('text_alignment', ev)">
+                                    <option value="L"
+                                            t-att-selected="(state.selectedData.text_alignment || 'L') === 'L'">Left</option>
+                                    <option value="C"
+                                            t-att-selected="state.selectedData.text_alignment === 'C'">Center</option>
+                                    <option value="R"
+                                            t-att-selected="state.selectedData.text_alignment === 'R'">Right</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Content (for text only) -->
+                        <t t-if="state.selectedData.element_type === 'text'">
+                            <div class="props-section">
+                                <div class="props-section-title">Content</div>
+                                <div class="props-row">
+                                    <input type="text" class="props-input-wide"
+                                           t-att-value="state.selectedData.content || ''"
+                                           t-on-change="(ev) => this.onPropertyChange('content', ev)"
+                                           placeholder="Enter text..."/>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Variable picker (for variable only) -->
+                        <t t-if="state.selectedData.element_type === 'variable'">
+                            <div class="props-section">
+                                <div class="props-section-title">Variable</div>
+                                <div class="props-row">
+                                    <label>Field:</label>
+                                    <select class="props-select"
+                                            t-on-change="onVariableChange">
+                                        <option value="">-- Select Variable --</option>
+                                        <t t-foreach="variableOptions" t-as="opt" t-key="opt.value">
+                                            <option t-att-value="opt.value"
+                                                    t-att-selected="'' + opt.value === '' + selectedVariableId">
+                                                <t t-esc="opt.label"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- Barcode properties -->
+                    <t t-if="state.selectedData.element_type === 'barcode'">
+                        <div class="props-section">
+                            <div class="props-section-title">Barcode</div>
+                            <div class="props-row">
+                                <label>Source:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onContentSourceChange(ev)">
+                                    <option value="{{PRODUCT_BARCODE}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_BARCODE}}'">Product Barcode</option>
+                                    <option value="{{PRODUCT_SKU}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_SKU}}'">Internal Reference (SKU)</option>
+                                    <option value="{{LOT_NUMBER}}"
+                                            t-att-selected="this.contentSource === '{{LOT_NUMBER}}'">Lot Number</option>
+                                    <option value="__custom__"
+                                            t-att-selected="this.contentSource === '__custom__'">Custom Value</option>
+                                </select>
+                            </div>
+                            <div class="props-row" t-if="this.contentSource === '__custom__'">
+                                <label>Value:</label>
+                                <input type="text" class="props-input-wide"
+                                       t-att-value="state.selectedData.content || ''"
+                                       t-on-change="(ev) => this.onPropertyChange('content', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Type:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('barcode_type', ev)">
+                                    <option value="C" t-att-selected="(state.selectedData.barcode_type || 'C') === 'C'">Code 128</option>
+                                    <option value="3" t-att-selected="state.selectedData.barcode_type === '3'">Code 39</option>
+                                    <option value="E" t-att-selected="state.selectedData.barcode_type === 'E'">EAN-13</option>
+                                    <option value="U" t-att-selected="state.selectedData.barcode_type === 'U'">UPC-A</option>
+                                    <option value="2" t-att-selected="state.selectedData.barcode_type === '2'">I 2 of 5</option>
+                                </select>
+                            </div>
+                            <div class="props-row">
+                                <label>Height:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.barcode_height"
+                                       t-on-change="(ev) => this.onPropertyChange('barcode_height', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Module W:</label>
+                                <input type="number" class="props-input" min="1" max="10"
+                                       t-att-value="state.selectedData.barcode_module_width"
+                                       t-on-change="(ev) => this.onPropertyChange('barcode_module_width', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>
+                                    <input type="checkbox"
+                                           t-att-checked="state.selectedData.show_text_below"
+                                           t-on-change="(ev) => this.onPropertyChange('show_text_below', ev)"/>
+                                    Text below
+                                </label>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- QR Code properties -->
+                    <t t-if="state.selectedData.element_type === 'qr_code'">
+                        <div class="props-section">
+                            <div class="props-section-title">QR Code</div>
+                            <div class="props-row">
+                                <label>Source:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onContentSourceChange(ev)">
+                                    <option value="{{PRODUCT_BARCODE}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_BARCODE}}'">Product Barcode</option>
+                                    <option value="{{PRODUCT_SKU}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_SKU}}'">Internal Reference (SKU)</option>
+                                    <option value="{{PRODUCT_NAME}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_NAME}}'">Product Name</option>
+                                    <option value="{{PRODUCT_PRICE}}"
+                                            t-att-selected="this.contentSource === '{{PRODUCT_PRICE}}'">Sales Price</option>
+                                    <option value="{{LOT_NUMBER}}"
+                                            t-att-selected="this.contentSource === '{{LOT_NUMBER}}'">Lot Number</option>
+                                    <option value="{{COMPANY_WEBSITE}}"
+                                            t-att-selected="this.contentSource === '{{COMPANY_WEBSITE}}'">Company Website</option>
+                                    <option value="__custom__"
+                                            t-att-selected="this.contentSource === '__custom__'">Custom Value</option>
+                                </select>
+                            </div>
+                            <div class="props-row" t-if="this.contentSource === '__custom__'">
+                                <label>Value:</label>
+                                <input type="text" class="props-input-wide"
+                                       t-att-value="state.selectedData.content || ''"
+                                       t-on-change="(ev) => this.onPropertyChange('content', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Size:</label>
+                                <input type="number" class="props-input" min="1" max="10"
+                                       t-att-value="state.selectedData.qr_magnification"
+                                       t-on-change="(ev) => this.onPropertyChange('qr_magnification', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Error Corr:</label>
+                                <select class="props-select"
+                                        t-on-change="(ev) => this.onPropertyChange('qr_error_correction', ev)">
+                                    <option value="H" t-att-selected="(state.selectedData.qr_error_correction || 'M') === 'H'">High (30%)</option>
+                                    <option value="Q" t-att-selected="state.selectedData.qr_error_correction === 'Q'">Quartile (25%)</option>
+                                    <option value="M" t-att-selected="(state.selectedData.qr_error_correction || 'M') === 'M'">Medium (15%)</option>
+                                    <option value="L" t-att-selected="state.selectedData.qr_error_correction === 'L'">Low (7%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Line properties -->
+                    <t t-if="state.selectedData.element_type === 'line'">
+                        <div class="props-section">
+                            <div class="props-section-title">Horizontal Line</div>
+                            <div class="props-row">
+                                <label>Length:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.shape_width"
+                                       t-on-change="(ev) => this.onPropertyChange('shape_width', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Thickness:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.border_thickness"
+                                       t-on-change="(ev) => this.onPropertyChange('border_thickness', ev)"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Vertical Line properties -->
+                    <t t-if="state.selectedData.element_type === 'v_line'">
+                        <div class="props-section">
+                            <div class="props-section-title">Vertical Line</div>
+                            <div class="props-row">
+                                <label>Length:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.shape_height"
+                                       t-on-change="(ev) => this.onPropertyChange('shape_height', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Thickness:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.border_thickness"
+                                       t-on-change="(ev) => this.onPropertyChange('border_thickness', ev)"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Box properties -->
+                    <t t-if="state.selectedData.element_type === 'box'">
+                        <div class="props-section">
+                            <div class="props-section-title">Box</div>
+                            <div class="props-row">
+                                <label>Width:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.shape_width"
+                                       t-on-change="(ev) => this.onPropertyChange('shape_width', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Height:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.shape_height"
+                                       t-on-change="(ev) => this.onPropertyChange('shape_height', ev)"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Border:</label>
+                                <input type="number" class="props-input"
+                                       t-att-value="state.selectedData.border_thickness"
+                                       t-on-change="(ev) => this.onPropertyChange('border_thickness', ev)"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Image properties -->
+                    <t t-if="state.selectedData.element_type === 'image'">
+                        <div class="props-section">
+                            <div class="props-section-title">Image</div>
+                            <div class="props-row">
+                                <label>Upload:</label>
+                                <input type="file" accept="image/*"
+                                       class="props-input-wide"
+                                       t-on-change="onImageUpload"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Width:</label>
+                                <input type="number" class="props-input" min="10"
+                                       t-att-value="state.selectedData.image_width"
+                                       t-on-change="(ev) => this.onPropertyChange('image_width', ev)"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Company Logo properties -->
+                    <t t-if="state.selectedData.element_type === 'company_logo'">
+                        <div class="props-section">
+                            <div class="props-section-title">Company Logo</div>
+                            <div class="props-row">
+                                <span class="props-hint">Auto-loaded from company settings</span>
+                            </div>
+                            <div class="props-row">
+                                <label>Width:</label>
+                                <input type="number" class="props-input" min="10"
+                                       t-att-value="state.selectedData.image_width"
+                                       t-on-change="(ev) => this.onPropertyChange('image_width', ev)"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Actions -->
+                    <div class="props-section props-actions">
+                        <button class="props-action-btn" t-on-click="onDuplicateElement"
+                                title="Duplicate (Ctrl+D)">
+                            <i class="fa fa-copy"/> Duplicate
+                        </button>
+                        <button class="props-action-btn text-danger" t-on-click="onDeleteElement"
+                                title="Delete (Del)">
+                            <i class="fa fa-trash"/> Delete
+                        </button>
+                        <div class="props-divider"/>
+                        <button class="props-action-btn" t-on-click="onBringForward"
+                                title="Bring forward">
+                            <i class="fa fa-arrow-up"/> Bring Forward
+                        </button>
+                        <button class="props-action-btn" t-on-click="onSendBackward"
+                                title="Send backward">
+                            <i class="fa fa-arrow-down"/> Send Backward
+                        </button>
+                    </div>
+
+                </t>
+
+                <!-- No selection state -->
+                <t t-if="!state.selectedData">
+                    <div class="props-empty">
+                        <i class="fa fa-mouse-pointer fa-2x text-muted mb-2"/>
+                        <div class="text-muted">Click an element on the canvas to edit its properties</div>
+                    </div>
+                </t>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

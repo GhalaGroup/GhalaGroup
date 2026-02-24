@@ -1,0 +1,24 @@
+Odoo Proprietary License v1.0
+
+This software and associated files (the "Software") may only be used (executed,
+modified, executed after modifications) if you have purchased a valid license
+from VPA Solutions Limited or Odoo S.A.
+
+The above permissions are granted for a single Odoo instance only (one database).
+
+You may develop Odoo modules that use the Software as a library (typically by
+depending on it, importing it and using its resources), but without copying any
+source code or material from the Software.
+
+You may use parts of the Software, but only for maintaining or extending
+existing modules.
+
+The Software is provided "as is", without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and noninfringement. In no event shall the
+authors or copyright holders be liable for any claim, damages or other
+liability, whether in an action of contract, tort or otherwise, arising from,
+out of or in connection with the Software or the use or other dealings in
+the Software.
+
+Copyright (C) 2025 VPA Solutions Limited

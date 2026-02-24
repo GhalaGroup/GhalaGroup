@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ===================== -->
+        <!-- PRODUCT VARIABLES     -->
+        <!-- ===================== -->
+        <record id="var_product_name" model="vpa.label.variable">
+            <field name="name">PRODUCT_NAME</field>
+            <field name="display_name_custom">Product Name</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">Plywood Sheet 18mm Birch</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_sku" model="vpa.label.variable">
+            <field name="name">PRODUCT_SKU</field>
+            <field name="display_name_custom">SKU / Internal Reference</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">default_code</field>
+            <field name="sample_value">WD/PLY/00042</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_barcode" model="vpa.label.variable">
+            <field name="name">PRODUCT_BARCODE</field>
+            <field name="display_name_custom">Product Barcode</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">barcode</field>
+            <field name="sample_value">5901234000001</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_price" model="vpa.label.variable">
+            <field name="name">PRODUCT_PRICE</field>
+            <field name="display_name_custom">Sales Price (Excl. VAT)</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">list_price</field>
+            <field name="sample_value">45,000.00 TZS</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_price_incl" model="vpa.label.variable">
+            <field name="name">PRODUCT_PRICE_INCL</field>
+            <field name="display_name_custom">Sales Price (Incl. VAT)</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">__compute_price_incl__</field>
+            <field name="sample_value">53,100.00 TZS</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_price_excl_vat_note" model="vpa.label.variable">
+            <field name="name">PRICE_EXCL_VAT_NOTE</field>
+            <field name="display_name_custom">Price Note (Excl. VAT)</field>
+            <field name="category">product</field>
+            <field name="sample_value">Excl. VAT</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_price_incl_vat_note" model="vpa.label.variable">
+            <field name="name">PRICE_INCL_VAT_NOTE</field>
+            <field name="display_name_custom">Price Note (Incl. VAT)</field>
+            <field name="category">product</field>
+            <field name="sample_value">Incl. VAT</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ======================= -->
+        <!-- VARIANT VARIABLES       -->
+        <!-- ======================= -->
+        <record id="var_product_variant" model="vpa.label.variable">
+            <field name="name">PRODUCT_VARIANT</field>
+            <field name="display_name_custom">Variant Attributes</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">__compute_variant__</field>
+            <field name="sample_value">Large, Red</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_variant_full" model="vpa.label.variable">
+            <field name="name">PRODUCT_VARIANT_FULL</field>
+            <field name="display_name_custom">Product Name + Variant</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">__compute_variant_full__</field>
+            <field name="sample_value">Office Chair (Large, Red)</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_weight" model="vpa.label.variable">
+            <field name="name">PRODUCT_WEIGHT</field>
+            <field name="display_name_custom">Weight (kg)</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">weight</field>
+            <field name="sample_value">12.5</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_category" model="vpa.label.variable">
+            <field name="name">PRODUCT_CATEGORY</field>
+            <field name="display_name_custom">Product Category</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">categ_id.name</field>
+            <field name="sample_value">Raw Materials / Wood</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_uom" model="vpa.label.variable">
+            <field name="name">PRODUCT_UOM</field>
+            <field name="display_name_custom">Unit of Measure</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">uom_id.name</field>
+            <field name="sample_value">Units</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_product_sale_description" model="vpa.label.variable">
+            <field name="name">PRODUCT_SALE_DESCRIPTION</field>
+            <field name="display_name_custom">Sales Description</field>
+            <field name="category">product</field>
+            <field name="model_name">product.product</field>
+            <field name="field_path">description_sale</field>
+            <field name="sample_value">High-quality office chair with ergonomic support</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ===================== -->
+        <!-- STOCK / LOT VARIABLES -->
+        <!-- ===================== -->
+        <record id="var_lot_number" model="vpa.label.variable">
+            <field name="name">LOT_NUMBER</field>
+            <field name="display_name_custom">Lot Number</field>
+            <field name="category">stock</field>
+            <field name="model_name">stock.lot</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">LOT-2026-0042</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_lot_expiry" model="vpa.label.variable">
+            <field name="name">LOT_EXPIRY</field>
+            <field name="display_name_custom">Expiry Date</field>
+            <field name="category">stock</field>
+            <field name="model_name">stock.lot</field>
+            <field name="field_path">expiration_date</field>
+            <field name="sample_value">2027-12-31</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_location_name" model="vpa.label.variable">
+            <field name="name">LOCATION_NAME</field>
+            <field name="display_name_custom">Stock Location</field>
+            <field name="category">stock</field>
+            <field name="model_name">stock.picking</field>
+            <field name="field_path">location_id.complete_name</field>
+            <field name="sample_value">WH/Stock</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_picking_name" model="vpa.label.variable">
+            <field name="name">PICKING_NAME</field>
+            <field name="display_name_custom">Transfer Reference</field>
+            <field name="category">stock</field>
+            <field name="model_name">stock.picking</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">WH/OUT/00156</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ======================== -->
+        <!-- MANUFACTURING VARIABLES  -->
+        <!-- ======================== -->
+        <record id="var_mo_name" model="vpa.label.variable">
+            <field name="name">MO_NAME</field>
+            <field name="display_name_custom">Manufacturing Order</field>
+            <field name="category">manufacturing</field>
+            <field name="model_name">mrp.production</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">MO/00082</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_mo_product" model="vpa.label.variable">
+            <field name="name">MO_PRODUCT</field>
+            <field name="display_name_custom">MO Product Name</field>
+            <field name="category">manufacturing</field>
+            <field name="model_name">mrp.production</field>
+            <field name="field_path">product_id.name</field>
+            <field name="sample_value">Executive Office Desk</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_mo_qty" model="vpa.label.variable">
+            <field name="name">MO_QTY</field>
+            <field name="display_name_custom">MO Quantity</field>
+            <field name="category">manufacturing</field>
+            <field name="model_name">mrp.production</field>
+            <field name="field_path">product_qty</field>
+            <field name="sample_value">10</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ===================== -->
+        <!-- PURCHASE VARIABLES    -->
+        <!-- ===================== -->
+        <record id="var_po_number" model="vpa.label.variable">
+            <field name="name">PO_NUMBER</field>
+            <field name="display_name_custom">Purchase Order Number</field>
+            <field name="category">purchase</field>
+            <field name="model_name">purchase.order</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">PO00045</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_vendor_name" model="vpa.label.variable">
+            <field name="name">VENDOR_NAME</field>
+            <field name="display_name_custom">Vendor Name</field>
+            <field name="category">purchase</field>
+            <field name="model_name">purchase.order</field>
+            <field name="field_path">partner_id.name</field>
+            <field name="sample_value">Tanzania Wood Suppliers</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- =========================== -->
+        <!-- ALTERNATIVE UOM VARIABLES   -->
+        <!-- =========================== -->
+        <record id="var_alt_uom_name" model="vpa.label.variable">
+            <field name="name">ALT_UOM_NAME</field>
+            <field name="display_name_custom">Alternative UoM Name</field>
+            <field name="category">alt_uom</field>
+            <field name="sample_value">Drum</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_alt_uom_barcode" model="vpa.label.variable">
+            <field name="name">ALT_UOM_BARCODE</field>
+            <field name="display_name_custom">Alternative UoM Barcode</field>
+            <field name="category">alt_uom</field>
+            <field name="sample_value">5901234100099</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_qty_per_package" model="vpa.label.variable">
+            <field name="name">QTY_PER_PACKAGE</field>
+            <field name="display_name_custom">Qty per Package</field>
+            <field name="category">alt_uom</field>
+            <field name="sample_value">20</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_packaging_name" model="vpa.label.variable">
+            <field name="name">PACKAGING_NAME</field>
+            <field name="display_name_custom">Packaging Name</field>
+            <field name="category">alt_uom</field>
+            <field name="sample_value">Drum of 20 Bottles</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ===================== -->
+        <!-- COMPANY VARIABLES     -->
+        <!-- ===================== -->
+        <record id="var_company_name" model="vpa.label.variable">
+            <field name="name">COMPANY_NAME</field>
+            <field name="display_name_custom">Company Name</field>
+            <field name="category">company</field>
+            <field name="model_name">res.company</field>
+            <field name="field_path">name</field>
+            <field name="sample_value">Ghala Group Ltd</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_company_phone" model="vpa.label.variable">
+            <field name="name">COMPANY_PHONE</field>
+            <field name="display_name_custom">Company Phone</field>
+            <field name="category">company</field>
+            <field name="model_name">res.company</field>
+            <field name="field_path">phone</field>
+            <field name="sample_value">+255 123 456 789</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_company_website" model="vpa.label.variable">
+            <field name="name">COMPANY_WEBSITE</field>
+            <field name="display_name_custom">Company Website</field>
+            <field name="category">company</field>
+            <field name="model_name">res.company</field>
+            <field name="field_path">website</field>
+            <field name="sample_value">www.ghalagroup.co.tz</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="var_print_date" model="vpa.label.variable">
+            <field name="name">PRINT_DATE</field>
+            <field name="display_name_custom">Print Date</field>
+            <field name="category">company</field>
+            <field name="sample_value">2026-02-20</field>
+            <field name="is_system" eval="True"/>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

@@ -106,6 +106,7 @@ class VpaCommissionLine(models.Model):
     rate = fields.Float(
         string='Rate (%)',
         digits=(5, 2),
+        aggregator='avg',
         help='Commission rate applied',
     )
     amount = fields.Float(

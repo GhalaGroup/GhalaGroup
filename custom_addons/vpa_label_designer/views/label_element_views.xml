@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Label Element Form View (opened from template inline or standalone) -->
+    <record id="vpa_label_element_form" model="ir.ui.view">
+        <field name="name">vpa.label.element.form</field>
+        <field name="model">vpa.label.element</field>
+        <field name="arch" type="xml">
+            <form string="Label Element">
+                <sheet>
+                    <group>
+                        <group string="Element">
+                            <field name="element_type"/>
+                            <field name="name" placeholder="Description (optional)"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Position">
+                            <field name="pos_x"/>
+                            <field name="pos_y"/>
+                            <field name="rotation"/>
+                        </group>
+                    </group>
+
+                    <!-- Text settings -->
+                    <group string="Text Settings" invisible="element_type not in ('text', 'variable')">
+                        <group>
+                            <field name="content" invisible="element_type == 'variable'"
+                                   placeholder="Enter static text"/>
+                            <field name="variable_id" invisible="element_type != 'variable'"/>
+                            <field name="font_id"/>
+                        </group>
+                        <group>
+                            <field name="font_height"/>
+                            <field name="font_width"/>
+                            <field name="max_width"/>
+                            <field name="max_lines"/>
+                            <field name="text_alignment"/>
+                        </group>
+                    </group>
+
+                    <!-- Barcode settings -->
+                    <group string="Barcode Settings" invisible="element_type != 'barcode'">
+                        <group>
+                            <field name="content" placeholder="{{PRODUCT_BARCODE}} or static value"/>
+                            <field name="barcode_type"/>
+                            <field name="show_text_below"/>
+                        </group>
+                        <group>
+                            <field name="barcode_height"/>
+                            <field name="barcode_module_width"/>
+                        </group>
+                    </group>
+
+                    <!-- QR Code settings -->
+                    <group string="QR Code Settings" invisible="element_type != 'qr_code'">
+                        <group>
+                            <field name="content" placeholder="{{PRODUCT_BARCODE}} or URL"/>
+                            <field name="qr_magnification"/>
+                        </group>
+                        <group>
+                            <field name="qr_error_correction"/>
+                        </group>
+                    </group>
+
+                    <!-- Shape settings -->
+                    <group string="Shape Settings" invisible="element_type not in ('line', 'box')">
+                        <group>
+                            <field name="shape_width"/>
+                            <field name="shape_height" invisible="element_type == 'line'"/>
+                        </group>
+                        <group>
+                            <field name="border_thickness"/>
+                            <field name="shape_color"/>
+                        </group>
+                    </group>
+
+                    <!-- Image settings -->
+                    <group string="Image Settings" invisible="element_type != 'image'">
+                        <group>
+                            <field name="image_data" widget="image"/>
+                            <field name="image_width"/>
+                        </group>
+                    </group>
+
+                    <!-- ZPL Preview -->
+                    <group string="Generated ZPL">
+                        <field name="zpl_snippet" readonly="1" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

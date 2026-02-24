@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_label_designer" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.label.designer</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="priority" eval="36"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="VPA Label Designer" string="VPA Label Designer" name="vpa_label_designer" groups="vpa_label_designer.group_label_manager">
+
+                    <block title="Defaults" name="label_defaults">
+                        <setting string="Default DPI" help="Default printer DPI for new label sizes">
+                            <field name="label_default_dpi"/>
+                        </setting>
+                        <setting string="Preview Method" help="How to render visual label previews">
+                            <field name="label_preview_api"/>
+                        </setting>
+                    </block>
+
+                    <block title="Statistics" name="label_statistics">
+                        <setting string="Label Templates" readonly="1">
+                            <field name="total_templates" readonly="1"/>
+                        </setting>
+                        <setting string="Configured Printers" readonly="1">
+                            <field name="total_printers" readonly="1"/>
+                        </setting>
+                        <setting string="Label Sizes" readonly="1">
+                            <field name="total_label_sizes" readonly="1"/>
+                        </setting>
+                    </block>
+
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

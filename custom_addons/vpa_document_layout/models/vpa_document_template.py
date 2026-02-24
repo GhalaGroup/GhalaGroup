@@ -18,8 +18,16 @@ class VPADocumentTemplate(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     # PDF Filename Configuration
-    print_name_pattern = fields.Selection(
-        selection='_get_print_name_pattern_selection',
+    print_name_pattern = fields.Selection([
+        ('doc_name', 'Basic (Document + Abbreviation)'),
+        ('doc_name_product', 'With Client Ref (Document + Customer + Client Ref)'),
+        ('doc_customer', 'With Customer (Document + Customer Name)'),
+        ('doc_customer_ref', 'With Reference (Document + Customer + Ref)'),
+        ('doc_customer_ref_date', 'Full (Document + Customer + Ref + Date)'),
+        ('customer_doc', 'Customer First (Customer + Document)'),
+        ('doc_date', 'With Date (Document + Date)'),
+        ('custom', 'Custom Expression'),
+    ],
         string='Filename Format',
         default='doc_name',
         required=True,
@@ -85,6 +93,19 @@ class VPADocumentTemplate(models.Model):
                 ('doc_customer_ref_date', 'Full (Document + Origin + Date)'),
                 ('customer_doc', 'With Date (Document + Date)'),
                 ('doc_date', 'Alternate (Number First)'),
+                ('custom', 'Custom Expression'),
+            ]
+
+        # Delivery / Picking specific labels
+        elif doc_type in ['delivery', 'picking']:
+            return [
+                ('doc_name', 'Basic (Document + Abbreviation)'),
+                ('doc_customer', 'With Customer (Document + Customer Name)'),
+                ('doc_customer_ref', 'With SO Reference (Document + Customer + SO)'),
+                ('doc_customer_ref_date', 'Full (Document + Customer + SO + Date)'),
+                ('customer_doc', 'Customer First (Customer + Document)'),
+                ('doc_date', 'With Date (Document + Date)'),
+                ('doc_name_product', 'With Client Ref (Document + Customer + Client Ref)'),
                 ('custom', 'Custom Expression'),
             ]
 
@@ -169,6 +190,31 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = 'Custom expression...'
                 else:
                     record.print_name_preview = ''
+            elif record.document_type in ['delivery', 'picking']:
+                # Delivery / Picking filename formats
+                doc_num = 'P01M_OUT_00177'
+                customer = 'Reliance Resorts'
+                origin_example = 'S01320'
+                client_ref_example = 'PO-2026-045'
+                date_example = '2026-02-21'
+                if record.print_name_pattern == 'doc_name':
+                    record.print_name_preview = f'{doc_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_customer':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer}.pdf'
+                elif record.print_name_pattern == 'doc_customer_ref':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({origin_example}).pdf'
+                elif record.print_name_pattern == 'doc_customer_ref_date':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({origin_example}) - {date_example}.pdf'
+                elif record.print_name_pattern == 'customer_doc':
+                    record.print_name_preview = f'{customer} - {doc_num}-{abbrev}.pdf'
+                elif record.print_name_pattern == 'doc_date':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {date_example}.pdf'
+                elif record.print_name_pattern == 'doc_name_product':
+                    record.print_name_preview = f'{doc_num}-{abbrev} - {customer} ({client_ref_example}).pdf'
+                elif record.print_name_pattern == 'custom':
+                    record.print_name_preview = 'Custom expression...'
+                else:
+                    record.print_name_preview = ''
             else:
                 # Standard format for sale orders, invoices, etc.
                 # Format: S00001-SQ - Customer Name (Ref).pdf
@@ -184,6 +230,8 @@ class VPADocumentTemplate(models.Model):
                     record.print_name_preview = f'Deco Addict - S00001-{abbrev}.pdf'
                 elif record.print_name_pattern == 'doc_date':
                     record.print_name_preview = f'S00001-{abbrev} - 2025-01-15.pdf'
+                elif record.print_name_pattern == 'doc_name_product':
+                    record.print_name_preview = f'S00001-{abbrev} - Deco Addict (PO-2026-045).pdf'
                 elif record.print_name_pattern == 'custom':
                     record.print_name_preview = 'Custom expression...'
                 else:
@@ -266,13 +314,42 @@ class VPADocumentTemplate(models.Model):
                 # Default: W03-INT-00045-W02 Transfer Request
                 return f"{src_wh} + '-{abbrev}-' + {doc_num} + '-' + {dest_wh} + ' Transfer Request'"
 
+        # Delivery / Picking uses stock.picking fields
+        # Format: DocName-ABBREV - Customer (Source).pdf
+        # Client ref accessed via sale_id.client_order_ref (from sale_stock module)
+        if self.document_type in ['delivery', 'picking']:
+            # Replace / with _ for clean filenames
+            doc_name = "(object.name or 'Delivery').replace('/', '_')"
+            customer = "(object.partner_id.name or 'Customer')"
+            client_ref = "(((' (' + object.sale_id.client_order_ref + ')') if object.sale_id and object.sale_id.client_order_ref else ''))"
+            if self.print_name_pattern == 'doc_name':
+                return f"{doc_name} + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_customer':
+                return f"{doc_name} + '-{abbrev} - ' + {customer}"
+            elif self.print_name_pattern == 'doc_customer_ref':
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else ''))"
+            elif self.print_name_pattern == 'doc_customer_ref_date':
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else '')) + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'customer_doc':
+                return f"{customer} + ' - ' + {doc_name} + '-{abbrev}'"
+            elif self.print_name_pattern == 'doc_date':
+                return f"{doc_name} + '-{abbrev}' + ((' - ' + str(object.scheduled_date.date())) if object.scheduled_date else '')"
+            elif self.print_name_pattern == 'doc_name_product':
+                # With Client Reference from Sale Order
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + {client_ref}"
+            elif self.print_name_pattern == 'custom':
+                return self.print_name_expression or f"{doc_name} + '-{abbrev} - ' + {customer}"
+            else:
+                # Default: DocName-ABBREV - Customer (Source)
+                return f"{doc_name} + '-{abbrev} - ' + {customer} + (((' (' + object.origin + ')') if object.origin else ''))"
+
         # Standard expressions for sale orders, invoices, etc.
         if self.print_name_pattern == 'doc_name':
             # S00001-SQ
             return f"(object.name or 'Document') + '-{abbrev}'"
         elif self.print_name_pattern == 'doc_name_product':
-            # S00001-SQ-Customer Name (for standard docs, uses partner name)
-            return f"(object.name or 'Document') + '-{abbrev}-' + (object.partner_id.name or 'Customer')"
+            # With Client Reference: S00001-SQ - Customer Name (ClientRef)
+            return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer') + (((' (' + object.client_order_ref + ')') if object.client_order_ref else ''))"
         elif self.print_name_pattern == 'doc_customer':
             # S00001-SQ - Customer Name
             return f"(object.name or 'Document') + '-{abbrev} - ' + (object.partner_id.name or 'Customer')"
@@ -2738,6 +2815,283 @@ class VPADocumentTemplate(models.Model):
                 template_id=self.id,
                 picture_section=picture_section,
                 desc_width='45' if show_pictures else '45',
+                primary_color=self.primary_accent_color or '#DC143C'
+            )
+        elif self.document_type in ['delivery', 'picking']:
+            # Delivery / Handover template - for outgoing deliveries (stock.picking)
+            main_template_arch = '''<t t-name="vpa_document_layout.report_template_{template_id}">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="doc">
+            <t t-set="doc" t-value="doc.with_context(vpa_template_id={template_id})" />
+            <t t-set="vpa_template" t-value="env['vpa.document.template'].browse({template_id})"/>
+            <t t-set="primary_color" t-value="vpa_template.primary_accent_color or '#DC143C'"/>
+            <t t-set="report_title" t-value="vpa_template.report_title or 'Delivery Note'"/>
+            <t t-set="address">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">DELIVERY TO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <t t-if="doc.partner_id">
+                        <div><strong><span t-field="doc.partner_id.name"/></strong></div>
+                        <div t-field="doc.partner_id" t-options='{{"widget": "contact", "fields": ["address", "phone", "email"], "no_marker": True}}'/>
+                    </t>
+                </div>
+            </t>
+            <t t-set="information_block">
+                <div t-att-style="'font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 6px; color: ' + (vpa_template.primary_accent_color or '#DC143C')">DELIVERY INFO</div>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                    <div t-if="doc.origin">
+                        <strong>Source Order:</strong>
+                        <span t-field="doc.origin"/>
+                    </div>
+                    <div t-if="doc.scheduled_date" style="margin-top: 4px;">
+                        <strong>Scheduled Date:</strong>
+                        <span t-field="doc.scheduled_date" t-options='{{"widget": "date"}}'/>
+                    </div>
+                    <div t-if="doc.picking_type_id.warehouse_id" style="margin-top: 4px;">
+                        <strong>Warehouse:</strong>
+                        <span t-field="doc.picking_type_id.warehouse_id.name"/>
+                    </div>
+                    <div t-if="doc.state" style="margin-top: 4px;">
+                        <strong>Status:</strong>
+                        <span t-field="doc.state"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set="layout_document_title">
+                <t t-out="report_title"/> - <span t-field="doc.name"/>
+            </t>
+            <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
+                <!-- Inline Styles for Delivery -->
+                <style>
+                    .vpa-delivery {{
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        font-size: 12px;
+                        color: #333;
+                    }}
+                    /* Table Card Container - Match Quotation style */
+                    .vpa-table-card {{
+                        background: linear-gradient(135deg, #fffafa 0%%, white 100%%);
+                        border-left: 3px solid {primary_color};
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+                    }}
+                    .vpa-section-header {{
+                        color: {primary_color};
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
+                    }}
+                    .vpa-table-card table {{
+                        width: 100%%;
+                        border-collapse: collapse;
+                        border: none !important;
+                    }}
+                    .vpa-table-card th {{
+                        background: transparent;
+                        color: {primary_color};
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        padding: 5px 4px;
+                        border: none !important;
+                        border-bottom: 1px solid #f0f0f0 !important;
+                        border-right: 1px solid #f0f0f0 !important;
+                        letter-spacing: 0.3px;
+                    }}
+                    .vpa-table-card th:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card td {{
+                        padding: 4px 4px;
+                        font-size: 11px;
+                        color: #333;
+                        border: none !important;
+                        border-bottom: 1px solid #f8f8f8 !important;
+                        border-right: 1px solid #f8f8f8 !important;
+                        vertical-align: top;
+                        line-height: 1.3;
+                    }}
+                    .vpa-table-card td:last-child {{
+                        border-right: none !important;
+                    }}
+                    .vpa-table-card tbody tr:last-child td {{
+                        border-bottom: none !important;
+                    }}
+                    .vpa-product-title {{
+                        font-weight: 600;
+                        color: #333;
+                        font-size: 10pt;
+                    }}
+                    .vpa-product-code {{
+                        color: #777;
+                        font-size: 10px;
+                    }}
+                    .vpa-qty-badge {{
+                        display: inline-block;
+                        background: white;
+                        color: {primary_color};
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid {primary_color};
+                    }}
+                    .vpa-confirmation-section {{
+                        page-break-inside: avoid;
+                        page-break-before: auto;
+                    }}
+                    .vpa-confirmation-section table {{
+                        border: none !important;
+                    }}
+                    .vpa-confirmation-section table td {{
+                        border: none !important;
+                    }}
+                    .vpa-confirmation-section table tr {{
+                        border: none !important;
+                    }}
+                    .vpa-table-card tbody tr {{
+                        page-break-inside: avoid;
+                    }}
+                </style>
+
+                <div class="vpa-delivery">
+                    <!-- Delivery Items Table -->
+                    <div class="vpa-table-card">
+                        <div class="vpa-section-header">DELIVERY ITEMS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%%; text-align: center;">NO.</th>
+                                    <th style="width: 55%%;">PRODUCT</th>
+                                    <th style="width: 15%%; text-align: center;">QTY</th>
+                                    <th style="width: 10%%; text-align: center;">UNIT</th>
+                                    <th style="width: 10%%; text-align: center;">&#x2713;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_num" t-value="0"/>
+                                <t t-foreach="doc.move_ids.filtered(lambda m: m.state != 'cancel')" t-as="move">
+                                    <t t-set="line_num" t-value="line_num + 1"/>
+                                    <tr>
+                                        <!-- Line Number -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <t t-out="line_num"/>
+                                        </td>
+                                        <!-- Product -->
+                                        <td style="text-align: left; vertical-align: middle;">
+                                            <div class="vpa-product-title">
+                                                <t t-if="move.product_id.default_code">
+                                                    <span class="vpa-product-code">[<t t-out="move.product_id.default_code"/>]</span>
+                                                </t>
+                                                <t t-out="move.product_id.name"/>
+                                            </div>
+                                            <t t-if="move.product_id.description_sale">
+                                                <div style="font-size: 9px; color: #666; margin-top: 2px;">
+                                                    <t t-out="move.product_id.description_sale"/>
+                                                </div>
+                                            </t>
+                                        </td>
+                                        <!-- Quantity (ordered qty only) -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span class="vpa-qty-badge"><t t-out="round(move.product_uom_qty, 4)"/></span>
+                                        </td>
+                                        <!-- Unit -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <span t-field="move.product_uom"/>
+                                        </td>
+                                        <!-- Checkbox for manual tick -->
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            <div style="width: 14px; height: 14px; border: 1.5px solid #666; border-radius: 2px; display: inline-block;"></div>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Goods Received Confirmation Section -->
+                    <div class="vpa-confirmation-section" t-att-style="'margin-top: 20px; padding: 15px 18px; border: 1.5px solid ' + primary_color + '; border-radius: 5px; background: #fffafa;'">
+                        <div t-att-style="'font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; color: ' + primary_color + ';'">GOODS RECEIVED CONFIRMATION</div>
+
+                        <!-- Delivery Summary -->
+                        <t t-set="active_moves" t-value="doc.move_ids.filtered(lambda m: m.state != 'cancel')"/>
+                        <table style="width: 100%%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px;">
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important; width: 50%%;">
+                                    <strong>Delivery No.:</strong> <span t-field="doc.name"/>
+                                </td>
+                                <td style="padding: 3px 0; border: none !important; width: 50%%;">
+                                    <t t-if="doc.origin">
+                                        <strong>Sales Order:</strong> <span t-field="doc.origin"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Items:</strong> <t t-out="len(active_moves)"/>
+                                </td>
+                                <td style="padding: 3px 0; border: none !important;">
+                                    <strong>Total Quantity:</strong> <t t-out="round(sum(active_moves.mapped('product_uom_qty')), 2)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="font-size: 10px; color: #333; margin-bottom: 15px; line-height: 1.6;">
+                            I, the undersigned, hereby acknowledge receipt of the goods described above. All items
+                            have been inspected and verified against this delivery note. The goods have been received
+                            in satisfactory condition and the quantities confirmed as stated. This document serves
+                            as confirmation of delivery in accordance with the agreed terms of the purchase order.
+                        </p>
+
+                        <!-- Signature Block -->
+                        <table style="width: 100%%; border-collapse: collapse; margin-top: 10px;">
+                            <tr>
+                                <td style="width: 48%%; vertical-align: bottom; padding-right: 15px; border: none !important;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">RECEIVED BY (CLIENT)</div>
+                                    <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
+                                    <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
+                                </td>
+                                <td style="width: 4%%; border: none !important;"></td>
+                                <td style="width: 48%%; vertical-align: bottom; padding-left: 15px; border: none !important;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DELIVERED BY</div>
+                                    <div style="border-bottom: 1px solid #333; height: 35px; margin-bottom: 4px;"></div>
+                                    <div style="font-size: 8px; color: #888;">Name &amp; Signature</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 12px; padding-right: 15px; border: none !important;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE RECEIVED</div>
+                                    <div style="border-bottom: 1px solid #333; width: 60%%; height: 18px;"></div>
+                                </td>
+                                <td style="border: none !important;"></td>
+                                <td style="padding-top: 12px; padding-left: 15px; border: none !important;">
+                                    <div style="font-size: 9px; font-weight: 600; color: #555; margin-bottom: 4px;">DATE DELIVERED</div>
+                                    <div style="border-bottom: 1px solid #333; width: 60%%; height: 18px;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <t t-if="doc.note">
+                        <div style="background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin: 10px 0;">
+                            <div t-att-style="'color: ' + primary_color + '; margin: 0 0 6px 0; font-size: 11px; font-weight: 600;'">NOTES:</div>
+                            <div style="font-size: 10px; color: #444; line-height: 1.4;">
+                                <span t-field="doc.note"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </t>
+</t>'''.format(
+                template_id=self.id,
                 primary_color=self.primary_accent_color or '#DC143C'
             )
         else:

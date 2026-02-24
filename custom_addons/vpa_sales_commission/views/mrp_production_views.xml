@@ -77,4 +77,22 @@
         </field>
     </record>
 
+    <!-- Add Commission Status to MO tree view -->
+    <record id="mrp_production_tree_view_commission" model="ir.ui.view">
+        <field name="name">mrp.production.list.commission</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="commission_status" string="Commission"
+                       widget="badge" optional="hide"
+                       decoration-muted="commission_status == 'none'"
+                       decoration-danger="commission_status in ('blocked', 'cancelled')"
+                       decoration-info="commission_status == 'pending'"
+                       decoration-warning="commission_status in ('confirmed', 'partial')"
+                       decoration-success="commission_status == 'paid'"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

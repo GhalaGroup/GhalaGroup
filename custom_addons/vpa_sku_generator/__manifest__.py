@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA SKU Generator',
-    'version': '19.0.1.0.6',
+    'version': '19.0.1.0.7',
     'category': 'Inventory/Inventory',
-    'summary': 'Advanced SKU management with auto-generation, category-based sequences, SKU locking, and gap filling',
+    'summary': 'Advanced SKU management with auto-generation, category-based sequences, SKU locking, and gap filling (v1.0.7)',
     'description': """
 VPA SKU Generator
 =================
@@ -35,6 +35,14 @@ Perfect For
 * Gap-free sequential numbering
 * Protection against accidental SKU changes
 * Professional inventory management
+
+Version History
+---------------
+* **19.0.1.0.7** - Internal Reference field always readonly (auto-generated SKUs cannot be manually edited)
+* **19.0.1.0.6** - Stability and maintenance release
+* **19.0.1.0.2** - Bug fixes for category hierarchy and recycle pool
+* **19.0.1.0.1** - Settings page UI/UX improvements
+* **19.0.1.0.0** - Initial release for Odoo 19
 
 Developed by VPA Solutions Limited
 Support: info@vpa.co.tz

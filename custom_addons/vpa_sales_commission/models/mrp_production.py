@@ -33,6 +33,19 @@ class MrpProduction(models.Model):
         store=True,
         help='Commission has been generated for this MO',
     )
+    commission_status = fields.Selection([
+        ('none', 'No Commission'),
+        ('blocked', 'Blocked'),
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('paid', 'Paid'),
+        ('partial', 'Partial'),
+        ('cancelled', 'Cancelled'),
+    ], string='Commission Status',
+        compute='_compute_commission_status',
+        store=True,
+    )
+
     commission_base_amount = fields.Float(
         string='Commission Base Amount',
         compute='_compute_commission_base_amount',
@@ -50,6 +63,30 @@ class MrpProduction(models.Model):
     def _compute_commission_generated(self):
         for production in self:
             production.commission_generated = bool(production.commission_line_ids)
+
+    @api.depends('commission_line_ids', 'commission_line_ids.state', 'commission_blocked')
+    def _compute_commission_status(self):
+        for production in self:
+            if production.commission_blocked:
+                production.commission_status = 'blocked'
+            elif not production.commission_line_ids:
+                production.commission_status = 'none'
+            else:
+                states = set(production.commission_line_ids.mapped('state'))
+                # Remove cancelled from consideration
+                active_states = states - {'cancelled'}
+                if not active_states:
+                    # All lines are cancelled
+                    production.commission_status = 'cancelled'
+                elif active_states == {'paid'}:
+                    production.commission_status = 'paid'
+                elif active_states == {'confirmed'}:
+                    production.commission_status = 'confirmed'
+                elif active_states == {'pending'}:
+                    production.commission_status = 'pending'
+                else:
+                    # Mix of states
+                    production.commission_status = 'partial'
 
     @api.depends('move_raw_ids', 'move_raw_ids.state', 'move_raw_ids.product_id', 'move_raw_ids.quantity')
     def _compute_commission_base_amount(self):
@@ -128,6 +165,7 @@ class MrpProduction(models.Model):
                     'production_name': cl.production_id.name,
                     'date': cl.date,
                     'product_qty': cl.production_id.product_qty,
+                    'product_uom_id': cl.production_id.product_uom_id.id,
                     'base_amount': cl.base_amount,
                     'commission_amount': cl.amount,
                     'currency_id': cl.currency_id.id,

@@ -27,6 +27,17 @@ class CommissionGenerateWizard(models.TransientModel):
         related='production_id.product_qty',
         readonly=True,
     )
+    product_uom_id = fields.Many2one(
+        'uom.uom',
+        string='Unit of Measure',
+        related='production_id.product_uom_id',
+        readonly=True,
+    )
+    cost_per_unit = fields.Float(
+        string='Cost Per Unit',
+        compute='_compute_cost_per_unit',
+        digits=(12, 2),
+    )
     material_line_ids = fields.One2many(
         'vpa.commission.generate.wizard.line',
         'wizard_id',
@@ -94,6 +105,14 @@ class CommissionGenerateWizard(models.TransientModel):
                 wizard.total_base_amount = sum(
                     line.amount for line in wizard.material_line_ids if line.included
                 )
+
+    @api.depends('total_base_amount', 'product_qty')
+    def _compute_cost_per_unit(self):
+        for wizard in self:
+            if wizard.product_qty:
+                wizard.cost_per_unit = wizard.total_base_amount / wizard.product_qty
+            else:
+                wizard.cost_per_unit = 0.0
 
     @api.depends('scheme_line_ids.selected', 'scheme_line_ids.estimated_amount')
     def _compute_total_commission_amount(self):
@@ -257,6 +276,11 @@ class CommissionGenerateWizardScheme(models.TransientModel):
         compute='_compute_estimated_amount',
         digits=(12, 2),
     )
+    commission_per_unit = fields.Float(
+        string='Per Unit',
+        compute='_compute_estimated_amount',
+        digits=(12, 2),
+    )
     currency_id = fields.Many2one(
         'res.currency',
         string='Currency',
@@ -272,10 +296,14 @@ class CommissionGenerateWizardScheme(models.TransientModel):
         help='Commission has already been generated for this employee on this MO',
     )
 
-    @api.depends('rate', 'wizard_id.total_base_amount')
+    @api.depends('rate', 'wizard_id.total_base_amount', 'wizard_id.product_qty')
     def _compute_estimated_amount(self):
         for line in self:
             line.estimated_amount = line.wizard_id.total_base_amount * line.rate / 100.0
+            if line.wizard_id.product_qty:
+                line.commission_per_unit = line.estimated_amount / line.wizard_id.product_qty
+            else:
+                line.commission_per_unit = 0.0
 
 
 class CommissionGenerateWizardHistory(models.TransientModel):
@@ -307,10 +335,20 @@ class CommissionGenerateWizardHistory(models.TransientModel):
         digits=(12, 2),
         readonly=True,
     )
+    product_uom_id = fields.Many2one(
+        'uom.uom',
+        string='UoM',
+        readonly=True,
+    )
     base_amount = fields.Float(
         string='Base Amount',
         digits=(12, 2),
         readonly=True,
+    )
+    cost_per_unit = fields.Float(
+        string='Per Unit',
+        compute='_compute_cost_per_unit',
+        digits=(12, 2),
     )
     commission_amount = fields.Float(
         string='Commission Paid',
@@ -324,15 +362,35 @@ class CommissionGenerateWizardHistory(models.TransientModel):
         readonly=True,
     )
 
+    @api.depends('base_amount', 'product_qty')
+    def _compute_cost_per_unit(self):
+        for line in self:
+            if line.product_qty:
+                line.cost_per_unit = line.base_amount / line.product_qty
+            else:
+                line.cost_per_unit = 0.0
+
     def action_use_this_amount(self):
-        """Apply this historical base amount to the wizard."""
+        """Apply this historical per-unit cost scaled to the current MO quantity."""
         self.ensure_one()
+        # Calculate per-unit cost from historical MO and scale to current qty
+        if self.product_qty:
+            per_unit = self.base_amount / self.product_qty
+        else:
+            per_unit = self.base_amount
+        current_qty = self.wizard_id.product_qty or 1.0
+        scaled_amount = per_unit * current_qty
+        uom_name = self.product_uom_id.name if self.product_uom_id else ''
         self.wizard_id.write({
             'use_override': True,
-            'override_base_amount': self.base_amount,
-            'override_source': '%s (%s)' % (
+            'override_base_amount': scaled_amount,
+            'override_source': '%s (%s) - %.2f/%s x %.4f %s' % (
                 self.production_name,
                 self.date.strftime('%d/%m/%Y') if self.date else '',
+                per_unit,
+                uom_name,
+                current_qty,
+                uom_name,
             ),
         })
         return {

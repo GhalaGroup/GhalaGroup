@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_label_designer_root"
+              name="Label Designer"
+              web_icon="vpa_label_designer,static/description/icon.png"
+              groups="vpa_label_designer.group_label_user"
+              sequence="95"/>
+
+    <!-- Templates Menu -->
+    <menuitem id="menu_label_templates"
+              name="Label Templates"
+              parent="menu_label_designer_root"
+              action="action_label_template"
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_label_config"
+              name="Configuration"
+              parent="menu_label_designer_root"
+              groups="vpa_label_designer.group_label_manager"
+              sequence="90"/>
+
+    <menuitem id="menu_label_sizes"
+              name="Label Sizes"
+              parent="menu_label_config"
+              action="action_label_size"
+              sequence="10"/>
+
+    <menuitem id="menu_printers"
+              name="Printers"
+              parent="menu_label_config"
+              action="action_printer_config"
+              sequence="20"/>
+
+    <menuitem id="menu_label_variables"
+              name="Variables"
+              parent="menu_label_config"
+              action="action_label_variable"
+              sequence="30"/>
+
+    <menuitem id="menu_label_settings"
+              name="Settings"
+              parent="menu_label_config"
+              action="base_setup.action_general_configuration"
+              sequence="99"/>
+
+</odoo>
