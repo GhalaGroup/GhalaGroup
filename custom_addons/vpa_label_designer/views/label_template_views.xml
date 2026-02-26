@@ -10,6 +10,8 @@
                 <header>
                     <button name="action_download_pdf" string="Download PDF" type="object"
                             class="btn-primary" icon="fa-file-pdf-o"/>
+                    <button name="action_export_template" string="Backup" type="object"
+                            class="btn-secondary" icon="fa-download"/>
                     <button name="action_copy_zpl" string="Copy ZPL" type="object"
                             class="btn-secondary" icon="fa-clipboard"/>
                 </header>

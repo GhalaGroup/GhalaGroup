@@ -11,3 +11,4 @@ access_printer_config_user,vpa.printer.config.user,model_vpa_printer_config,grou
 access_printer_config_manager,vpa.printer.config.manager,model_vpa_printer_config,group_label_manager,1,1,1,1
 access_print_wizard_user,vpa.print.label.wizard.user,model_vpa_print_label_wizard,group_label_user,1,1,1,1
 access_print_wizard_line_user,vpa.print.label.wizard.line.user,model_vpa_print_label_wizard_line,group_label_user,1,1,1,1
+access_import_label_wizard_user,vpa.import.label.wizard.user,model_vpa_import_label_wizard,group_label_user,1,1,1,1

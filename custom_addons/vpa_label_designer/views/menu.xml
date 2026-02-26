@@ -40,6 +40,12 @@
               action="action_label_variable"
               sequence="30"/>
 
+    <menuitem id="menu_restore_label_template"
+              name="Restore Template"
+              parent="menu_label_config"
+              action="action_import_label_wizard"
+              sequence="40"/>
+
     <menuitem id="menu_label_settings"
               name="Settings"
               parent="menu_label_config"

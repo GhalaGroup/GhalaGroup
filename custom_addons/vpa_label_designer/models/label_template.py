@@ -3,6 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
 import base64
+import json
 import logging
 import re
 from datetime import date
@@ -385,4 +386,94 @@ class LabelTemplate(models.Model):
                 'type': 'info',
                 'sticky': False,
             }
+        }
+
+    def action_export_template(self):
+        """Export this template as a JSON file for backup/restore."""
+        self.ensure_one()
+
+        # Serialize label size
+        size = self.label_size_id
+        size_data = {
+            'name': size.name,
+            'width_mm': size.width_mm,
+            'height_mm': size.height_mm,
+            'dpi': size.dpi,
+            'has_rfid': size.has_rfid,
+            'rfid_position': size.rfid_position,
+        }
+
+        # Serialize elements
+        elements = []
+        for el in self.element_ids.sorted('sequence'):
+            el_data = {
+                'sequence': el.sequence,
+                'name': el.name,
+                'element_type': el.element_type,
+                'pos_x': el.pos_x,
+                'pos_y': el.pos_y,
+                'content': el.content,
+                'font_id': el.font_id,
+                'font_height': el.font_height,
+                'font_width': el.font_width,
+                'rotation': el.rotation,
+                'max_width': el.max_width,
+                'max_lines': el.max_lines,
+                'text_alignment': el.text_alignment,
+                # Variable reference by name (portable across instances)
+                'variable_name': el.variable_id.name if el.variable_id else False,
+                # Barcode
+                'barcode_type': el.barcode_type,
+                'barcode_height': el.barcode_height,
+                'barcode_module_width': el.barcode_module_width,
+                'show_text_below': el.show_text_below,
+                # QR Code
+                'qr_magnification': el.qr_magnification,
+                'qr_error_correction': el.qr_error_correction,
+                # Shape
+                'shape_width': el.shape_width,
+                'shape_height': el.shape_height,
+                'border_thickness': el.border_thickness,
+                'shape_color': el.shape_color,
+                # Image (base64 encoded)
+                'image_data': el.image_data.decode('ascii') if el.image_data else False,
+                'image_width': el.image_width,
+            }
+            elements.append(el_data)
+
+        export_data = {
+            '_export_format': 'vpa_label_designer',
+            '_version': '1.0',
+            'template': {
+                'name': self.name,
+                'model_name': self.model_name,
+                'is_default': self.is_default,
+                'rfid_data_variable_name': (
+                    self.rfid_data_variable_id.name
+                    if self.rfid_data_variable_id else False
+                ),
+            },
+            'label_size': size_data,
+            'elements': elements,
+        }
+
+        json_str = json.dumps(export_data, indent=2, ensure_ascii=False)
+        json_b64 = base64.b64encode(json_str.encode('utf-8'))
+
+        filename = f'{self.name or "label_template"}.vpa'
+        # Sanitize filename
+        filename = re.sub(r'[^\w\s\-.]', '', filename).strip()
+        if not filename.endswith('.vpa'):
+            filename += '.vpa'
+
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'datas': json_b64,
+            'mimetype': 'application/octet-stream',
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'new',
         }
