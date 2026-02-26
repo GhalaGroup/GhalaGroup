@@ -179,7 +179,7 @@ class VpaBomCategory(models.Model):
         else:
             name = f"Template - {self.name}"
 
-        # Create the placeholder product
+        # Create the placeholder product (archived so it's hidden from users)
         product_vals = {
             'name': name,
             'type': 'consu',  # Consumable - no stock tracking
@@ -190,6 +190,7 @@ class VpaBomCategory(models.Model):
             'purchase_ok': False,
             'list_price': 0.0,
             'standard_price': 0.0,
+            'active': False,  # Hidden from product lists, still works via direct reference
         }
 
         product = self.env['product.product'].sudo().create(product_vals)
@@ -201,3 +202,14 @@ class VpaBomCategory(models.Model):
             if not record.is_main_category and not record.placeholder_product_id:
                 record._create_placeholder_product()
         return True
+
+    def _auto_init(self):
+        """Archive any existing active placeholder products on module load."""
+        res = super()._auto_init()
+        self.env.cr.execute("""
+            UPDATE product_template
+            SET active = FALSE
+            WHERE is_template_placeholder = TRUE
+            AND active = TRUE
+        """)
+        return res
