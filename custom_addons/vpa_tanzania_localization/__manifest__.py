@@ -84,7 +84,7 @@ Copyright (C) 2025 VPA Software Limited
     'license': 'OPL-1',
     'price': 29.99,
     'currency': 'USD',
-    'depends': ['base', 'account', 'contacts'],
+    'depends': ['base', 'account', 'contacts', 'sale'],
 
     'pre_init_hook': 'pre_init_hook',
 
@@ -95,6 +95,7 @@ Copyright (C) 2025 VPA Software Limited
         'data/tanzania_complete_wards.xml',
         'data/update_wards_to_districts.xml',
         'views/res_partner_views.xml',
+        'views/sale_order_views.xml',
     ],
     'images': ['static/description/icon.png'],
     'installable': True,

@@ -4,3 +4,4 @@
 
 from . import change_effective_wizard
 from . import change_effective_wizard_mo
+from . import change_effective_wizard_so

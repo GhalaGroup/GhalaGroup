@@ -74,8 +74,10 @@ Support: info@vpa.co.tz
         'views/effective_date_change.xml',
         'views/effective_date_change_privilege.xml',
         'views/mrp_production_views.xml',
+        'views/sale_order_views.xml',
         'wizard/change_effective_wizard_views.xml',
         'wizard/change_effective_wizard_mo_views.xml',
+        'wizard/change_effective_wizard_so_views.xml',
     ],
     'images': [
         'static/description/icon.png',

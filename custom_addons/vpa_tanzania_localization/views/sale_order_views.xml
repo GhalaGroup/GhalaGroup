@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Show Quotation Date for all users, positioned before Expiration -->
+    <record id="view_order_form_quotation_date" model="ir.ui.view">
+        <field name="name">sale.order.form.quotation.date</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Hide the original superuser-only label div -->
+            <xpath expr="//group[@name='order_details']/div[hasclass('o_td_label')][@groups='base.group_no_one']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups"/>
+            </xpath>
+            <!-- Hide the original superuser-only field -->
+            <xpath expr="//group[@name='order_details']/field[@name='date_order'][@groups='base.group_no_one']" position="attributes">
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups"/>
+            </xpath>
+
+            <!-- Add Quotation Date (date only) before Expiration -->
+            <xpath expr="//group[@name='order_details']/field[@name='validity_date']" position="before">
+                <div class="o_td_label" invisible="state in ['sale', 'cancel']">
+                    <label for="date_order" string="Quotation Date"/>
+                </div>
+                <field
+                    name="date_order"
+                    nolabel="1"
+                    invisible="state in ['sale', 'cancel']"
+                    readonly="state in ['cancel', 'sale']"
+                    options="{'show_time': false}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
