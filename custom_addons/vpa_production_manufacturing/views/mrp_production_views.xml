@@ -53,10 +53,14 @@
             <!-- For regular moves (bom_category_id=False): show all products -->
             <!-- Domain: exclude placeholders AND match category if set -->
             <xpath expr="//field[@name='move_raw_ids']//list//field[@name='product_id']" position="attributes">
-                <attribute name="domain">[
-                    ('product_tmpl_id.is_template_placeholder', '=', False),
-                    ('product_tmpl_id.bom_category_id', '=', bom_category_id)
-                ]</attribute>
+                <attribute name="domain">
+                    bom_category_id and [
+                        ('product_tmpl_id.is_template_placeholder', '=', False),
+                        ('product_tmpl_id.bom_category_id', '=', bom_category_id)
+                    ] or [
+                        ('product_tmpl_id.is_template_placeholder', '=', False)
+                    ]
+                </attribute>
                 <!-- Allow product changes on template moves even when MO is confirmed -->
                 <!-- Template placeholders need to be replaced before MO can be marked done -->
                 <attribute name="readonly">parent.state in ('done', 'cancel') or (not is_template_move and parent.state != 'draft')</attribute>
