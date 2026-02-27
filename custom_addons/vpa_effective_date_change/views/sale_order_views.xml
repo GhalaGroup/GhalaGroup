@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data>
+        <!-- Add Change Order Date button to Sale Order form -->
+        <record model="ir.ui.view" id="sale_order_effective_date_button">
+            <field name="name">sale.order.effective.date.button</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_cancel']" position="after">
+                    <button name="wiz_open_so"
+                            groups="base.group_system"
+                            type="object"
+                            string="Change Order Date"
+                            invisible="state != 'sale'"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

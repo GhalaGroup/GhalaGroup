@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_vpa_effective_date_change,access.vpa.effective.date.change,stock.model_stock_picking,,1,1,1,1
 access_vpa_change_effective_wizard,access.vpa.change.effective.wizard,model_change_effective_wizard,,1,1,1,1
 access_vpa_change_effective_wizard_mo,access.vpa.change.effective.wizard.mo,model_change_effective_wizard_mo,,1,1,1,1
+access_vpa_change_effective_wizard_so,access.vpa.change.effective.wizard.so,model_change_effective_wizard_so,,1,1,1,1
