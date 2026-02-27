@@ -34,6 +34,8 @@ class ChangeEffectiveWizardSO(models.TransientModel):
         so = self.sale_order_id
         new_date = self.effective_date
 
+        old_date = self.original_date
+
         # 1. Update Sale Order date
         so.date_order = new_date
 
@@ -55,9 +57,29 @@ class ChangeEffectiveWizardSO(models.TransientModel):
             mo.date_deadline = new_date
 
         # 4. Update related draft invoices
-        for invoice in so.invoice_ids:
-            if invoice.state == 'draft':
-                invoice.date = new_date.date() if hasattr(new_date, 'date') else new_date
-                invoice.invoice_date = new_date.date() if hasattr(new_date, 'date') else new_date
+        draft_invoices = so.invoice_ids.filtered(lambda inv: inv.state == 'draft')
+        for invoice in draft_invoices:
+            invoice.date = new_date.date() if hasattr(new_date, 'date') else new_date
+            invoice.invoice_date = new_date.date() if hasattr(new_date, 'date') else new_date
+
+        # 5. Log tracking message in chatter
+        old_str = fields.Datetime.to_string(old_date)
+        new_str = fields.Datetime.to_string(new_date)
+        updated_docs = []
+        if pickings:
+            updated_docs.append(f"Deliveries: {', '.join(pickings.mapped('name'))}")
+        if mos:
+            updated_docs.append(f"Manufacturing Orders: {', '.join(mos.mapped('name'))}")
+        if draft_invoices:
+            updated_docs.append(f"Invoices: {', '.join(draft_invoices.mapped('name'))}")
+
+        body = f"<b>Order Date Changed</b><br/>" \
+               f"<b>From:</b> {old_str}<br/>" \
+               f"<b>To:</b> {new_str}<br/>"
+        if updated_docs:
+            body += f"<br/><b>Related documents updated:</b><br/>" \
+                    + "<br/>".join(updated_docs)
+
+        so.message_post(body=body, subtype_xmlid='mail.mt_note')
 
         return {'type': 'ir.actions.act_window_close'}
