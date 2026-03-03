@@ -1,105 +1,64 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, useState } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
 
 /**
- * Zebra Browser Print Client Action
- *
- * Sends ZPL data to a local Zebra Browser Print SDK instance.
- * The SDK runs as a service on the user's machine at localhost:9101.
+ * Browser Print handler registered as a client action.
+ * Called when action_print returns tag = vpa_label_designer.browser_print.
+ * Runs entirely in the browser — fetches Browser Print SDK on localhost,
+ * sends ZPL, shows a notification toast, and closes the wizard dialog.
  */
-class ZebraBrowserPrintAction extends Component {
-    static template = "vpa_label_designer.ZebraBrowserPrintAction";
+async function browserPrintHandler(env, action) {
+    const params = action.params || {};
+    const url = (params.browser_print_url || "https://localhost:9101").replace(/\/$/, "");
+    const deviceName = params.device_name || "";
+    const zplData = params.zpl_data || "";
+    const notification = env.services.notification;
 
-    setup() {
-        this.actionService = useService("action");
-        this.state = useState({
-            status: "connecting",
-            message: "Connecting to Zebra Browser Print...",
-            printers: [],
-            error: null,
-        });
+    try {
+        const resp = await fetch(`${url}/available`);
+        if (!resp.ok) throw new Error(`Browser Print returned ${resp.status}`);
+        const data = await resp.json();
+        const printers = data.printer || [];
 
-        const params = this.props.action.params || {};
-        this.zplData = params.zpl_data || "";
-        this.browserPrintUrl = params.browser_print_url || "http://localhost:9101";
-        this.deviceName = params.device_name || "";
-        this.printerName = params.printer_name || "Browser Print";
-
-        this._connectAndPrint();
-    }
-
-    async _connectAndPrint() {
-        try {
-            // Step 1: Get available printers
-            this.state.status = "connecting";
-            this.state.message = "Discovering printers via Browser Print SDK...";
-
-            const printers = await this._getAvailablePrinters();
-            this.state.printers = printers;
-
-            if (printers.length === 0) {
-                this.state.status = "error";
-                this.state.error = "No Zebra printers found. Please check that Zebra Browser Print is running and a printer is connected.";
-                return;
-            }
-
-            // Step 2: Select printer
-            let selectedPrinter = printers[0];
-            if (this.deviceName) {
-                const match = printers.find(p => p.name === this.deviceName);
-                if (match) selectedPrinter = match;
-            }
-
-            // Step 3: Send ZPL
-            this.state.status = "printing";
-            this.state.message = `Sending ZPL to ${selectedPrinter.name}...`;
-
-            await this._sendToPrinter(selectedPrinter, this.zplData);
-
-            this.state.status = "success";
-            this.state.message = `Print job sent to ${selectedPrinter.name} successfully!`;
-
-        } catch (e) {
-            this.state.status = "error";
-            this.state.error = e.message || "Failed to connect to Zebra Browser Print";
-        }
-    }
-
-    async _getAvailablePrinters() {
-        const response = await fetch(`${this.browserPrintUrl}/available`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Browser Print SDK returned ${response.status}`);
+        if (!printers.length) {
+            notification.add("No Zebra printers found. Is Browser Print running?", {
+                title: "Printer Not Found",
+                type: "danger",
+                sticky: true,
+            });
+            env.services.action.doAction({ type: "ir.actions.act_window_close" });
+            return;
         }
 
-        const data = await response.json();
-        return data.printer || [];
-    }
+        let printer = printers[0];
+        if (deviceName) {
+            const match = printers.find(p => p.name === deviceName);
+            if (match) printer = match;
+        }
 
-    async _sendToPrinter(printer, zplData) {
-        const response = await fetch(`${this.browserPrintUrl}/write`, {
+        const writeResp = await fetch(`${url}/write`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                device: printer,
-                data: zplData,
-            }),
+            body: JSON.stringify({ device: printer, data: zplData }),
+        });
+        if (!writeResp.ok) throw new Error(`Write failed: ${writeResp.status}`);
+
+        notification.add(`Print job sent to ${printer.name}`, {
+            title: "Printing...",
+            type: "success",
+            sticky: false,
         });
 
-        if (!response.ok) {
-            throw new Error(`Failed to send print job: ${response.status}`);
-        }
+    } catch (e) {
+        notification.add(e.message || "Failed to connect to Zebra Browser Print", {
+            title: "Print Failed",
+            type: "danger",
+            sticky: true,
+        });
     }
 
-    onClose() {
-        this.actionService.doAction({ type: "ir.actions.act_window_close" });
-    }
+    env.services.action.doAction({ type: "ir.actions.act_window_close" });
 }
 
-registry.category("actions").add("vpa_label_designer.browser_print", ZebraBrowserPrintAction);
+registry.category("actions").add("vpa_label_designer.browser_print", browserPrintHandler);

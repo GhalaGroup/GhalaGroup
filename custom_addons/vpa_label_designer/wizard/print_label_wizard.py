@@ -35,6 +35,15 @@ class PrintLabelWizard(models.TransientModel):
     source_ids = fields.Char(string='Source Record IDs',
                              help='JSON list of record IDs')
 
+    # Variant selection (only used when source_model == product.template with multiple variants)
+    variant_ids = fields.Many2many(
+        'product.product', string='Variants',
+        help='Select which variants to print. Leave empty to print all variants.')
+    available_variant_ids = fields.Many2many(
+        'product.product', 'vpa_print_wizard_avail_variant_rel',
+        string='Available Variants', compute='_compute_available_variants')
+    has_multiple_variants = fields.Boolean(compute='_compute_available_variants')
+
     # PO / Receipt flow - per-line detail
     line_ids = fields.One2many('vpa.print.label.wizard.line', 'wizard_id',
                                string='Label Lines')
@@ -45,7 +54,25 @@ class PrintLabelWizard(models.TransientModel):
     preview_zpl = fields.Text(string='Preview ZPL', readonly=True)
     total_labels = fields.Integer(string='Total Labels', compute='_compute_total_labels')
 
-    @api.depends('copies', 'line_ids', 'line_ids.label_qty', 'is_quantity_mode', 'source_ids')
+    @api.depends('source_model', 'source_ids')
+    def _compute_available_variants(self):
+        for rec in self:
+            if rec.source_model == 'product.template':
+                try:
+                    ids_list = json.loads(rec.source_ids or '[]')
+                    templates = self.env['product.template'].browse(ids_list)
+                    variants = templates.mapped('product_variant_ids')
+                    rec.available_variant_ids = variants
+                    rec.has_multiple_variants = len(variants) > 1
+                except (json.JSONDecodeError, TypeError):
+                    rec.available_variant_ids = False
+                    rec.has_multiple_variants = False
+            else:
+                rec.available_variant_ids = False
+                rec.has_multiple_variants = False
+
+    @api.depends('copies', 'line_ids', 'line_ids.label_qty', 'is_quantity_mode', 'source_ids',
+                 'variant_ids', 'has_multiple_variants')
     def _compute_total_labels(self):
         for rec in self:
             if rec.is_quantity_mode:
@@ -53,7 +80,15 @@ class PrintLabelWizard(models.TransientModel):
             else:
                 try:
                     ids_list = json.loads(rec.source_ids or '[]')
-                    rec.total_labels = len(ids_list) * (rec.copies or 1)
+                    if rec.source_model == 'product.template':
+                        if rec.variant_ids:
+                            count = len(rec.variant_ids)
+                        else:
+                            templates = self.env['product.template'].browse(ids_list)
+                            count = len(templates.mapped('product_variant_ids'))
+                    else:
+                        count = len(ids_list)
+                    rec.total_labels = count * (rec.copies or 1)
                 except (json.JSONDecodeError, TypeError):
                     rec.total_labels = 0
 
@@ -100,6 +135,13 @@ class PrintLabelWizard(models.TransientModel):
 
             if default_template:
                 res['template_id'] = default_template.id
+
+            # For product.template with single variant, auto-select it
+            if active_model == 'product.template':
+                templates = self.env['product.template'].browse(active_ids)
+                variants = templates.mapped('product_variant_ids')
+                if len(variants) == 1:
+                    res['variant_ids'] = [(6, 0, variants.ids)]
 
             # Quantity mode for PO and Picking
             if active_model == 'purchase.order':
@@ -167,8 +209,15 @@ class PrintLabelWizard(models.TransientModel):
             # Standard flow - use sample values
             source_ids = json.loads(self.source_ids or '[]')
             if source_ids and self.source_model:
-                record = self.env[self.source_model].browse(source_ids[0])
-                preview = self.template_id.resolve_zpl_for_record(record)
+                if self.source_model == 'product.template':
+                    if self.variant_ids:
+                        record = self.variant_ids[0]
+                    else:
+                        tmpl = self.env['product.template'].browse(source_ids[0])
+                        record = tmpl.product_variant_ids[:1]
+                else:
+                    record = self.env[self.source_model].browse(source_ids[0])
+                preview = self.template_id.resolve_zpl_for_record(record) if record else self.template_id.zpl_preview
             else:
                 preview = self.template_id.zpl_preview
 
@@ -202,7 +251,14 @@ class PrintLabelWizard(models.TransientModel):
             # Standard mode: copies per record
             source_ids = json.loads(self.source_ids or '[]')
             if source_ids and self.source_model:
-                records = self.env[self.source_model].browse(source_ids)
+                if self.source_model == 'product.template':
+                    if self.variant_ids:
+                        records = self.variant_ids
+                    else:
+                        templates = self.env['product.template'].browse(source_ids)
+                        records = templates.mapped('product_variant_ids')
+                else:
+                    records = self.env[self.source_model].browse(source_ids)
                 for record in records:
                     zpl = self.template_id.resolve_zpl_for_record(record)
                     for _i in range(self.copies or 1):
@@ -237,7 +293,14 @@ class PrintLabelWizard(models.TransientModel):
         else:
             source_ids = json.loads(self.source_ids or '[]')
             if source_ids and self.source_model:
-                records = self.env[self.source_model].browse(source_ids)
+                if self.source_model == 'product.template':
+                    if self.variant_ids:
+                        records = self.variant_ids
+                    else:
+                        templates = self.env['product.template'].browse(source_ids)
+                        records = templates.mapped('product_variant_ids')
+                else:
+                    records = self.env[self.source_model].browse(source_ids)
                 for record in records:
                     zpl = self.template_id.resolve_zpl_for_record(record)
                     for _i in range(self.copies or 1):
