@@ -11,6 +11,8 @@
                 <field name="is_quantity_mode" invisible="1"/>
                 <field name="source_model" invisible="1"/>
                 <field name="source_ids" invisible="1"/>
+                <field name="has_multiple_variants" invisible="1"/>
+                <field name="available_variant_ids" invisible="1"/>
 
                 <header>
                     <div class="d-flex gap-2 align-items-center w-100" style="padding: 4px 0;">
@@ -47,6 +49,12 @@
                         </group>
                         <group string="Print Summary">
                             <field name="total_labels" readonly="1"/>
+                        </group>
+                        <group string="Variants" invisible="not has_multiple_variants">
+                            <field name="variant_ids" nolabel="1" widget="many2many_tags"
+                                   domain="[('id', 'in', available_variant_ids)]"
+                                   options="{'color_field': 'color'}"
+                                   placeholder="All variants (leave empty to print all)"/>
                         </group>
                     </group>
 

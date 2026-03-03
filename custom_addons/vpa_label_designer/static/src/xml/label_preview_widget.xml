@@ -43,51 +43,5 @@
         </div>
     </t>
 
-    <!-- Zebra Browser Print Action Template -->
-    <t t-name="vpa_label_designer.ZebraBrowserPrintAction">
-        <div class="o_zebra_browser_print p-4 text-center">
-            <h3 class="mb-3">
-                <i class="fa fa-print me-2"/>
-                Zebra Browser Print
-            </h3>
-
-            <t t-if="state.status === 'connecting'">
-                <div class="mb-3">
-                    <i class="fa fa-spinner fa-spin fa-2x text-primary"/>
-                </div>
-                <p class="text-muted"><t t-esc="state.message"/></p>
-            </t>
-
-            <t t-if="state.status === 'printing'">
-                <div class="mb-3">
-                    <i class="fa fa-spinner fa-spin fa-2x text-info"/>
-                </div>
-                <p class="text-info"><t t-esc="state.message"/></p>
-            </t>
-
-            <t t-if="state.status === 'success'">
-                <div class="mb-3">
-                    <i class="fa fa-check-circle fa-2x text-success"/>
-                </div>
-                <p class="text-success fw-bold"><t t-esc="state.message"/></p>
-                <button class="btn btn-primary mt-2" t-on-click="onClose">Close</button>
-            </t>
-
-            <t t-if="state.status === 'error'">
-                <div class="mb-3">
-                    <i class="fa fa-exclamation-circle fa-2x text-danger"/>
-                </div>
-                <div class="alert alert-danger">
-                    <t t-esc="state.error"/>
-                </div>
-                <p class="text-muted small mt-2">
-                    Make sure Zebra Browser Print is installed and running on your computer.
-                    <a href="https://www.zebra.com/us/en/support-downloads/printer-software/by-request-software.html"
-                       target="_blank">Download Zebra Browser Print</a>
-                </p>
-                <button class="btn btn-secondary mt-2" t-on-click="onClose">Close</button>
-            </t>
-        </div>
-    </t>
 
 </templates>

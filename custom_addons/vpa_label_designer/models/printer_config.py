@@ -5,6 +5,8 @@
 import logging
 import socket
 
+import requests as http_requests
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -172,13 +174,13 @@ class PrinterConfig(models.Model):
             raise UserError(f'Failed to send print job: {e}')
 
     def _send_browser_print(self, zpl_data):
-        """Return client action for Browser Print SDK."""
+        """Return client action for Browser Print SDK (handled in browser JS)."""
         return {
             'type': 'ir.actions.client',
             'tag': 'vpa_label_designer.browser_print',
             'params': {
                 'zpl_data': zpl_data,
-                'browser_print_url': self.browser_print_url or 'http://localhost:9101',
+                'browser_print_url': self.browser_print_url or 'https://localhost:9101',
                 'device_name': self.browser_print_device or '',
                 'printer_name': self.name,
             }

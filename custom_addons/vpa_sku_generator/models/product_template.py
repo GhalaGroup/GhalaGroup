@@ -61,18 +61,42 @@ class ProductTemplate(models.Model):
 
     @api.onchange('categ_id')
     def _onchange_categ_id(self):
-        """Auto-generate SKU when category changes"""
+        """Show SKU preview when category changes (does NOT consume sequence)"""
         auto_generate = self.env['ir.config_parameter'].sudo().get_param(
             'vpa_sku_generator.auto_generate', 'True'
         ) == 'True'
 
-        # Only auto-generate if enabled, product is not locked, and category is set
+        # Only show preview if enabled, product is not locked, and category is set
         if auto_generate and not self.sku_locked and self.categ_id:
-            # Only generate if no existing SKU or category changed
+            # Only update if no existing SKU or category changed
             if not self.default_code or (self._origin and self._origin.categ_id != self.categ_id):
-                new_sku = self._generate_default_code()
-                if new_sku:
-                    self.default_code = new_sku
+                # Use preview method - reads sequence without consuming it
+                # Actual sequence consumption happens in create() on save
+                parent_categories = self.env['product.category'].search([
+                    ('id', 'parent_of', self.categ_id.id)
+                ], order="id asc")
+
+                if all(cat.short_name for cat in parent_categories):
+                    short_names = "/".join(parent_categories.mapped("short_name"))
+
+                    # Check recycle pool first (preview only - don't consume)
+                    enable_recycle = self.env['ir.config_parameter'].sudo().get_param(
+                        'vpa_sku_generator.enable_recycle', 'True'
+                    ) == 'True'
+                    recycled_preview = False
+                    if enable_recycle:
+                        recycled = self.env['product.sku.recycle.pool'].search([
+                            ('category_id', '=', self.categ_id.id),
+                            ('company_id', '=', self.env.company.id)
+                        ], order='sku_number asc', limit=1)
+                        if recycled:
+                            recycled_preview = recycled.name
+
+                    if recycled_preview:
+                        self.default_code = recycled_preview
+                    else:
+                        next_num = self.categ_id._get_next_sku_number_preview()
+                        self.default_code = f"{short_names}/{str(next_num).zfill(5)}"
 
     def get_or_create_ir_sequence(self):
         """Get or create sequence for category, accounting for imported SKUs"""
@@ -178,6 +202,10 @@ class ProductTemplate(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Override create to auto-generate SKU"""
+        auto_generate = self.env['ir.config_parameter'].sudo().get_param(
+            'vpa_sku_generator.auto_generate', 'True'
+        ) == 'True'
+
         res = super(ProductTemplate, self).create(vals_list)
 
         # Skip SKU generation if we're in a copy operation
@@ -185,12 +213,27 @@ class ProductTemplate(models.Model):
         if self.env.context.get('skip_variant_sku_generation'):
             return res
 
-        auto_generate = self.env['ir.config_parameter'].sudo().get_param(
-            'vpa_sku_generator.auto_generate', 'True'
-        ) == 'True'
-
         for record, vals in zip(res, vals_list):
-            if auto_generate and "categ_id" in vals and 'default_code' not in vals:
+            if auto_generate and "categ_id" in vals:
+                # Always generate a real SKU on create() so the sequence is properly consumed.
+                # The onchange only shows a preview (no sequence consumption), so we must
+                # generate here. If the user provided a manual SKU (not from the onchange),
+                # they would have set 'skip_sku_validation' context or block_manual would apply.
+                # We skip generation only when a manual SKU was explicitly provided AND
+                # it doesn't match the auto-generated pattern for this category.
+                user_provided_sku = vals.get('default_code')
+                categ = record.categ_id
+                parent_categories = self.env['product.category'].search([
+                    ('id', 'parent_of', categ.id)
+                ], order="id asc") if categ else self.env['product.category']
+                auto_prefix = "/".join(parent_categories.mapped("short_name")) + "/" if all(
+                    cat.short_name for cat in parent_categories) else None
+
+                # If user provided a SKU that doesn't match the auto-generated prefix, keep it
+                if user_provided_sku and auto_prefix and not user_provided_sku.startswith(auto_prefix):
+                    continue  # Preserve manually-entered SKU with different format
+
+                # Generate the real SKU (consumes sequence exactly once on save)
                 default_code = record._generate_default_code()
                 if default_code:
                     record.with_context(skip_sku_validation=True).write({'default_code': default_code})

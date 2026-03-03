@@ -64,6 +64,10 @@ class LabelVariable(models.Model):
             return str(extra_values[self.name])
 
         if not self.field_path or not record:
+            # Alt UoM variables have no field_path — they only get values via extra_values.
+            # When no alt UoM is selected, return empty string (not the sample value).
+            if self.category == 'alt_uom':
+                return ''
             return self.sample_value or ''
 
         # Handle special computed variables
@@ -139,7 +143,16 @@ class LabelVariable(models.Model):
         if hasattr(product, 'product_template_attribute_value_ids'):
             ptavs = product.product_template_attribute_value_ids
             if ptavs:
-                return ptavs._get_combination_name() or ''
+                # _get_combination_name() returns '' for single-variant products in Odoo 19
+                # Fall back to reading attribute values directly
+                name = ptavs._get_combination_name()
+                if not name:
+                    name = ', '.join(
+                        ptav.product_attribute_value_id.name
+                        for ptav in ptavs
+                        if ptav.product_attribute_value_id
+                    )
+                return name or ''
         return ''
 
     def _compute_variant_full(self, record):
