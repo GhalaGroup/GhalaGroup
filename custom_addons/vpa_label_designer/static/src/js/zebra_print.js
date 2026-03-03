@@ -2,6 +2,7 @@
 
 import { registry } from "@web/core/registry";
 import { Component, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 /**
  * Zebra Browser Print Client Action
@@ -13,6 +14,7 @@ class ZebraBrowserPrintAction extends Component {
     static template = "vpa_label_designer.ZebraBrowserPrintAction";
 
     setup() {
+        this.actionService = useService("action");
         this.state = useState({
             status: "connecting",
             message: "Connecting to Zebra Browser Print...",
@@ -96,7 +98,7 @@ class ZebraBrowserPrintAction extends Component {
     }
 
     onClose() {
-        this.props.action.doAction({ type: "ir.actions.act_window_close" });
+        this.actionService.doAction({ type: "ir.actions.act_window_close" });
     }
 }
 
