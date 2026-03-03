@@ -477,3 +477,18 @@ class LabelTemplate(models.Model):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'new',
         }
+
+    def action_open_copy_wizard(self):
+        """Open the copy elements wizard for this template."""
+        self.ensure_one()
+        wizard = self.env['vpa.copy.elements.wizard'].create({
+            'target_template_id': self.id,
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Copy Elements from Template',
+            'res_model': 'vpa.copy.elements.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }

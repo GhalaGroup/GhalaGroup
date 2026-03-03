@@ -5,3 +5,4 @@
 from . import print_label_wizard
 from . import print_label_wizard_line
 from . import import_label_wizard
+from . import copy_elements_wizard

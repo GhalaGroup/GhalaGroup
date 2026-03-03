@@ -14,6 +14,9 @@
                             class="btn-secondary" icon="fa-download"/>
                     <button name="action_copy_zpl" string="Copy ZPL" type="object"
                             class="btn-secondary" icon="fa-clipboard"/>
+                    <button name="action_open_copy_wizard" string="Copy from Template" type="object"
+                            class="btn-secondary" icon="fa-copy"
+                            invisible="not id"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

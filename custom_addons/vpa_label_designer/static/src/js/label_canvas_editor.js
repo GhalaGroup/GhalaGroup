@@ -103,32 +103,39 @@ class LabelCanvasEditor extends Component {
             () => [this.canvasContainerRef.el]
         );
 
-        // Watch for label size changes and rebuild the canvas
-        // Also handles initial load when label_width_dots/label_height_dots arrive after canvas init
+        // Watch for label_size_id changes — fetch real dots from server and rebuild canvas
         useEffect(
             () => {
-                const config = this.labelConfig;
-                if (config.width <= 0 || config.height <= 0) return;
-                const el = this.canvasContainerRef.el;
-                if (!el) return;
-                try {
-                    if (!this.stage) {
-                        // Canvas was skipped earlier because dots weren't loaded yet — init now
-                        this._initCanvas();
-                        this._loadElementsToCanvas();
-                    } else if (config.width !== this.state.labelWidth || config.height !== this.state.labelHeight || config.dpi !== this.state.dpi) {
-                        // Label size changed — rebuild
-                        this._destroyCanvas();
-                        this._initCanvas();
-                        this._loadElementsToCanvas();
+                const rec = this.props.record.data;
+                const sizeId = rec.label_size_id;
+                const cid = Array.isArray(sizeId) ? sizeId[0] : (sizeId && sizeId.id);
+                if (!cid) return;
+                this.orm.read("vpa.label.size", [cid], ["width_dots", "height_dots", "dpi"]).then((result) => {
+                    if (!result || !result[0]) return;
+                    const { width_dots, height_dots, dpi } = result[0];
+                    const w = width_dots || 640;
+                    const h = height_dots || 640;
+                    const d = parseInt(dpi) || 203;
+                    const el = this.canvasContainerRef.el;
+                    if (!el) return;
+                    try {
+                        if (!this.stage) {
+                            this._initCanvas(w, h, d);
+                            this._loadElementsToCanvas();
+                        } else if (w !== this.state.labelWidth || h !== this.state.labelHeight || d !== this.state.dpi) {
+                            this._destroyCanvas();
+                            this._initCanvas(w, h, d);
+                            this._loadElementsToCanvas();
+                        }
+                    } catch (e) {
+                        console.error("[VPA Canvas] Rebuild error:", e);
                     }
-                } catch (e) {
-                    console.error("[VPA Canvas] Rebuild error:", e);
-                }
+                }).catch((e) => console.error("[VPA Canvas] Failed to read label size:", e));
             },
             () => {
-                const config = this.labelConfig;
-                return [config.width, config.height, config.dpi];
+                const rec = this.props.record.data;
+                const sizeId = rec.label_size_id;
+                return [Array.isArray(sizeId) ? sizeId[0] : (sizeId && sizeId.id)];
             }
         );
 
@@ -295,7 +302,7 @@ class LabelCanvasEditor extends Component {
 
     // ─── Canvas Initialization ──────────────────────────────────
 
-    _initCanvas() {
+    _initCanvas(forcedWidth, forcedHeight, forcedDpi) {
         const container = this.canvasContainerRef.el;
         if (!container || this.stage) return;
 
@@ -305,7 +312,13 @@ class LabelCanvasEditor extends Component {
         }
 
         const config = this.labelConfig;
-        if (!config.width || !config.height) return;
+        // Use forced dimensions (from live server fetch) or fall back to related fields
+        const width = forcedWidth || config.width;
+        const height = forcedHeight || config.height;
+        const dpi = forcedDpi || config.dpi;
+        if (!width || !height) return;
+        // Override config reference for the rest of init
+        Object.assign(config, { width, height, dpi });
         const padding = 40;
         const containerWidth = container.clientWidth || 700;
         const containerHeight = container.clientHeight || 500;

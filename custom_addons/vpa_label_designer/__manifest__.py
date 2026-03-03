@@ -59,6 +59,7 @@ Support: info@vpa.co.tz
         'views/res_config_settings_views.xml',
         'wizard/print_label_wizard_views.xml',
         'wizard/import_label_wizard_views.xml',
+        'wizard/copy_elements_wizard_views.xml',
         'views/menu.xml',
     ],
     'assets': {
