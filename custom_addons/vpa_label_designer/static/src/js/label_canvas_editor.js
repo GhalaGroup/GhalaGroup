@@ -83,21 +83,26 @@ class LabelCanvasEditor extends Component {
         );
 
         // Watch for label size changes and rebuild the canvas
+        // Also handles initial load when label_width_dots/label_height_dots arrive after canvas init
         useEffect(
             () => {
                 const config = this.labelConfig;
-                if (this.stage && config.width > 0 && config.height > 0 &&
-                    (config.width !== this.state.labelWidth || config.height !== this.state.labelHeight || config.dpi !== this.state.dpi)) {
-                    this._destroyCanvas();
-                    const el = this.canvasContainerRef.el;
-                    if (el) {
-                        try {
-                            this._initCanvas();
-                            this._loadElementsToCanvas();
-                        } catch (e) {
-                            console.error("[VPA Canvas] Rebuild error:", e);
-                        }
+                if (config.width <= 0 || config.height <= 0) return;
+                const el = this.canvasContainerRef.el;
+                if (!el) return;
+                try {
+                    if (!this.stage) {
+                        // Canvas was skipped earlier because dots weren't loaded yet — init now
+                        this._initCanvas();
+                        this._loadElementsToCanvas();
+                    } else if (config.width !== this.state.labelWidth || config.height !== this.state.labelHeight || config.dpi !== this.state.dpi) {
+                        // Label size changed — rebuild
+                        this._destroyCanvas();
+                        this._initCanvas();
+                        this._loadElementsToCanvas();
                     }
+                } catch (e) {
+                    console.error("[VPA Canvas] Rebuild error:", e);
                 }
             },
             () => {
@@ -279,6 +284,7 @@ class LabelCanvasEditor extends Component {
         }
 
         const config = this.labelConfig;
+        if (!config.width || !config.height) return;
         const padding = 40;
         const containerWidth = container.clientWidth || 700;
         const containerHeight = container.clientHeight || 500;
