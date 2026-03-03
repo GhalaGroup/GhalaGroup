@@ -69,15 +69,42 @@ class LabelCanvasEditor extends Component {
         useEffect(
             () => {
                 const el = this.canvasContainerRef.el;
-                if (el) {
+                if (!el) return;
+
+                const tryInit = () => {
+                    if (this.stage) return; // already initialised
                     try {
                         this._initCanvas();
-                        this._loadElementsToCanvas();
+                        if (this.stage) this._loadElementsToCanvas();
                     } catch (e) {
                         console.error("[VPA Canvas] Init error:", e);
                     }
+                };
+
+                // Try immediately — works when container already has dimensions
+                tryInit();
+
+                // If still no stage (container had 0 width e.g. on Odoo.sh),
+                // watch for the container to get its real size via ResizeObserver
+                let observer = null;
+                if (!this.stage) {
+                    observer = new ResizeObserver((entries) => {
+                        for (const entry of entries) {
+                            if (entry.contentRect.width > 0) {
+                                observer.disconnect();
+                                observer = null;
+                                tryInit();
+                                break;
+                            }
+                        }
+                    });
+                    observer.observe(el);
                 }
-                return () => this._destroyCanvas();
+
+                return () => {
+                    if (observer) { observer.disconnect(); observer = null; }
+                    this._destroyCanvas();
+                };
             },
             () => [this.canvasContainerRef.el]
         );
