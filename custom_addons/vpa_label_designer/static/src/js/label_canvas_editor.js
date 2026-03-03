@@ -4,11 +4,10 @@ import { Component, onWillStart, useEffect, useRef, useState, onWillUnmount } fr
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { loadBundle } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
 import { ElementFactory } from "./canvas/element_factory";
 import { GridLayer } from "./canvas/grid_layer";
-import { ZEBRA_FONTS, FONT_PRESETS, dotsToPoints, dotsToScreenPx } from "./canvas/font_metrics";
+import { ZEBRA_FONTS, FONT_PRESETS, dotsToPoints } from "./canvas/font_metrics";
 
 /**
  * Visual Label Canvas Editor
@@ -57,11 +56,6 @@ class LabelCanvasEditor extends Component {
         });
 
         onWillStart(async () => {
-            try {
-                await loadBundle("vpa_label_designer.konva_lib");
-            } catch (e) {
-                console.error("[VPA Canvas] Failed to load Konva:", e);
-            }
             await this._loadAvailableVariables();
             await this._loadCompanyLogo();
         });
@@ -69,40 +63,79 @@ class LabelCanvasEditor extends Component {
         useEffect(
             () => {
                 const el = this.canvasContainerRef.el;
-                if (el) {
+                if (!el) return;
+
+                const tryInit = () => {
+                    if (this.stage) return; // already initialised
                     try {
                         this._initCanvas();
-                        this._loadElementsToCanvas();
+                        if (this.stage) this._loadElementsToCanvas();
                     } catch (e) {
                         console.error("[VPA Canvas] Init error:", e);
                     }
+                };
+
+                // Try immediately — works when container already has dimensions
+                tryInit();
+
+                // If still no stage (container had 0 width e.g. on Odoo.sh),
+                // watch for the container to get its real size via ResizeObserver
+                let observer = null;
+                if (!this.stage) {
+                    observer = new ResizeObserver((entries) => {
+                        for (const entry of entries) {
+                            if (entry.contentRect.width > 0) {
+                                observer.disconnect();
+                                observer = null;
+                                tryInit();
+                                break;
+                            }
+                        }
+                    });
+                    observer.observe(el);
                 }
-                return () => this._destroyCanvas();
+
+                return () => {
+                    if (observer) { observer.disconnect(); observer = null; }
+                    this._destroyCanvas();
+                };
             },
             () => [this.canvasContainerRef.el]
         );
 
-        // Watch for label size changes and rebuild the canvas
+        // Watch for label_size_id changes — fetch real dots from server and rebuild canvas
         useEffect(
             () => {
-                const config = this.labelConfig;
-                if (this.stage && config.width > 0 && config.height > 0 &&
-                    (config.width !== this.state.labelWidth || config.height !== this.state.labelHeight || config.dpi !== this.state.dpi)) {
-                    this._destroyCanvas();
+                const rec = this.props.record.data;
+                const sizeId = rec.label_size_id;
+                const cid = Array.isArray(sizeId) ? sizeId[0] : (sizeId && sizeId.id);
+                if (!cid) return;
+                this.orm.read("vpa.label.size", [cid], ["width_dots", "height_dots", "dpi"]).then((result) => {
+                    if (!result || !result[0]) return;
+                    const { width_dots, height_dots, dpi } = result[0];
+                    const w = width_dots || 640;
+                    const h = height_dots || 640;
+                    const d = parseInt(dpi) || 203;
                     const el = this.canvasContainerRef.el;
-                    if (el) {
-                        try {
-                            this._initCanvas();
+                    if (!el) return;
+                    try {
+                        if (!this.stage) {
+                            this._initCanvas(w, h, d);
                             this._loadElementsToCanvas();
-                        } catch (e) {
-                            console.error("[VPA Canvas] Rebuild error:", e);
+                        } else if (w !== this.state.labelWidth || h !== this.state.labelHeight || d !== this.state.dpi) {
+                            this._destroyCanvas();
+                            this._initCanvas(w, h, d);
+                            this._loadElementsToCanvas();
                         }
+                    } catch (e) {
+                        console.error("[VPA Canvas] Rebuild error:", e);
                     }
-                }
+                }).catch((e) => console.error("[VPA Canvas] Failed to read label size:", e));
             },
             () => {
-                const config = this.labelConfig;
-                return [config.width, config.height, config.dpi];
+                const rec = this.props.record.data;
+                const sizeId = rec.label_size_id;
+                return [Array.isArray(sizeId) ? sizeId[0] : (sizeId && sizeId.id)];
             }
         );
 
@@ -269,7 +302,7 @@ class LabelCanvasEditor extends Component {
 
     // ─── Canvas Initialization ──────────────────────────────────
 
-    _initCanvas() {
+    _initCanvas(forcedWidth, forcedHeight, forcedDpi) {
         const container = this.canvasContainerRef.el;
         if (!container || this.stage) return;
 
@@ -279,6 +312,13 @@ class LabelCanvasEditor extends Component {
         }
 
         const config = this.labelConfig;
+        // Use forced dimensions (from live server fetch) or fall back to related fields
+        const width = forcedWidth || config.width;
+        const height = forcedHeight || config.height;
+        const dpi = forcedDpi || config.dpi;
+        if (!width || !height) return;
+        // Override config reference for the rest of init
+        Object.assign(config, { width, height, dpi });
         const padding = 40;
         const containerWidth = container.clientWidth || 700;
         const containerHeight = container.clientHeight || 500;

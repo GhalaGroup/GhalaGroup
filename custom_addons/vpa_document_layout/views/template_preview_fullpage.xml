@@ -281,7 +281,12 @@
                                 </div>
                             </t>
                             <t t-set="layout_document_title">
-                                <span><t t-if="doc.state in ['draft','sent']">Quotation #</t><t t-elif="doc.state in ['sale','done']">Order #</t><t t-elif="doc.state == 'cancel'">Cancelled Order #</t><t t-out="doc.name"/></span>
+                                <t t-if="template.report_title">
+                                    <span><t t-out="template.report_title"/> # <t t-out="doc.name"/></span>
+                                </t>
+                                <t t-else="">
+                                    <span><t t-if="doc.state in ['draft','sent']">Quotation #</t><t t-elif="doc.state in ['sale','done']">Order #</t><t t-elif="doc.state == 'cancel'">Cancelled Order #</t><t t-out="doc.name"/></span>
+                                </t>
                             </t>
                             <!-- Header for preview when header_repeat_on_pages is True -->
                             <!-- (In PDF, this comes from wkhtmltopdf header-html param, but preview needs it inline) -->

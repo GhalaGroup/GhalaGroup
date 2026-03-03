@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Copy Elements Wizard Form View -->
+    <record id="view_copy_elements_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.copy.elements.wizard.form</field>
+        <field name="model">vpa.copy.elements.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Copy Elements from Another Template">
+                <field name="target_template_id" invisible="1"/>
+                <group>
+                    <field name="source_template_id" string="Copy From Template"/>
+                    <field name="replace_existing"/>
+                </group>
+
+                <div invisible="not source_template_id" class="mb-2">
+                    <button name="action_select_all" string="Select All" type="object"
+                            class="btn btn-sm btn-secondary me-1"/>
+                    <button name="action_deselect_all" string="Deselect All" type="object"
+                            class="btn btn-sm btn-secondary"/>
+                    <span class="ms-3 text-muted">
+                        <field name="selected_count" readonly="1" nolabel="1" class="d-inline"/> selected
+                    </span>
+                </div>
+
+                <field name="element_line_ids" invisible="not source_template_id"
+                       nolabel="1">
+                    <list editable="bottom" decoration-muted="not selected">
+                        <field name="selected" string=""/>
+                        <field name="sequence" column_invisible="1"/>
+                        <field name="element_type" string="Type" readonly="1"/>
+                        <field name="name" string="Name" readonly="1"/>
+                        <field name="content_preview" string="Content" readonly="1"/>
+                        <field name="element_id" column_invisible="1"/>
+                    </list>
+                </field>
+
+                <footer>
+                    <button name="action_copy" string="Copy Selected" type="object"
+                            class="btn-primary"
+                            invisible="not source_template_id"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

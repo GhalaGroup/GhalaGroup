@@ -1163,10 +1163,15 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                <t t-if="doc.state in ['draft','sent']">Quotation # </t>
-                <t t-elif="doc.state in ['sale','done']">Order # </t>
-                <t t-elif="doc.state == 'cancel'">Cancelled Order # </t>
-                <span t-field="doc.name"/>
+                <t t-if="vpa_template.report_title">
+                    <t t-out="vpa_template.report_title"/> # <span t-field="doc.name"/>
+                </t>
+                <t t-else="">
+                    <t t-if="doc.state in ['draft','sent']">Quotation # </t>
+                    <t t-elif="doc.state in ['sale','done']">Order # </t>
+                    <t t-elif="doc.state == 'cancel'">Cancelled Order # </t>
+                    <span t-field="doc.name"/>
+                </t>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <!-- Inline Styles matching Production Summary -->
@@ -3119,7 +3124,10 @@ class VPADocumentTemplate(models.Model):
                 </div>
             </t>
             <t t-set="layout_document_title">
-                {doc_type_title} # <span t-field="doc.name"/>
+                <t t-if="vpa_template.report_title">
+                    <t t-out="vpa_template.report_title"/> # <span t-field="doc.name"/>
+                </t>
+                <t t-else="">{doc_type_title} # <span t-field="doc.name"/></t>
             </t>
             <t t-call="vpa_document_layout.external_layout_vpa_template_{template_id}">
                 <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
