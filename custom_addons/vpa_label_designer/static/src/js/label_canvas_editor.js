@@ -4,11 +4,10 @@ import { Component, onWillStart, useEffect, useRef, useState, onWillUnmount } fr
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { loadBundle } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
 import { ElementFactory } from "./canvas/element_factory";
 import { GridLayer } from "./canvas/grid_layer";
-import { ZEBRA_FONTS, FONT_PRESETS, dotsToPoints, dotsToScreenPx } from "./canvas/font_metrics";
+import { ZEBRA_FONTS, FONT_PRESETS, dotsToPoints } from "./canvas/font_metrics";
 
 /**
  * Visual Label Canvas Editor
@@ -57,11 +56,6 @@ class LabelCanvasEditor extends Component {
         });
 
         onWillStart(async () => {
-            try {
-                await loadBundle("vpa_label_designer.konva_lib");
-            } catch (e) {
-                console.error("[VPA Canvas] Failed to load Konva:", e);
-            }
             await this._loadAvailableVariables();
             await this._loadCompanyLogo();
         });

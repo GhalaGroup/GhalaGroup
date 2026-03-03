@@ -66,6 +66,7 @@ Support: info@vpa.co.tz
             'vpa_label_designer/static/lib/konva/konva.min.js',
         ],
         'web.assets_backend': [
+            'vpa_label_designer/static/lib/konva/konva.min.js',
             'vpa_label_designer/static/src/js/canvas/font_metrics.js',
             'vpa_label_designer/static/src/js/canvas/grid_layer.js',
             'vpa_label_designer/static/src/js/canvas/element_factory.js',
