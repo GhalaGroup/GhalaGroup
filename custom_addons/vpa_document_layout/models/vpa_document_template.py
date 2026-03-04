@@ -2124,12 +2124,17 @@ class VPADocumentTemplate(models.Model):
                                         <tr>
                                             <td style="text-align: center; color: #666; font-size: 10pt;"><t t-out="line_num"/></td>
                                             <td>
-                                                <div style="font-weight: 500; color: #333; font-size: 10pt;">
-                                                    <t t-if="line.product_id.default_code">
-                                                        <span class="vpa-product-code">[<t t-out="line.product_id.default_code"/>]</span>
-                                                    </t>
-                                                    <t t-out="line.name"/>
-                                                </div>
+                                                <t t-if="line.product_id.default_code">
+                                                    <div class="vpa-product-code" style="font-size: 10px; color: #777; margin-bottom: 1px;">[<t t-out="line.product_id.default_code"/>]</div>
+                                                </t>
+                                                <!-- Use product name directly (no newlines), then show rest of line.name as description -->
+                                                <t t-set="prod_name" t-value="line.product_id.name or ''"/>
+                                                <div style="font-weight: 500; color: #333; font-size: 10pt;"><t t-out="prod_name"/></div>
+                                                <t t-set="full_name" t-value="line.name or ''"/>
+                                                <t t-set="name_after_product" t-value="full_name[full_name.find(prod_name) + len(prod_name):].strip() if prod_name and prod_name in full_name else ''"/>
+                                                <t t-if="name_after_product">
+                                                    <div style="font-style: italic; color: #666; font-size: 9.5pt; padding-left: 8px; line-height: 1.4; white-space: pre-wrap;"><t t-out="name_after_product"/></div>
+                                                </t>
                                             </td>
                                             <td style="text-align: center; font-size: 10pt;">
                                                 <span class="vpa-qty-badge"><t t-out="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else round(line.product_uom_qty, 2)"/></span>
@@ -2170,7 +2175,7 @@ class VPADocumentTemplate(models.Model):
                                     <span class="vpa-total-label">Total Production Quantity:</span>
                                 </td>
                                 <td style="width: 30%%; text-align: center;">
-                                    <span class="vpa-total-value"><t t-out="total_qty"/></span>
+                                    <span class="vpa-total-value"><t t-out="int(total_qty) if total_qty == int(total_qty) else round(total_qty, 4)"/></span>
                                 </td>
                             </tr>
                         </table>

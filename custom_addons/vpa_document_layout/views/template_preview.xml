@@ -387,85 +387,107 @@
                     }
                     .vpa-qty-badge {
                         display: inline-block;
-                        background: <t t-out="primary_color"/>;
-                        color: white;
-                        padding: 2px 8px;
-                        border-radius: 3px;
-                        font-weight: bold;
-                        font-size: 9pt;
+                        background: white;
+                        color: <t t-out="primary_color"/>;
+                        padding: 2px 6px;
+                        border-radius: 2px;
+                        font-weight: 600;
+                        font-size: 11px;
+                        border: 1px solid <t t-out="primary_color"/>;
                     }
                     .vpa-mo-badge {
                         display: inline-block;
                         background: <t t-out="primary_color"/>;
                         color: white;
                         padding: 2px 6px;
-                        border-radius: 3px;
-                        font-size: 8pt;
+                        border-radius: 6px;
+                        font-size: 9px;
+                        font-weight: 500;
                         margin: 1px;
                     }
                     .vpa-mo-pending {
-                        background: #999;
+                        background: transparent;
+                        color: #bbb;
+                        border: none;
+                        font-size: 10px;
                     }
                     .vpa-section-row td {
-                        background: #fafafa !important;
-                        font-weight: bold;
-                        color: #555;
-                        padding: 6px 8px;
+                        background: #f0f0f0 !important;
+                        font-weight: 700;
+                        color: #666;
+                        padding: 6px 4px;
+                        font-size: 12px;
+                        border-bottom: 1px solid #ddd !important;
                     }
-                    .vpa-sale-production table tbody tr {
-                        background-color: white;
+                    .vpa-table-card {
+                        background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        border-radius: 5px;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }
-                    .vpa-sale-production table tbody td {
-                        background-color: white;
-                        color: #333;
+                    .vpa-section-header {
+                        color: <t t-out="primary_color"/>;
+                        font-size: 11px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.4px;
+                        margin: 6px 6px 4px 6px;
+                        padding-bottom: 3px;
+                        border-bottom: 1px solid #f0f0f0;
                     }
-                    .vpa-total-box {
-                        background: #f9f9f9;
-                        border: 1px solid #eee;
-                        border-radius: 4px;
-                        padding: 10px 15px;
-                        margin-top: 15px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
+                    .vpa-total-card {
+                        background: linear-gradient(135deg, #fffafa 0%, white 100%);
+                        border-left: 3px solid <t t-out="primary_color"/>;
+                        padding: 10px;
+                        border-radius: 5px;
+                        margin: 10px 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.03);
                     }
                     .vpa-total-label {
-                        font-weight: bold;
-                        color: #333;
+                        font-size: 13px;
+                        color: #666;
                     }
                     .vpa-total-value {
-                        font-size: 16pt;
-                        font-weight: bold;
+                        font-size: 18px;
+                        font-weight: 600;
                         color: <t t-out="primary_color"/>;
                     }
                     .vpa-notes-section {
                         background: #f9f9f9;
-                        border: 1px solid #eee;
-                        border-radius: 4px;
-                        padding: 10px 12px;
-                        margin-top: 12px;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 5px;
+                        padding: 10px;
+                        margin: 10px 0;
                     }
                     .vpa-notes-title {
                         color: <t t-out="primary_color"/>;
-                        font-weight: bold;
-                        font-size: 8pt;
-                        text-transform: uppercase;
-                        margin-bottom: 6px;
+                        margin: 0 0 6px 0;
+                        font-size: 11px;
+                        font-weight: 600;
+                    }
+                    .vpa-notes-content {
+                        min-height: 40px;
+                        background: white;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 3px;
+                        padding: 8px;
                     }
                 </style>
 
                 <div class="vpa-sale-production">
-                    <!-- Items Table - Customer details and order info are in the header via address/information_block -->
+                    <!-- Items Table -->
                     <div class="vpa-table-card">
-                        <div class="vpa-section-header">ITEMS SUMMARY</div>
-                        <table class="table table-sm o_main_table">
+                        <div class="vpa-section-header">ITEMS SUMMARY DETAILS</div>
+                        <table style="width:100%; border-collapse:collapse;">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">No.</th>
-                                    <th style="width: 45%;">Product Description</th>
-                                    <th style="width: 15%; text-align: center;">Quantity</th>
-                                    <th style="width: 10%; text-align: center;">Unit</th>
-                                    <th style="width: 25%; text-align: center;">MO Reference</th>
+                                    <th style="width:5%; text-align:center; color:#DC143C; font-weight:600; text-transform:uppercase; font-size:10px; padding:5px 4px; border-bottom:1px solid #f0f0f0;">NO.</th>
+                                    <th style="width:50%; color:#DC143C; font-weight:600; text-transform:uppercase; font-size:10px; padding:5px 4px; border-bottom:1px solid #f0f0f0;">PRODUCT DESCRIPTION</th>
+                                    <th style="width:12%; text-align:center; color:#DC143C; font-weight:600; text-transform:uppercase; font-size:10px; padding:5px 4px; border-bottom:1px solid #f0f0f0;">QUANTITY</th>
+                                    <th style="width:10%; text-align:center; color:#DC143C; font-weight:600; text-transform:uppercase; font-size:10px; padding:5px 4px; border-bottom:1px solid #f0f0f0;">UNIT</th>
+                                    <th style="width:23%; text-align:center; color:#DC143C; font-weight:600; text-transform:uppercase; font-size:10px; padding:5px 4px; border-bottom:1px solid #f0f0f0;">MO REFERENCE</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -473,52 +495,62 @@
                                     <td colspan="5">Furniture</td>
                                 </tr>
                                 <tr>
-                                    <td>1</td>
-                                    <td>
-                                        <strong>[FURN_8999]</strong> Three-Seat Sofa
-                                        <div style="font-size: 8pt; color: #666;">Three Seater Sofa with Lounger</div>
+                                    <td style="text-align:center; color:#666; font-size:10pt; padding:4px;">1</td>
+                                    <td style="padding:4px;">
+                                        <div style="font-size:10px; color:#777; margin-bottom:1px;">[FURN_8999]</div>
+                                        <div style="font-weight:500; color:#333; font-size:10pt;">Three-Seat Sofa<br/><span style="font-weight:400;">Three Seater Sofa with Lounger</span></div>
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td style="text-align:center; font-size:10pt; padding:4px;">
                                         <span class="vpa-qty-badge">5</span>
                                     </td>
-                                    <td style="text-align: center;">Units</td>
-                                    <td style="text-align: center;">
+                                    <td style="text-align:center; color:#666; font-size:10pt; padding:4px;">Units</td>
+                                    <td style="text-align:center; padding:4px;">
                                         <span class="vpa-mo-badge">MO/00045</span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>2</td>
-                                    <td>
-                                        <strong>[FURN_8220]</strong> Four Person Desk
-                                        <div style="font-size: 8pt; color: #666;">Modern office workstation</div>
+                                    <td style="text-align:center; color:#666; font-size:10pt; padding:4px;">2</td>
+                                    <td style="padding:4px;">
+                                        <div style="font-size:10px; color:#777; margin-bottom:1px;">[FURN_8220]</div>
+                                        <div style="font-weight:500; color:#333; font-size:10pt;">Four Person Desk<br/><span style="font-weight:400;">Modern office workstation, 4-seat configuration</span></div>
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td style="text-align:center; font-size:10pt; padding:4px;">
                                         <span class="vpa-qty-badge">3</span>
                                     </td>
-                                    <td style="text-align: center;">Units</td>
-                                    <td style="text-align: center;">
-                                        <span class="vpa-mo-badge vpa-mo-pending">Pending</span>
+                                    <td style="text-align:center; color:#666; font-size:10pt; padding:4px;">Units</td>
+                                    <td style="text-align:center; padding:4px;">
+                                        <span class="vpa-mo-pending">Pending</span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Total Box -->
-                    <div class="vpa-total-box">
-                        <span class="vpa-total-label">Total Production Quantity:</span>
-                        <span class="vpa-total-value">8.00</span>
+                    <!-- Total Card -->
+                    <div class="vpa-total-card">
+                        <table style="width:100%;">
+                            <tr>
+                                <td style="width:70%; text-align:right; padding-right:15px;">
+                                    <span class="vpa-total-label">Total Production Quantity:</span>
+                                </td>
+                                <td style="width:30%; text-align:center;">
+                                    <span class="vpa-total-value">8</span>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
 
                     <!-- Production Notes -->
                     <div class="vpa-notes-section">
-                        <div class="vpa-notes-title">Production Notes:</div>
-                        <p style="margin: 4px 0; font-size: 9pt;"><strong>Manufacturing Orders:</strong></p>
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li style="margin: 4px 0; font-size: 9pt;">
-                                <strong>MO/00045</strong> - Three-Seat Sofa (5.0 Units) | PO-2025-001
-                            </li>
-                        </ul>
+                        <div class="vpa-notes-title">PRODUCTION NOTES:</div>
+                        <div class="vpa-notes-content">
+                            <div style="font-size:8px; color:#666; margin-left:0;">
+                                <strong>Manufacturing Orders:</strong>
+                            </div>
+                            <div style="font-size:10px; color:#666; margin-top:2px;">
+                                • <span style="color:#DC143C; font-weight:600;">MO/00045</span> - Three-Seat Sofa (5 Units) | PO-2025-001
+                            </div>
+                        </div>
                     </div>
                 </div>
             </t>
