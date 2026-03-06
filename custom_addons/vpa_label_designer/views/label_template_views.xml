@@ -59,26 +59,29 @@
                                     <field name="pos_x"/>
                                     <field name="pos_y"/>
                                     <field name="name" optional="hide"/>
-                                    <field name="font_id" invisible="element_type not in ('text', 'variable')" optional="hide"/>
+                                    <field name="font_id" invisible="element_type not in ('text', 'variable')" optional="show"/>
                                     <field name="font_height" invisible="element_type not in ('text', 'variable')" optional="show"/>
                                     <field name="max_width" invisible="element_type not in ('text', 'variable')" optional="show"/>
-                                    <field name="rotation" invisible="element_type not in ('text', 'variable', 'barcode')" optional="hide"/>
+                                    <field name="rotation" invisible="element_type not in ('text', 'variable', 'barcode')" optional="show"/>
                                     <field name="barcode_type" invisible="element_type != 'barcode'" optional="show"/>
                                     <field name="barcode_height" invisible="element_type != 'barcode'" optional="show"/>
-                                    <field name="barcode_module_width" invisible="element_type != 'barcode'" optional="hide"/>
-                                    <field name="show_text_below" invisible="element_type != 'barcode'" optional="hide"/>
+                                    <field name="barcode_module_width" invisible="element_type != 'barcode'" optional="show"/>
+                                    <field name="show_text_below" invisible="element_type != 'barcode'" optional="show"/>
                                     <field name="qr_magnification" invisible="element_type != 'qr_code'" optional="show"/>
-                                    <field name="qr_error_correction" invisible="element_type != 'qr_code'" optional="hide"/>
+                                    <field name="qr_error_correction" invisible="element_type != 'qr_code'" optional="show"/>
                                     <field name="shape_width" invisible="element_type not in ('line', 'box')" optional="show"/>
                                     <field name="shape_height" invisible="element_type not in ('v_line', 'box')" optional="show"/>
-                                    <field name="border_thickness" invisible="element_type not in ('line', 'v_line', 'box')" optional="hide"/>
+                                    <field name="border_thickness" invisible="element_type not in ('line', 'v_line', 'box')" optional="show"/>
                                     <field name="image_width" invisible="element_type not in ('image', 'company_logo')" optional="show"/>
-                                    <field name="image_data" invisible="element_type != 'image'" optional="hide"/>
+                                    <field name="image_data" invisible="element_type != 'image'" optional="show"/>
                                     <field name="font_width" invisible="1"/>
                                     <field name="max_lines" invisible="1"/>
                                     <field name="text_alignment" invisible="1"/>
                                     <field name="shape_color" invisible="1"/>
-                                    <field name="zpl_snippet" optional="hide"/>
+                                    <field name="font_bold" invisible="1"/>
+                                    <field name="font_italic" invisible="1"/>
+                                    <field name="font_underline" invisible="1"/>
+                                    <field name="zpl_snippet" optional="show"/>
                                 </list>
                             </field>
                         </page>

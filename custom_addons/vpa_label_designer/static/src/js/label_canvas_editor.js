@@ -53,6 +53,7 @@ class LabelCanvasEditor extends Component {
             labelWidth: 0,
             labelHeight: 0,
             dpi: 203,
+            fontPreviewUrl: null,
         });
 
         onWillStart(async () => {
@@ -158,7 +159,9 @@ class LabelCanvasEditor extends Component {
                     const d = r.data;
                     return this._recordKey(r) + ":" + (d.pos_x || 0) + "," + (d.pos_y || 0) +
                            "," + (d.element_type || "") + "," + (d.content || "") +
-                           "," + (d.font_height || 0) + "," + (d.shape_width || 0) +
+                           "," + (d.font_id || "") + "," + (d.font_height || 0) +
+                           "," + (d.font_bold ? "1" : "0") + "," + (d.font_italic ? "1" : "0") +
+                           "," + (d.rotation || "") + "," + (d.shape_width || 0) +
                            "," + (d.image_width || 0);
                 }).join("|");
                 return [recs.length, fingerprint];
@@ -202,7 +205,7 @@ class LabelCanvasEditor extends Component {
     get fontOptions() {
         return Object.entries(ZEBRA_FONTS).map(([id, font]) => ({
             value: id,
-            label: id + " \u2014 " + font.desc,
+            label: font.desc,
         }));
     }
 
@@ -220,6 +223,15 @@ class LabelCanvasEditor extends Component {
         if (!this.state.selectedData) return "";
         const dots = this.state.selectedData.font_height || 30;
         return "~" + dotsToPoints(dots, this.labelConfig.dpi) + "pt";
+    }
+
+    _updateFontPreview(fontId) {
+        const font = fontId || '0';
+        // Use a taller label so bitmap fonts render large enough to see clearly
+        // 3"x0.6" at 8dpmm (203dpi) = 609x121 dots, font height 60 dots
+        const zpl = `^XA^FO10,15^A${font}N,60,0^FDAaBbCc 123^FS^XZ`;
+        const encoded = encodeURIComponent(zpl);
+        this.state.fontPreviewUrl = `http://api.labelary.com/v1/printers/8dpmm/labels/3x0.6/0/${encoded}`;
     }
 
     get variableOptions() {
@@ -637,8 +649,15 @@ class LabelCanvasEditor extends Component {
         const record = this._findRecord(key);
         if (record) {
             this.state.selectedData = Object.assign({}, record.data);
+            const et = record.data.element_type;
+            if (et === 'text' || et === 'variable') {
+                this._updateFontPreview(record.data.font_id);
+            } else {
+                this.state.fontPreviewUrl = null;
+            }
         } else {
             this.state.selectedData = null;
+            this.state.fontPreviewUrl = null;
         }
     }
 
@@ -945,7 +964,23 @@ class LabelCanvasEditor extends Component {
         ];
         if (intFields.includes(fieldName)) value = parseInt(value) || 0;
         if (fieldName === "show_text_below") value = ev.target.checked;
+        if (fieldName === "font_id") this._updateFontPreview(value);
         this._updateRecordField(this.state.selectedElementId, fieldName, value);
+    }
+
+    onStyleToggle(fieldName) {
+        if (!this.state.selectedElementId || !this.state.selectedData) return;
+        const current = !!this.state.selectedData[fieldName];
+        this._updateRecordField(this.state.selectedElementId, fieldName, !current);
+    }
+
+    async onSaveTemplate() {
+        try {
+            await this.props.record.save();
+            this.notification.add('Template saved.', { type: 'success' });
+        } catch (e) {
+            this.notification.add('Save failed: ' + (e.message || e), { type: 'danger' });
+        }
     }
 
     onContentSourceChange(ev) {

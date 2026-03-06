@@ -102,13 +102,17 @@ class PrintLabelWizard(models.TransientModel):
             res['source_model'] = active_model
             res['source_ids'] = json.dumps(active_ids)
 
-            # Set default printer
-            default_printer = self.env['vpa.printer.config'].search([
-                ('is_default', '=', True),
-                ('company_id', 'in', [False, self.env.company.id]),
-            ], limit=1)
-            if default_printer:
-                res['printer_id'] = default_printer.id
+            # Set default printer: user preference first, then company default
+            user_printer = self.env.user.default_printer_id
+            if user_printer:
+                res['printer_id'] = user_printer.id
+            else:
+                default_printer = self.env['vpa.printer.config'].search([
+                    ('is_default', '=', True),
+                    ('company_id', 'in', [False, self.env.company.id]),
+                ], limit=1)
+                if default_printer:
+                    res['printer_id'] = default_printer.id
 
             # Find matching templates
             model_map = {

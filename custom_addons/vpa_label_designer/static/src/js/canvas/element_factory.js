@@ -3,18 +3,43 @@
 import { ZEBRA_FONTS, dotsToScreenPx } from "./font_metrics";
 
 /**
- * Map Zebra font IDs to CSS font families for approximate on-screen rendering.
+ * Map Zebra font IDs to CSS font families for on-screen canvas rendering.
+ *
+ * Font 0  = scalable proportional (Helvetica/Swiss 721 on printer)
+ *           → IBM Plex Sans: clean proportional sans, professional label look
+ *
+ * Fonts A–H = fixed bitmap monospace fonts of varying sizes
+ *           → IBM Plex Mono: IBM's own monospaced font, designed for technical
+ *             clarity at small sizes — the closest web equivalent to Zebra's
+ *             built-in bitmap fonts in character and industrial feel.
  */
 const FONT_FAMILY_MAP = {
-    '0': "'Arial', 'Helvetica', sans-serif",          // Font 0 = scalable proportional (Helvetica-like)
-    'A': "'Courier New', monospace",                    // Bitmap fonts → monospace approximation
-    'B': "'Courier New', monospace",
-    'C': "'Courier New', monospace",
-    'D': "'Courier New', monospace",
-    'E': "'Courier New', monospace",
-    'F': "'Courier New', monospace",
-    'G': "'Arial Black', 'Impact', sans-serif",         // Font G is large/bold
-    'H': "'Courier New', monospace",
+    '0': "'IBM Plex Sans', 'Arial', sans-serif",
+    'A': "'IBM Plex Mono', 'Courier New', monospace",
+    'B': "'IBM Plex Mono', 'Courier New', monospace",
+    'C': "'IBM Plex Mono', 'Courier New', monospace",
+    'D': "'IBM Plex Mono', 'Courier New', monospace",
+    'E': "'IBM Plex Mono', 'Courier New', monospace",
+    'F': "'IBM Plex Mono', 'Courier New', monospace",
+    'G': "'IBM Plex Mono', 'Courier New', monospace",
+    'H': "'IBM Plex Mono', 'Courier New', monospace",
+};
+
+/**
+ * Zebra font natural aspect ratios (width/height) for canvas approximation.
+ * IBM Plex Mono natural aspect is ~0.6; we scale relative to that so the
+ * canvas text width matches each Zebra font's real character proportions.
+ */
+const FONT_ASPECT_MAP = {
+    '0': null,   // scalable proportional — no fixed aspect
+    'A': 0.56,   // 5/9  — condensed
+    'B': 0.64,   // 7/11 — narrow
+    'C': 0.56,   // 10/18
+    'D': 0.56,   // 10/18
+    'E': 0.54,   // 15/28
+    'F': 0.50,   // 13/26
+    'G': 0.67,   // 40/60
+    'H': 0.62,   // 13/21
 };
 
 /**
@@ -125,13 +150,16 @@ export class ElementFactory {
     _updateText(node, data) {
         const maxW = data.max_width || 0;
         if (maxW > 0 && typeof node.destroyChildren === 'function') {
-            this._updateTextGroup(node, data, data.content || 'Text', '#000000', false);
+            this._updateTextGroup(node, data, data.content || 'Text', '#000000', this._getFontStyle(data));
         } else {
             const fontSize = dotsToScreenPx(data.font_height || 30);
             const fontId = data.font_id || '0';
             node.fontSize(fontSize);
             node.fontFamily(FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0']);
+            node.fontStyle(this._getFontStyle(data));
+            node.textDecoration(data.font_underline ? 'underline' : '');
             node.text(data.content || 'Text');
+            node.scaleX(this._getFontScaleX(fontId));
             node.rotation(this._getRotationDegrees(data.rotation));
         }
     }
@@ -141,12 +169,13 @@ export class ElementFactory {
         const varDisplay = this._getVariableDisplay(data);
         const varName = this._getVariableName(data);
         const vatNote = this._getVatNote(varName);
+        const fontStyle = this._getFontStyle(data);
+        const textDeco = data.font_underline ? 'underline' : '';
 
         if (maxW > 0 && typeof node.destroyChildren === 'function') {
-            this._updateTextGroup(node, data, varDisplay, '#0055aa', true);
+            this._updateTextGroup(node, data, varDisplay, '#0055aa', fontStyle);
             if (vatNote) this._addVatNoteToGroup(node, data, vatNote);
         } else if (vatNote && typeof node.destroyChildren === 'function') {
-            // Price variable Group without max_width
             node.destroyChildren();
             const fontSize = dotsToScreenPx(data.font_height || 30);
             const fontId = data.font_id || '0';
@@ -156,7 +185,8 @@ export class ElementFactory {
                 fontSize: fontSize,
                 fontFamily: FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0'],
                 fill: '#0055aa',
-                fontStyle: 'italic',
+                fontStyle: fontStyle,
+                textDecoration: textDeco,
             }));
             const noteSize = Math.max(8, Math.round(fontSize * 0.6));
             node.add(new Konva.Text({
@@ -173,10 +203,12 @@ export class ElementFactory {
             const fontId = data.font_id || '0';
             node.fontSize(fontSize);
             node.fontFamily(FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0']);
+            node.fontStyle(fontStyle);
+            node.textDecoration(textDeco);
             node.text(varDisplay);
+            node.scaleX(this._getFontScaleX(fontId));
             node.rotation(this._getRotationDegrees(data.rotation));
         } else {
-            // Type mismatch — signal recreate
             return null;
         }
     }
@@ -184,27 +216,27 @@ export class ElementFactory {
     /**
      * Update a text Group (bounding box + text) with new data.
      */
-    _updateTextGroup(group, data, text, color, isItalic) {
+    _updateTextGroup(group, data, text, color, fontStyle) {
         const fontSize = dotsToScreenPx(data.font_height || 30);
         const fontId = data.font_id || '0';
         const maxW = data.max_width;
         const lines = parseInt(data.max_lines) || 1;
         const boxHeight = fontSize * lines + 4;
+        const textDeco = data.font_underline ? 'underline' : '';
 
         group.rotation(this._getRotationDegrees(data.rotation));
 
-        // Update children
         const children = group.getChildren();
-        // First child = Rect (bounding box)
         if (children[0]) {
             children[0].width(maxW);
             children[0].height(boxHeight);
         }
-        // Second child = Text
         if (children[1]) {
             const alignMap = { 'L': 'left', 'C': 'center', 'R': 'right' };
             children[1].fontSize(fontSize);
             children[1].fontFamily(FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0']);
+            children[1].fontStyle(fontStyle || 'normal');
+            children[1].textDecoration(textDeco);
             children[1].text(text);
             children[1].fill(color);
             children[1].width(maxW);
@@ -278,7 +310,7 @@ export class ElementFactory {
     _createText(data) {
         const maxW = data.max_width || 0;
         if (maxW > 0) {
-            return this._createTextGroup(data, data.content || 'Text', '#000000', false);
+            return this._createTextGroup(data, data.content || 'Text', '#000000', this._getFontStyle(data));
         }
         const fontSize = dotsToScreenPx(data.font_height || 30);
         const fontId = data.font_id || '0';
@@ -288,7 +320,10 @@ export class ElementFactory {
             text: data.content || 'Text',
             fontSize: fontSize,
             fontFamily: FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0'],
+            fontStyle: this._getFontStyle(data),
+            textDecoration: data.font_underline ? 'underline' : '',
             fill: '#000000',
+            scaleX: this._getFontScaleX(fontId),
             rotation: this._getRotationDegrees(data.rotation),
         });
     }
@@ -298,15 +333,16 @@ export class ElementFactory {
         const varDisplay = this._getVariableDisplay(data);
         const varName = this._getVariableName(data);
         const vatNote = this._getVatNote(varName);
+        const fontStyle = this._getFontStyle(data);
+        const textDeco = data.font_underline ? 'underline' : '';
 
         if (maxW > 0) {
-            const node = this._createTextGroup(data, varDisplay, '#0055aa', true);
+            const node = this._createTextGroup(data, varDisplay, '#0055aa', fontStyle);
             if (vatNote) this._addVatNoteToGroup(node, data, vatNote);
             return node;
         }
 
         if (vatNote) {
-            // Use a Group for price variable + VAT note
             const fontSize = dotsToScreenPx(data.font_height || 30);
             const fontId = data.font_id || '0';
             const group = new Konva.Group({
@@ -320,7 +356,8 @@ export class ElementFactory {
                 fontSize: fontSize,
                 fontFamily: FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0'],
                 fill: '#0055aa',
-                fontStyle: 'italic',
+                fontStyle: fontStyle,
+                textDecoration: textDeco,
             }));
             const noteSize = Math.max(8, Math.round(fontSize * 0.6));
             group.add(new Konva.Text({
@@ -343,7 +380,9 @@ export class ElementFactory {
             fontSize: fontSize,
             fontFamily: FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0'],
             fill: '#0055aa',
-            fontStyle: 'italic',
+            fontStyle: fontStyle,
+            textDecoration: textDeco,
+            scaleX: this._getFontScaleX(fontId),
             rotation: this._getRotationDegrees(data.rotation),
         });
     }
@@ -351,12 +390,13 @@ export class ElementFactory {
     /**
      * Create a Group with blue dashed bounding box + Text for max_width elements.
      */
-    _createTextGroup(data, text, color, isItalic) {
+    _createTextGroup(data, text, color, fontStyle) {
         const fontSize = dotsToScreenPx(data.font_height || 30);
         const fontId = data.font_id || '0';
         const maxW = data.max_width;
         const lines = parseInt(data.max_lines) || 1;
         const boxHeight = fontSize * lines + 4;
+        const textDeco = data.font_underline ? 'underline' : '';
 
         const group = new Konva.Group({
             x: data.pos_x || 0,
@@ -364,7 +404,6 @@ export class ElementFactory {
             rotation: this._getRotationDegrees(data.rotation),
         });
 
-        // Blue dashed bounding box
         group.add(new Konva.Rect({
             x: 0, y: 0,
             width: maxW,
@@ -375,18 +414,18 @@ export class ElementFactory {
             fill: 'rgba(51, 136, 221, 0.04)',
         }));
 
-        // Text node
         const alignMap = { 'L': 'left', 'C': 'center', 'R': 'right' };
         const textProps = {
             x: 0, y: 2,
             text: text,
             fontSize: fontSize,
             fontFamily: FONT_FAMILY_MAP[fontId] || FONT_FAMILY_MAP['0'],
+            fontStyle: fontStyle || 'normal',
+            textDecoration: textDeco,
             fill: color,
             width: maxW,
             align: alignMap[data.text_alignment] || 'left',
         };
-        if (isItalic) textProps.fontStyle = 'italic';
         if (lines === 1) {
             textProps.wrap = 'none';
             textProps.ellipsis = true;
@@ -695,6 +734,23 @@ export class ElementFactory {
     }
 
     // ─── Helpers ────────────────────────────────────────────────
+
+    _getFontScaleX(fontId) {
+        const aspect = FONT_ASPECT_MAP[fontId || '0'];
+        if (aspect == null) return 1;
+        // IBM Plex Mono natural char aspect (width/height) is ~0.60
+        // Scale horizontally so canvas char width matches Zebra font proportions
+        return aspect / 0.60;
+    }
+
+    _getFontStyle(data) {
+        const bold = data.font_bold;
+        const italic = data.font_italic;
+        if (bold && italic) return 'bold italic';
+        if (bold) return 'bold';
+        if (italic) return 'italic';
+        return 'normal';
+    }
 
     _getVariableName(data) {
         if (!data.variable_id) return '';

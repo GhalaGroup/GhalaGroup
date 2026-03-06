@@ -8,3 +8,4 @@ from . import label_element
 from . import label_template
 from . import printer_config
 from . import res_config_settings
+from . import res_users

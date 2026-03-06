@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Add "Reset to Draft" button on cancelled stock pickings -->
+    <record id="view_picking_form_reset_to_draft" model="ir.ui.view">
+        <field name="name">stock.picking.form.reset.to.draft</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <button name="action_cancel" position="after">
+                <button name="action_reset_to_draft"
+                        string="Reset to Draft"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not can_reset_to_draft"
+                        groups="vpa_effective_date_change.vpa_effective_date_change_group"
+                        confirm="This will reset the cancelled transfer back to a ready state. Continue?"/>
+            </button>
+        </field>
+    </record>
+
+</odoo>

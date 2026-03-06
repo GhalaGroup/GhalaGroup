@@ -77,6 +77,9 @@ class LabelElement(models.Model):
         ('C', 'Center'),
         ('R', 'Right'),
     ], string='Alignment', default='L')
+    font_bold = fields.Boolean(string='Bold', default=False)
+    font_italic = fields.Boolean(string='Italic', default=False)
+    font_underline = fields.Boolean(string='Underline', default=False)
 
     # Variable settings
     variable_id = fields.Many2one('vpa.label.variable', string='Variable',
@@ -153,7 +156,7 @@ class LabelElement(models.Model):
                  'show_text_below', 'qr_magnification', 'qr_error_correction',
                  'shape_width', 'shape_height', 'border_thickness', 'shape_color',
                  'image_data', 'image_width', 'max_width', 'max_lines',
-                 'text_alignment')
+                 'text_alignment', 'font_bold', 'font_italic', 'font_underline')
     def _compute_zpl_snippet(self):
         for rec in self:
             if rec.element_type == 'text':
@@ -189,14 +192,30 @@ class LabelElement(models.Model):
         font = self.font_id or '0'
         rot = self.rotation or 'N'
         height = self.font_height or 30
-        width = self.font_width or 0
         lines = int(self.max_lines or '1')
         align = self.text_alignment or 'L'
+
+        # Bold: increase font_width to ~130% of height for Font 0 (scalable)
+        # For bitmap fonts (A-H), bold-like effect via wider width
+        if self.font_bold:
+            width = self.font_width if self.font_width else int(height * 1.3)
+        else:
+            width = self.font_width or 0
+
         zpl = f'^FO{self.pos_x},{self.pos_y}^A{font}{rot},{height},{width}'
         if self.max_width and self.max_width > 0:
-            # ^FB{width},{max_lines},{line_spacing},{justification}
             zpl += f'^FB{self.max_width},{lines},0,{align}'
-        zpl += f'^FD{content}^FS'
+
+        # Underline using ^FU command (field underline) — supported on most Zebra firmware
+        if self.font_underline:
+            zpl += f'^FD{content}^FS'
+            # Draw underline as thin graphic box below the text
+            line_y = self.pos_y + height + 2
+            text_width = self.max_width if self.max_width else (width or height) * len(str(content))
+            text_width = min(max(text_width, 20), 800)
+            zpl += f'\n^FO{self.pos_x},{line_y}^GB{text_width},2,2^FS'
+        else:
+            zpl += f'^FD{content}^FS'
         return zpl
 
     def _zpl_vat_note(self, note_text):
