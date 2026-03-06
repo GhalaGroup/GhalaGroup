@@ -33,10 +33,8 @@ class MrpProductionCommissionReport(models.Model):
     commission_generated = fields.Boolean(string='Has Commission', readonly=True)
     commission_status = fields.Selection([
         ('not_applicable', 'Not Applicable'),
-        ('blocked', 'Blocked'),
         ('pending_generation', 'Pending Generation'),
-        ('pending_confirmation', 'Pending Confirmation'),
-        ('confirmed', 'Confirmed'),
+        ('applied', 'Applied'),
         ('paid', 'Paid'),
     ], string='Commission Status', readonly=True)
 
@@ -77,12 +75,11 @@ class MrpProductionCommissionReport(models.Model):
 
                     -- Commission Status Logic
                     CASE
-                        WHEN mp.commission_blocked = true THEN 'blocked'
+                        WHEN mp.commission_blocked = true THEN 'not_applicable'
                         WHEN mp.state NOT IN ('done', 'to_close') THEN 'not_applicable'
                         WHEN COUNT(cl.id) = 0 THEN 'pending_generation'
                         WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'paid') = COUNT(cl.id) THEN 'paid'
-                        WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'confirmed') > 0 THEN 'confirmed'
-                        ELSE 'pending_confirmation'
+                        ELSE 'applied'
                     END AS commission_status,
 
                     COALESCE(MAX(cl.base_amount), 0) AS commission_base_amount,

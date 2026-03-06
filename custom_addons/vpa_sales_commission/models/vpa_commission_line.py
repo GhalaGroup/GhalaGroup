@@ -124,8 +124,8 @@ class VpaCommissionLine(models.Model):
 
     # Status workflow
     state = fields.Selection([
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
+        ('pending', 'Applied'),
+        ('confirmed', 'Applied'),
         ('paid', 'Paid'),
         ('cancelled', 'Cancelled'),
     ], string='Status', default='pending', required=True)

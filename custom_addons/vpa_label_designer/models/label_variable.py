@@ -70,16 +70,21 @@ class LabelVariable(models.Model):
                 try:
                     product = self._get_product(record)
                     if product:
-                        # Try product template's sale packaging_ids first
                         tmpl = product.product_tmpl_id if product._name == 'product.product' else product
-                        pkgs = getattr(tmpl, 'packaging_ids', None)
-                        pkg = pkgs[:1] if pkgs else None
-                        if pkg:
+                        # Read from VPA UoM conversions - find first one with packaging info
+                        conversions = getattr(tmpl, 'uom_conversion_ids', None)
+                        conv = None
+                        if conversions:
+                            # Prefer conversion with packaging_name set
+                            conv = next((c for c in conversions if c.packaging_name), None)
+                            if not conv:
+                                conv = conversions[0]
+                        if conv:
                             if self.name == 'QTY_PER_PACKAGE':
-                                qty = pkg.qty
+                                qty = conv.qty_per_package or 0
                                 return str(int(qty)) if qty == int(qty) else str(qty)
                             if self.name == 'PACKAGING_NAME':
-                                return pkg.name or ''
+                                return conv.packaging_name or conv.uom_id.name or ''
                 except Exception:
                     pass
                 return ''

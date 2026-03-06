@@ -19,7 +19,7 @@
                             invisible="state not in ('confirmed', 'paid', 'cancelled')"
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="pending,confirmed,paid"/>
+                           statusbar_visible="pending,paid"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -111,8 +111,7 @@
                 <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="delivered" widget="boolean" string="Delivered"/>
                 <field name="state" widget="badge"
-                       decoration-info="state == 'pending'"
-                       decoration-warning="state == 'confirmed'"
+                       decoration-info="state in ('pending', 'confirmed')"
                        decoration-success="state == 'paid'"
                        decoration-danger="state == 'cancelled'"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
@@ -131,8 +130,7 @@
                 <field name="scheme_id"/>
                 <field name="production_id"/>
                 <separator/>
-                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
-                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Applied" name="pending" domain="[('state', 'in', ('pending', 'confirmed'))]"/>
                 <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
                 <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
@@ -193,7 +191,7 @@
         <field name="res_model">vpa.commission.line</field>
         <field name="view_mode">list,pivot,graph,form</field>
         <field name="search_view_id" ref="vpa_commission_line_view_search"/>
-        <field name="context">{'search_default_pending': 1}</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No commission lines yet

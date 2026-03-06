@@ -10,6 +10,12 @@ class CommissionStatementWizard(models.TransientModel):
     _name = 'vpa.commission.statement.wizard'
     _description = 'Commission Statement Wizard'
 
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.company,
+    )
     employee_id = fields.Many2one(
         'hr.employee',
         string='Employee',

@@ -35,11 +35,9 @@ class MrpProduction(models.Model):
     )
     commission_status = fields.Selection([
         ('none', 'No Commission'),
-        ('blocked', 'Blocked'),
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
+        ('not_applicable', 'Not Applicable'),
+        ('applied', 'Applied'),
         ('paid', 'Paid'),
-        ('partial', 'Partial'),
         ('cancelled', 'Cancelled'),
     ], string='Commission Status',
         compute='_compute_commission_status',
@@ -68,25 +66,18 @@ class MrpProduction(models.Model):
     def _compute_commission_status(self):
         for production in self:
             if production.commission_blocked:
-                production.commission_status = 'blocked'
+                production.commission_status = 'not_applicable'
             elif not production.commission_line_ids:
                 production.commission_status = 'none'
             else:
                 states = set(production.commission_line_ids.mapped('state'))
-                # Remove cancelled from consideration
                 active_states = states - {'cancelled'}
                 if not active_states:
-                    # All lines are cancelled
                     production.commission_status = 'cancelled'
                 elif active_states == {'paid'}:
                     production.commission_status = 'paid'
-                elif active_states == {'confirmed'}:
-                    production.commission_status = 'confirmed'
-                elif active_states == {'pending'}:
-                    production.commission_status = 'pending'
                 else:
-                    # Mix of states
-                    production.commission_status = 'partial'
+                    production.commission_status = 'applied'
 
     @api.depends('move_raw_ids', 'move_raw_ids.state', 'move_raw_ids.product_id', 'move_raw_ids.quantity')
     def _compute_commission_base_amount(self):
@@ -106,6 +97,13 @@ class MrpProduction(models.Model):
         """Unblock commission generation for this MO. Manager only."""
         self.ensure_one()
         self.commission_blocked = False
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.production',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'target': 'self',
+        }
 
     def action_generate_commission(self):
         """Create and open the commission generation wizard."""
