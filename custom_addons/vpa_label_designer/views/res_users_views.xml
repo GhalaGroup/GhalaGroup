@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Default Label Printer field to user preferences -->
+    <record id="view_users_form_inherit_label_designer" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.label.designer</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='other_preferences']" position="inside">
+                <field name="default_printer_id" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

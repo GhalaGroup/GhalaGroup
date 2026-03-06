@@ -8,15 +8,15 @@
  */
 
 export const ZEBRA_FONTS = {
-    '0': { name: 'Default Proportional', cellH: 15, cellW: 12, scalable: true, desc: 'Scalable, Helvetica-like' },
-    'A': { name: 'Font A', cellH: 9, cellW: 5, scalable: false, desc: '9x5 dots — Smallest' },
-    'B': { name: 'Font B', cellH: 11, cellW: 7, scalable: false, desc: '11x7 dots' },
-    'C': { name: 'Font C', cellH: 18, cellW: 10, scalable: false, desc: '18x10 dots' },
-    'D': { name: 'Font D', cellH: 18, cellW: 10, scalable: false, desc: '18x10 dots' },
-    'E': { name: 'Font E', cellH: 28, cellW: 15, scalable: false, desc: '28x15 dots — Medium' },
-    'F': { name: 'Font F', cellH: 26, cellW: 13, scalable: false, desc: '26x13 dots' },
-    'G': { name: 'Font G', cellH: 60, cellW: 40, scalable: false, desc: '60x40 dots — Large/Bold' },
-    'H': { name: 'Font H', cellH: 21, cellW: 13, scalable: false, desc: '21x13 dots' },
+    '0': { name: 'Font 0', cellH: 15, cellW: 12, scalable: true, desc: 'Font 0 — Scalable (Helvetica)' },
+    'A': { name: 'Font A', cellH: 9, cellW: 5, scalable: false, desc: 'Font A — Condensed' },
+    'B': { name: 'Font B', cellH: 11, cellW: 7, scalable: false, desc: 'Font B — Narrow' },
+    'C': { name: 'Font C', cellH: 18, cellW: 10, scalable: false, desc: 'Font C — Standard' },
+    'D': { name: 'Font D', cellH: 18, cellW: 10, scalable: false, desc: 'Font D — Standard Wide' },
+    'E': { name: 'Font E', cellH: 28, cellW: 15, scalable: false, desc: 'Font E — Medium Bold' },
+    'F': { name: 'Font F', cellH: 26, cellW: 13, scalable: false, desc: 'Font F — Medium' },
+    'G': { name: 'Font G', cellH: 60, cellW: 40, scalable: false, desc: 'Font G — Large Bold' },
+    'H': { name: 'Font H', cellH: 21, cellW: 13, scalable: false, desc: 'Font H — Regular' },
 };
 
 /**
@@ -43,10 +43,20 @@ export function dotsToPoints(dots, dpi = 203) {
 
 /**
  * Convert ZPL dot height to screen pixel font size for Konva.js text
- * rendering. Uses 1:1 mapping so the canvas matches the actual ZPL
- * output (Labelary PDF / printer). The element layer zoom handles
- * visual scaling to fit the screen.
+ * rendering.
+ *
+ * Zebra bitmap fonts fill ~92% of their cell height (characters nearly
+ * touch the top and bottom of the dot-height box). Web fonts (IBM Plex
+ * Mono / IBM Plex Sans) have a cap-height of ~68% of their fontSize em.
+ *
+ * To make the rendered cap-height on screen match the ZPL dot height:
+ *   fontSize = dots / capHeightRatio  →  capHeight = fontSize × 0.68 ≈ dots × 0.92
+ *
+ * Correction factor = 0.92 / 0.68 ≈ 1.35
+ *
+ * The element layer zoom handles scaling to fit the screen container.
  */
 export function dotsToScreenPx(dots) {
-    return Math.max(8, Math.round(dots));
+    const CAP_HEIGHT_CORRECTION = 1.35; // Zebra cell fill (0.92) / IBM Plex cap-height ratio (0.68)
+    return Math.max(8, Math.round(dots * CAP_HEIGHT_CORRECTION));
 }

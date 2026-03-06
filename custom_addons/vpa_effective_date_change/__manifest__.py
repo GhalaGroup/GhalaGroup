@@ -78,6 +78,7 @@ Support: info@vpa.co.tz
         'wizard/change_effective_wizard_views.xml',
         'wizard/change_effective_wizard_mo_views.xml',
         'wizard/change_effective_wizard_so_views.xml',
+        'views/stock_picking_views.xml',
     ],
     'images': [
         'static/description/icon.png',

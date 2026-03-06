@@ -88,6 +88,11 @@
 
             <!-- RIGHT: Properties Panel -->
             <div class="vpa_canvas_props">
+                <div class="props-save-bar">
+                    <button class="props-save-btn" t-on-click="onSaveTemplate" title="Save all changes">
+                        <i class="fa fa-save"/> Save
+                    </button>
+                </div>
                 <t t-if="state.selectedData">
                     <div class="props-header">
                         <t t-if="state.multiSelectCount >= 2">
@@ -162,6 +167,12 @@
                                     </t>
                                 </select>
                             </div>
+                            <t t-if="state.fontPreviewUrl">
+                                <div class="props-font-preview">
+                                    <img t-att-src="state.fontPreviewUrl"
+                                         alt="Font preview"/>
+                                </div>
+                            </t>
                             <div class="props-row">
                                 <label>Preset:</label>
                                 <select class="props-select" t-on-change="onFontPresetChange">
@@ -178,6 +189,23 @@
                                        t-att-value="state.selectedData.font_height"
                                        t-on-change="(ev) => this.onPropertyChange('font_height', ev)"/>
                                 <span class="props-hint" t-esc="fontPointSize"/>
+                            </div>
+                            <div class="props-row">
+                                <label>Style:</label>
+                                <div class="props-style-btns">
+                                    <button class="props-style-btn"
+                                            t-att-class="state.selectedData.font_bold ? 'props-style-btn active' : 'props-style-btn'"
+                                            t-on-click="() => this.onStyleToggle('font_bold')"
+                                            title="Bold"><b>B</b></button>
+                                    <button class="props-style-btn"
+                                            t-att-class="state.selectedData.font_italic ? 'props-style-btn active' : 'props-style-btn'"
+                                            t-on-click="() => this.onStyleToggle('font_italic')"
+                                            title="Italic"><i>I</i></button>
+                                    <button class="props-style-btn"
+                                            t-att-class="state.selectedData.font_underline ? 'props-style-btn active' : 'props-style-btn'"
+                                            t-on-click="() => this.onStyleToggle('font_underline')"
+                                            title="Underline"><u>U</u></button>
+                                </div>
                             </div>
                             <div class="props-row">
                                 <label>Rotation:</label>
