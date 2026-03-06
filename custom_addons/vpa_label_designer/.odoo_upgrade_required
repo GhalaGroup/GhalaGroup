@@ -1,0 +1,2 @@
+# This file triggers a rebuild cycle.
+# vpa_label_designer requires a module upgrade to create the default_printer_id column.
