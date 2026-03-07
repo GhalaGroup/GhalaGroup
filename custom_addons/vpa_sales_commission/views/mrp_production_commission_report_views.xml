@@ -7,7 +7,7 @@
         <field name="model">mrp.production.commission.report</field>
         <field name="arch" type="xml">
             <list string="MO Commission Report" create="false" delete="false" edit="false"
-                  decoration-muted="commission_status == 'not_applicable'"
+                  decoration-muted="commission_status in ('not_applicable', 'draft')"
                   decoration-warning="commission_status == 'pending_generation'"
                   decoration-info="commission_status == 'applied'"
                   decoration-success="commission_status == 'paid'">
@@ -17,7 +17,7 @@
                 <field name="date_finished"/>
                 <field name="state" optional="hide"/>
                 <field name="commission_status" widget="badge"
-                       decoration-muted="commission_status == 'not_applicable'"
+                       decoration-muted="commission_status in ('not_applicable', 'draft')"
                        decoration-warning="commission_status == 'pending_generation'"
                        decoration-info="commission_status == 'applied'"
                        decoration-success="commission_status == 'paid'"/>
@@ -89,6 +89,7 @@
                 <field name="date_year"/>
                 <field name="date_month"/>
                 <separator/>
+                <filter string="Draft" name="filter_draft" domain="[('commission_status', '=', 'draft')]"/>
                 <filter string="Not Applicable" name="filter_not_applicable" domain="[('commission_status', '=', 'not_applicable')]"/>
                 <filter string="Pending Generation" name="filter_pending_generation"
                         domain="[('commission_status', '=', 'pending_generation')]"/>
