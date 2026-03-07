@@ -32,7 +32,6 @@ class MrpProductionCommissionReport(models.Model):
     commission_blocked = fields.Boolean(string='Commission Blocked', readonly=True)
     commission_generated = fields.Boolean(string='Has Commission', readonly=True)
     commission_status = fields.Selection([
-        ('draft', 'Draft'),
         ('not_applicable', 'Not Applicable'),
         ('pending_generation', 'Pending Generation'),
         ('applied', 'Applied'),
@@ -77,7 +76,6 @@ class MrpProductionCommissionReport(models.Model):
                     -- Commission Status Logic
                     CASE
                         WHEN mp.commission_blocked = true THEN 'not_applicable'
-                        WHEN mp.state NOT IN ('done', 'to_close') THEN 'draft'
                         WHEN COUNT(cl.id) = 0 THEN 'pending_generation'
                         WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'paid') = COUNT(cl.id) THEN 'paid'
                         ELSE 'applied'
@@ -96,7 +94,7 @@ class MrpProductionCommissionReport(models.Model):
                 FROM mrp_production mp
                 LEFT JOIN vpa_commission_line cl ON cl.production_id = mp.id AND cl.state != 'cancelled'
                 LEFT JOIN res_company rc ON rc.id = mp.company_id
-                WHERE mp.state IN ('draft', 'confirmed', 'progress', 'to_close', 'done')
+                WHERE mp.state IN ('to_close', 'done')
                 GROUP BY mp.id, mp.name, mp.product_id, mp.product_qty, mp.date_finished,
                          mp.state, mp.commission_blocked,
                          mp.company_id, rc.currency_id
