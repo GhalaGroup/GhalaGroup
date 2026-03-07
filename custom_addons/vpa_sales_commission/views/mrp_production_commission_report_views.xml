@@ -11,6 +11,14 @@
                   decoration-warning="commission_status == 'pending_generation'"
                   decoration-info="commission_status == 'applied'"
                   decoration-success="commission_status == 'paid'">
+                <header>
+                    <button name="action_mark_not_applicable" type="object"
+                            string="Mark Not Applicable" class="btn-warning"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="action_remove_not_applicable" type="object"
+                            string="Remove Not Applicable" class="btn-secondary"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                </header>
                 <field name="name" string="MO Reference"/>
                 <field name="product_id" optional="show"/>
                 <field name="product_qty" optional="hide"/>

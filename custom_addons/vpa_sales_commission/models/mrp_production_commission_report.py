@@ -129,3 +129,13 @@ class MrpProductionCommissionReport(models.Model):
         """Generate commission for this MO."""
         self.ensure_one()
         return self.production_id.action_generate_commission()
+
+    def action_mark_not_applicable(self):
+        """Mark selected MOs as Not Applicable (block commission)."""
+        productions = self.mapped('production_id').filtered(lambda p: not p.commission_blocked)
+        productions.write({'commission_blocked': True})
+
+    def action_remove_not_applicable(self):
+        """Remove Not Applicable from selected MOs."""
+        productions = self.mapped('production_id').filtered(lambda p: p.commission_blocked)
+        productions.write({'commission_blocked': False})
