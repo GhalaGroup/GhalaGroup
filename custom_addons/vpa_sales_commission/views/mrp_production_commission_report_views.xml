@@ -6,19 +6,11 @@
         <field name="name">mrp.production.commission.report.tree</field>
         <field name="model">mrp.production.commission.report</field>
         <field name="arch" type="xml">
-            <list string="MO Commission Report" create="false" delete="false" edit="false"
+            <list string="Commission by MO" create="false" delete="false" edit="false"
                   decoration-muted="commission_status == 'not_applicable'"
                   decoration-warning="commission_status == 'pending_generation'"
                   decoration-info="commission_status == 'applied'"
                   decoration-success="commission_status == 'paid'">
-                <header>
-                    <button name="action_mark_not_applicable" type="object"
-                            string="Mark Not Applicable" class="btn-warning"
-                            groups="vpa_sales_commission.group_commission_manager"/>
-                    <button name="action_remove_not_applicable" type="object"
-                            string="Remove Not Applicable" class="btn-secondary"
-                            groups="vpa_sales_commission.group_commission_manager"/>
-                </header>
                 <field name="name" string="MO Reference"/>
                 <field name="product_id" optional="show"/>
                 <field name="product_qty" optional="hide"/>
@@ -41,6 +33,11 @@
                        options="{'currency_field': 'currency_id'}" optional="hide"/>
                 <field name="employee_count" string="Employees" optional="hide"/>
                 <field name="commission_line_count" string="Lines" optional="hide"/>
+                <field name="billing_status" widget="badge" optional="show"
+                       decoration-muted="billing_status == 'not_billed'"
+                       decoration-warning="billing_status == 'partial'"
+                       decoration-info="billing_status == 'billed'"/>
+                <field name="billed_line_count" column_invisible="1"/>
                 <field name="commission_blocked" column_invisible="1"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="company_id" column_invisible="1"/>
@@ -132,7 +129,7 @@
 
     <!-- Action for MO Commission Report -->
     <record id="action_mrp_production_commission_report" model="ir.actions.act_window">
-        <field name="name">MO Commission Report</field>
+        <field name="name">Commission by MO</field>
         <field name="res_model">mrp.production.commission.report</field>
         <field name="view_mode">list,pivot,graph</field>
         <field name="search_view_id" ref="mrp_production_commission_report_view_search"/>
@@ -147,5 +144,28 @@
         </field>
     </record>
 
+    <!-- Server Action: Mark Not Applicable (in Actions menu, with confirmation) -->
+    <record id="server_action_mark_not_applicable" model="ir.actions.server">
+        <field name="name">Mark Not Applicable</field>
+        <field name="model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list</field>
+
+        <field name="state">code</field>
+        <field name="code">action = records.action_mark_not_applicable()</field>
+    </record>
+
+    <!-- Server Action: Remove Not Applicable (in Actions menu, with confirmation) -->
+    <record id="server_action_remove_not_applicable" model="ir.actions.server">
+        <field name="name">Remove Not Applicable</field>
+        <field name="model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list</field>
+
+        <field name="state">code</field>
+        <field name="code">action = records.action_remove_not_applicable()</field>
+    </record>
 
 </odoo>

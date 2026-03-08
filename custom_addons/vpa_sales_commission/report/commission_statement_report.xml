@@ -3,19 +3,7 @@
 <!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
 <odoo>
 
-    <!-- Report 1: Commission Statement from Annual Guarantee -->
-    <record id="action_report_commission_statement_guarantee" model="ir.actions.report">
-        <field name="name">Commission Statement</field>
-        <field name="model">vpa.commission.guarantee</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">vpa_sales_commission.report_commission_statement_guarantee</field>
-        <field name="report_file">vpa_sales_commission.report_commission_statement_guarantee</field>
-        <field name="print_report_name">'Commission Statement - %s' % (object.name)</field>
-        <field name="binding_model_id" ref="model_vpa_commission_guarantee"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- Report 2: Commission Statement from Wizard (custom date range) -->
+    <!-- Report 1: Commission Statement from Wizard (custom date range) -->
     <record id="action_report_commission_statement_wizard" model="ir.actions.report">
         <field name="name">Commission Statement</field>
         <field name="model">vpa.commission.statement.wizard</field>
@@ -23,6 +11,74 @@
         <field name="report_name">vpa_sales_commission.report_commission_statement_wizard</field>
         <field name="report_file">vpa_sales_commission.report_commission_statement_wizard</field>
         <field name="print_report_name">'Commission Statement - %s' % (object.employee_id.name)</field>
+    </record>
+
+    <!-- Report 2: Annual Commission Statement (from scheme year form) -->
+    <record id="action_report_annual_commission_statement" model="ir.actions.report">
+        <field name="name">Annual Commission Statement</field>
+        <field name="model">vpa.commission.scheme.year</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_annual_commission_statement</field>
+        <field name="report_file">vpa_sales_commission.report_annual_commission_statement</field>
+        <field name="print_report_name">'Annual Commission Statement - %s %s' % (object.employee_id.name, object.year)</field>
+        <field name="binding_model_id" ref="model_vpa_commission_scheme_year"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report 3: Monthly Billing Summary (from scheme year form) -->
+    <record id="action_report_monthly_billing_summary" model="ir.actions.report">
+        <field name="name">Monthly Billing Summary</field>
+        <field name="model">vpa.commission.scheme.year</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_monthly_billing_summary</field>
+        <field name="report_file">vpa_sales_commission.report_monthly_billing_summary</field>
+        <field name="print_report_name">'Monthly Billing Summary - %s %s' % (object.employee_id.name, object.year)</field>
+        <field name="binding_model_id" ref="model_vpa_commission_scheme_year"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report 5: MO Commission Report (bound to list view) -->
+    <record id="action_report_mo_commission_report" model="ir.actions.report">
+        <field name="name">Commission by MO</field>
+        <field name="model">mrp.production.commission.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_mo_commission_report</field>
+        <field name="report_file">vpa_sales_commission.report_mo_commission_report</field>
+        <field name="print_report_name">'Commission by MO'</field>
+        <field name="binding_model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report 6: Commission Statement by Sales Order (wizard) -->
+    <record id="action_report_commission_statement_by_so" model="ir.actions.report">
+        <field name="name">Commission Statement by Sales Order</field>
+        <field name="model">vpa.commission.statement.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_commission_statement_by_so</field>
+        <field name="report_file">vpa_sales_commission.report_commission_statement_by_so</field>
+        <field name="print_report_name">'Commission by SO - %s' % (object.employee_id.name)</field>
+    </record>
+
+    <!-- Report 7: SO Commission Report (bound to list view) -->
+    <record id="action_report_so_commission_report" model="ir.actions.report">
+        <field name="name">Commission by SO</field>
+        <field name="model">so.commission.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_so_commission_report</field>
+        <field name="report_file">vpa_sales_commission.report_so_commission_report</field>
+        <field name="print_report_name">'Commission by SO'</field>
+        <field name="binding_model_id" ref="model_so_commission_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report 4: Year Summary (all employees, wizard) -->
+    <record id="action_report_commission_year_summary" model="ir.actions.report">
+        <field name="name">Commission Year Summary</field>
+        <field name="model">vpa.commission.year.summary.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_commission_year_summary</field>
+        <field name="report_file">vpa_sales_commission.report_commission_year_summary</field>
+        <field name="print_report_name">'Commission Year Summary - FY %s' % (object.year)</field>
     </record>
 
 </odoo>

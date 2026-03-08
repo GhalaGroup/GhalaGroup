@@ -13,10 +13,6 @@
                                 class="oe_stat_button" icon="fa-list-alt">
                             <field name="total_commission" string="Total" widget="statinfo"/>
                         </button>
-                        <button name="action_view_guarantees" type="object"
-                                class="oe_stat_button" icon="fa-shield">
-                            <field name="guarantee_count" string="Guarantees" widget="statinfo"/>
-                        </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
@@ -33,7 +29,10 @@
                         </group>
                         <group string="Commission Types">
                             <field name="production_commission" string="Production (Raw Material)"/>
-                            <field name="production_rate" string="Production Rate (%)" invisible="not production_commission"/>
+                            <field name="production_rate" string="Default Rate (%)"
+                                   invisible="not production_commission"
+                                   help="Fallback rate when no yearly rate is configured"/>
+                            <field name="expense_account_id" string="Default Expense Account"/>
                             <field name="sales_commission" string="Sales"/>
                             <field name="sales_rate" string="Sales Rate (%)" invisible="not sales_commission"/>
                         </group>
@@ -60,38 +59,13 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Minimum Guarantee" name="minimum_guarantee">
-                            <group>
-                                <group>
-                                    <field name="has_minimum"/>
-                                    <field name="minimum_amount" invisible="not has_minimum"
-                                           widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="minimum_frequency" invisible="not has_minimum"/>
-                                </group>
-                            </group>
-                            <separator string="Annual Guarantee Table"/>
-                            <field name="guarantee_ids">
-                                <list editable="bottom">
-                                    <field name="year"/>
-                                    <field name="currency_id" column_invisible="1"/>
-                                    <field name="guarantee_amount" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}" string="Guarantee"/>
-                                    <field name="guarantee_amount_usd" string="USD Equiv."/>
-                                    <field name="total_earned" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}" string="Earned"/>
-                                    <field name="total_paid" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}" string="Paid"/>
-                                    <field name="shortfall" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}" string="Shortfall"
-                                           decoration-danger="shortfall > 0"/>
-                                    <field name="outstanding" widget="monetary"
-                                           options="{'currency_field': 'currency_id'}" string="Outstanding"/>
-                                    <field name="status" widget="badge"
-                                           decoration-success="status == 'on_track'"
-                                           decoration-danger="status == 'shortfall'"
-                                           decoration-muted="status == 'no_lines'"/>
-                                </list>
-                            </field>
+                        <page string="Yearly Rates" name="yearly_rates">
+                            <p class="text-muted">
+                                Configure the commission rate and minimum guarantee for each year.
+                                When generating commission, the rate for the MO's year is used automatically.
+                            </p>
+                            <field name="year_ids"
+                                   view_id="vpa_sales_commission.vpa_commission_scheme_year_view_list_inline"/>
                         </page>
                         <page string="Commission Lines" name="commission_lines">
                             <field name="commission_line_ids" readonly="1">

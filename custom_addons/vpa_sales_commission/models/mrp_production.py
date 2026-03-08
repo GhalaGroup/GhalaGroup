@@ -122,17 +122,20 @@ class MrpProduction(models.Model):
                 'included': not move.product_id.not_commissionable,
             }))
 
-        # Build scheme lines
+        # Build scheme lines — use yearly rate if available
+        mo_year = str(self.date_finished.year) if self.date_finished else str(fields.Date.today().year)
         CommissionLine = self.env['vpa.commission.line']
         schemes = self.env['vpa.commission.scheme'].search([
             ('active', '=', True),
             ('production_commission', '=', True),
-            ('production_rate', '>', 0),
             ('company_id', '=', self.company_id.id),
         ])
         scheme_lines = []
         for scheme in schemes:
             if not scheme._applies_to_production(self):
+                continue
+            rate = scheme._get_rate_for_year(mo_year)
+            if not rate:
                 continue
             existing = CommissionLine.search([
                 ('production_id', '=', self.id),
@@ -141,7 +144,7 @@ class MrpProduction(models.Model):
             scheme_lines.append((0, 0, {
                 'scheme_id': scheme.id,
                 'employee_id': scheme.employee_id.id,
-                'rate': scheme.production_rate,
+                'rate': rate,
                 'currency_id': scheme.currency_id.id,
                 'selected': not bool(existing),
                 'already_generated': bool(existing),

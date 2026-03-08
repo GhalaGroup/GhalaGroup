@@ -93,7 +93,7 @@
         <field name="arch" type="xml">
             <list string="Commission Lines" multi_edit="1" create="0">
                 <header>
-                    <button name="%(action_commission_make_payment)d" string="Make Payment"
+                    <button name="%(action_commission_generate_bill)d" string="Generate Bill"
                             type="action" class="btn-primary"
                             groups="vpa_sales_commission.group_commission_manager"/>
                 </header>
@@ -114,6 +114,17 @@
                        decoration-info="state in ('pending', 'confirmed')"
                        decoration-success="state == 'paid'"
                        decoration-danger="state == 'cancelled'"/>
+                <field name="bill_id" optional="show" string="Bill"
+                       decoration-info="bill_state == 'billed'"
+                       decoration-success="bill_state == 'paid'"/>
+                <button name="action_view_bill" type="object"
+                        icon="fa-external-link" title="Open Bill"
+                        invisible="not bill_id"/>
+                <field name="bill_state" widget="badge" optional="hide"
+                       decoration-muted="bill_state == 'not_billed'"
+                       decoration-info="bill_state == 'billed'"
+                       decoration-success="bill_state == 'paid'"/>
+                <field name="year_locked" column_invisible="1"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>
         </field>
@@ -139,6 +150,9 @@
                 <separator/>
                 <filter string="Delivered" name="delivered" domain="[('delivered', '=', True)]"/>
                 <filter string="Not Delivered" name="not_delivered" domain="[('delivered', '=', False)]"/>
+                <separator/>
+                <filter string="Not Billed" name="not_billed" domain="[('bill_id', '=', False)]"/>
+                <filter string="Billed" name="billed" domain="[('bill_id', '!=', False)]"/>
                 <separator/>
                 <filter string="Date" name="filter_date" date="date" default_period="year"/>
                 <separator/>

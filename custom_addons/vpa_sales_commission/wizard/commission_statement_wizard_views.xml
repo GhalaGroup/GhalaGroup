@@ -11,14 +11,20 @@
             <form string="Commission Statement">
                 <group>
                     <field name="employee_id"/>
-                    <field name="date_from"/>
-                    <field name="date_to"/>
+                    <field name="year"/>
+                    <field name="month"/>
                     <field name="include_pending"/>
                     <field name="currency_id" invisible="1"/>
                 </group>
                 <footer>
-                    <button name="action_print_statement" string="Print Statement"
-                            type="object" class="btn-primary" icon="fa-print"/>
+                    <button name="action_print_statement" string="Preview Statement"
+                            type="object" class="btn-primary" icon="fa-eye"/>
+                    <button name="action_pdf_statement" string="PDF Statement"
+                            type="object" class="btn-secondary" icon="fa-file-pdf-o"/>
+                    <button name="action_print_by_so" string="Preview by SO"
+                            type="object" class="btn-primary" icon="fa-eye"/>
+                    <button name="action_pdf_by_so" string="PDF by SO"
+                            type="object" class="btn-secondary" icon="fa-file-pdf-o"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

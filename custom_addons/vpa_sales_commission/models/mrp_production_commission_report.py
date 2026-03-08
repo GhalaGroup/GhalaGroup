@@ -49,6 +49,14 @@ class MrpProductionCommissionReport(models.Model):
     commission_line_count = fields.Integer(string='# of Commission Lines', readonly=True)
     employee_count = fields.Integer(string='# of Employees', readonly=True)
 
+    # Billing status
+    billed_line_count = fields.Integer(string='Billed Lines', readonly=True)
+    billing_status = fields.Selection([
+        ('not_billed', 'Not Billed'),
+        ('partial', 'Partially Billed'),
+        ('billed', 'Billed'),
+    ], string='Billing Status', readonly=True)
+
     # Company
     company_id = fields.Many2one('res.company', string='Company', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True)
@@ -88,6 +96,16 @@ class MrpProductionCommissionReport(models.Model):
                     COALESCE(SUM(CASE WHEN cl.state = 'paid' THEN cl.amount ELSE 0 END), 0) AS paid_commission_amount,
                     COUNT(cl.id) AS commission_line_count,
                     COUNT(DISTINCT cl.employee_id) AS employee_count,
+
+                    -- Billing Status
+                    COUNT(cl.id) FILTER (WHERE cl.bill_id IS NOT NULL) AS billed_line_count,
+                    CASE
+                        WHEN COUNT(cl.id) = 0 THEN 'not_billed'
+                        WHEN COUNT(cl.id) FILTER (WHERE cl.bill_id IS NOT NULL) = COUNT(cl.id) THEN 'billed'
+                        WHEN COUNT(cl.id) FILTER (WHERE cl.bill_id IS NOT NULL) > 0 THEN 'partial'
+                        ELSE 'not_billed'
+                    END AS billing_status,
+
                     mp.company_id AS company_id,
                     rc.currency_id AS currency_id
 
@@ -134,8 +152,28 @@ class MrpProductionCommissionReport(models.Model):
         """Mark selected MOs as Not Applicable (block commission)."""
         productions = self.mapped('production_id').filtered(lambda p: not p.commission_blocked)
         productions.write({'commission_blocked': True})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Done',
+                'message': '%d MO(s) marked as Not Applicable.' % len(productions),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
 
     def action_remove_not_applicable(self):
         """Remove Not Applicable from selected MOs."""
         productions = self.mapped('production_id').filtered(lambda p: p.commission_blocked)
         productions.write({'commission_blocked': False})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Done',
+                'message': '%d MO(s) re-enabled for commission.' % len(productions),
+                'type': 'success',
+                'sticky': False,
+            },
+        }

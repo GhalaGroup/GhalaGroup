@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Year Summary Wizard Form -->
+    <record id="vpa_commission_year_summary_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.year.summary.wizard.form</field>
+        <field name="model">vpa.commission.year.summary.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Commission Year Summary Report">
+                <group>
+                    <field name="year"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Print Report"
+                            type="object" class="btn-primary" icon="fa-print"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Year Summary Wizard Action -->
+    <record id="action_commission_year_summary_wizard" model="ir.actions.act_window">
+        <field name="name">Year Summary Report</field>
+        <field name="res_model">vpa.commission.year.summary.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="vpa_commission_year_summary_wizard_view_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

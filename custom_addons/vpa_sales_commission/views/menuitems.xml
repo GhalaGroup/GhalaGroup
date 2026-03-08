@@ -24,14 +24,6 @@
               sequence="12"
               groups="vpa_sales_commission.group_commission_manager"/>
 
-    <!-- Annual Guarantees Menu -->
-    <menuitem id="menu_commission_guarantees"
-              name="Annual Guarantees"
-              parent="menu_commission_root"
-              action="vpa_commission_guarantee_action"
-              sequence="15"
-              groups="vpa_sales_commission.group_commission_manager"/>
-
     <!-- Commission Statement Menu -->
     <menuitem id="menu_commission_statement"
               name="Commission Statement"
@@ -47,12 +39,28 @@
               sequence="90"
               groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
 
+    <!-- Year Summary Report -->
+    <menuitem id="menu_commission_year_summary"
+              name="Year Summary"
+              parent="menu_commission_reporting"
+              action="action_commission_year_summary_wizard"
+              sequence="20"
+              groups="vpa_sales_commission.group_commission_manager"/>
+
     <!-- MO Commission Report -->
     <menuitem id="menu_mrp_production_commission_report"
-              name="MO Commission Report"
+              name="Commission by MO"
               parent="menu_commission_reporting"
               action="action_mrp_production_commission_report"
               sequence="10"
+              groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
+
+    <!-- SO Commission Report -->
+    <menuitem id="menu_so_commission_report"
+              name="Commission by SO"
+              parent="menu_commission_reporting"
+              action="action_so_commission_report"
+              sequence="15"
               groups="vpa_sales_commission.group_commission_user,vpa_sales_commission.group_commission_manager"/>
 
     <!-- Configuration Menu -->

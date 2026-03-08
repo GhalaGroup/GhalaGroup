@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Commission Scheme Year Form View -->
+    <record id="vpa_commission_scheme_year_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.scheme.year.form</field>
+        <field name="model">vpa.commission.scheme.year</field>
+        <field name="arch" type="xml">
+            <form string="Commission Year">
+                <header>
+                    <button name="action_close_year" type="object"
+                            string="Close Year" class="btn-danger"
+                            invisible="state == 'closed'"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="action_reopen_year" type="object"
+                            string="Reopen Year" class="btn-secondary"
+                            invisible="state == 'open'"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="action_generate_bill" type="object"
+                            string="Generate Bill" class="btn-primary"
+                            invisible="bill_count > 0"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="action_generate_bill" type="object"
+                            string="Generate Additional Bill" class="btn-secondary"
+                            invisible="bill_count == 0"
+                            groups="vpa_sales_commission.group_commission_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="open,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_commission_lines" type="object"
+                                class="oe_stat_button" icon="fa-list">
+                            <field name="total_earned" string="Total Earned" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_bills" type="object"
+                                class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="bill_count == 0">
+                            <field name="bill_count" string="Bills" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="display_name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="scheme_id" readonly="1"/>
+                            <field name="year" readonly="state == 'closed'"/>
+                            <field name="production_rate" readonly="state == 'closed'"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="minimum_amount" widget="monetary" readonly="state == 'closed'"/>
+                            <field name="minimum_amount_usd" readonly="state == 'closed'"/>
+                            <field name="expense_account_id" readonly="state == 'closed'"/>
+                        </group>
+                    </group>
+                    <group string="Advance (Minimum Guarantee)"
+                          invisible="minimum_amount == 0">
+                        <group>
+                            <field name="minimum_amount" widget="monetary" string="Advance Paid"/>
+                            <field name="advance_consumed" widget="monetary"/>
+                            <field name="advance_remaining" widget="monetary"
+                                   decoration-success="advance_remaining &gt; 0"
+                                   decoration-muted="advance_remaining == 0"/>
+                        </group>
+                        <group>
+                            <field name="payable_to_employee" widget="monetary"
+                                   string="Extra Payable to Employee"
+                                   decoration-warning="payable_to_employee &gt; 0"/>
+                        </group>
+                    </group>
+                    <group string="Commission Performance">
+                        <group>
+                            <field name="total_earned" widget="monetary"/>
+                            <field name="total_paid" widget="monetary"/>
+                            <field name="outstanding" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="total_pending" widget="monetary"/>
+                            <field name="shortfall" widget="monetary"/>
+                        </group>
+                    </group>
+                    <field name="notes"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Commission Scheme Year List View (inline for scheme form) -->
+    <record id="vpa_commission_scheme_year_view_list_inline" model="ir.ui.view">
+        <field name="name">vpa.commission.scheme.year.list.inline</field>
+        <field name="model">vpa.commission.scheme.year</field>
+        <field name="arch" type="xml">
+            <list string="Yearly Configuration" editable="bottom">
+                <field name="year"/>
+                <field name="production_rate" string="Rate (%)"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="minimum_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="minimum_amount_usd" optional="hide"/>
+                <field name="expense_account_id" optional="show"/>
+                <field name="advance_consumed" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="advance_remaining" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="payable_to_employee" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="total_earned" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="total_paid" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="shortfall" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'open'"
+                       decoration-danger="state == 'closed'"/>
+                <button name="action_close_year" type="object" string="Close"
+                        icon="fa-lock" invisible="state == 'closed'"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <field name="bill_count" column_invisible="1"/>
+                <button name="action_generate_bill" type="object" string="Bill"
+                        icon="fa-file-text-o"
+                        invisible="bill_count > 0"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <button name="action_view_bills" type="object" string="Billed"
+                        icon="fa-check-circle" class="text-success"
+                        invisible="bill_count == 0"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Close Year Confirmation Wizard -->
+    <record id="vpa_commission_close_year_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.commission.close.year.wizard.form</field>
+        <field name="model">vpa.commission.close.year.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Close Year">
+                <sheet>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This year has unpaid commission lines.
+                    </div>
+                    <group>
+                        <field name="scheme_year_id" readonly="1"/>
+                        <field name="unpaid_count" readonly="1" string="Unpaid Lines"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="unpaid_amount" readonly="1" widget="monetary" string="Unpaid Amount"/>
+                    </group>
+                    <p>Closing the year will lock all commission lines. You can still create bills and payments after closing.</p>
+                </sheet>
+                <footer>
+                    <button name="action_confirm_close" type="object"
+                            string="Close Year Anyway" class="btn-danger"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

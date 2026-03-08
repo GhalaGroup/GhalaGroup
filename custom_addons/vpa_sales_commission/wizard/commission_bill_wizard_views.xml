@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="vpa_commission_bill_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.commission.bill.wizard.form</field>
+        <field name="model">vpa.commission.bill.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Commission Bill">
+                <sheet>
+                    <group string="Bill Configuration">
+                        <group>
+                            <field name="scheme_id"/>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="bill_type"/>
+                            <field name="include_mo_lines" invisible="bill_type != 'base'"
+                                   string="Include MO Commission Lines"/>
+                        </group>
+                        <group>
+                            <field name="year"/>
+                            <field name="month" invisible="bill_type != 'monthly'"/>
+                        </group>
+                    </group>
+                    <group string="Bill Settings">
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="expense_account_id"/>
+                        </group>
+                        <group>
+                            <field name="bill_date"/>
+                        </group>
+                    </group>
+
+                    <!-- Existing bills warning -->
+                    <div class="alert alert-info" invisible="existing_bill_count == 0">
+                        <strong>Note:</strong>
+                        <field name="existing_bill_count" nolabel="1"/> existing bill(s) already created for this period.
+                        Lines already included in those bills are excluded from this new bill.
+                    </div>
+
+                    <!-- Advance status banner (monthly bills only) -->
+                    <div class="alert alert-success"
+                         invisible="bill_type != 'monthly' or advance_status != 'covered'">
+                        <strong>Covered by Advance:</strong>
+                        This bill (<field name="total_amount" widget="monetary" nolabel="1" readonly="1"/>)
+                        is fully covered by the minimum guarantee advance.
+                        Advance remaining after this bill:
+                        <field name="advance_remaining" widget="monetary" nolabel="1" readonly="1"/>.
+                        No additional payment needed for this month.
+                    </div>
+                    <div class="alert alert-warning"
+                         invisible="bill_type != 'monthly' or advance_status != 'partial'">
+                        <strong>Partially Covered:</strong>
+                        The advance covers part of this bill.
+                        Advance remaining: <field name="advance_remaining" widget="monetary" nolabel="1" readonly="1"/>.
+                        Once the advance is exhausted, the remaining amount is payable to the employee.
+                    </div>
+                    <div class="alert alert-danger"
+                         invisible="bill_type != 'monthly' or advance_status != 'exceeded'">
+                        <strong>Advance Fully Consumed:</strong>
+                        The minimum guarantee advance has been fully used up.
+                        This bill is fully payable to the employee.
+                    </div>
+
+                    <!-- Base bill summary -->
+                    <field name="currency_id" invisible="1"/>
+                    <div invisible="bill_type != 'base' or include_mo_lines" class="mb-3">
+                        <h6 class="mt-2 mb-2"><strong>GUARANTEE BILL SUMMARY</strong></h6>
+                        <group>
+                            <group>
+                                <field name="guarantee_amount" widget="monetary" readonly="1"
+                                       string="Guarantee Amount"/>
+                            </group>
+                            <group/>
+                        </group>
+                        <div class="mt-2">
+                            <strong>Bill Line Preview:</strong>
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:75%">Description</th>
+                                        <th class="text-end" style="width:25%">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <field name="guarantee_line_description" readonly="1" nolabel="1"/>
+                                            <br/>
+                                            <field name="guarantee_deferred_note" readonly="1" nolabel="1"
+                                                   style="font-size:0.8em; color:#6c757d; white-space:pre-line; display:block;"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <field name="guarantee_amount" widget="monetary" readonly="1" nolabel="1"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Lines summary -->
+                    <group string="Commission Lines to Bill"
+                           invisible="bill_type == 'base' and not include_mo_lines">
+                        <group>
+                            <field name="line_count" string="Lines to Include" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_amount" widget="monetary" readonly="1" string="Total Amount"/>
+                        </group>
+                    </group>
+
+                    <field name="line_ids" readonly="1"
+                           invisible="bill_type == 'base' and not include_mo_lines">
+                        <list>
+                            <field name="name"/>
+                            <field name="production_id"/>
+                            <field name="date"/>
+                            <field name="item_name"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="base_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="rate"/>
+                            <field name="amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="state" widget="badge"
+                                   decoration-info="state in ('pending', 'confirmed')"
+                                   decoration-success="state == 'paid'"/>
+                        </list>
+                    </field>
+                </sheet>
+                <footer>
+                    <button name="action_create_bill" type="object"
+                            string="Create Bill" class="btn-primary"
+                            invisible="bill_type == 'monthly' and line_count == 0"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open bill wizard -->
+    <record id="action_commission_generate_bill" model="ir.actions.act_window">
+        <field name="name">Generate Commission Bill</field>
+        <field name="res_model">vpa.commission.bill.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="vpa_sales_commission.model_vpa_commission_line"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

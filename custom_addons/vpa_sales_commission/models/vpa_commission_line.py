@@ -186,6 +186,28 @@ class VpaCommissionLine(models.Model):
         readonly=False,
     )
 
+    # Billing
+    bill_id = fields.Many2one(
+        'account.move',
+        string='Vendor Bill',
+        readonly=True,
+        ondelete='set null',
+        index=True,
+        help='The vendor bill this commission line was included in',
+    )
+    bill_state = fields.Selection([
+        ('not_billed', 'Not Billed'),
+        ('billed', 'Billed'),
+        ('paid', 'Paid'),
+    ], string='Bill Status', compute='_compute_bill_state', store=True)
+
+    # Year lock
+    year_locked = fields.Boolean(
+        string='Year Locked',
+        default=False,
+        help='Set when the commission year is closed. Prevents further edits.',
+    )
+
     # Material breakdown
     material_line_ids = fields.One2many(
         'vpa.commission.line.material',
@@ -256,8 +278,28 @@ class VpaCommissionLine(models.Model):
                 line.amount_paid = 0.0
             line.amount_due = line.amount - line.amount_paid
 
+    @api.depends('bill_id', 'bill_id.payment_state')
+    def _compute_bill_state(self):
+        for line in self:
+            if not line.bill_id:
+                line.bill_state = 'not_billed'
+            elif line.bill_id.payment_state == 'paid':
+                line.bill_state = 'paid'
+            else:
+                line.bill_state = 'billed'
+
+    def _check_year_locked(self):
+        """Raise if any selected line is year-locked."""
+        locked = self.filtered(lambda l: l.year_locked)
+        if locked:
+            raise UserError(_(
+                'Commission lines for a closed year cannot be modified: %s',
+                ', '.join(locked.mapped('name'))
+            ))
+
     def action_confirm(self):
         """Confirm commission lines - only managers can do this."""
+        self._check_year_locked()
         for line in self:
             if line.state != 'pending':
                 raise UserError(_('Only pending commission lines can be confirmed.'))
@@ -269,6 +311,7 @@ class VpaCommissionLine(models.Model):
 
     def action_cancel(self):
         """Cancel commission lines."""
+        self._check_year_locked()
         for line in self:
             if line.state == 'paid':
                 raise UserError(_('Paid commission lines cannot be cancelled. Reset to pending first.'))
@@ -287,6 +330,19 @@ class VpaCommissionLine(models.Model):
                 'paid_by': False,
                 'payment_id': False,
             })
+
+    def action_view_bill(self):
+        """Open the related vendor bill."""
+        self.ensure_one()
+        if not self.bill_id:
+            raise UserError(_('No vendor bill linked to this commission line.'))
+        return {
+            'name': _('Vendor Bill'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'form',
+            'res_id': self.bill_id.id,
+        }
 
     def action_view_production(self):
         """Open the related manufacturing order."""
