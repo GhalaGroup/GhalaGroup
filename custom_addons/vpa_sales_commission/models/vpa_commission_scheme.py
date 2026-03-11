@@ -94,22 +94,13 @@ class VpaCommissionScheme(models.Model):
         string='Products',
     )
 
-    # Minimum Guarantee fields
-    has_minimum = fields.Boolean(
-        string='Has Minimum Guarantee',
-        default=False,
+    # Default expense account (can be overridden per year)
+    expense_account_id = fields.Many2one(
+        'account.account',
+        string='Expense Account',
+        domain="[('account_type', 'in', ('expense', 'expense_direct_cost'))]",
+        help='Default debit account for commission expense journal entries.',
     )
-    minimum_amount = fields.Float(
-        string='Minimum Amount',
-        digits=(12, 2),
-        help='Annual minimum commission guarantee',
-    )
-    minimum_frequency = fields.Selection([
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly'),
-    ], string='Minimum Frequency', default='yearly',
-        help='How often to check/apply minimum guarantee')
 
     # Related commission lines
     commission_line_ids = fields.One2many(
@@ -118,15 +109,15 @@ class VpaCommissionScheme(models.Model):
         string='Commission Lines',
     )
 
-    # Annual guarantees
-    guarantee_ids = fields.One2many(
-        'vpa.commission.guarantee',
+    # Yearly rate/guarantee configuration
+    year_ids = fields.One2many(
+        'vpa.commission.scheme.year',
         'scheme_id',
-        string='Annual Guarantees',
+        string='Yearly Configuration',
     )
-    guarantee_count = fields.Integer(
-        string='Guarantees',
-        compute='_compute_guarantee_count',
+    year_count = fields.Integer(
+        string='Years',
+        compute='_compute_year_count',
     )
 
     # Computed fields for dashboard/reporting
@@ -175,12 +166,6 @@ class VpaCommissionScheme(models.Model):
             if scheme.sales_rate < 0 or scheme.sales_rate > 100:
                 raise ValidationError(_('Sales commission rate must be between 0 and 100%.'))
 
-    @api.constrains('minimum_amount')
-    def _check_minimum_amount(self):
-        for scheme in self:
-            if scheme.has_minimum and scheme.minimum_amount < 0:
-                raise ValidationError(_('Minimum amount cannot be negative.'))
-
     @api.constrains('apply_to', 'workcenter_ids', 'product_category_ids', 'product_ids')
     def _check_filter_fields(self):
         for scheme in self:
@@ -206,10 +191,34 @@ class VpaCommissionScheme(models.Model):
             return production.product_id in self.product_ids
         return False
 
-    @api.depends('guarantee_ids')
-    def _compute_guarantee_count(self):
+    @api.depends('year_ids')
+    def _compute_year_count(self):
         for scheme in self:
-            scheme.guarantee_count = len(scheme.guarantee_ids)
+            scheme.year_count = len(scheme.year_ids)
+
+    def _get_rate_for_year(self, year_str):
+        """Return the commission rate for a given year. Falls back to production_rate."""
+        self.ensure_one()
+        year_line = self.year_ids.filtered(lambda y: y.year == year_str)
+        if year_line and year_line[0].production_rate:
+            return year_line[0].production_rate
+        return self.production_rate
+
+    def _get_minimum_for_year(self, year_str):
+        """Return the minimum guarantee amount for a given year."""
+        self.ensure_one()
+        year_line = self.year_ids.filtered(lambda y: y.year == year_str)
+        if year_line:
+            return year_line[0].minimum_amount
+        return 0.0
+
+    def _get_expense_account_for_year(self, year_str):
+        """Return the expense account for a given year. Falls back to scheme default."""
+        self.ensure_one()
+        year_line = self.year_ids.filtered(lambda y: y.year == year_str)
+        if year_line and year_line[0].expense_account_id:
+            return year_line[0].expense_account_id
+        return self.expense_account_id
 
     def action_view_commission_lines(self):
         """Open commission lines for this scheme."""
@@ -223,14 +232,3 @@ class VpaCommissionScheme(models.Model):
             'context': {'default_scheme_id': self.id},
         }
 
-    def action_view_guarantees(self):
-        """Open annual guarantees for this scheme."""
-        self.ensure_one()
-        return {
-            'name': _('Annual Guarantees'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'vpa.commission.guarantee',
-            'view_mode': 'list,form',
-            'domain': [('scheme_id', '=', self.id)],
-            'context': {'default_scheme_id': self.id},
-        }

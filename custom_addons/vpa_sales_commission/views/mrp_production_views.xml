@@ -30,15 +30,15 @@
                         string="Commission Applied" class="btn-success"
                         invisible="state != 'done' or not commission_generated"
                         groups="vpa_sales_commission.group_commission_manager"/>
-                <!-- Block Commission: visible in all states, not blocked, not generated -->
+                <!-- Not Applicable: visible when done, not blocked, not generated -->
                 <button name="action_block_commission" type="object"
-                        string="Block Commission" class="btn-warning"
+                        string="Not Applicable" class="btn-warning"
                         icon="fa-ban"
                         invisible="commission_blocked or commission_generated"
                         groups="vpa_sales_commission.group_commission_user"/>
-                <!-- Unblock Commission: visible when blocked (manager only) -->
+                <!-- Remove Not Applicable: visible when blocked (manager only) -->
                 <button name="action_unblock_commission" type="object"
-                        string="Unblock Commission" class="btn-danger"
+                        string="Remove Not Applicable" class="btn-danger"
                         icon="fa-unlock"
                         invisible="not commission_blocked"
                         groups="vpa_sales_commission.group_commission_manager"/>
@@ -66,8 +66,7 @@
                             <field name="amount" widget="monetary"
                                    options="{'currency_field': 'currency_id'}"/>
                             <field name="state" widget="badge"
-                                   decoration-info="state == 'pending'"
-                                   decoration-warning="state == 'confirmed'"
+                                   decoration-info="state in ('pending', 'confirmed')"
                                    decoration-success="state == 'paid'"
                                    decoration-danger="state == 'cancelled'"/>
                         </list>
@@ -86,10 +85,8 @@
             <xpath expr="//field[@name='state']" position="before">
                 <field name="commission_status" string="Commission"
                        widget="badge" optional="hide"
-                       decoration-muted="commission_status == 'none'"
-                       decoration-danger="commission_status in ('blocked', 'cancelled')"
-                       decoration-info="commission_status == 'pending'"
-                       decoration-warning="commission_status in ('confirmed', 'partial')"
+                       decoration-muted="commission_status in ('none', 'not_applicable', 'cancelled')"
+                       decoration-info="commission_status == 'applied'"
                        decoration-success="commission_status == 'paid'"/>
             </xpath>
         </field>

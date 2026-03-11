@@ -114,7 +114,7 @@
                     <th class="cs-th cs-th-right" style="width: 9%;">Paid</th>
                     <th class="cs-th cs-th-right" style="width: 9%;">Due</th>
                     <th class="cs-th" style="width: 9%;">Pay Ref</th>
-                    <th class="cs-th" style="width: 7%;">Pay Date</th>
+                    <th class="cs-th" style="width: 7%;">Bill Date</th>
                 </tr>
                 <t t-foreach="lines" t-as="line">
                     <t t-set="rc" t-value="'cs-row-paid' if line.state == 'paid' else ('cs-row-confirmed' if line.state == 'confirmed' else ('cs-row-alt' if line_index % 2 == 1 else ''))"/>
@@ -134,7 +134,7 @@
                         <td class="cs-td cs-td-right"><span t-field="line.amount_paid" t-options='{"widget": "float", "precision": 2}'/></td>
                         <td class="cs-td cs-td-right"><span t-field="line.amount_due" t-options='{"widget": "float", "precision": 2}'/></td>
                         <td class="cs-td cs-td-small"><t t-if="line.payment_id"><span t-field="line.payment_id"/></t><t t-else="">-</t></td>
-                        <td class="cs-td" style="font-size: 9px;"><t t-if="line.paid_date"><span t-field="line.paid_date" t-options='{"format": "dd/MM/yy"}'/></t><t t-else="">-</t></td>
+                        <td class="cs-td" style="font-size: 9px;"><t t-if="line.bill_id and line.bill_id.invoice_date"><span t-field="line.bill_id.invoice_date" t-options='{"format": "dd/MM/yy"}'/></t><t t-else="">-</t></td>
                     </tr>
                 </t>
                 <t t-if="not lines">
@@ -217,8 +217,10 @@
         </div>
     </template>
 
-    <!-- Report Template: Guarantee (yearly) -->
-    <template id="report_commission_statement_guarantee">
+    <!-- ============================================================ -->
+    <!-- Report Template: Annual Commission Statement (scheme year)  -->
+    <!-- ============================================================ -->
+    <template id="report_annual_commission_statement">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
@@ -227,17 +229,384 @@
                     <t t-set="employee_name" t-value="doc.employee_id.name"/>
                     <t t-set="period_label" t-value="doc.year"/>
                     <t t-set="currency" t-value="doc.currency_id"/>
-                    <t t-set="currency_symbol" t-value="doc.currency_id.symbol"/>
-                    <t t-set="guarantee_amount" t-value="doc.guarantee_amount"/>
+                    <t t-set="sym" t-value="doc.currency_id.symbol or doc.currency_id.name"/>
+                    <t t-set="lines" t-value="doc.scheme_id.commission_line_ids.filtered(lambda l: l.date_year == doc.year and l.state != 'cancelled').sorted(key=lambda l: l.date)"/>
                     <t t-set="total_earned" t-value="doc.total_earned"/>
-                    <t t-set="total_confirmed" t-value="doc.total_confirmed"/>
-                    <t t-set="total_pending" t-value="doc.total_pending"/>
                     <t t-set="total_paid" t-value="doc.total_paid"/>
                     <t t-set="outstanding" t-value="doc.outstanding"/>
+                    <t t-set="minimum_amount" t-value="doc.minimum_amount"/>
+                    <t t-set="advance_consumed" t-value="doc.advance_consumed"/>
+                    <t t-set="advance_remaining" t-value="doc.advance_remaining"/>
+                    <t t-set="payable_to_employee" t-value="doc.payable_to_employee"/>
                     <t t-set="shortfall" t-value="doc.shortfall"/>
-                    <t t-set="lines" t-value="doc.commission_line_ids.sorted(key=lambda l: l.date)"/>
-                    <t t-set="payment_lines" t-value="doc.commission_line_ids.filtered(lambda l: l.state == 'paid').sorted(key=lambda l: l.paid_date or l.date)"/>
-                    <t t-call="vpa_sales_commission.report_commission_statement_body"/>
+                    <div class="page cs-page">
+                        <style>
+                            .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                            .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                            .cs-subtitle { font-size: 14px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+                            .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+                            .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+                            .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; border: none; }
+                            .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border: none; }
+                            .cs-th-right { text-align: right; }
+                            .cs-th-center { text-align: center; }
+                            .cs-td { padding: 6px 5px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
+                            .cs-td-right { text-align: right; }
+                            .cs-td-center { text-align: center; }
+                            .cs-td-bold { font-weight: 700; }
+                            .cs-td-small { font-size: 8px; color: #666; }
+                            .cs-row-paid { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
+                            .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+                            .cs-badge { padding: 3px 8px; border-radius: 12px; font-size: 8px; font-weight: 700; color: #fff !important; display: inline-block; -webkit-print-color-adjust: exact; }
+                            .cs-badge-paid { background-color: #27ae60 !important; }
+                            .cs-badge-pending { background-color: #3498db !important; }
+                            .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+                            .cs-summary { width: 52%; margin-left: auto; border-collapse: collapse; margin-bottom: 16px; }
+                            .cs-summary-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; border: none; }
+                            .cs-summary td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
+                            .cs-summary-label { font-weight: 600; color: #2d3436; background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 58%; }
+                            .cs-summary-value { text-align: right; color: #2d3436; }
+                            .cs-summary-highlight td { border-top: 2px solid #2d3436; border-bottom: 2px solid #2d3436; font-weight: 800 !important; font-size: 11px; }
+                            .cs-summary-danger td { background-color: #fdecea !important; -webkit-print-color-adjust: exact; border: 1px solid #e74c3c; }
+                            .cs-summary-danger .cs-summary-value { color: #DC143C; font-weight: 800; }
+                            .cs-summary-success td { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; border: 1px solid #27ae60; }
+                            .cs-summary-success .cs-summary-value { color: #27ae60; font-weight: 800; }
+                            .cs-advance-box { background-color: #eaf4fb !important; -webkit-print-color-adjust: exact; border: 1px solid #3498db; border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; }
+                            .cs-sig-table { width: 100%; margin-top: 30px; }
+                            .cs-sig-table td { text-align: center; vertical-align: top; padding: 0 15px; }
+                            .cs-sig-line { border-top: 1px solid #2d3436; padding-top: 4px; font-size: 10px; font-weight: 700; color: #2d3436; margin-bottom: 30px; }
+                            .cs-sig-field { font-size: 9px; color: #777; }
+                            .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+                        </style>
+
+                        <!-- Header -->
+                        <table style="width:100%; margin-bottom:15px;">
+                            <tr>
+                                <td style="border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                                    <div class="cs-title">ANNUAL COMMISSION STATEMENT — FY <t t-out="doc.year"/></div>
+                                    <div class="cs-subtitle"><t t-out="employee_name"/></div>
+                                    <div class="cs-date">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Advance / Minimum Guarantee Box (only if set) -->
+                        <t t-if="minimum_amount">
+                            <div class="cs-advance-box">
+                                <table style="width:100%; border-collapse:collapse;">
+                                    <tr>
+                                        <td style="width:25%; font-weight:700; font-size:10px; padding:3px 8px;">Minimum Guarantee</td>
+                                        <td style="width:25%; text-align:right; padding:3px 8px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(minimum_amount)"/></td>
+                                        <td style="width:25%; font-weight:700; font-size:10px; padding:3px 8px;">Advance Consumed</td>
+                                        <td style="width:25%; text-align:right; padding:3px 8px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(advance_consumed)"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:700; font-size:10px; padding:3px 8px;">Advance Remaining</td>
+                                        <td style="text-align:right; padding:3px 8px; color:#27ae60; font-weight:700;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(advance_remaining)"/></td>
+                                        <td style="font-weight:700; font-size:10px; padding:3px 8px;">Extra Payable to Employee</td>
+                                        <td style="text-align:right; padding:3px 8px; color:#e74c3c; font-weight:700;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(payable_to_employee)"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- Commission Lines -->
+                        <table class="cs-table o_ignore_layout_styling">
+                            <tr class="cs-table-title"><td colspan="10">Commission Lines — FY <t t-out="doc.year"/></td></tr>
+                            <tr>
+                                <th class="cs-th" style="width:7%;">Date</th>
+                                <th class="cs-th" style="width:11%;">MO</th>
+                                <th class="cs-th" style="width:8%;">SO</th>
+                                <th class="cs-th" style="width:16%;">Item</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Base Amt</th>
+                                <th class="cs-th cs-th-center" style="width:5%;">%</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Commission</th>
+                                <th class="cs-th cs-th-center" style="width:8%;">Status</th>
+                                <th class="cs-th" style="width:9%;">Bill</th>
+                                <th class="cs-th" style="width:14%;">Pay Ref</th>
+                            </tr>
+                            <t t-foreach="lines" t-as="line">
+                                <t t-set="rclass" t-value="'cs-row-paid' if line.state == 'paid' else ('cs-row-alt' if line_index % 2 == 1 else '')"/>
+                                <tr t-att-class="rclass">
+                                    <td class="cs-td"><span t-field="line.date" t-options='{"format":"dd/MM/yy"}'/></td>
+                                    <td class="cs-td cs-td-small"><t t-out="line.production_id.name or '-'"/></td>
+                                    <td class="cs-td"><t t-out="line.sale_order_name or '-'"/></td>
+                                    <td class="cs-td" style="font-size:9px;"><t t-out="line.item_name or '-'"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(line.base_amount)"/></td>
+                                    <td class="cs-td cs-td-center"><t t-out="line.rate"/>%</td>
+                                    <td class="cs-td cs-td-right cs-td-bold"><t t-out="'{:,.2f}'.format(line.amount)"/></td>
+                                    <td class="cs-td cs-td-center">
+                                        <t t-if="line.state == 'paid'"><span class="cs-badge cs-badge-paid">PAID</span></t>
+                                        <t t-else=""><span class="cs-badge cs-badge-pending">APPLIED</span></t>
+                                    </td>
+                                    <td class="cs-td cs-td-small"><t t-out="line.bill_id.name or '-'"/></td>
+                                    <td class="cs-td cs-td-small"><t t-if="line.payment_id"><t t-out="line.payment_id.name"/></t><t t-else="">-</t></td>
+                                </tr>
+                            </t>
+                            <t t-if="not lines">
+                                <tr><td colspan="10" class="cs-td" style="text-align:center; color:#999; font-style:italic; padding:15px;">No commission lines for this year</td></tr>
+                            </t>
+                            <t t-if="lines">
+                                <tr class="cs-totals">
+                                    <td colspan="4" style="text-align:right;">TOTALS</td>
+                                    <td style="text-align:right;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(sum(lines.mapped('base_amount')))"/></td>
+                                    <td></td>
+                                    <td style="text-align:right;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned)"/></td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            </t>
+                        </table>
+
+                        <!-- Summary -->
+                        <table class="cs-summary o_ignore_layout_styling">
+                            <tr class="cs-summary-title"><td colspan="2">Statement Summary</td></tr>
+                            <tr><td class="cs-summary-label">A. Total Commission Earned</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned)"/></td></tr>
+                            <tr><td class="cs-summary-label">B. Total Paid</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_paid)"/></td></tr>
+                            <tr class="cs-summary-highlight"><td class="cs-summary-label">C. Outstanding (A - B)</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(outstanding)"/></td></tr>
+                            <t t-if="minimum_amount">
+                                <tr><td class="cs-summary-label">D. Minimum Guarantee</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(minimum_amount)"/></td></tr>
+                                <t t-if="shortfall > 0">
+                                    <tr class="cs-summary-danger"><td class="cs-summary-label">E. Shortfall (D - A)</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(shortfall)"/></td></tr>
+                                </t>
+                                <t t-else="">
+                                    <tr class="cs-summary-success"><td class="cs-summary-label">E. Above Guarantee</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned - minimum_amount)"/></td></tr>
+                                </t>
+                            </t>
+                        </table>
+
+                        <!-- Signatures -->
+                        <table class="cs-sig-table o_ignore_layout_styling">
+                            <tr>
+                                <td style="width:33%;"><div class="cs-sig-line">Prepared By</div><div class="cs-sig-field">Name: ________________________</div><div class="cs-sig-field" style="margin-top:3px;">Date: ________________________</div></td>
+                                <td style="width:33%;"><div class="cs-sig-line">Employee</div><div class="cs-sig-field">Name: ________________________</div><div class="cs-sig-field" style="margin-top:3px;">Date: ________________________</div></td>
+                                <td style="width:33%;"><div class="cs-sig-line">Authorized By</div><div class="cs-sig-field">Name: ________________________</div><div class="cs-sig-field" style="margin-top:3px;">Date: ________________________</div></td>
+                            </tr>
+                        </table>
+                        <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Report Template: Monthly Billing Summary (scheme year)       -->
+    <!-- ============================================================ -->
+    <template id="report_monthly_billing_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-set="sym" t-value="doc.currency_id.symbol or doc.currency_id.name"/>
+                    <t t-set="all_bills" t-value="doc.bill_ids.filtered(lambda b: b.move_type == 'in_invoice').sorted(key=lambda b: b.invoice_date or b.create_date)"/>
+                    <t t-set="monthly_bills" t-value="all_bills.filtered(lambda b: b.commission_month)"/>
+                    <t t-set="base_bills" t-value="all_bills.filtered(lambda b: not b.commission_month)"/>
+                    <div class="page cs-page">
+                        <style>
+                            .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                            .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                            .cs-subtitle { font-size: 14px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+                            .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+                            .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+                            .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; border: none; }
+                            .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; border: none; }
+                            .cs-th-right { text-align: right; }
+                            .cs-td { padding: 6px 5px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
+                            .cs-td-right { text-align: right; }
+                            .cs-td-bold { font-weight: 700; }
+                            .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+                            .cs-row-paid { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
+                            .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+                            .cs-badge { padding: 3px 8px; border-radius: 12px; font-size: 8px; font-weight: 700; color: #fff !important; display: inline-block; -webkit-print-color-adjust: exact; }
+                            .cs-badge-paid { background-color: #27ae60 !important; }
+                            .cs-badge-draft { background-color: #95a5a6 !important; }
+                            .cs-badge-posted { background-color: #3498db !important; }
+                            .cs-info-box { background-color: #eaf4fb !important; -webkit-print-color-adjust: exact; border: 1px solid #3498db; border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; }
+                            .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+                        </style>
+
+                        <!-- Header -->
+                        <table style="width:100%; margin-bottom:15px;">
+                            <tr>
+                                <td style="border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                                    <div class="cs-title">MONTHLY BILLING SUMMARY — FY <t t-out="doc.year"/></div>
+                                    <div class="cs-subtitle"><t t-out="doc.employee_id.name"/></div>
+                                    <div class="cs-date">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Advance Status Box -->
+                        <t t-if="doc.minimum_amount">
+                            <div class="cs-info-box">
+                                <table style="width:100%; border-collapse:collapse;">
+                                    <tr>
+                                        <td style="width:25%; font-weight:700; padding:3px 8px;">Minimum Guarantee (Advance)</td>
+                                        <td style="width:25%; text-align:right; padding:3px 8px; font-weight:700;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.minimum_amount)"/></td>
+                                        <td style="width:25%; font-weight:700; padding:3px 8px;">Advance Consumed</td>
+                                        <td style="width:25%; text-align:right; padding:3px 8px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.advance_consumed)"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:700; padding:3px 8px;">Advance Remaining</td>
+                                        <td style="text-align:right; padding:3px 8px; color:#27ae60; font-weight:700;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.advance_remaining)"/></td>
+                                        <td style="font-weight:700; padding:3px 8px;">Extra Payable to Employee</td>
+                                        <td style="text-align:right; padding:3px 8px; color:#e74c3c; font-weight:700;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.payable_to_employee)"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- Base/Guarantee Bills -->
+                        <t t-if="base_bills">
+                            <table class="cs-table o_ignore_layout_styling">
+                                <tr class="cs-table-title"><td colspan="5">Guarantee / Advance Bill</td></tr>
+                                <tr>
+                                    <th class="cs-th" style="width:30%;">Bill Reference</th>
+                                    <th class="cs-th" style="width:15%;">Date</th>
+                                    <th class="cs-th" style="width:20%;">Reference</th>
+                                    <th class="cs-th cs-th-right" style="width:20%;">Amount</th>
+                                    <th class="cs-th" style="width:15%;">Status</th>
+                                </tr>
+                                <t t-foreach="base_bills" t-as="bill">
+                                    <tr t-att-class="'cs-row-paid' if bill.payment_state == 'paid' else ('cs-row-alt' if bill_index % 2 == 1 else '')">
+                                        <td class="cs-td cs-td-bold"><t t-out="bill.name"/></td>
+                                        <td class="cs-td"><t t-if="bill.invoice_date"><span t-field="bill.invoice_date" t-options='{"format":"dd/MM/yyyy"}'/></t></td>
+                                        <td class="cs-td" style="font-size:9px;"><t t-out="bill.ref or '-'"/></td>
+                                        <td class="cs-td cs-td-right cs-td-bold"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(bill.amount_total)"/></td>
+                                        <td class="cs-td">
+                                            <t t-if="bill.payment_state == 'paid'"><span class="cs-badge cs-badge-paid">PAID</span></t>
+                                            <t t-elif="bill.state == 'posted'"><span class="cs-badge cs-badge-posted">POSTED</span></t>
+                                            <t t-else=""><span class="cs-badge cs-badge-draft">DRAFT</span></t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+
+                        <!-- Monthly Bills -->
+                        <table class="cs-table o_ignore_layout_styling">
+                            <tr class="cs-table-title"><td colspan="6">Monthly Commission Bills</td></tr>
+                            <tr>
+                                <th class="cs-th" style="width:8%;">Month</th>
+                                <th class="cs-th" style="width:25%;">Bill Reference</th>
+                                <th class="cs-th" style="width:12%;">Date</th>
+                                <th class="cs-th" style="width:15%;">Lines</th>
+                                <th class="cs-th cs-th-right" style="width:20%;">Amount</th>
+                                <th class="cs-th" style="width:20%;">Status</th>
+                            </tr>
+                            <t t-foreach="monthly_bills" t-as="bill">
+                                <t t-set="month_lines" t-value="bill.commission_line_ids"/>
+                                <tr t-att-class="'cs-row-paid' if bill.payment_state == 'paid' else ('cs-row-alt' if bill_index % 2 == 1 else '')">
+                                    <td class="cs-td cs-td-bold"><t t-out="bill.commission_month or '-'"/></td>
+                                    <td class="cs-td cs-td-bold"><t t-out="bill.name"/></td>
+                                    <td class="cs-td"><t t-if="bill.invoice_date"><span t-field="bill.invoice_date" t-options='{"format":"dd/MM/yyyy"}'/></t></td>
+                                    <td class="cs-td"><t t-out="len(month_lines)"/> lines</td>
+                                    <td class="cs-td cs-td-right cs-td-bold"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(bill.amount_total)"/></td>
+                                    <td class="cs-td">
+                                        <t t-if="bill.payment_state == 'paid'"><span class="cs-badge cs-badge-paid">PAID</span></t>
+                                        <t t-elif="bill.state == 'posted'"><span class="cs-badge cs-badge-posted">POSTED</span></t>
+                                        <t t-else=""><span class="cs-badge cs-badge-draft">DRAFT</span></t>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="not monthly_bills">
+                                <tr><td colspan="6" class="cs-td" style="text-align:center; color:#999; font-style:italic; padding:15px;">No monthly bills generated yet</td></tr>
+                            </t>
+                            <t t-if="monthly_bills">
+                                <tr class="cs-totals">
+                                    <td colspan="4" style="text-align:right;">TOTAL BILLED</td>
+                                    <td style="text-align:right;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(sum(monthly_bills.mapped('amount_total')))"/></td>
+                                    <td></td>
+                                </tr>
+                            </t>
+                        </table>
+
+                        <!-- Performance Summary -->
+                        <table style="width:50%; margin-left:auto; border-collapse:collapse; margin-bottom:16px;">
+                            <tr style="background-color:#DC143C !important; -webkit-print-color-adjust:exact;"><td colspan="2" style="color:#fff !important; text-align:center; padding:7px; font-size:12px; font-weight:700; border:none;">Performance Summary</td></tr>
+                            <tr><td style="font-weight:600; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px; width:58%; border-bottom:1px solid #e0e0e0;">Total Commission Earned</td><td style="text-align:right; padding:7px 10px; border-bottom:1px solid #e0e0e0;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.total_earned)"/></td></tr>
+                            <tr><td style="font-weight:600; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px; border-bottom:1px solid #e0e0e0;">Total Paid</td><td style="text-align:right; padding:7px 10px; border-bottom:1px solid #e0e0e0;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.total_paid)"/></td></tr>
+                            <tr style="border-top:2px solid #2d3436; border-bottom:2px solid #2d3436;"><td style="font-weight:800; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px;">Outstanding</td><td style="text-align:right; padding:7px 10px; font-weight:800; font-size:11px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.outstanding)"/></td></tr>
+                        </table>
+
+                        <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Report Template: Year Summary (all employees, wizard)        -->
+    <!-- ============================================================ -->
+    <template id="report_commission_year_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-set="year_lines" t-value="doc.get_year_lines()"/>
+                    <div class="page cs-page">
+                        <style>
+                            .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                            .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                            .cs-subtitle { font-size: 14px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+                            .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+                            .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+                            .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; border: none; }
+                            .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; border: none; }
+                            .cs-th-right { text-align: right; }
+                            .cs-td { padding: 6px 5px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
+                            .cs-td-right { text-align: right; }
+                            .cs-td-bold { font-weight: 700; }
+                            .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+                            .cs-row-danger { background-color: #fdecea !important; -webkit-print-color-adjust: exact; }
+                            .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+                            .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+                        </style>
+
+                        <!-- Header -->
+                        <table style="width:100%; margin-bottom:15px;">
+                            <tr>
+                                <td style="border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                                    <div class="cs-title">COMMISSION YEAR SUMMARY — FY <t t-out="doc.year"/></div>
+                                    <div class="cs-subtitle">All Employees</div>
+                                    <div class="cs-date">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="cs-table o_ignore_layout_styling">
+                            <tr class="cs-table-title"><td colspan="9">Employee Commission Summary — FY <t t-out="doc.year"/></td></tr>
+                            <tr>
+                                <th class="cs-th" style="width:18%;">Employee</th>
+                                <th class="cs-th cs-th-right" style="width:12%;">Min. Guarantee</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Total Earned</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Total Paid</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Outstanding</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Adv. Consumed</th>
+                                <th class="cs-th cs-th-right" style="width:11%;">Adv. Remaining</th>
+                                <th class="cs-th cs-th-right" style="width:10%;">Extra Payable</th>
+                                <th class="cs-th cs-th-right" style="width:10%;">Shortfall</th>
+                            </tr>
+                            <t t-foreach="year_lines" t-as="yl">
+                                <t t-set="row_class" t-value="'cs-row-danger' if yl.shortfall > 0 else ('cs-row-alt' if yl_index % 2 == 1 else '')"/>
+                                <tr t-att-class="row_class">
+                                    <td class="cs-td cs-td-bold"><t t-out="yl.employee_id.name"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.minimum_amount)"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.total_earned)"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.total_paid)"/></td>
+                                    <td class="cs-td cs-td-right cs-td-bold"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.outstanding)"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.advance_consumed)"/></td>
+                                    <td class="cs-td cs-td-right" style="color:#27ae60;"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.advance_remaining)"/></td>
+                                    <td class="cs-td cs-td-right" style="color:#e74c3c;"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.payable_to_employee)"/></td>
+                                    <td class="cs-td cs-td-right" t-att-style="'color:#DC143C; font-weight:700;' if yl.shortfall > 0 else ''"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.shortfall)"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not year_lines">
+                                <tr><td colspan="9" class="cs-td" style="text-align:center; color:#999; font-style:italic; padding:15px;">No commission scheme years found for <t t-out="doc.year"/></td></tr>
+                            </t>
+                        </table>
+
+                        <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                    </div>
                 </t>
             </t>
         </t>
@@ -267,6 +636,417 @@
                     <t t-set="payment_lines" t-value="all_lines.filtered(lambda l: l.state == 'paid').sorted(key=lambda l: l.paid_date or l.date)"/>
                     <t t-call="vpa_sales_commission.report_commission_statement_body"/>
                 </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Template: MO Commission Report -->
+    <template id="report_mo_commission_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page cs-page">
+                    <style>
+                        .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                        .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                        .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+                        .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+                        .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; border: none; }
+                        .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; border: none; }
+                        .cs-th-right { text-align: right; }
+                        .cs-td { padding: 5px; border-bottom: 1px solid #e0e0e0; font-size: 9px; }
+                        .cs-td-right { text-align: right; }
+                        .cs-td-bold { font-weight: 700; }
+                        .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+                        .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+                        .cs-year-header td { background-color: #875A7B !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-weight: 700; font-size: 11px; border: none; }
+                        .cs-month-header td { background-color: #e8e0ed !important; -webkit-print-color-adjust: exact; color: #4a3558 !important; padding: 5px; font-weight: 700; font-size: 9px; border: none; }
+                        .cs-subtotal td { background-color: #f0ebf4 !important; -webkit-print-color-adjust: exact; color: #4a3558 !important; padding: 5px; font-weight: 700; font-size: 9px; border-top: 1px solid #c9b8d6; border-bottom: 2px solid #875A7B; }
+                        .badge-pending { background-color: #f39c12 !important; -webkit-print-color-adjust: exact; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 8px; }
+                        .badge-applied { background-color: #3498db !important; -webkit-print-color-adjust: exact; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 8px; }
+                        .badge-paid { background-color: #27ae60 !important; -webkit-print-color-adjust: exact; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 8px; }
+                        .badge-na { background-color: #bdc3c7 !important; -webkit-print-color-adjust: exact; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 8px; }
+                        .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+                    </style>
+
+                    <!-- Header -->
+                    <table style="width:100%; margin-bottom:15px;">
+                        <tr>
+                            <td style="border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                                <div class="cs-title">MO COMMISSION REPORT</div>
+                                <div class="cs-date">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Build year → month grouping from docs -->
+                    <t t-set="month_names" t-value="{'01':'January','02':'February','03':'March','04':'April','05':'May','06':'June','07':'July','08':'August','09':'September','10':'October','11':'November','12':'December'}"/>
+                    <t t-set="year_groups" t-value="{}"/>
+                    <t t-foreach="docs" t-as="doc">
+                        <t t-set="yr" t-value="doc.date_year or 'Unknown'"/>
+                        <t t-set="mo_key" t-value="doc.date_month or 'Unknown'"/>
+                        <t t-if="yr not in year_groups" t-set="year_groups" t-value="{**year_groups, yr: {}}"/>
+                        <t t-if="mo_key not in year_groups[yr]" t-set="year_groups" t-value="{**year_groups, yr: {**year_groups[yr], mo_key: []}}"/>
+                        <t t-set="_dummy" t-value="year_groups[yr][mo_key].append(doc)"/>
+                    </t>
+                    <t t-set="multi_year" t-value="len(year_groups) > 1"/>
+
+                    <table class="cs-table o_ignore_layout_styling">
+                        <tr class="cs-table-title"><td colspan="7">Manufacturing Orders — Commission Summary</td></tr>
+                        <tr>
+                            <th class="cs-th" style="width:14%;">MO Reference</th>
+                            <th class="cs-th" style="width:28%;">Product</th>
+                            <th class="cs-th" style="width:10%;">Date Finished</th>
+                            <th class="cs-th" style="width:12%;">Status</th>
+                            <th class="cs-th cs-th-right" style="width:12%;">Base Amount</th>
+                            <th class="cs-th cs-th-right" style="width:12%;">Total Commission</th>
+                            <th class="cs-th cs-th-right" style="width:12%;">Paid</th>
+                        </tr>
+
+                        <t t-foreach="sorted(year_groups.keys())" t-as="yr">
+                            <!-- Year header row -->
+                            <tr class="cs-year-header">
+                                <td colspan="7">FY <t t-out="yr"/></td>
+                            </tr>
+                            <t t-set="yr_months" t-value="year_groups[yr]"/>
+                            <t t-set="multi_month" t-value="len(yr_months) > 1"/>
+                            <t t-set="yr_row_idx" t-value="0"/>
+
+                            <t t-foreach="sorted(yr_months.keys())" t-as="mo_key">
+                                <!-- Month sub-header (only when multiple months in this year) -->
+                                <t t-if="multi_month">
+                                    <t t-set="mo_display" t-value="month_names.get(mo_key[-2:], mo_key) if mo_key != 'Unknown' else 'Unknown'"/>
+                                    <tr class="cs-month-header">
+                                        <td colspan="7"><t t-out="mo_display"/></td>
+                                    </tr>
+                                </t>
+
+                                <t t-set="mo_base" t-value="0.0"/>
+                                <t t-set="mo_total" t-value="0.0"/>
+                                <t t-set="mo_paid" t-value="0.0"/>
+
+                                <t t-foreach="yr_months[mo_key]" t-as="doc">
+                                    <t t-set="row_class" t-value="'cs-row-alt' if yr_row_idx % 2 == 1 else ''"/>
+                                    <t t-set="yr_row_idx" t-value="yr_row_idx + 1"/>
+                                    <t t-set="mo_base" t-value="mo_base + doc.commission_base_amount"/>
+                                    <t t-set="mo_total" t-value="mo_total + doc.total_commission_amount"/>
+                                    <t t-set="mo_paid" t-value="mo_paid + doc.paid_commission_amount"/>
+                                    <tr t-att-class="row_class">
+                                        <td class="cs-td cs-td-bold"><t t-out="doc.name"/></td>
+                                        <td class="cs-td"><t t-out="doc.product_id.display_name or ''"/></td>
+                                        <td class="cs-td"><t t-out="doc.date_finished.strftime('%d/%m/%Y') if doc.date_finished else ''"/></td>
+                                        <td class="cs-td">
+                                            <t t-if="doc.commission_status == 'pending_generation'"><span class="badge-pending">Pending</span></t>
+                                            <t t-elif="doc.commission_status == 'applied'"><span class="badge-applied">Applied</span></t>
+                                            <t t-elif="doc.commission_status == 'paid'"><span class="badge-paid">Paid</span></t>
+                                            <t t-else=""><span class="badge-na">N/A</span></t>
+                                        </td>
+                                        <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(doc.commission_base_amount)"/></td>
+                                        <td class="cs-td cs-td-right cs-td-bold"><t t-out="'{:,.2f}'.format(doc.total_commission_amount)"/></td>
+                                        <td class="cs-td cs-td-right" style="color:#27ae60;"><t t-out="'{:,.2f}'.format(doc.paid_commission_amount)"/></td>
+                                    </tr>
+                                </t>
+
+                                <!-- Month subtotal (only when multiple months) -->
+                                <t t-if="multi_month">
+                                    <tr class="cs-subtotal">
+                                        <td colspan="4"><t t-out="mo_display"/> Subtotal (<t t-out="len(yr_months[mo_key])"/> MOs)</td>
+                                        <td class="cs-td-right"><t t-out="'{:,.2f}'.format(mo_base)"/></td>
+                                        <td class="cs-td-right"><t t-out="'{:,.2f}'.format(mo_total)"/></td>
+                                        <td class="cs-td-right"><t t-out="'{:,.2f}'.format(mo_paid)"/></td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </t>
+
+                        <!-- Grand Total -->
+                        <tr class="cs-totals">
+                            <td colspan="4" class="cs-td cs-td-bold">GRAND TOTAL (<t t-out="len(docs)"/> MOs)</td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('commission_base_amount')))"/></td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('total_commission_amount')))"/></td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('paid_commission_amount')))"/></td>
+                        </tr>
+                    </table>
+
+                    <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+
+    <!-- ============================================================ -->
+    <!-- Report 6: Commission Statement by Sales Order                -->
+    <!-- ============================================================ -->
+
+    <!-- Outer wrapper -->
+    <template id="report_commission_statement_by_so">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-call="vpa_sales_commission.report_commission_statement_by_so_body"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Body content -->
+    <template id="report_commission_statement_by_so_body">
+        <t t-set="lines" t-value="doc.get_commission_lines()"/>
+        <t t-set="so_lines" t-value="doc.get_so_lines(lines)"/>
+        <t t-set="totals" t-value="doc.get_totals(lines)"/>
+        <t t-set="period_label" t-value="doc.get_period_label()"/>
+        <t t-set="employee_name" t-value="doc.employee_id.name"/>
+        <t t-set="currency_symbol" t-value="doc.currency_id.symbol or ''"/>
+
+        <style>
+            .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+            .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+            .cs-subtitle { font-size: 14px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+            .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+            .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+            .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; border: none; }
+            .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; border: none; }
+            .cs-th-right { text-align: right; }
+            .cs-th-center { text-align: center; }
+            .cs-td { padding: 6px 5px; border-bottom: 1px solid #e0e0e0; font-size: 10px; }
+            .cs-td-right { text-align: right; }
+            .cs-td-center { text-align: center; }
+            .cs-td-bold { font-weight: 700; }
+            .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+            .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+            .cs-summary { width: 48%; margin-left: auto; border-collapse: collapse; margin-bottom: 16px; }
+            .cs-summary-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; border: none; }
+            .cs-summary td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
+            .cs-summary-label { font-weight: 600; color: #2d3436; background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 58%; }
+            .cs-summary-value { text-align: right; color: #2d3436; }
+            .cs-summary-highlight td { border-top: 2px solid #2d3436; border-bottom: 2px solid #2d3436; font-weight: 800 !important; font-size: 11px; }
+            .cs-summary-danger td { background-color: #fdecea !important; -webkit-print-color-adjust: exact; border: 1px solid #e74c3c; }
+            .cs-summary-danger .cs-summary-value { color: #DC143C; font-weight: 800; font-size: 11px; }
+            .cs-summary-success td { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; border: 1px solid #27ae60; }
+            .cs-summary-success .cs-summary-value { color: #27ae60; font-weight: 800; font-size: 11px; }
+            .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+        </style>
+
+        <div class="page cs-page">
+
+            <!-- Header -->
+            <table style="width: 100%; margin-bottom: 15px;">
+                <tr>
+                    <td style="width: 100%; border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                        <div class="cs-title">COMMISSION STATEMENT BY SALES ORDER — <span style="font-size: 22px;"><t t-out="period_label"/></span></div>
+                        <div class="cs-subtitle"><t t-out="employee_name"/></div>
+                        <div class="cs-date" style="margin-top: 2px;">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- SO Table -->
+            <table class="cs-table o_ignore_layout_styling">
+                <tr class="cs-table-title">
+                    <td colspan="7">Commission by Sales Order</td>
+                </tr>
+                <tr>
+                    <th class="cs-th" style="width: 14%;">SO Number</th>
+                    <th class="cs-th" style="width: 26%;">Client</th>
+                    <th class="cs-th cs-th-center" style="width: 8%;"># MOs</th>
+                    <th class="cs-th cs-th-right" style="width: 8%;">Rate %</th>
+                    <th class="cs-th cs-th-right" style="width: 15%;">Commission Amt</th>
+                    <th class="cs-th cs-th-right" style="width: 15%;">Paid</th>
+                    <th class="cs-th cs-th-right" style="width: 14%;">Outstanding</th>
+                </tr>
+                <t t-foreach="so_lines" t-as="sol">
+                    <tr t-attf-class="#{sol_index % 2 == 0 and 'cs-row-alt' or ''}">
+                        <td class="cs-td cs-td-bold"><t t-out="sol['so_name']"/></td>
+                        <td class="cs-td"><t t-out="sol['client_name']"/></td>
+                        <td class="cs-td cs-td-center"><t t-out="sol['mo_count']"/></td>
+                        <td class="cs-td cs-td-right"><t t-out="'{:.2f}%'.format(sol['rate'])"/></td>
+                        <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sol['total_amount'])"/></td>
+                        <td class="cs-td cs-td-right" style="color:#27ae60;"><t t-out="'{:,.2f}'.format(sol['total_paid'])"/></td>
+                        <td class="cs-td cs-td-right" t-attf-style="color:#{sol['outstanding'] > 0 and '#DC143C' or '#27ae60'};">
+                            <t t-out="'{:,.2f}'.format(sol['outstanding'])"/>
+                        </td>
+                    </tr>
+                </t>
+                <!-- Totals row -->
+                <tr class="cs-totals">
+                    <td colspan="2" class="cs-td cs-td-bold">TOTALS</td>
+                    <td class="cs-td cs-td-center"><t t-out="sum(s['mo_count'] for s in so_lines)"/></td>
+                    <td class="cs-td"></td>
+                    <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(totals['total_earned'])"/></td>
+                    <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(totals['total_paid'])"/></td>
+                    <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(totals['outstanding'])"/></td>
+                </tr>
+            </table>
+
+            <!-- Summary box -->
+            <table class="cs-summary o_ignore_layout_styling">
+                <tr class="cs-summary-title"><td colspan="2">Summary</td></tr>
+                <tr>
+                    <td class="cs-td cs-summary-label">Total Commission Earned</td>
+                    <td class="cs-td cs-summary-value"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['total_earned'])"/></td>
+                </tr>
+                <tr>
+                    <td class="cs-td cs-summary-label">Confirmed</td>
+                    <td class="cs-td cs-summary-value"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['total_confirmed'])"/></td>
+                </tr>
+                <tr>
+                    <td class="cs-td cs-summary-label">Pending</td>
+                    <td class="cs-td cs-summary-value"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['total_pending'])"/></td>
+                </tr>
+                <tr>
+                    <td class="cs-td cs-summary-label">Total Paid</td>
+                    <td class="cs-td cs-summary-value cs-summary-success"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['total_paid'])"/></td>
+                </tr>
+                <tr class="cs-summary-highlight cs-summary-danger">
+                    <td class="cs-td cs-summary-label">Outstanding Balance</td>
+                    <td class="cs-td cs-summary-value"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['outstanding'])"/></td>
+                </tr>
+            </table>
+
+            <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+
+        </div>
+    </template>
+
+
+    <!-- ============================================================ -->
+    <!-- Report 7: SO Commission Report (bound to list view)          -->
+    <!-- ============================================================ -->
+
+    <template id="report_so_commission_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page cs-page">
+                    <style>
+                        .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                        .cs-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                        .cs-date { font-size: 9px; color: #999; margin-top: 4px; }
+                        .cs-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+                        .cs-table-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 7px; font-size: 12px; font-weight: 700; border: none; }
+                        .cs-th { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 6px 5px; font-size: 9px; font-weight: 600; text-transform: uppercase; border: none; }
+                        .cs-th-right { text-align: right; }
+                        .cs-th-center { text-align: center; }
+                        .cs-td { padding: 5px; border-bottom: 1px solid #e0e0e0; font-size: 9px; }
+                        .cs-td-right { text-align: right; }
+                        .cs-td-center { text-align: center; }
+                        .cs-td-bold { font-weight: 700; }
+                        .cs-row-alt { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+                        .cs-totals td { background-color: #2d3436 !important; -webkit-print-color-adjust: exact; color: #fff !important; padding: 7px 5px; font-weight: 700; font-size: 10px; border: none; }
+                        .cs-footer-note { text-align: center; margin-top: 12px; font-size: 8px; color: #bbb; font-style: italic; }
+                    </style>
+
+                    <!-- Compute subtitle directly from docs -->
+                    <t t-set="rpt_years" t-value="', '.join(sorted(set(d.date_year for d in docs if d.date_year)))"/>
+                    <t t-set="rpt_employees" t-value="', '.join(sorted(set(d.employee_id.name for d in docs if d.employee_id)))"/>
+                    <t t-set="rpt_subtitle" t-value="(rpt_years + ' \u2014 ' + rpt_employees) if (rpt_years and rpt_employees) else (rpt_years or rpt_employees)"/>
+
+                    <!-- Header -->
+                    <table style="width:100%; margin-bottom:15px;">
+                        <tr>
+                            <td style="border-bottom: 3px solid #DC143C; padding-bottom: 10px;">
+                                <div class="cs-title">COMMISSION BY SO</div>
+                                <t t-if="rpt_subtitle">
+                                    <div style="font-size:13px; font-weight:600; color:#555; margin-top:3px;">
+                                        <t t-out="rpt_subtitle"/>
+                                    </div>
+                                </t>
+                                <div class="cs-date">Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Build grouped structure: {year: {month_key: [docs]}}
+                         month_key is 'MM' (01-12) for sorting, display name resolved separately -->
+                    <t t-set="month_names" t-value="{'01':'January','02':'February','03':'March','04':'April','05':'May','06':'June','07':'July','08':'August','09':'September','10':'October','11':'November','12':'December'}"/>
+                    <t t-set="year_groups" t-value="{}"/>
+                    <t t-foreach="docs" t-as="doc">
+                        <t t-set="yr" t-value="doc.date_year or 'N/A'"/>
+                        <t t-set="mo" t-value="doc.date_month or 'N/A'"/>
+                        <t t-if="yr not in year_groups" t-set="year_groups" t-value="{**year_groups, yr: {}}"/>
+                        <t t-if="mo not in year_groups[yr]" t-set="year_groups" t-value="{**year_groups, yr: {**year_groups[yr], mo: []}}"/>
+                        <t t-set="_discard" t-value="year_groups[yr][mo].append(doc)"/>
+                    </t>
+                    <t t-set="multi_year" t-value="len(year_groups) > 1"/>
+
+                    <table class="cs-table o_ignore_layout_styling">
+                        <t t-set="table_title" t-value="rpt_subtitle or 'Sales Order Commission Summary'"/>
+                        <tr class="cs-table-title"><td colspan="8"><t t-out="table_title"/></td></tr>
+                        <tr>
+                            <th class="cs-th" style="width:10%;">Sales Order</th>
+                            <th class="cs-th" style="width:25%;">Client</th>
+                            <th class="cs-th" style="width:18%;">Employee</th>
+                            <th class="cs-th cs-th-center" style="width:7%;"># MOs</th>
+                            <th class="cs-th cs-th-right" style="width:7%;">Rate %</th>
+                            <th class="cs-th cs-th-right" style="width:11%;">Commission</th>
+                            <th class="cs-th cs-th-right" style="width:11%;">Paid</th>
+                            <th class="cs-th cs-th-right" style="width:11%;">Outstanding</th>
+                        </tr>
+
+                        <t t-foreach="sorted(year_groups.keys())" t-as="yr">
+                            <!-- Year header: only show when multiple years OR always for clarity -->
+                            <tr>
+                                <td colspan="8" style="background-color:#f0f0f0 !important; -webkit-print-color-adjust:exact; padding:6px 5px; font-size:11px; font-weight:800; color:#2d3436; border-bottom:2px solid #DC143C; border-top:2px solid #DC143C;">
+                                    FY <t t-out="yr"/>
+                                </td>
+                            </tr>
+
+                            <t t-set="multi_month" t-value="len(year_groups[yr]) > 1"/>
+                            <t t-foreach="sorted(year_groups[yr].keys())" t-as="mo">
+                                <t t-set="mo_docs" t-value="year_groups[yr][mo]"/>
+                                <t t-set="mo_name" t-value="month_names.get(mo, mo)"/>
+
+                                <!-- Month sub-header (only if more than one month in this year) -->
+                                <t t-if="multi_month">
+                                    <tr>
+                                        <td colspan="8" style="background-color:#f8f8f8 !important; -webkit-print-color-adjust:exact; padding:4px 5px 4px 15px; font-size:10px; font-weight:700; color:#555; border-bottom:1px solid #ddd;">
+                                            <t t-out="mo_name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <t t-foreach="mo_docs" t-as="doc">
+                                    <t t-set="row_class" t-value="'cs-row-alt' if doc_index % 2 == 1 else ''"/>
+                                    <tr t-att-class="row_class">
+                                        <td class="cs-td cs-td-bold"><t t-out="doc.sale_order_name or ''"/></td>
+                                        <td class="cs-td"><t t-out="doc.partner_id.name or '—'"/></td>
+                                        <td class="cs-td"><t t-out="doc.employee_id.name or ''"/></td>
+                                        <td class="cs-td cs-td-center"><t t-out="doc.mo_count"/></td>
+                                        <td class="cs-td cs-td-right"><t t-out="'{:.2f}'.format(doc.rate)"/></td>
+                                        <td class="cs-td cs-td-right cs-td-bold"><t t-out="'{:,.2f}'.format(doc.total_amount)"/></td>
+                                        <td class="cs-td cs-td-right" style="color:#27ae60;"><t t-out="'{:,.2f}'.format(doc.paid_amount)"/></td>
+                                        <td class="cs-td cs-td-right" t-attf-style="color:{{ '#DC143C' if doc.outstanding_amount > 0 else '#27ae60' }};"><t t-out="'{:,.2f}'.format(doc.outstanding_amount)"/></td>
+                                    </tr>
+                                </t>
+
+                                <!-- Month subtotal (only if multiple months) -->
+                                <t t-if="multi_month">
+                                    <tr style="background-color:#ececec !important; -webkit-print-color-adjust:exact;">
+                                        <td colspan="3" class="cs-td cs-td-bold" style="padding-left:15px; font-size:9px; color:#555;">
+                                            <t t-out="mo_name"/> Subtotal (<t t-out="len(mo_docs)"/> orders)
+                                        </td>
+                                        <td class="cs-td cs-td-center" style="font-weight:700;"><t t-out="sum(d.mo_count for d in mo_docs)"/></td>
+                                        <td class="cs-td"></td>
+                                        <td class="cs-td cs-td-right" style="font-weight:700;"><t t-out="'{:,.2f}'.format(sum(d.total_amount for d in mo_docs))"/></td>
+                                        <td class="cs-td cs-td-right" style="font-weight:700; color:#27ae60;"><t t-out="'{:,.2f}'.format(sum(d.paid_amount for d in mo_docs))"/></td>
+                                        <td class="cs-td cs-td-right" style="font-weight:700; color:#DC143C;"><t t-out="'{:,.2f}'.format(sum(d.outstanding_amount for d in mo_docs))"/></td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </t>
+
+                        <!-- Grand Total -->
+                        <tr class="cs-totals">
+                            <td colspan="3" class="cs-td cs-td-bold">GRAND TOTAL (<t t-out="len(docs)"/> orders)</td>
+                            <td class="cs-td cs-td-center"><t t-out="sum(docs.mapped('mo_count'))"/></td>
+                            <td class="cs-td"></td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('total_amount')))"/></td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('paid_amount')))"/></td>
+                            <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('outstanding_amount')))"/></td>
+                        </tr>
+                    </table>
+
+                    <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
+                </div>
             </t>
         </t>
     </template>

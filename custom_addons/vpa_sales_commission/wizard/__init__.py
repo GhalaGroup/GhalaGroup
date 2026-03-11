@@ -5,3 +5,7 @@
 from . import commission_generate_wizard
 from . import commission_payment_wizard
 from . import commission_statement_wizard
+from . import commission_bill_wizard
+from . import commission_year_summary_wizard
+from . import manual_commission_wizard
+from . import adjust_materials_wizard

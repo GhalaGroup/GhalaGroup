@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- List View -->
+    <record id="so_commission_report_view_list" model="ir.ui.view">
+        <field name="name">so.commission.report.list</field>
+        <field name="model">so.commission.report</field>
+        <field name="arch" type="xml">
+            <list string="Commission by SO" create="false" delete="false" edit="false"
+                  decoration-success="paid_amount > 0 and outstanding_amount == 0"
+                  decoration-muted="total_amount == 0">
+                <control>
+                    <button name="action_print_pdf" string="Print PDF" type="object"
+                            class="btn-primary"/>
+                </control>
+                <field name="sale_order_name" string="Sales Order"/>
+                <field name="partner_id" string="Client"/>
+                <field name="employee_id" string="Employee"/>
+                <field name="mo_count" string="# MOs"/>
+                <field name="rate" string="Rate %" widget="float" digits="[5,2]"/>
+                <field name="base_amount" string="Base Amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="total_amount" string="Commission Amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="confirmed_amount" string="Confirmed" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="pending_amount" string="Pending" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="paid_amount" string="Paid" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="outstanding_amount" string="Outstanding" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="date_year" column_invisible="1"/>
+                <field name="date_quarter" column_invisible="1"/>
+                <field name="date_month" column_invisible="1"/>
+                <field name="date" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="so_commission_report_view_pivot" model="ir.ui.view">
+        <field name="name">so.commission.report.pivot</field>
+        <field name="model">so.commission.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Commission by SO">
+                <field name="employee_id" type="row"/>
+                <field name="sale_order_name" type="row"/>
+                <field name="total_amount" type="measure"/>
+                <field name="paid_amount" type="measure"/>
+                <field name="outstanding_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="so_commission_report_view_search" model="ir.ui.view">
+        <field name="name">so.commission.report.search</field>
+        <field name="model">so.commission.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Commission by SO">
+                <searchpanel>
+                    <field name="employee_id" string="Employee" icon="fa-user"
+                           select="multi" enable_counters="1" limit="20"/>
+                </searchpanel>
+                <field name="sale_order_name" string="Sales Order"/>
+                <field name="partner_id" string="Client"/>
+                <field name="employee_id"/>
+                <separator/>
+                <filter string="Has Outstanding" name="filter_outstanding"
+                        domain="[('outstanding_amount', '>', 0)]"/>
+                <filter string="Fully Paid" name="filter_paid"
+                        domain="[('outstanding_amount', '=', 0)]"/>
+                <separator/>
+                <filter string="2024" name="filter_2024" domain="[('date_year', '=', '2024')]"/>
+                <filter string="2025" name="filter_2025" domain="[('date_year', '=', '2025')]"/>
+                <filter string="2026" name="filter_2026" domain="[('date_year', '=', '2026')]"/>
+                <separator/>
+                <filter string="Q1 (Jan–Mar)" name="filter_q1" domain="[('date_quarter', '=', 'Q1')]"/>
+                <filter string="Q2 (Apr–Jun)" name="filter_q2" domain="[('date_quarter', '=', 'Q2')]"/>
+                <filter string="Q3 (Jul–Sep)" name="filter_q3" domain="[('date_quarter', '=', 'Q3')]"/>
+                <filter string="Q4 (Oct–Dec)" name="filter_q4" domain="[('date_quarter', '=', 'Q4')]"/>
+                <separator/>
+                <filter string="January"   name="filter_m01" domain="[('date_month', '=', '01')]"/>
+                <filter string="February"  name="filter_m02" domain="[('date_month', '=', '02')]"/>
+                <filter string="March"     name="filter_m03" domain="[('date_month', '=', '03')]"/>
+                <filter string="April"     name="filter_m04" domain="[('date_month', '=', '04')]"/>
+                <filter string="May"       name="filter_m05" domain="[('date_month', '=', '05')]"/>
+                <filter string="June"      name="filter_m06" domain="[('date_month', '=', '06')]"/>
+                <filter string="July"      name="filter_m07" domain="[('date_month', '=', '07')]"/>
+                <filter string="August"    name="filter_m08" domain="[('date_month', '=', '08')]"/>
+                <filter string="September" name="filter_m09" domain="[('date_month', '=', '09')]"/>
+                <filter string="October"   name="filter_m10" domain="[('date_month', '=', '10')]"/>
+                <filter string="November"  name="filter_m11" domain="[('date_month', '=', '11')]"/>
+                <filter string="December"  name="filter_m12" domain="[('date_month', '=', '12')]"/>
+                <separator/>
+                <filter string="Employee" name="group_employee"
+                        context="{'group_by': 'employee_id'}"/>
+                <filter string="Client" name="group_partner"
+                        context="{'group_by': 'partner_id'}"/>
+                <filter string="Year" name="group_year"
+                        context="{'group_by': 'date:year'}"/>
+                <filter string="Quarter" name="group_quarter"
+                        context="{'group_by': 'date:quarter'}"/>
+                <filter string="Month" name="group_month"
+                        context="{'group_by': 'date:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Server Action: always-visible Print PDF in gear menu -->
+    <record id="server_action_so_commission_print" model="ir.actions.server">
+        <field name="name">Print PDF</field>
+        <field name="model_id" ref="model_so_commission_report"/>
+        <field name="binding_model_id" ref="model_so_commission_report"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+recs = records if records else env['so.commission.report'].search([])
+years = sorted(set(r.date_year for r in recs if r.date_year))
+employees = sorted(set(r.employee_id.name for r in recs if r.employee_id))
+parts = []
+if years:
+    parts.append(', '.join(years))
+if employees:
+    parts.append(', '.join(employees))
+subtitle = ' — '.join(parts) if parts else ''
+action = env.ref('vpa_sales_commission.action_report_so_commission_report').report_action(recs, data={'subtitle': subtitle, 'ids': recs.ids, 'model': 'so.commission.report'})
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_so_commission_report" model="ir.actions.act_window">
+        <field name="name">Commission by SO</field>
+        <field name="res_model">so.commission.report</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="search_view_id" ref="so_commission_report_view_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No commission data found
+            </p>
+            <p>
+                This report shows commissions consolidated by Sales Order.
+            </p>
+        </field>
+    </record>
+
+</odoo>

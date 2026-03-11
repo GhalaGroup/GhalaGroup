@@ -65,8 +65,28 @@ class LabelVariable(models.Model):
 
         if not self.field_path or not record:
             # Alt UoM variables have no field_path — they only get values via extra_values.
-            # When no alt UoM is selected, return empty string (not the sample value).
+            # When no alt UoM is selected, fall back to standard product packaging.
             if self.category == 'alt_uom':
+                try:
+                    product = self._get_product(record)
+                    if product:
+                        tmpl = product.product_tmpl_id if product._name == 'product.product' else product
+                        # Read from VPA UoM conversions - find first one with packaging info
+                        conversions = getattr(tmpl, 'uom_conversion_ids', None)
+                        conv = None
+                        if conversions:
+                            # Prefer conversion with packaging_name set
+                            conv = next((c for c in conversions if c.packaging_name), None)
+                            if not conv:
+                                conv = conversions[0]
+                        if conv:
+                            if self.name == 'QTY_PER_PACKAGE':
+                                qty = conv.qty_per_package or 0
+                                return str(int(qty)) if qty == int(qty) else str(qty)
+                            if self.name == 'PACKAGING_NAME':
+                                return conv.packaging_name or conv.uom_id.name or ''
+                except Exception:
+                    pass
                 return ''
             return self.sample_value or ''
 

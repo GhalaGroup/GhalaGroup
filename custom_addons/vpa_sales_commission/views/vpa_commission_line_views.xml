@@ -19,7 +19,7 @@
                             invisible="state not in ('confirmed', 'paid', 'cancelled')"
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="pending,confirmed,paid"/>
+                           statusbar_visible="pending,paid"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -35,9 +35,10 @@
                             <field name="date" readonly="1"/>
                         </group>
                         <group>
-                            <field name="production_id" readonly="1"/>
-                            <field name="sale_order_name"/>
-                            <field name="item_name"/>
+                            <field name="production_id" readonly="1" invisible="type == 'manual'"/>
+                            <field name="partner_id" readonly="type != 'manual'"/>
+                            <field name="sale_order_name" readonly="type != 'manual'"/>
+                            <field name="item_name" readonly="type != 'manual'"/>
                             <field name="invoice_id" invisible="type != 'sales'" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="delivered"/>
@@ -46,8 +47,8 @@
                     </group>
                     <group string="Commission Calculation">
                         <group>
-                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
-                            <field name="rate" readonly="1"/>
+                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="type != 'manual'"/>
+                            <field name="rate" readonly="type != 'manual'"/>
                         </group>
                         <group>
                             <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
@@ -62,12 +63,22 @@
                         <group invisible="state != 'paid'">
                             <field name="paid_date"/>
                             <field name="paid_by"/>
-                            <field name="payment_id"/>
+                            <field name="payment_id" invisible="not payment_id"/>
+                            <field name="bill_id" invisible="payment_id or not bill_id" string="Paid Via Bill"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Materials" name="materials">
-                            <field name="material_line_ids">
+                            <div class="d-flex mb-2">
+                                <button name="action_adjust_materials"
+                                        string="Adjust Materials"
+                                        type="object"
+                                        class="btn-primary"
+                                        icon="fa-pencil"
+                                        invisible="state in ('paid', 'cancelled')"
+                                        groups="vpa_sales_commission.group_commission_manager"/>
+                            </div>
+                            <field name="material_line_ids" readonly="1">
                                 <list>
                                     <field name="included"/>
                                     <field name="product_id"/>
@@ -93,7 +104,7 @@
         <field name="arch" type="xml">
             <list string="Commission Lines" multi_edit="1" create="0">
                 <header>
-                    <button name="%(action_commission_make_payment)d" string="Make Payment"
+                    <button name="%(action_commission_generate_bill)d" string="Generate Bill"
                             type="action" class="btn-primary"
                             groups="vpa_sales_commission.group_commission_manager"/>
                 </header>
@@ -102,7 +113,8 @@
                 <field name="employee_id"/>
                 <field name="scheme_id" optional="hide"/>
                 <field name="type" optional="hide"/>
-                <field name="production_id"/>
+                <field name="production_id" optional="hide"/>
+                <field name="partner_id" optional="hide" string="Client"/>
                 <field name="sale_order_name"/>
                 <field name="item_name"/>
                 <field name="currency_id" column_invisible="1"/>
@@ -111,10 +123,20 @@
                 <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                 <field name="delivered" widget="boolean" string="Delivered"/>
                 <field name="state" widget="badge"
-                       decoration-info="state == 'pending'"
-                       decoration-warning="state == 'confirmed'"
+                       decoration-info="state in ('pending', 'confirmed')"
                        decoration-success="state == 'paid'"
                        decoration-danger="state == 'cancelled'"/>
+                <field name="bill_id" optional="show" string="Bill"
+                       decoration-info="bill_state == 'billed'"
+                       decoration-success="bill_state == 'paid'"/>
+                <button name="action_view_bill" type="object"
+                        icon="fa-external-link" title="Open Bill"
+                        invisible="not bill_id"/>
+                <field name="bill_state" widget="badge" optional="hide"
+                       decoration-muted="bill_state == 'not_billed'"
+                       decoration-info="bill_state == 'billed'"
+                       decoration-success="bill_state == 'paid'"/>
+                <field name="year_locked" column_invisible="1"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>
         </field>
@@ -131,16 +153,19 @@
                 <field name="scheme_id"/>
                 <field name="production_id"/>
                 <separator/>
-                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
-                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Applied" name="pending" domain="[('state', 'in', ('pending', 'confirmed'))]"/>
                 <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
                 <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
                 <filter string="Production" name="production" domain="[('type', '=', 'production')]"/>
                 <filter string="Sales" name="sales" domain="[('type', '=', 'sales')]"/>
+                <filter string="Manual" name="manual" domain="[('type', '=', 'manual')]"/>
                 <separator/>
                 <filter string="Delivered" name="delivered" domain="[('delivered', '=', True)]"/>
                 <filter string="Not Delivered" name="not_delivered" domain="[('delivered', '=', False)]"/>
+                <separator/>
+                <filter string="Not Billed" name="not_billed" domain="[('bill_id', '=', False)]"/>
+                <filter string="Billed" name="billed" domain="[('bill_id', '!=', False)]"/>
                 <separator/>
                 <filter string="Date" name="filter_date" date="date" default_period="year"/>
                 <separator/>
@@ -193,7 +218,7 @@
         <field name="res_model">vpa.commission.line</field>
         <field name="view_mode">list,pivot,graph,form</field>
         <field name="search_view_id" ref="vpa_commission_line_view_search"/>
-        <field name="context">{'search_default_pending': 1}</field>
+        <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No commission lines yet

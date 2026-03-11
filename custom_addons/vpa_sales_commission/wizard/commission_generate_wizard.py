@@ -187,7 +187,7 @@ class CommissionGenerateWizard(models.TransientModel):
                 'date': commission_date,
                 'production_id': self.production_id.id,
                 'base_amount': base_amount,
-                'rate': scheme.production_rate,
+                'rate': scheme_line.rate,
                 'state': 'pending',
                 'material_line_ids': material_vals,
             }
