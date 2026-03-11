@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <record id="manual_commission_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.manual.commission.wizard.form</field>
+        <field name="model">vpa.manual.commission.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add Manual Commission">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Add Manual Commission</h1>
+                    </div>
+                    <group>
+                        <group string="Employee">
+                            <field name="scheme_id"/>
+                            <field name="employee_id"/>
+                            <field name="date"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Reference (Optional)">
+                            <field name="partner_id"
+                                   domain="[('customer_rank', '>', 0)]"
+                                   context="{'show_address': False, 'no_address_in_searchview': True}"
+                                   options="{'no_quick_create': True}"/>
+                            <field name="sale_order_id"
+                                   domain="[('partner_id', '=', partner_id)]"
+                                   options="{'no_quick_create': True}"/>
+                            <field name="sale_order_ref"
+                                   readonly="1"
+                                   invisible="not sale_order_id"
+                                   string="Customer Reference"/>
+                        </group>
+                    </group>
+                    <group string="Commission Amount">
+                        <group>
+                            <field name="base_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="rate" widget="float" digits="[5,2]"
+                                   string="Rate (%)" placeholder="e.g. 5.00"/>
+                        </group>
+                        <group>
+                            <field name="amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"
+                                   string="Commission Amount"
+                                   required="1"/>
+                        </group>
+                    </group>
+                    <group string="Reason">
+                        <field name="notes" nolabel="1"
+                               placeholder="Required: explain why this manual commission is being added..."
+                               colspan="2"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_create" string="Create Commission"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_manual_commission_wizard" model="ir.actions.act_window">
+        <field name="name">Add Manual Commission</field>
+        <field name="res_model">vpa.manual.commission.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

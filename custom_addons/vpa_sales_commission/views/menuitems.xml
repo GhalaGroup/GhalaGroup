@@ -32,6 +32,14 @@
               sequence="17"
               groups="vpa_sales_commission.group_commission_manager"/>
 
+    <!-- Manual Commission Menu -->
+    <menuitem id="menu_manual_commission"
+              name="Add Manual Commission"
+              parent="menu_commission_root"
+              action="action_manual_commission_wizard"
+              sequence="18"
+              groups="vpa_sales_commission.group_commission_manager"/>
+
     <!-- Reporting Menu -->
     <menuitem id="menu_commission_reporting"
               name="Reporting"

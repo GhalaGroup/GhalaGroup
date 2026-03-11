@@ -35,9 +35,10 @@
                             <field name="date" readonly="1"/>
                         </group>
                         <group>
-                            <field name="production_id" readonly="1"/>
-                            <field name="sale_order_name"/>
-                            <field name="item_name"/>
+                            <field name="production_id" readonly="1" invisible="type == 'manual'"/>
+                            <field name="partner_id" readonly="type != 'manual'"/>
+                            <field name="sale_order_name" readonly="type != 'manual'"/>
+                            <field name="item_name" readonly="type != 'manual'"/>
                             <field name="invoice_id" invisible="type != 'sales'" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="delivered"/>
@@ -46,8 +47,8 @@
                     </group>
                     <group string="Commission Calculation">
                         <group>
-                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
-                            <field name="rate" readonly="1"/>
+                            <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="type != 'manual'"/>
+                            <field name="rate" readonly="type != 'manual'"/>
                         </group>
                         <group>
                             <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
@@ -62,12 +63,22 @@
                         <group invisible="state != 'paid'">
                             <field name="paid_date"/>
                             <field name="paid_by"/>
-                            <field name="payment_id"/>
+                            <field name="payment_id" invisible="not payment_id"/>
+                            <field name="bill_id" invisible="payment_id or not bill_id" string="Paid Via Bill"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Materials" name="materials">
-                            <field name="material_line_ids">
+                            <div class="d-flex mb-2">
+                                <button name="action_adjust_materials"
+                                        string="Adjust Materials"
+                                        type="object"
+                                        class="btn-primary"
+                                        icon="fa-pencil"
+                                        invisible="state in ('paid', 'cancelled')"
+                                        groups="vpa_sales_commission.group_commission_manager"/>
+                            </div>
+                            <field name="material_line_ids" readonly="1">
                                 <list>
                                     <field name="included"/>
                                     <field name="product_id"/>
@@ -102,7 +113,8 @@
                 <field name="employee_id"/>
                 <field name="scheme_id" optional="hide"/>
                 <field name="type" optional="hide"/>
-                <field name="production_id"/>
+                <field name="production_id" optional="hide"/>
+                <field name="partner_id" optional="hide" string="Client"/>
                 <field name="sale_order_name"/>
                 <field name="item_name"/>
                 <field name="currency_id" column_invisible="1"/>
@@ -147,6 +159,7 @@
                 <separator/>
                 <filter string="Production" name="production" domain="[('type', '=', 'production')]"/>
                 <filter string="Sales" name="sales" domain="[('type', '=', 'sales')]"/>
+                <filter string="Manual" name="manual" domain="[('type', '=', 'manual')]"/>
                 <separator/>
                 <filter string="Delivered" name="delivered" domain="[('delivered', '=', True)]"/>
                 <filter string="Not Delivered" name="not_delivered" domain="[('delivered', '=', False)]"/>

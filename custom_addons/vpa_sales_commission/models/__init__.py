@@ -12,3 +12,4 @@ from . import mrp_production_commission_report
 from . import so_commission_report
 from . import hr_employee
 from . import res_config_settings
+from . import sale_order

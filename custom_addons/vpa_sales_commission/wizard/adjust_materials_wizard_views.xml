@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Adjust Materials Wizard Form View -->
+    <record id="vpa_adjust_materials_wizard_view_form" model="ir.ui.view">
+        <field name="name">vpa.adjust.materials.wizard.form</field>
+        <field name="model">vpa.adjust.materials.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Adjust Materials">
+                <group>
+                    <group>
+                        <field name="commission_line_id" invisible="1"/>
+                        <field name="employee_name"/>
+                        <field name="production_name"/>
+                    </group>
+                    <group>
+                        <field name="current_base_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="new_base_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"
+                               decoration-danger="new_base_amount != current_base_amount"
+                               decoration-success="new_base_amount == current_base_amount"/>
+                        <field name="rate"/>
+                        <field name="new_commission_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <separator string="Materials"/>
+                <field name="line_ids">
+                    <list editable="bottom">
+                        <field name="included"/>
+                        <field name="material_line_id" column_invisible="1"/>
+                        <field name="product_id" readonly="1"/>
+                        <field name="quantity" readonly="1"/>
+                        <field name="unit_cost" readonly="1"/>
+                        <field name="amount" readonly="1" sum="Total"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_apply" string="Apply Changes"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open the wizard -->
+    <record id="action_adjust_materials_wizard" model="ir.actions.act_window">
+        <field name="name">Adjust Materials</field>
+        <field name="res_model">vpa.adjust.materials.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

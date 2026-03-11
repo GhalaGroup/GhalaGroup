@@ -74,6 +74,8 @@ Support: info@vpa.co.tz
         'wizard/commission_statement_wizard_views.xml',
         'wizard/commission_bill_wizard_views.xml',
         'wizard/commission_year_summary_wizard_views.xml',
+        'wizard/manual_commission_wizard_views.xml',
+        'wizard/adjust_materials_wizard_views.xml',
         'report/commission_statement_report.xml',
         'report/commission_statement_template.xml',
         'views/vpa_commission_scheme_year_views.xml',

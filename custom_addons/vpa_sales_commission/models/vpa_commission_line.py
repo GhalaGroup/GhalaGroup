@@ -40,10 +40,11 @@ class VpaCommissionLine(models.Model):
         store=True,
     )
 
-    # Type field for future-proofing (Phase 2: Sales commission)
+    # Type field
     type = fields.Selection([
         ('production', 'Production'),
         ('sales', 'Sales'),
+        ('manual', 'Manual'),
     ], string='Type', default='production', required=True)
 
     date = fields.Date(
@@ -83,11 +84,13 @@ class VpaCommissionLine(models.Model):
         string='Sales Order',
         compute='_compute_sale_order_info',
         store=True,
+        readonly=False,
     )
     item_name = fields.Char(
         string='Item',
         compute='_compute_sale_order_info',
         store=True,
+        readonly=False,
     )
     invoice_id = fields.Many2one(
         'account.move',
@@ -101,6 +104,9 @@ class VpaCommissionLine(models.Model):
     base_amount = fields.Float(
         string='Base Amount',
         digits=(12, 2),
+        compute='_compute_base_amount',
+        store=True,
+        readonly=False,
         help='Sum of commissionable material costs',
     )
     rate = fields.Float(
@@ -114,6 +120,14 @@ class VpaCommissionLine(models.Model):
         digits=(12, 2),
         compute='_compute_amount',
         store=True,
+        readonly=False,
+    )
+    partner_id = fields.Many2one(
+        'res.partner',
+        string='Client',
+        index=True,
+        ondelete='set null',
+        help='Client associated with this manual commission',
     )
     currency_id = fields.Many2one(
         'res.currency',
@@ -264,10 +278,24 @@ class VpaCommissionLine(models.Model):
                 line.date_year = False
                 line.date_month = False
 
-    @api.depends('base_amount', 'rate')
+    @api.depends('material_line_ids.included', 'material_line_ids.amount')
+    def _compute_base_amount(self):
+        for line in self:
+            if line.material_line_ids:
+                line.base_amount = sum(
+                    m.amount for m in line.material_line_ids if m.included
+                )
+            # If no materials (manual or sales type), leave base_amount as-is
+
+    @api.depends('base_amount', 'rate', 'type')
     def _compute_amount(self):
         for line in self:
-            line.amount = line.base_amount * line.rate / 100
+            if line.type == 'manual':
+                # For manual lines, don't overwrite — amount is set directly
+                if not line.amount:
+                    line.amount = line.base_amount * line.rate / 100 if line.rate else 0.0
+            else:
+                line.amount = line.base_amount * line.rate / 100
 
     @api.depends('amount', 'state')
     def _compute_amount_paid(self):
@@ -344,6 +372,30 @@ class VpaCommissionLine(models.Model):
             'res_id': self.bill_id.id,
         }
 
+    def action_adjust_materials(self):
+        """Open the Adjust Materials wizard."""
+        self.ensure_one()
+        if self.state in ('paid', 'cancelled'):
+            raise UserError(_('Cannot adjust materials on a paid or cancelled commission line.'))
+        if not self.material_line_ids:
+            raise UserError(_('No materials to adjust.'))
+
+        wizard = self.env['vpa.adjust.materials.wizard'].create({
+            'commission_line_id': self.id,
+            'line_ids': [(0, 0, {
+                'material_line_id': m.id,
+                'included': m.included,
+            }) for m in self.material_line_ids],
+        })
+        return {
+            'name': _('Adjust Materials'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'vpa.adjust.materials.wizard',
+            'view_mode': 'form',
+            'res_id': wizard.id,
+            'target': 'new',
+        }
+
     def action_view_production(self):
         """Open the related manufacturing order."""
         self.ensure_one()
@@ -407,5 +459,4 @@ class VpaCommissionLineMaterial(models.Model):
     )
     included = fields.Boolean(
         string='Included',
-        readonly=True,
     )

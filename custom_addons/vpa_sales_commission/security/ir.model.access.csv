@@ -19,3 +19,6 @@ access_vpa_commission_scheme_year_user,vpa.commission.scheme.year.user,model_vpa
 access_vpa_commission_close_year_wizard,vpa.commission.close.year.wizard,model_vpa_commission_close_year_wizard,group_commission_manager,1,1,1,1
 access_vpa_commission_bill_wizard,vpa.commission.bill.wizard,model_vpa_commission_bill_wizard,group_commission_manager,1,1,1,1
 access_vpa_commission_year_summary_wizard,vpa.commission.year.summary.wizard,model_vpa_commission_year_summary_wizard,group_commission_manager,1,1,1,1
+access_vpa_manual_commission_wizard,vpa.manual.commission.wizard,model_vpa_manual_commission_wizard,group_commission_manager,1,1,1,1
+access_vpa_adjust_materials_wizard,vpa.adjust.materials.wizard,model_vpa_adjust_materials_wizard,group_commission_manager,1,1,1,1
+access_vpa_adjust_materials_wizard_line,vpa.adjust.materials.wizard.line,model_vpa_adjust_materials_wizard_line,group_commission_manager,1,1,1,1
