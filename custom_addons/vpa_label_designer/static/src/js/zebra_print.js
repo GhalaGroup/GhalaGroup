@@ -15,11 +15,15 @@ async function browserPrintHandler(env, action) {
     const zplData = params.zpl_data || "";
     const notification = env.services.notification;
 
-    // Zebra Browser Print serves HTTPS on 9102, HTTP on 9101.
-    // Try configured URL first, then HTTPS 9102, then HTTP 9101.
+    // Zebra Browser Print may serve HTTPS on 9102 or 9101 depending on version.
+    // Try configured URL first, then all known combinations.
     const candidates = [];
     if (configuredUrl) candidates.push(configuredUrl);
-    candidates.push("https://localhost:9102", "http://localhost:9101");
+    candidates.push(
+        "https://localhost:9102",
+        "https://localhost:9101",
+        "http://localhost:9101",
+    );
 
     let url = null;
     let resp = null;
