@@ -10,14 +10,28 @@ import { registry } from "@web/core/registry";
  */
 async function browserPrintHandler(env, action) {
     const params = action.params || {};
-    const url = (params.browser_print_url || "https://localhost:9101").replace(/\/$/, "");
+    const configuredUrl = (params.browser_print_url || "").replace(/\/$/, "");
     const deviceName = params.device_name || "";
     const zplData = params.zpl_data || "";
     const notification = env.services.notification;
 
+    // Zebra Browser Print serves HTTPS on 9102, HTTP on 9101.
+    // Try configured URL first, then HTTPS 9102, then HTTP 9101.
+    const candidates = [];
+    if (configuredUrl) candidates.push(configuredUrl);
+    candidates.push("https://localhost:9102", "http://localhost:9101");
+
+    let url = null;
+    let resp = null;
+    for (const candidate of candidates) {
+        try {
+            resp = await fetch(`${candidate}/available`);
+            if (resp.ok) { url = candidate; break; }
+        } catch (_) { /* try next */ }
+    }
+
     try {
-        const resp = await fetch(`${url}/available`);
-        if (!resp.ok) throw new Error(`Browser Print returned ${resp.status}`);
+        if (!url || !resp) throw new Error("Cannot connect to Zebra Browser Print. Is the agent running?");
         const data = await resp.json();
         const printers = data.printer || [];
 

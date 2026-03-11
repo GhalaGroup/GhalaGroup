@@ -180,7 +180,7 @@ class PrinterConfig(models.Model):
             'tag': 'vpa_label_designer.browser_print',
             'params': {
                 'zpl_data': zpl_data,
-                'browser_print_url': self.browser_print_url or 'https://localhost:9101',
+                'browser_print_url': self.browser_print_url or '',
                 'device_name': self.browser_print_device or '',
                 'printer_name': self.name,
             }
