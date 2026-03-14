@@ -40,6 +40,12 @@ class PrinterConfig(models.Model):
         ('600', '600 DPI'),
     ], string='Default DPI', default='203')
 
+    # Label offset (Label Home ^LH) — adjusts print position on the physical label
+    label_offset_x = fields.Integer(string='Label Offset X (dots)', default=0,
+                                     help='Horizontal offset in dots. Shifts all print content to the right.')
+    label_offset_y = fields.Integer(string='Label Offset Y (dots)', default=0,
+                                     help='Vertical offset in dots. Shifts all print content downward.')
+
     is_default = fields.Boolean(string='Default Printer', default=False)
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company)
@@ -137,6 +143,12 @@ class PrinterConfig(models.Model):
 
         if isinstance(zpl_data, list):
             zpl_data = '\n'.join(zpl_data)
+
+        # Inject Label Home offset (^LH) if configured
+        if self.label_offset_x or self.label_offset_y:
+            lh_cmd = f'^LH{self.label_offset_x},{self.label_offset_y}'
+            zpl_data = zpl_data.replace('^XA\n', f'^XA\n{lh_cmd}\n')
+            zpl_data = zpl_data.replace('^XA^', f'^XA{lh_cmd}^')
 
         if self.print_method == 'network':
             return self._send_network(zpl_data)
