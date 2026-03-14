@@ -2095,6 +2095,7 @@ class VPADocumentTemplate(models.Model):
                             <tbody>
                                 <t t-set="line_num" t-value="0"/>
                                 <t t-set="total_qty" t-value="0"/>
+                                <t t-set="line_mo_map" t-value="doc._get_line_mo_map()"/>
 
                                 <t t-foreach="doc.order_line" t-as="line">
                                     <!-- Section Headers -->
@@ -2143,7 +2144,7 @@ class VPADocumentTemplate(models.Model):
                                                 <t t-out="line.product_uom_id.name"/>
                                             </td>
                                             <td style="text-align: center;">
-                                                <t t-set="mos" t-value="doc.mrp_production_ids.filtered(lambda m: line.product_id in m.move_raw_ids.mapped('product_id') or m.product_id == line.product_id)"/>
+                                                <t t-set="mos" t-value="line_mo_map.get(line.id)"/>
                                                 <t t-if="mos">
                                                     <t t-foreach="mos" t-as="mo">
                                                         <span class="vpa-mo-badge">

@@ -54,10 +54,12 @@ class StockRule(models.Model):
                 'picking_type_id': picking_type.id if picking_type else values.get('warehouse_id') and values['warehouse_id'].manu_type_id.id,
                 'company_id': company_id.id,
                 'move_dest_ids': False,
+                'sale_line_id': values.get('sale_line_id', False),
                 'user_id': False,
             }
 
         # Call parent method if BOM exists, then remove move_dest_ids
         vals = super()._prepare_mo_vals(product_id, product_qty, product_uom, location_dest_id, name, origin, company_id, values, bom)
         vals['move_dest_ids'] = False
+        vals['sale_line_id'] = values.get('sale_line_id', False)
         return vals

@@ -12,7 +12,7 @@ class PrintLabelWizardLine(models.TransientModel):
 
     wizard_id = fields.Many2one('vpa.print.label.wizard', string='Wizard',
                                 required=True, ondelete='cascade')
-    product_id = fields.Many2one('product.product', string='Product', required=True)
+    product_id = fields.Many2one('product.product', string='Product')
     product_sku = fields.Char(related='product_id.default_code', string='SKU')
     product_barcode = fields.Char(related='product_id.barcode', string='Barcode')
 

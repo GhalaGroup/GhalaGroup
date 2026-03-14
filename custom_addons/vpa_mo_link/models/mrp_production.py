@@ -11,6 +11,12 @@ class MrpProduction(models.Model):
         string='Lot Reference',
         help="Reference for production lots (e.g., 'Lot 1/3', 'Lot 2/3')",
     )
+    sale_line_id = fields.Many2one(
+        'sale.order.line',
+        string='Sale Order Line',
+        help="The specific SO line that triggered creation of this MO.",
+        index=True,
+    )
 
     def action_split_mo(self):
         """Open wizard to split this MO into multiple lots."""

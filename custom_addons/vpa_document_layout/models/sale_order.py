@@ -45,3 +45,37 @@ class SaleOrder(models.Model):
                 result['context']['default_report_template_ids'] = [(4, vpa_template.report_action_id.id)]
 
         return result
+
+    def _get_line_mo_map(self):
+        """Build a mapping of sale.order.line ID -> mrp.production recordset.
+
+        Used by the Production Summary report to show correct MOs per line.
+        First tries sale_line_id (direct link), then falls back to creation-order matching.
+        """
+        self.ensure_one()
+        MrpProduction = self.env['mrp.production']
+        all_mos = self.mrp_production_ids.sorted('id')
+        line_mo_map = {}
+        used_mo_ids = set()
+
+        # First pass: MOs with sale_line_id
+        for mo in all_mos:
+            if mo.sale_line_id:
+                key = mo.sale_line_id.id
+                if key in line_mo_map:
+                    line_mo_map[key] |= mo
+                else:
+                    line_mo_map[key] = mo
+                used_mo_ids.add(mo.id)
+
+        # Second pass: unlinked MOs matched by creation order
+        unlinked_mos = [m for m in all_mos if m.id not in used_mo_ids]
+        product_lines = [
+            l for l in self.order_line
+            if l.product_uom_qty > 0 and not l.display_type and l.id not in line_mo_map
+        ]
+        for idx, pl in enumerate(product_lines):
+            if idx < len(unlinked_mos):
+                line_mo_map[pl.id] = unlinked_mos[idx]
+
+        return line_mo_map
