@@ -38,6 +38,14 @@
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
+                    <group string="Label Position Offset">
+                        <field name="label_offset_x"/>
+                        <field name="label_offset_y"/>
+                        <div colspan="2" class="text-muted small">
+                            Adjusts the print position on the physical label (in dots).
+                            Use this if your printed labels don't match the design preview.
+                        </div>
+                    </group>
                     <group string="Network Settings" invisible="print_method != 'network'">
                         <field name="printer_ip" placeholder="192.168.1.100"/>
                         <field name="printer_port"/>
