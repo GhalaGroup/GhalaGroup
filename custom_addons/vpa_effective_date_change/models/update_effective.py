@@ -98,10 +98,12 @@ class UpdateEffective(models.Model):
                 pass
             elif current_picking_id == 'incoming':
                 if current_picking_id == 'incoming' and int(purchase_orders_ids.currency_id) != system_default_currency:
-                    rate = float(self.env['res.currency.rate'].search([('currency_id', '=', int(purchase_orders_ids.currency_id)), ('name', '=', selected_date.strftime('%Y-%m-%d'))]).inverse_company_rate)
+                    company = self.env.company
+                    po_currency = purchase_orders_ids.currency_id
+                    rate = po_currency._get_conversion_rate(po_currency, company.currency_id, company, selected_date)
 
-                    if rate == 0.0:
-                        raise UserError('You have selected the currency rate of ' + str(purchase_orders_ids.currency_id.name) + ' which is currently not available based on your selected date. Make sure to fill it under Accounting > Settings > Currencies > ' + str(purchase_orders_ids.currency_id.name) + '!')
+                    if not rate:
+                        raise UserError('You have selected the currency rate of ' + str(po_currency.name) + ' which is currently not available based on your selected date. Make sure to fill it under Accounting > Settings > Currencies > ' + str(po_currency.name) + '!')
                     else:
                         po_quantity = []
                         po_price_unit = []
