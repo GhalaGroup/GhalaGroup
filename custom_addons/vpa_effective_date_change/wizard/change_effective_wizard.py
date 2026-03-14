@@ -102,7 +102,7 @@ class ChangeEffectiveWizard(models.TransientModel):
                         for product in self.env['purchase.order.line'].search([('order_id', '=', int(purchase_orders_ids))]):
                             po_quantity.append(product.product_qty)
                             po_price_unit.append(product.price_unit)
-                            po_tax_include.append(product.taxes_id.price_include)
+                            po_tax_include.append(product.tax_ids.price_include)
                             po_tax_amount.append(product.price_tax)
                             po_subtotal.append(product.price_subtotal)
 
