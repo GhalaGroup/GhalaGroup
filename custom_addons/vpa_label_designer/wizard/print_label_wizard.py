@@ -163,7 +163,7 @@ class PrintLabelWizard(models.TransientModel):
         orders = self.env['purchase.order'].browse(po_ids)
         for order in orders:
             for po_line in order.order_line:
-                if not po_line.product_id:
+                if po_line.display_type or not po_line.product_id:
                     continue
                 # Get alternative UoMs
                 alt_uom_ids = po_line.product_id.product_tmpl_id.uom_conversion_ids.mapped('uom_id').ids
@@ -188,7 +188,7 @@ class PrintLabelWizard(models.TransientModel):
                 lines.append((0, 0, {
                     'product_id': move.product_id.id,
                     'ordered_qty': qty,
-                    'product_uom_id': move.product_uom_id.id,
+                    'product_uom_id': move.product_uom.id,
                     'label_qty': int(qty),
                     'source_document': picking.name,
                 }))
@@ -285,9 +285,11 @@ class PrintLabelWizard(models.TransientModel):
 
         # Build the list of ZPL labels (same logic as action_print)
         zpl_list = []
+        _logger.info('PDF Download: is_quantity_mode=%s, line_ids=%s, source_model=%s, source_ids=%s',
+                     self.is_quantity_mode, self.line_ids.ids, self.source_model, self.source_ids)
         if self.is_quantity_mode:
             for line in self.line_ids:
-                if line.label_qty <= 0:
+                if not line.product_id or line.label_qty <= 0:
                     continue
                 extra_values = line._get_extra_values()
                 zpl = self.template_id.resolve_zpl_for_record(
@@ -313,37 +315,56 @@ class PrintLabelWizard(models.TransientModel):
         if not zpl_list:
             raise UserError('No labels to export. Please check your selection.')
 
-        # Combine all labels into one ZPL string
-        combined_zpl = '\n'.join(zpl_list)
-
-        # Call Labelary API for PDF
+        # Call Labelary API in batches to avoid 413 payload too large
         tmpl = self.template_id
-        try:
-            url = (
-                f'http://api.labelary.com/v1/printers/{tmpl.label_dpmm}dpmm'
-                f'/labels/{tmpl.label_width_inch}x{tmpl.label_height_inch}/0/'
-            )
-            response = requests.post(
-                url,
-                data=combined_zpl.encode('utf-8'),
-                headers={'Accept': 'application/pdf'},
-                timeout=30,
-            )
+        BATCH_SIZE = 10
+        pdf_pages = []
 
-            if response.status_code != 200:
-                raise UserError(
-                    f'Labelary API returned status {response.status_code}. '
-                    'Please try again or check your label design.'
+        url = (
+            f'http://api.labelary.com/v1/printers/{tmpl.label_dpmm}dpmm'
+            f'/labels/{tmpl.label_width_inch}x{tmpl.label_height_inch}/0/'
+        )
+
+        for i in range(0, len(zpl_list), BATCH_SIZE):
+            batch = zpl_list[i:i + BATCH_SIZE]
+            combined_zpl = '\n'.join(batch)
+            try:
+                response = requests.post(
+                    url,
+                    data=combined_zpl.encode('utf-8'),
+                    headers={'Accept': 'application/pdf'},
+                    timeout=60,
                 )
-        except requests.Timeout:
-            raise UserError('Labelary API request timed out. Please try again.')
-        except requests.ConnectionError:
-            raise UserError(
-                'Could not connect to Labelary API. '
-                'Please check your internet connection.'
-            )
 
-        pdf_b64 = base64.b64encode(response.content)
+                if response.status_code != 200:
+                    raise UserError(
+                        f'Labelary API returned status {response.status_code}. '
+                        'Please try again or check your label design.'
+                    )
+                pdf_pages.append(response.content)
+            except requests.Timeout:
+                raise UserError('Labelary API request timed out. Please try again.')
+            except requests.ConnectionError:
+                raise UserError(
+                    'Could not connect to Labelary API. '
+                    'Please check your internet connection.'
+                )
+
+        # Merge PDF batches
+        if len(pdf_pages) == 1:
+            pdf_content = pdf_pages[0]
+        else:
+            from PyPDF2 import PdfMerger
+            import io
+            merger = PdfMerger()
+            for pdf_data in pdf_pages:
+                merger.append(io.BytesIO(pdf_data))
+            output = io.BytesIO()
+            merger.write(output)
+            merger.close()
+            pdf_content = output.getvalue()
+
+        pdf_b64 = base64.b64encode(pdf_content)
         filename = f'{tmpl.name or "labels"}.pdf'
         attachment = self.env['ir.attachment'].create({
             'name': filename,
