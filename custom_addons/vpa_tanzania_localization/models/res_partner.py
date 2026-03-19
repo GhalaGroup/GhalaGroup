@@ -58,15 +58,15 @@ class ResPartner(models.Model):
                 # Remove common separators
                 vrn_clean = partner.vrn.replace('-', '').replace(' ', '').replace('.', '')
 
-                # VRN should be 10 characters starting with 40
-                if not re.match(r'^40\d{7}[A-Z0-9]$', vrn_clean):
+                # VRN should be 10 characters starting with 40, 41, or 42
+                if not re.match(r'^4[012]\d{7}[A-Z0-9]$', vrn_clean):
                     raise ValidationError(_(
                         'Invalid VRN format for Tanzania!\n\n'
                         'VRN must:\n'
-                        '- Start with "40" (Tanzania VAT prefix)\n'
+                        '- Start with "40", "41", or "42" (Tanzania VAT prefix)\n'
                         '- Followed by 7 digits\n'
                         '- End with 1 alphanumeric check character\n'
-                        'Example: 40-1234567-X or 401234567X\n\n'
+                        'Example: 40-1234567-X or 411234567X\n\n'
                         'Your input: %s'
                     ) % partner.vrn)
 
