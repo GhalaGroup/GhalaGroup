@@ -57,6 +57,6 @@ export function dotsToPoints(dots, dpi = 203) {
  * The element layer zoom handles scaling to fit the screen container.
  */
 export function dotsToScreenPx(dots) {
-    const CAP_HEIGHT_CORRECTION = 1.35; // Zebra cell fill (0.92) / IBM Plex cap-height ratio (0.68)
+    const CAP_HEIGHT_CORRECTION = 1.0; // No correction — direct dot-to-pixel mapping
     return Math.max(8, Math.round(dots * CAP_HEIGHT_CORRECTION));
 }
