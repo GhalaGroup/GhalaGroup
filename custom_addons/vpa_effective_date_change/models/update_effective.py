@@ -97,7 +97,7 @@ class UpdateEffective(models.Model):
             elif current_picking_id == 'outgoing':
                 pass
             elif current_picking_id == 'incoming':
-                if current_picking_id == 'incoming' and int(purchase_orders_ids.currency_id) != system_default_currency:
+                if purchase_orders_ids and purchase_orders_ids.currency_id and purchase_orders_ids.currency_id.id != system_default_currency:
                     company = self.env.company
                     po_currency = purchase_orders_ids.currency_id
                     rate = po_currency._get_conversion_rate(po_currency, company.currency_id, company, selected_date)
