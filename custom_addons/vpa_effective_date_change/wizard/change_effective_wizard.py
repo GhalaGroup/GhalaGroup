@@ -71,8 +71,9 @@ class ChangeEffectiveWizard(models.TransientModel):
                 self.env.cr.execute("UPDATE account_move set date = (%s) WHERE ref SIMILAR TO %s",
                                     [selected_date, str(picking.name + "%")])
 
-            # Get system default currency ID
-            system_default_currency = int(self.env.ref('base.main_company').currency_id)
+            # Get the company default currency ID (use the picking's own company,
+            # not base.main_company, to avoid cross-company access errors)
+            system_default_currency = picking.company_id.currency_id.id
             current_picking_id = picking.picking_type_id.code
             purchase_orders_ids = self.env['purchase.order'].search([('name', '=', str(picking.origin))])
 

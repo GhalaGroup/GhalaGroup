@@ -140,7 +140,7 @@
     </tr>
     <tr style="border-bottom: 1px solid #875A7B;">
         <td style="padding: 12px 15px; font-weight: bold;">Version</td>
-        <td style="padding: 12px 15px;">19.0.1.0.0</td>
+        <td style="padding: 12px 15px;">19.0.1.2.2</td>
     </tr>
     <tr style="border-bottom: 1px solid #875A7B;">
         <td style="padding: 12px 15px; font-weight: bold;">License</td>
@@ -215,6 +215,48 @@
 
 <!-- VERSION HISTORY -->
 <h2 style="color: #875A7B; border-bottom: 2px solid #875A7B; padding-bottom: 10px;">Version History</h2>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.2.2</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: June 23, 2026 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Multi-company access error fix</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Fixed "Access Error: no read access to Companies" when validating transfers that reference another company (e.g. inter-company purchases)</li>
+        <li>Currency comparison now uses the transfer's own company currency instead of the system main company</li>
+    </ul>
+</div>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.2.1</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: February 11, 2026 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Duplicate button fix</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Removed duplicate "Change Effective Date" button caused by module rename</li>
+        <li>Added migration script to clean up orphaned views from the old module</li>
+    </ul>
+</div>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.2.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: February 6, 2026 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Privilege-based security and bug fixes</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Added privilege-based security section in Settings &gt; Users &gt; Access Rights</li>
+        <li>Fixed journal entry sequence handling for multiple entries</li>
+        <li>Fixed deprecation warnings (self.env.context) for Odoo 19 compatibility</li>
+    </ul>
+</div>
+
+<div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
+    <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.1.0</h3>
+    <p style="font-size: 0.9em; margin-bottom: 10px;">Released: December 2025 | Odoo 19</p>
+    <p style="font-style: italic; margin-bottom: 10px;">Added Manufacturing Order support</p>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Change completion date for done Manufacturing Orders</li>
+        <li>Pre-set effective date before marking MO as done</li>
+        <li>Syncs all related stock moves and valuation layers</li>
+    </ul>
+</div>
 
 <div style="border-left: 4px solid #875A7B; padding-left: 20px; margin-bottom: 25px;">
     <h3 style="color: #875A7B; margin-bottom: 5px;">Version 19.0.1.0.0</h3>
