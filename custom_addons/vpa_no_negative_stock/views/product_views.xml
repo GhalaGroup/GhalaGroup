@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Product: Allow Negative Stock (Inventory tab) -->
+    <record id="product_template_form_view_nns" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.stock.sentinel</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stock.view_template_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='inventory']" position="inside">
+                <group string="VPA Stock Sentinel" name="vpa_stock_sentinel"
+                       invisible="type != 'consu'">
+                    <field name="nns_allow_negative"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product Category: Allow Negative Stock -->
+    <record id="product_category_form_view_nns" model="ir.ui.view">
+        <field name="name">product.category.form.inherit.stock.sentinel</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="stock.product_category_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='logistics']" position="inside">
+                <field name="nns_allow_negative"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Stock Location: Allow Negative Stock -->
+    <record id="view_location_form_nns" model="ir.ui.view">
+        <field name="name">stock.location.form.inherit.stock.sentinel</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='replenish_location']" position="after">
+                <field name="nns_allow_negative" invisible="usage != 'internal'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

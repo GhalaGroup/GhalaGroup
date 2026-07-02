@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data noupdate="0">
+        <!-- Privilege - section in the user form Access Rights tab -->
+        <record model="res.groups.privilege" id="res_groups_privilege_stock_sentinel">
+            <field name="name">Stock Sentinel</field>
+            <field name="sequence">28</field>
+            <field name="category_id" ref="base.module_category_inventory"/>
+        </record>
+
+        <!-- Override Manager - can force negative-stock operations and manage the log -->
+        <record model="res.groups" id="group_stock_sentinel_override">
+            <field name="name">Stock Sentinel: Override Manager</field>
+            <field name="sequence">10</field>
+            <field name="privilege_id" ref="res_groups_privilege_stock_sentinel"/>
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+            <field name="comment">Can override negative-stock blocks (with a mandatory reason) and manage the Stock Sentinel log.</field>
+            <field name="user_ids" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+
+        <!-- Block log: company-scoped visibility for all inventory users -->
+        <record id="stock_sentinel_log_company_rule" model="ir.rule">
+            <field name="name">Stock Sentinel Log: Company Access</field>
+            <field name="model_id" ref="model_stock_sentinel_log"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+        </record>
+
+        <!-- Adjustment requests: company-scoped visibility (users only see the
+             requests for their own company/companies). -->
+        <record id="stock_adjustment_request_company_rule" model="ir.rule">
+            <field name="name">Adjustment Request: Company Access</field>
+            <field name="model_id" ref="model_stock_adjustment_request"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('stock.group_stock_user'))]"/>
+        </record>
+    </data>
+</odoo>

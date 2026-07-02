@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_stock_sentinel_log_user,stock.sentinel.log.user,model_stock_sentinel_log,stock.group_stock_user,1,0,0,0
+access_stock_sentinel_log_manager,stock.sentinel.log.manager,model_stock_sentinel_log,group_stock_sentinel_override,1,1,1,1
+access_nns_override_wizard,nns.override.wizard,model_nns_override_wizard,stock.group_stock_user,1,1,1,1
+access_stock_adjustment_request_user,stock.adjustment.request.user,model_stock_adjustment_request,stock.group_stock_user,1,1,1,0
+access_stock_adjustment_request_manager,stock.adjustment.request.manager,model_stock_adjustment_request,stock.group_stock_manager,1,1,1,1
+access_nns_adjustment_reason_wizard,nns.adjustment.reason.wizard,model_nns_adjustment_reason_wizard,stock.group_stock_user,1,1,1,1
+access_nns_adjustment_reject_wizard,nns.adjustment.reject.wizard,model_nns_adjustment_reject_wizard,stock.group_stock_user,1,1,1,1

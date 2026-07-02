@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <menuitem id="menu_stock_sentinel_log"
+              name="Stock Sentinel Log"
+              action="stock_sentinel_log_action"
+              parent="stock.menu_warehouse_report"
+              sequence="80"/>
+
+    <menuitem id="menu_nns_negative_quant"
+              name="Currently Negative Stock"
+              action="nns_negative_quant_action"
+              parent="stock.menu_warehouse_report"
+              sequence="81"/>
+
+    <menuitem id="menu_stock_adjustment_request"
+              name="Adjustment Approvals"
+              action="stock_adjustment_request_action"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="95"/>
+</odoo>
