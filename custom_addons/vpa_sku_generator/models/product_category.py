@@ -105,11 +105,14 @@ class ProductCategory(models.Model):
 
         sku_prefix = "/".join(parent_categories.mapped("short_name")) + "/"
 
-        # Search products with matching SKUs
-        products = self.env['product.product'].search([
-            ('categ_id', '=', self.id),
+        # Search by PREFIX across ALL products (active + archived), regardless of which
+        # category they are currently linked to. SKU prefixes are unique per category
+        # hierarchy, so the prefix is the authoritative numbering space. Matching only
+        # on categ_id could miss products (re-categorised, archived, variants) and lead
+        # to a sequence restarting low -> duplicate codes.
+        products = self.env['product.product'].with_context(active_test=False).search([
             ('default_code', '!=', False),
-            ('default_code', '=like', sku_prefix + '%')
+            ('default_code', '=like', sku_prefix + '%'),
         ])
 
         max_number = 0

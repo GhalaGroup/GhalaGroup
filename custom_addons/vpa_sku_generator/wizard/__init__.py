@@ -3,3 +3,4 @@
 # Copyright (C) 2025 VPA Software Limited
 
 from . import regenerate_sku_wizard
+from . import sku_audit_wizard
