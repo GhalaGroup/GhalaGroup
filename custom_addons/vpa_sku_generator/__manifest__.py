@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA SKU Generator',
-    'version': '19.0.1.0.7',
+    'version': '19.0.1.2.0',
     'category': 'Inventory/Inventory',
-    'summary': 'Advanced SKU management with auto-generation, category-based sequences, SKU locking, and gap filling (v1.0.7)',
+    'summary': 'Advanced SKU management with auto-generation, category-based sequences, SKU locking, gap filling, and SKU Audit (v1.2.0)',
     'description': """
 VPA SKU Generator
 =================
@@ -26,6 +26,9 @@ Key Features
   - Sequence overview (company-specific sequences)
   - Recycle pool (available deleted SKUs for reuse)
 * **Regenerate Wizard**: SKU regeneration with before/after preview
+* **SKU Audit**: Scan products for SKU integrity issues (template/variant code mismatch,
+  duplicate codes, missing codes, multi-variant irregularities) and fix them safely
+  with automatic recycle-pool handling and chatter traceability notes
 * **Multi-Company**: Full multi-company support
 
 Perfect For
@@ -38,6 +41,21 @@ Perfect For
 
 Version History
 ---------------
+* **19.0.1.2.0** - Critical sequence integrity fix + variant SKU fixes
+  - Fixed SKU sequences restarting low and producing DUPLICATE codes after a
+    sequence-code rename (e.g. a new office chair getting 00003 while 78 already exist)
+  - Sequences now self-heal: next number is always past the highest existing SKU for the prefix
+  - Max-SKU detection is now prefix-based (covers archived/re-categorised products)
+  - Migration reconciles all existing category sequences on upgrade
+  - Fixed variant SKUs: correct -001/-002 numbering and no more blank variant codes
+    when creating a product together with its variants in one step
+
+* **19.0.1.1.0** - New SKU Audit feature
+  - Inventory > Configuration > SKU Audit: scan & fix SKU integrity issues
+  - Detects template/variant code mismatch, duplicate codes, missing codes, multi-variant irregularities
+  - Fix by aligning variant to template or regenerating from category sequence
+  - Freed codes sent to the recycle pool; old->new reference logged on product chatter for traceability
+
 * **19.0.1.0.7** - Internal Reference field always readonly (auto-generated SKUs cannot be manually edited)
 * **19.0.1.0.6** - Stability and maintenance release
 * **19.0.1.0.2** - Bug fixes for category hierarchy and recycle pool
@@ -67,6 +85,7 @@ Support: info@vpa.co.tz
         'views/product_template_views.xml',
         'views/product_sku_recycle_pool_views.xml',
         'wizard/regenerate_sku_wizard_views.xml',
+        'wizard/sku_audit_wizard_views.xml',
         'data/product_actions.xml',
     ],
     'images': [

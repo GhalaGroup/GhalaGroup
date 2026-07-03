@@ -72,16 +72,31 @@ class ProductProduct(models.Model):
                                 base_sku = existing_sku
                             break
 
+                # Make sure base_sku has no leftover suffix (e.g. "CR/00001-002")
+                if base_sku and '-' in base_sku:
+                    head, tail = base_sku.rsplit('-', 1)
+                    if tail.isdigit():
+                        base_sku = head
+
                 if base_sku:
-                    # Sort all variants consistently
-                    sorted_variants = all_variants.sorted(
+                    # Only number variants that have a real attribute combination.
+                    # When an attribute is added to an existing product, Odoo momentarily
+                    # keeps the original no-attribute variant alongside the new ones before
+                    # deleting it; counting it would shift the suffixes (-002, -003 instead
+                    # of -001, -002). Excluding attribute-less variants fixes the off-by-one.
+                    real_variants = all_variants.filtered(
+                        lambda v: v.product_template_attribute_value_ids
+                    ) or all_variants
+
+                    # Sort consistently for stable, repeatable numbering
+                    sorted_variants = real_variants.sorted(
                         lambda v: (
                             ','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))),
                             v.id
                         )
                     )
 
-                    # Update ALL variants with proper suffixed SKUs
+                    # Update variants with proper sequential suffixed SKUs starting at -001
                     for idx, v in enumerate(sorted_variants, 1):
                         new_sku = f"{base_sku}-{str(idx).zfill(3)}"
                         if v.default_code != new_sku:
@@ -125,13 +140,24 @@ class ProductProduct(models.Model):
         if not base_sku:
             return False
 
+        # Strip any leftover numeric suffix from the base SKU
+        if base_sku and '-' in base_sku:
+            head, tail = base_sku.rsplit('-', 1)
+            if tail.isdigit():
+                base_sku = head
+
         # If this is the only variant, use template SKU without suffix
         if len(template.product_variant_ids) == 1:
             return base_sku
 
-        # For multiple variants, add sequential suffix based on variant attribute combination
-        # Sort all variants by their attribute values for consistent ordering
-        all_variants = template.product_variant_ids.sorted(
+        # For multiple variants, add sequential suffix based on variant attribute combination.
+        # Only consider variants with a real attribute combination - the transient
+        # attribute-less variant (kept briefly during attribute creation) would otherwise
+        # shift the numbering (e.g. -002 instead of -001).
+        real_variants = template.product_variant_ids.filtered(
+            lambda v: v.product_template_attribute_value_ids
+        ) or template.product_variant_ids
+        all_variants = real_variants.sorted(
             lambda v: (
                 ','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))),
                 v.id  # Fallback to ID for stability

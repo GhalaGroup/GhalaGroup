@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <!-- Reason at apply time -->
+    <record id="nns_adjustment_reason_wizard_view_form" model="ir.ui.view">
+        <field name="name">nns.adjustment.reason.wizard.form</field>
+        <field name="model">nns.adjustment.reason.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Adjustment - Reason Required">
+                <div class="alert alert-info" role="alert">
+                    This inventory adjustment requires approval. Enter a reason to
+                    submit it for review. <b>Stock will not change until approved.</b>
+                </div>
+                <group>
+                    <field name="summary" readonly="1" nolabel="1"
+                           invisible="not summary"/>
+                    <field name="reason" placeholder="Why is this adjustment needed?"/>
+                </group>
+                <field name="quant_ids" invisible="1"/>
+                <footer>
+                    <button name="action_submit" type="object"
+                            string="Submit for Approval" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Reject -->
+    <record id="nns_adjustment_reject_wizard_view_form" model="ir.ui.view">
+        <field name="name">nns.adjustment.reject.wizard.form</field>
+        <field name="model">nns.adjustment.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Adjustment">
+                <group>
+                    <field name="request_id" invisible="1"/>
+                    <field name="reject_reason" placeholder="Why is this adjustment rejected?"/>
+                </group>
+                <footer>
+                    <button name="action_reject" type="object"
+                            string="Reject" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

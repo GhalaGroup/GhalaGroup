@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data noupdate="1">
+        <record id="seq_stock_sentinel_log" model="ir.sequence">
+            <field name="name">Stock Sentinel Log</field>
+            <field name="code">stock.sentinel.log</field>
+            <field name="prefix">NNS/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_stock_adjustment_request" model="ir.sequence">
+            <field name="name">Inventory Adjustment Request</field>
+            <field name="code">stock.adjustment.request</field>
+            <field name="prefix">ADJ/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

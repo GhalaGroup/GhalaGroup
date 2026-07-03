@@ -2,3 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_product_sku_recycle_pool_all,product.sku.recycle.pool.all,model_product_sku_recycle_pool,base.group_system,1,1,1,1
 access_regenerate_sku_wizard_all,regenerate.sku.wizard.all,model_regenerate_sku_wizard,base.group_system,1,1,1,1
 access_regenerate_sku_wizard_line_all,regenerate.sku.wizard.line.all,model_regenerate_sku_wizard_line,base.group_system,1,1,1,1
+access_sku_audit_wizard_all,sku.audit.wizard.all,model_sku_audit_wizard,base.group_system,1,1,1,1
+access_sku_audit_wizard_line_all,sku.audit.wizard.line.all,model_sku_audit_wizard_line,base.group_system,1,1,1,1

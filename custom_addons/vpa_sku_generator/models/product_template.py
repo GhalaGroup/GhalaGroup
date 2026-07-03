@@ -108,18 +108,21 @@ class ProductTemplate(models.Model):
 
         company_id = self.company_id.id or self.env.company.id
 
+        # The authoritative next number is always (highest existing SKU for this
+        # category's prefix) + 1. We compute it every time and use it both to create
+        # a new sequence AND to heal an existing sequence that has fallen behind
+        # (e.g. after a sequence-code rename that orphaned the old counter). This makes
+        # it impossible for the sequence to hand out a number that is already in use.
+        max_sku = self.categ_id._get_max_sku_number_from_products()
+        safe_next = max_sku + 1 if max_sku > 0 else 1
+
         # Check if sequence exists
         IrSequence = self.env["ir.sequence"].sudo().search([
             ("code", "=", sequence_code),
             ("company_id", "=", company_id)
-        ])
+        ], limit=1)
 
-        # Create if doesn't exist
         if not IrSequence:
-            # Check for existing SKUs from imports to set correct starting number
-            max_sku = self.categ_id._get_max_sku_number_from_products()
-            next_number = max_sku + 1 if max_sku > 0 else 1
-
             # Build full category path for sequence name
             parent_categories = self.env['product.category'].search([
                 ('id', 'parent_of', self.categ_id.id)
@@ -130,10 +133,13 @@ class ProductTemplate(models.Model):
                 "name": f"Product SKU Sequence: {full_path}",
                 "code": sequence_code,
                 "padding": 5,
-                "number_next": next_number,
+                "number_next": safe_next,
                 "number_increment": 1,
                 "company_id": company_id,
             })
+        elif IrSequence.number_next_actual < safe_next:
+            # Self-heal: the sequence is behind the real data (would create duplicates).
+            IrSequence.sudo().write({"number_next": safe_next})
 
         # Get next number using _next method
         return IrSequence._next()
@@ -197,6 +203,13 @@ class ProductTemplate(models.Model):
                             'default_code': default_code
                         })
 
+        # When variants are added/changed, make sure they all have correct SKUs
+        # (covers blank variant codes and re-numbering). Guard against recursion
+        # from our own variant code writes.
+        if 'attribute_line_ids' in vals and not self.env.context.get('skip_variant_sku_generation'):
+            for record in self:
+                record._sync_variant_skus()
+
         return result
 
     @api.model_create_multi
@@ -238,7 +251,57 @@ class ProductTemplate(models.Model):
                 if default_code:
                     record.with_context(skip_sku_validation=True).write({'default_code': default_code})
 
+            # When a product is created WITH variants in one step, Odoo creates the
+            # variants before the template SKU exists, so the variants come out blank.
+            # Now that the template has its code, (re)assign the variant SKUs.
+            record._sync_variant_skus()
+
         return res
+
+    def _sync_variant_skus(self):
+        """(Re)assign Internal References to this template's variants.
+
+        - Single variant      -> same code as the template (no suffix)
+        - Multiple variants    -> base code + sequential suffix (-001, -002, ...)
+        Skips locked templates and templates without a base code.
+        """
+        self.ensure_one()
+        if self.sku_locked:
+            return
+        base_sku = self.default_code if self.default_code and self.default_code != 'False' else False
+        if not base_sku:
+            return
+        # Strip any stray numeric suffix from the base
+        if '-' in base_sku:
+            head, tail = base_sku.rsplit('-', 1)
+            if tail.isdigit():
+                base_sku = head
+
+        variants = self.product_variant_ids
+        Product = self.env['product.product']
+        if len(variants) <= 1:
+            # Single variant mirrors the template code
+            for v in variants:
+                if v.default_code != base_sku:
+                    super(type(Product), v).with_context(skip_sku_validation=True).write(
+                        {'default_code': base_sku})
+            return
+
+        # Multiple variants: number only those with a real attribute combination,
+        # starting at -001 (the off-by-one guard).
+        real_variants = variants.filtered(
+            lambda v: v.product_template_attribute_value_ids) or variants
+        sorted_variants = real_variants.sorted(
+            lambda v: (
+                ','.join(sorted(v.product_template_attribute_value_ids.mapped('name'))),
+                v.id,
+            )
+        )
+        for idx, v in enumerate(sorted_variants, 1):
+            new_sku = f"{base_sku}-{str(idx).zfill(3)}"
+            if v.default_code != new_sku:
+                super(type(Product), v).with_context(skip_sku_validation=True).write(
+                    {'default_code': new_sku})
 
     def copy(self, default=None):
         """Override copy to generate new SKU for duplicated products"""

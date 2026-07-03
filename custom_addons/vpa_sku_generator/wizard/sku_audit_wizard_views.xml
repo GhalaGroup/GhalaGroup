@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sku_audit_wizard_view_form" model="ir.ui.view">
+        <field name="name">sku.audit.wizard.form</field>
+        <field name="model">sku.audit.wizard</field>
+        <field name="arch" type="xml">
+            <form string="SKU Audit">
+                <!-- DRAFT: choose what to scan and how to fix -->
+                <group invisible="state != 'draft'">
+                    <group string="What to check">
+                        <field name="check_mismatch"/>
+                        <field name="check_duplicate"/>
+                        <field name="check_missing"/>
+                        <field name="check_variant_irregular"/>
+                    </group>
+                    <group string="How to fix">
+                        <field name="fix_method"/>
+                        <field name="recycle_freed"/>
+                        <field name="post_chatter"/>
+                        <field name="company_id"/>
+                    </group>
+                </group>
+
+                <!-- PREVIEW: findings -->
+                <div invisible="state != 'preview'">
+                    <div class="alert alert-info" role="alert" invisible="not message">
+                        <field name="message" nolabel="1" readonly="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="total_found" string="Issues found"/>
+                            <field name="total_fixable" string="Selected to fix"/>
+                            <field name="total_collision" string="Need manual review"/>
+                        </group>
+                        <group>
+                            <field name="fix_method"/>
+                            <field name="recycle_freed"/>
+                            <field name="post_chatter"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom" create="false" delete="false"
+                              decoration-muted="not fixable" decoration-success="done">
+                            <field name="to_fix" widget="boolean_toggle" readonly="not fixable"/>
+                            <field name="issue_type"/>
+                            <field name="company_name"/>
+                            <field name="product_name"/>
+                            <field name="current_code"/>
+                            <field name="template_code"/>
+                            <field name="proposed_code"/>
+                            <field name="fixable"/>
+                            <field name="locked" widget="boolean_toggle"/>
+                            <field name="done"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </div>
+
+                <!-- DONE -->
+                <div invisible="state != 'done'" class="alert alert-success" role="alert">
+                    <field name="message" nolabel="1" readonly="1"/>
+                </div>
+
+                <footer>
+                    <button name="action_scan" type="object" string="Scan"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_apply" type="object" string="Apply Fixes"
+                            class="btn-primary" invisible="state != 'preview'"
+                            confirm="Apply the selected SKU corrections? Freed codes will be recycled and a traceability note posted on each product."/>
+                    <button name="action_scan" type="object" string="Re-scan"
+                            invisible="state != 'preview'"/>
+                    <button special="cancel" string="Close" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sku_audit_wizard" model="ir.actions.act_window">
+        <field name="name">SKU Audit</field>
+        <field name="res_model">sku.audit.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_sku_audit"
+              name="SKU Audit"
+              parent="stock.menu_stock_config_settings"
+              action="action_sku_audit_wizard"
+              sequence="102"
+              groups="base.group_system"/>
+
+</odoo>

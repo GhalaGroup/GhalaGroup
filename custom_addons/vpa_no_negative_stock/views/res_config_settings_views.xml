@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <record id="res_config_settings_view_form_nns" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.stock.sentinel</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='stock']" position="inside">
+                <block title="VPA Stock Sentinel" name="vpa_stock_sentinel">
+                    <setting string="Prevent Negative Stock"
+                             help="Block (or warn on) operations that would drive on-hand stock below zero">
+                        <field name="nns_enabled"/>
+                    </setting>
+                    <setting string="Mode"
+                             help="Hard Block stops the operation. Soft Warn lets an Inventory Manager override it with a reason."
+                             invisible="not nns_enabled">
+                        <field name="nns_mode" widget="radio"/>
+                    </setting>
+                    <setting string="Alert Users"
+                             help="Users notified with a to-do activity when a block or override happens"
+                             invisible="not nns_enabled">
+                        <field name="nns_alert_user_ids" widget="many2many_tags"/>
+                    </setting>
+                </block>
+                <block title="Inventory Adjustment Approval" name="vpa_stock_sentinel_adj">
+                    <setting string="Require Approval for Inventory Adjustments"
+                             help="Manual inventory adjustments need a reason and manager approval before the stock change is applied">
+                        <field name="nns_adj_approval"/>
+                    </setting>
+                    <setting string="Adjustment Approvers"
+                             help="Users who can approve or reject adjustment requests. If empty, any Inventory Manager can approve."
+                             invisible="not nns_adj_approval">
+                        <field name="nns_adj_approver_ids" widget="many2many_tags"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

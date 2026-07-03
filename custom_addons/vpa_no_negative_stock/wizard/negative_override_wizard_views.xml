@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <record id="nns_override_wizard_view_form" model="ir.ui.view">
+        <field name="name">nns.override.wizard.form</field>
+        <field name="model">nns.override.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Override Negative Stock">
+                <div class="alert alert-warning" role="alert">
+                    You are about to force an operation that will create
+                    <b>negative stock</b>. A reason is required and will be logged.
+                </div>
+                <group>
+                    <field name="document_name" readonly="1"/>
+                    <field name="reason" placeholder="Why is this negative operation necessary?"/>
+                </group>
+                <field name="res_model" invisible="1"/>
+                <field name="res_id" invisible="1"/>
+                <footer>
+                    <button name="action_confirm" type="object" string="Override and Validate"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

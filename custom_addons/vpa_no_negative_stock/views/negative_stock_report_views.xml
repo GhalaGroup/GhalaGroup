@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <record id="nns_negative_quant_view_list" model="ir.ui.view">
+        <field name="name">stock.quant.negative.list</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <list string="Currently Negative Stock" create="false" edit="false"
+                  decoration-danger="quantity &lt; 0">
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="warehouse_id" optional="show"/>
+                <field name="lot_id" optional="hide"/>
+                <field name="quantity"/>
+                <field name="available_quantity" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nns_negative_quant_action" model="ir.actions.act_window">
+        <field name="name">Currently Negative Stock</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="nns_negative_quant_view_list"/>
+        <field name="domain">[('quantity', '&lt;', 0), ('location_id.usage', '=', 'internal')]</field>
+        <field name="context">{'search_default_group_by_warehouse': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No negative stock - your inventory is clean</p>
+            <p>Products that are currently negative on hand. Fix these before enabling enforcement.</p>
+        </field>
+    </record>
+</odoo>
