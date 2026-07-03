@@ -63,7 +63,9 @@
                 </attribute>
                 <!-- Allow product changes on template moves even when MO is confirmed -->
                 <!-- Template placeholders need to be replaced before MO can be marked done -->
-                <attribute name="readonly">parent.state in ('done', 'cancel') or (not is_template_move and parent.state != 'draft')</attribute>
+                <!-- For regular moves: mirror core Odoo so manually-added lines (additional=True) -->
+                <!-- stay editable on a confirmed MO. Uses the move's own state, not parent.state. -->
+                <attribute name="readonly">parent.state in ('done', 'cancel') or (not is_template_move and (move_lines_count &gt; 0 or (state != 'draft' and not additional)))</attribute>
             </xpath>
 
             <!-- Replace forecast_availability with actual stock availability badge -->
