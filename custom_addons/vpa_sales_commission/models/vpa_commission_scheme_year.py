@@ -63,7 +63,7 @@ class VpaCommissionSchemeYear(models.Model):
         help='Commission percentage for this year. Leave 0 to use the scheme default rate.',
     )
     effective_rate = fields.Float(
-        string='Rate (%)',
+        string='Effective Rate (%)',
         digits=(5, 2),
         compute='_compute_effective_rate',
         help='The rate actually applied: this year\'s rate if set, otherwise the scheme default.',
@@ -142,7 +142,7 @@ class VpaCommissionSchemeYear(models.Model):
     )
     effective_expense_account_id = fields.Many2one(
         'account.account',
-        string='Expense Account',
+        string='Effective Expense Account',
         compute='_compute_effective_expense_account',
         help='The account this year will actually bill to: the year override if set, '
              'otherwise the scheme default expense account.',
@@ -190,7 +190,7 @@ class VpaCommissionSchemeYear(models.Model):
         help='How much below the minimum guarantee',
     )
     outstanding = fields.Monetary(
-        string='Outstanding',
+        string='Outstanding (Earned)',
         currency_field='currency_id',
         compute='_compute_totals',
         store=True,

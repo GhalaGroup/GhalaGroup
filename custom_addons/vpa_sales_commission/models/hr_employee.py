@@ -19,7 +19,7 @@ class HrEmployee(models.Model):
         string='Commission Lines',
     )
     commission_count = fields.Integer(
-        string='Commission Lines',
+        string='Commission Line Count',
         compute='_compute_commission_count',
         groups='vpa_sales_commission.group_commission_user',
     )
