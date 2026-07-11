@@ -145,6 +145,7 @@ class MrpProduction(models.Model):
                 'scheme_id': scheme.id,
                 'employee_id': scheme.employee_id.id,
                 'rate': rate,
+                'standard_rate': rate,
                 'currency_id': scheme.currency_id.id,
                 'selected': not bool(existing),
                 'already_generated': bool(existing),

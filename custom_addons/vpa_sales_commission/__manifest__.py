@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.10',
+    'version': '19.0.2.0.11',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,14 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.11** - Manual commission in the Generate wizard
+  - New "Manual Commission" checkbox: tick to edit the Total Commission,
+    per-employee amount or rate directly (all stay in sync, generated
+    amounts match exactly what was typed); untick resets to standard rates
+  - "Extra vs Standard" shown at the top and per employee: how much above
+    (or below) the standard year rate the commission is
+  - Rates carry full precision so manually entered amounts are exact
+
 * **19.0.2.0.10** - Change history restored on commission years
   - Rate, Minimum Guarantee and State changes are logged again in the year's
     chatter (old value -> new value, user, timestamp). Verified compatible

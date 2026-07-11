@@ -65,8 +65,24 @@ class CommissionGenerateWizard(models.TransientModel):
     total_commission_amount = fields.Float(
         string='Total Commission',
         compute='_compute_total_commission_amount',
+        inverse='_inverse_total_commission_amount',
+        readonly=False,
         digits=(12, 2),
-        help='Sum of all estimated commissions for selected employees',
+        help='Editable. Type the total commission to pay for this MO — it is '
+             'distributed over the selected employees (proportionally when '
+             'several) and their rates are back-calculated.',
+    )
+    manual_commission = fields.Boolean(
+        string='Manual Commission',
+        help='Tick to enter the commission manually (total, per-employee amount '
+             'or rate). Untick to reset everything to the standard year rates.',
+    )
+    total_extra_amount = fields.Float(
+        string='Extra vs Standard',
+        compute='_compute_total_extra_amount',
+        digits=(12, 2),
+        help='Total commission above (or below) what the standard year rates '
+             'would give for the selected employees.',
     )
     commission_date = fields.Date(
         string='Commission Date',
@@ -120,6 +136,38 @@ class CommissionGenerateWizard(models.TransientModel):
             wizard.total_commission_amount = sum(
                 line.estimated_amount for line in wizard.scheme_line_ids if line.selected
             )
+
+    @api.depends('scheme_line_ids.selected', 'scheme_line_ids.extra_amount')
+    def _compute_total_extra_amount(self):
+        for wizard in self:
+            wizard.total_extra_amount = sum(
+                l.extra_amount for l in wizard.scheme_line_ids if l.selected)
+
+    @api.onchange('manual_commission')
+    def _onchange_manual_commission(self):
+        """Unticking resets every line back to its standard year rate."""
+        if not self.manual_commission:
+            for line in self.scheme_line_ids:
+                line.rate = line.standard_rate
+
+    @api.onchange('total_commission_amount')
+    def _onchange_total_commission_amount(self):
+        """Guarantee live propagation to the employee lines in the dialog."""
+        self._inverse_total_commission_amount()
+
+    def _inverse_total_commission_amount(self):
+        """Typing the total distributes it over the selected employees
+        (proportional to their current amounts) via back-calculated rates."""
+        for wizard in self:
+            selected = wizard.scheme_line_ids.filtered(
+                lambda l: l.selected and not l.already_generated)
+            base = wizard.total_base_amount
+            if not selected or not base:
+                continue
+            current = sum(selected.mapped('estimated_amount'))
+            for line in selected:
+                share = (line.estimated_amount / current) if current else 1.0 / len(selected)
+                line.rate = wizard.total_commission_amount * share / base * 100.0
 
     def action_clear_override(self):
         """Clear the historical base amount override."""
@@ -268,13 +316,16 @@ class CommissionGenerateWizardScheme(models.TransientModel):
     )
     rate = fields.Float(
         string='Rate (%)',
-        digits=(5, 2),
-        readonly=True,
+        help='Editable. Changing the rate recalculates the commission amount.',
     )
     estimated_amount = fields.Float(
         string='Estimated Commission',
         compute='_compute_estimated_amount',
+        inverse='_inverse_estimated_amount',
+        readonly=False,
         digits=(12, 2),
+        help='Editable. Typing an amount back-calculates the rate, so the '
+             'generated commission matches exactly what you entered.',
     )
     commission_per_unit = fields.Float(
         string='Per Unit',
@@ -285,6 +336,18 @@ class CommissionGenerateWizardScheme(models.TransientModel):
         'res.currency',
         string='Currency',
         readonly=True,
+    )
+    standard_rate = fields.Float(
+        string='Standard Rate (%)',
+        readonly=True,
+        help='The configured rate of the commission year — the baseline.',
+    )
+    extra_amount = fields.Float(
+        string='Extra',
+        compute='_compute_extra_amount',
+        digits=(12, 2),
+        help='How much above (or below) the standard-rate commission this '
+             'employee gets with the current amount.',
     )
     selected = fields.Boolean(
         string='Select',
@@ -304,6 +367,20 @@ class CommissionGenerateWizardScheme(models.TransientModel):
                 line.commission_per_unit = line.estimated_amount / line.wizard_id.product_qty
             else:
                 line.commission_per_unit = 0.0
+
+    @api.depends('estimated_amount', 'standard_rate', 'wizard_id.total_base_amount')
+    def _compute_extra_amount(self):
+        for line in self:
+            standard = line.wizard_id.total_base_amount * line.standard_rate / 100.0
+            line.extra_amount = line.estimated_amount - standard
+
+    def _inverse_estimated_amount(self):
+        """Typing the amount back-calculates the rate (full precision), so the
+        generated commission equals exactly the amount entered."""
+        for line in self:
+            base = line.wizard_id.total_base_amount
+            if base:
+                line.rate = line.estimated_amount / base * 100.0
 
 
 class CommissionGenerateWizardHistory(models.TransientModel):

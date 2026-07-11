@@ -34,8 +34,14 @@
                                    options="{'currency_field': 'currency_id'}"/>
                             <span class="oe_inline">/ <field name="product_uom_id" class="oe_inline" readonly="1" options="{'no_open': True}"/></span>
                         </div>
+                        <field name="manual_commission"/>
                         <field name="total_commission_amount" widget="monetary"
-                               options="{'currency_field': 'currency_id'}"/>
+                               options="{'currency_field': 'currency_id'}"
+                               readonly="not manual_commission"/>
+                        <field name="total_extra_amount" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"
+                               invisible="total_extra_amount == 0"
+                               decoration-warning="total_extra_amount &gt; 0"/>
                     </group>
                 </group>
                 <!-- Override Banner -->
@@ -80,10 +86,17 @@
                         <field name="selected" string="Select"
                                readonly="already_generated"/>
                         <field name="employee_id"/>
-                        <field name="rate" string="Rate (%)"/>
+                        <field name="rate" string="Rate (%)"
+                               readonly="not parent.manual_commission"/>
                         <field name="estimated_amount" string="Commission"
                                widget="monetary"
-                               options="{'currency_field': 'currency_id'}"/>
+                               options="{'currency_field': 'currency_id'}"
+                               readonly="not parent.manual_commission"/>
+                        <field name="standard_rate" string="Std. Rate" optional="hide"/>
+                        <field name="extra_amount" string="Extra" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"
+                               decoration-warning="extra_amount &gt; 0"
+                               decoration-info="extra_amount &lt; 0"/>
                         <field name="commission_per_unit" string="Per Unit"
                                widget="monetary"
                                options="{'currency_field': 'currency_id'}"/>
