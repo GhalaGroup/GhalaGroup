@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <!-- Commission Payment Voucher report action -->
+    <record id="action_report_commission_payment_voucher" model="ir.actions.report">
+        <field name="name">Commission Payment Voucher</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vpa_sales_commission.report_commission_payment_voucher</field>
+        <field name="report_file">vpa_sales_commission.report_commission_payment_voucher</field>
+        <field name="print_report_name">'Commission Payment Voucher - %s' % (object.name)</field>
+    </record>
+
+    <!-- Voucher template -->
+    <template id="report_commission_payment_voucher">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="payment">
+                <t t-call="web.external_layout">
+                    <style>
+                        .cpv-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
+                        .cpv-title { color: #DC143C; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; }
+                        .cpv-subtitle { font-size: 13px; color: #555; margin: 2px 0 0 0; font-weight: 600; }
+                        .cpv-info { width: 100%; border-collapse: collapse; margin: 14px 0; }
+                        .cpv-info td { padding: 6px 8px; border-bottom: 1px solid #e0e0e0; }
+                        .cpv-label { font-weight: 600; color: #2d3436; background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 22%; }
+                        .cpv-value { width: 28%; }
+                        .cpv-amount-box { border: 2px solid #DC143C; border-radius: 6px; padding: 14px 16px; margin: 12px 0; background-color: #fdf3f5 !important; -webkit-print-color-adjust: exact; text-align: center; }
+                        .cpv-amount { color: #DC143C; font-size: 30px; font-weight: 800; }
+                        .cpv-words { font-size: 10px; color: #555; font-style: italic; margin-top: 5px; }
+                        .cpv-summary { width: 48%; border-collapse: collapse; margin: 14px 0; }
+                        .cpv-summary-left { margin-right: auto; }
+                        .cpv-summary-right { margin-left: auto; }
+                        .cpv-summary-title td { background-color: #DC143C !important; -webkit-print-color-adjust: exact; color: #fff !important; text-align: center; padding: 6px; font-size: 11px; font-weight: 700; border: none; }
+                        .cpv-summary td { padding: 6px 10px; border-bottom: 1px solid #e0e0e0; }
+                        .cpv-s-label { font-weight: 600; background-color: #f5f6fa !important; -webkit-print-color-adjust: exact; width: 58%; }
+                        .cpv-s-value { text-align: right; }
+                        .cpv-sig-table { width: 100%; margin-top: 40px; }
+                        .cpv-sig-table td { text-align: center; vertical-align: top; padding: 0 15px; width: 33%; }
+                        .cpv-sig-line { border-top: 1px solid #2d3436; padding-top: 4px; font-size: 10px; font-weight: 700; margin-top: 35px; }
+                        .cpv-sig-field { font-size: 9px; color: #777; }
+                        .cpv-badge { padding: 3px 10px; border-radius: 12px; font-size: 9px; font-weight: 700; color: #fff !important; display: inline-block; -webkit-print-color-adjust: exact; background-color: #27ae60 !important; }
+                    </style>
+
+                    <t t-set="sy" t-value="payment.commission_year_id"/>
+                    <t t-set="cur" t-value="sy.currency_id or payment.company_id.currency_id"/>
+                    <t t-set="usd" t-value="payment.env['res.currency'].search([('name', '=', 'USD')], limit=1)"/>
+                    <t t-set="show_usd" t-value="bool(usd and cur and usd != cur)"/>
+                    <t t-set="conv_company" t-value="sy.company_id or payment.company_id"/>
+
+                    <div class="page cpv-page">
+                        <!-- Header -->
+                        <table style="width: 100%; margin-bottom: 6px;">
+                            <tr>
+                                <td>
+                                    <p class="cpv-title">COMMISSION PAYMENT VOUCHER</p>
+                                    <p class="cpv-subtitle"><span t-field="payment.name"/></p>
+                                </td>
+                                <td style="text-align: right; vertical-align: top;">
+                                    <span class="cpv-badge" t-esc="dict(payment._fields['state'].selection).get(payment.state)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Payment information -->
+                        <table class="cpv-info">
+                            <tr>
+                                <td class="cpv-label">Paid To</td>
+                                <td class="cpv-value"><span t-field="payment.partner_id.name"/></td>
+                                <td class="cpv-label">Payment Date</td>
+                                <td class="cpv-value"><span t-field="payment.date"/></td>
+                            </tr>
+                            <tr>
+                                <td class="cpv-label">Commission Year</td>
+                                <td class="cpv-value"><span t-esc="sy.year or '-'"/> (<span t-esc="sy.employee_id.name or ''"/>)</td>
+                                <td class="cpv-label">Journal</td>
+                                <td class="cpv-value"><span t-field="payment.journal_id.name"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- Amount box -->
+                        <div class="cpv-amount-box">
+                            <div>
+                                <span class="cpv-amount" t-field="payment.amount"
+                                      t-options='{"widget": "monetary", "display_currency": payment.currency_id}'/>
+                            </div>
+                            <div class="cpv-words">
+                                <span t-esc="payment.currency_id.amount_to_text(payment.amount)"/>
+                            </div>
+                        </div>
+
+                        <!-- Year status summaries: TZS + USD side by side -->
+                        <t t-if="sy">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="width: 48%; vertical-align: top;">
+                                        <table class="cpv-summary" style="width: 100%;">
+                                            <tr class="cpv-summary-title"><td colspan="2">COMMISSION YEAR <t t-esc="sy.year"/> STATUS</td></tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Minimum Guarantee</td>
+                                                <td class="cpv-s-value"><span t-esc="'{:,.2f}'.format(sy.minimum_amount)"/> <t t-esc="cur.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Total Earned</td>
+                                                <td class="cpv-s-value"><span t-esc="'{:,.2f}'.format(sy.total_earned)"/> <t t-esc="cur.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Due for Year</td>
+                                                <td class="cpv-s-value"><span t-esc="'{:,.2f}'.format(sy.amount_due_year)"/> <t t-esc="cur.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Paid to Date (incl. this)</td>
+                                                <td class="cpv-s-value"><span t-esc="'{:,.2f}'.format(sy.amount_paid_cash)"/> <t t-esc="cur.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Outstanding</td>
+                                                <td class="cpv-s-value"><span t-esc="'{:,.2f}'.format(sy.outstanding_cash)"/> <t t-esc="cur.name"/></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td style="width: 4%;"/>
+                                    <td style="width: 48%; vertical-align: top;" t-if="show_usd">
+                                        <table class="cpv-summary" style="width: 100%;">
+                                            <tr class="cpv-summary-title"><td colspan="2">USD EQUIVALENT</td></tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Minimum Guarantee</td>
+                                                <td class="cpv-s-value">$ <span t-esc="'{:,.2f}'.format(cur._convert(sy.minimum_amount, usd, conv_company, payment.date))"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Total Earned</td>
+                                                <td class="cpv-s-value">$ <span t-esc="'{:,.2f}'.format(cur._convert(sy.total_earned, usd, conv_company, payment.date))"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Due for Year</td>
+                                                <td class="cpv-s-value">$ <span t-esc="'{:,.2f}'.format(cur._convert(sy.amount_due_year, usd, conv_company, payment.date))"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Paid to Date (incl. this)</td>
+                                                <td class="cpv-s-value">$ <span t-esc="'{:,.2f}'.format(cur._convert(sy.amount_paid_cash, usd, conv_company, payment.date))"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="cpv-s-label">Outstanding</td>
+                                                <td class="cpv-s-value">$ <span t-esc="'{:,.2f}'.format(cur._convert(sy.outstanding_cash, usd, conv_company, payment.date))"/></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Signatures -->
+                        <table class="cpv-sig-table">
+                            <tr>
+                                <td>
+                                    <div class="cpv-sig-line">Prepared By</div>
+                                    <div class="cpv-sig-field">Name &amp; Signature / Date</div>
+                                </td>
+                                <td>
+                                    <div class="cpv-sig-line">Approved By</div>
+                                    <div class="cpv-sig-field">Name &amp; Signature / Date</div>
+                                </td>
+                                <td>
+                                    <div class="cpv-sig-line">Received By</div>
+                                    <div class="cpv-sig-field">Name &amp; Signature / Date</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

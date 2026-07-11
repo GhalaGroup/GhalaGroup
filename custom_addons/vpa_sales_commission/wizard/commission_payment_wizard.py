@@ -60,7 +60,11 @@ class CommissionPaymentWizard(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
+        # Only interpret active_ids as commission lines when they really are —
+        # from other models' buttons they'd be foreign ids (wrong-record bug).
         active_ids = self.env.context.get('active_ids', [])
+        if self.env.context.get('active_model') != 'vpa.commission.line':
+            active_ids = []
         if active_ids:
             lines = self.env['vpa.commission.line'].browse(active_ids)
             # Only include confirmed lines (not pending, paid, or cancelled)

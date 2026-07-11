@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <record id="commission_change_date_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.commission.change.date.wizard.form</field>
+        <field name="model">vpa.commission.change.date.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Change Commission Date">
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="line_count == 0">
+                        <field name="source_summary" nolabel="1"/>
+                        —
+                        <strong><field name="line_count" nolabel="1" class="oe_inline"/></strong>
+                        commission line(s) will be updated.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="line_count != 0">
+                        No eligible commission lines were found for the current selection.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="old_date_display" readonly="1"/>
+                            <field name="new_date"/>
+                        </group>
+                        <group>
+                            <field name="reason" placeholder="e.g. Corrected to actual completion date"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" invisible="1"/>
+                    <field name="line_count" invisible="1"/>
+                    <group string="Affected Commissions" invisible="line_count == 0">
+                        <field name="line_ids" nolabel="1" readonly="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="date" string="Current Date"
+                                       decoration-warning="1"/>
+                                <field name="employee_id"/>
+                                <field name="production_id" optional="show"/>
+                                <field name="sale_order_name" optional="show"/>
+                                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="state" widget="badge"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_change_date" string="Change Date" type="object"
+                            class="btn-primary" invisible="line_count == 0"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Server Action: Change Commission Date — Commissions list -->
+    <record id="server_action_change_commission_date_line" model="ir.actions.server">
+        <field name="name">Change Commission Date</field>
+        <field name="model_id" ref="model_vpa_commission_line"/>
+        <field name="binding_model_id" ref="model_vpa_commission_line"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('vpa_sales_commission.group_commission_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'name': 'Change Commission Date',
+    'type': 'ir.actions.act_window',
+    'res_model': 'vpa.commission.change.date.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_model='vpa.commission.line', active_ids=records.ids),
+}
+        </field>
+    </record>
+
+    <!-- Server Action: Change Commission Date — Commission by MO -->
+    <record id="server_action_change_commission_date_mo" model="ir.actions.server">
+        <field name="name">Change Commission Date</field>
+        <field name="model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_model_id" ref="model_mrp_production_commission_report"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list</field>
+        <field name="group_ids" eval="[(4, ref('vpa_sales_commission.group_commission_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'name': 'Change Commission Date',
+    'type': 'ir.actions.act_window',
+    'res_model': 'vpa.commission.change.date.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_model='mrp.production.commission.report', active_ids=records.ids),
+}
+        </field>
+    </record>
+
+    <!-- Server Action: Change Commission Date — Commission by SO -->
+    <record id="server_action_change_commission_date_so" model="ir.actions.server">
+        <field name="name">Change Commission Date</field>
+        <field name="model_id" ref="model_so_commission_report"/>
+        <field name="binding_model_id" ref="model_so_commission_report"/>
+        <field name="binding_type">action</field>
+        <field name="binding_view_types">list</field>
+        <field name="group_ids" eval="[(4, ref('vpa_sales_commission.group_commission_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    'name': 'Change Commission Date',
+    'type': 'ir.actions.act_window',
+    'res_model': 'vpa.commission.change.date.wizard',
+    'view_mode': 'form',
+    'target': 'new',
+    'context': dict(env.context, active_model='so.commission.report', active_ids=records.ids),
+}
+        </field>
+    </record>
+
+</odoo>

@@ -92,6 +92,14 @@ class VpaCommissionLine(models.Model):
         store=True,
         readonly=False,
     )
+    customer_ref = fields.Char(
+        string='Customer Reference',
+        compute='_compute_sale_order_info',
+        store=True,
+        readonly=False,
+        help='Customer Reference of the linked Sales Order. '
+             'Will become the Project link once the project app exists.',
+    )
     invoice_id = fields.Many2one(
         'account.move',
         string='Invoice',
@@ -139,13 +147,13 @@ class VpaCommissionLine(models.Model):
     # Status workflow
     state = fields.Selection([
         ('pending', 'Applied'),
-        ('confirmed', 'Applied'),
+        ('confirmed', 'Confirmed'),
         ('paid', 'Paid'),
         ('cancelled', 'Cancelled'),
     ], string='Status', default='pending', required=True)
 
-    confirmed_date = fields.Date(
-        string='Confirmed Date',
+    confirmed_date = fields.Datetime(
+        string='Confirmed On',
         readonly=True,
     )
     confirmed_by = fields.Many2one(
@@ -237,36 +245,54 @@ class VpaCommissionLine(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('vpa.commission.line') or _('New')
         return super().create(vals_list)
 
-    @api.depends('production_id')
+    @api.depends('production_id', 'production_id.sale_line_id.order_id.picking_ids.state',
+                 'production_id.origin')
     def _compute_delivered(self):
         for line in self:
-            if line.production_id and hasattr(line.production_id, 'sale_line_id') and line.production_id.sale_line_id:
-                sale_order = line.production_id.sale_line_id.order_id
+            # Resolve the sale order the same way the SO-name column does:
+            # direct sale-line link first, otherwise match by MO origin
+            # (manually linked MOs have no sale_line_id).
+            sale_order = False
+            production = line.production_id
+            if production:
+                if production.sale_line_id:
+                    sale_order = production.sale_line_id.order_id
+                elif production.origin:
+                    sale_order = self.env['sale.order'].search(
+                        [('name', '=', production.origin)], limit=1)
+            if sale_order:
                 done_pickings = sale_order.picking_ids.filtered(
                     lambda p: p.state == 'done' and p.picking_type_code == 'outgoing'
                 )
                 if done_pickings:
                     line.delivered = True
                     line.delivery_date = done_pickings[0].date_done.date() if done_pickings[0].date_done else False
-                else:
-                    if not line.delivered:
-                        line.delivered = False
-                    if not line.delivery_date:
-                        line.delivery_date = False
-            else:
-                if not line.delivered:
-                    line.delivered = False
-                if not line.delivery_date:
-                    line.delivery_date = False
+                    continue
+            # No delivery found: keep manual overrides, default the rest
+            if not line.delivered:
+                line.delivered = False
+            if not line.delivery_date:
+                line.delivery_date = False
 
-    @api.depends('production_id', 'production_id.sale_line_id.order_id', 'production_id.product_id')
+    @api.depends('production_id', 'production_id.sale_line_id.order_id',
+                 'production_id.sale_line_id.order_id.client_order_ref',
+                 'production_id.product_id', 'production_id.origin')
     def _compute_sale_order_info(self):
         for line in self:
             sale_order = False
             if line.production_id and hasattr(line.production_id, 'sale_line_id') and line.production_id.sale_line_id:
                 sale_order = line.production_id.sale_line_id.order_id
+            elif line.production_id and line.production_id.origin:
+                # Manually linked MOs carry the SO only in origin
+                sale_order = self.env['sale.order'].search(
+                    [('name', '=', line.production_id.origin)], limit=1)
             line.sale_order_name = sale_order.name if sale_order else (line.production_id.origin or False)
             line.item_name = line.production_id.product_id.name if line.production_id else False
+            line.customer_ref = sale_order.client_order_ref if sale_order else False
+            # Derive the client from the SO for production lines;
+            # manual lines keep the client entered in the wizard.
+            if sale_order:
+                line.partner_id = sale_order.partner_id
 
     @api.depends('date')
     def _compute_date_parts(self):
@@ -333,9 +359,31 @@ class VpaCommissionLine(models.Model):
                 raise UserError(_('Only pending commission lines can be confirmed.'))
             line.write({
                 'state': 'confirmed',
-                'confirmed_date': fields.Date.today(),
+                'confirmed_date': fields.Datetime.now(),
                 'confirmed_by': self.env.uid,
             })
+        # Refresh the current view so approved rows drop out of filtered lists
+        return {'type': 'ir.actions.client', 'tag': 'soft_reload'}
+
+    def action_bulk_confirm(self):
+        """Confirm all pending lines in the selection; skip the rest gracefully."""
+        pending = self.filtered(lambda l: l.state == 'pending' and not l.year_locked)
+        pending.write({
+            'state': 'confirmed',
+            'confirmed_date': fields.Datetime.now(),
+            'confirmed_by': self.env.uid,
+        })
+        skipped = len(self) - len(pending)
+        msg = _('%d commission line(s) confirmed.') % len(pending)
+        if skipped:
+            msg += _(' %d skipped (not pending or year-locked).') % skipped
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {'title': _('Confirm'), 'message': msg,
+                       'type': 'success', 'sticky': False,
+                       'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'}},
+        }
 
     def action_cancel(self):
         """Cancel commission lines."""
@@ -344,6 +392,7 @@ class VpaCommissionLine(models.Model):
             if line.state == 'paid':
                 raise UserError(_('Paid commission lines cannot be cancelled. Reset to pending first.'))
             line.write({'state': 'cancelled'})
+        return {'type': 'ir.actions.client', 'tag': 'soft_reload'}
 
     def action_reset_to_pending(self):
         """Reset confirmed, paid, or cancelled lines back to pending."""
@@ -411,15 +460,24 @@ class VpaCommissionLine(models.Model):
 
     @api.model
     def action_open_commission_payments(self):
-        """Open all payments linked to commission lines."""
-        payment_ids = self.search([
+        """Open all commission payments: line-linked, year-linked and bill-matched."""
+        line_payment_ids = self.search([
             ('payment_id', '!=', False),
         ]).mapped('payment_id').ids
+        year_payments = self.env['account.payment'].search([
+            ('commission_year_id', '!=', False),
+        ])
+        bill_payments = self.env['account.move'].search([
+            ('commission_year_id', '!=', False),
+        ]).mapped('matched_payment_ids')
+        payment_ids = list(set(line_payment_ids) | set(year_payments.ids) | set(bill_payments.ids))
+        list_view = self.env.ref('vpa_sales_commission.view_account_payment_list_commission')
         return {
             'name': _('Commission Payments'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
             'view_mode': 'list,form',
+            'views': [(list_view.id, 'list'), (False, 'form')],
             'domain': [('id', 'in', payment_ids)],
             'context': {'create': False},
         }

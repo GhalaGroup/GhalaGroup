@@ -38,6 +38,7 @@
                             <field name="production_id" readonly="1" invisible="type == 'manual'"/>
                             <field name="partner_id" readonly="type != 'manual'"/>
                             <field name="sale_order_name" readonly="type != 'manual'"/>
+                            <field name="customer_ref" readonly="1"/>
                             <field name="item_name" readonly="type != 'manual'"/>
                             <field name="invoice_id" invisible="type != 'sales'" readonly="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
@@ -55,14 +56,22 @@
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
-                    <group string="Status Information" invisible="state == 'pending'">
+                    <group string="History">
+                        <group>
+                            <field name="create_date" string="Created On" readonly="1"/>
+                            <field name="create_uid" string="Created By" readonly="1"/>
+                        </group>
                         <group invisible="not confirmed_date">
                             <field name="confirmed_date"/>
                             <field name="confirmed_by"/>
                         </group>
-                        <group invisible="state != 'paid'">
+                    </group>
+                    <group string="Payment Information" invisible="state != 'paid'">
+                        <group>
                             <field name="paid_date"/>
                             <field name="paid_by"/>
+                        </group>
+                        <group>
                             <field name="payment_id" invisible="not payment_id"/>
                             <field name="bill_id" invisible="payment_id or not bill_id" string="Paid Via Bill"/>
                         </group>
@@ -104,29 +113,46 @@
         <field name="arch" type="xml">
             <list string="Commission Lines" multi_edit="1" create="0">
                 <header>
+                    <button name="action_bulk_confirm" string="Confirm"
+                            type="object" class="btn-success"
+                            groups="vpa_sales_commission.group_commission_manager"/>
                     <button name="%(action_commission_generate_bill)d" string="Generate Bill"
                             type="action" class="btn-primary"
                             groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="%(server_action_change_commission_date_line)d" string="Change Date"
+                            type="action" class="btn-secondary"
+                            groups="vpa_sales_commission.group_commission_manager"/>
                 </header>
-                <field name="name"/>
-                <field name="date"/>
-                <field name="employee_id"/>
+                <field name="name" width="155px"/>
+                <field name="date" width="98px"/>
+                <field name="employee_id" optional="hide"/>
                 <field name="scheme_id" optional="hide"/>
                 <field name="type" optional="hide"/>
-                <field name="production_id" optional="hide"/>
+                <field name="production_id" optional="hide" width="135px"/>
                 <field name="partner_id" optional="hide" string="Client"/>
-                <field name="sale_order_name"/>
-                <field name="item_name"/>
+                <field name="sale_order_name" width="85px"/>
+                <field name="customer_ref" string="Customer Ref" optional="show"
+                       width="190px"/>
+                <field name="item_name" width="300px"/>
                 <field name="currency_id" column_invisible="1"/>
-                <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="rate"/>
+                <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" optional="hide"/>
+                <field name="rate" width="55px"/>
                 <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                <field name="delivered" widget="boolean" string="Delivered"/>
+                <field name="delivered" widget="boolean" string="Dlv" width="40px"/>
                 <field name="state" widget="badge"
-                       decoration-info="state in ('pending', 'confirmed')"
+                       decoration-info="state == 'pending'"
+                       decoration-warning="state == 'confirmed'"
                        decoration-success="state == 'paid'"
                        decoration-danger="state == 'cancelled'"/>
-                <field name="bill_id" optional="show" string="Bill"
+                <button name="action_confirm" type="object" string="Approve"
+                        icon="fa-check" class="text-success"
+                        invisible="state != 'pending'"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <button name="action_cancel" type="object" string="Reject"
+                        icon="fa-times" class="text-danger"
+                        invisible="state != 'pending'"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <field name="bill_id" optional="hide" string="Bill"
                        decoration-info="bill_state == 'billed'"
                        decoration-success="bill_state == 'paid'"/>
                 <button name="action_view_bill" type="object"
@@ -137,6 +163,9 @@
                        decoration-info="bill_state == 'billed'"
                        decoration-success="bill_state == 'paid'"/>
                 <field name="year_locked" column_invisible="1"/>
+                <field name="create_date" string="Created On" optional="hide"/>
+                <field name="confirmed_date" string="Confirmed On" optional="show" width="150px"/>
+                <field name="confirmed_by" string="Confirmed By" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
             </list>
         </field>
@@ -150,6 +179,9 @@
             <search string="Commission Lines">
                 <field name="name"/>
                 <field name="employee_id"/>
+                <field name="partner_id" string="Client"/>
+                <field name="customer_ref"/>
+                <field name="sale_order_name"/>
                 <field name="scheme_id"/>
                 <field name="production_id"/>
                 <separator/>
@@ -170,6 +202,9 @@
                 <filter string="Date" name="filter_date" date="date" default_period="year"/>
                 <separator/>
                 <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Client" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                <filter string="Customer Ref" name="group_customer_ref" context="{'group_by': 'customer_ref'}"/>
+                <filter string="Sales Order" name="group_sale_order" context="{'group_by': 'sale_order_name'}"/>
                 <filter string="Scheme" name="group_scheme" context="{'group_by': 'scheme_id'}"/>
                 <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
                 <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>

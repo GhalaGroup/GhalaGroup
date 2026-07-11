@@ -10,8 +10,12 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_commission_lines" type="object"
-                                class="oe_stat_button" icon="fa-list-alt">
-                            <field name="total_commission" string="Total" widget="statinfo"/>
+                                class="oe_stat_button" icon="fa-list-alt"
+                                string="Commission Lines"/>
+                        <button name="action_view_commission_lines" type="object"
+                                class="oe_stat_button" icon="fa-money">
+                            <field name="total_commission" string="Total" widget="statinfo"
+                                   options="{'currency_field': 'currency_id'}"/>
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
@@ -37,58 +41,26 @@
                             <field name="sales_rate" string="Sales Rate (%)" invisible="not sales_commission"/>
                         </group>
                     </group>
-                    <group>
-                        <group string="Totals">
-                            <field name="total_pending" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <field name="total_confirmed" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <group string="MO Filter">
+                        <group>
+                            <field name="apply_to" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="workcenter_ids" widget="many2many_tags"
+                                   invisible="apply_to != 'workcenter'"/>
+                            <field name="product_category_ids" widget="many2many_tags"
+                                   invisible="apply_to != 'product_category'"/>
+                            <field name="product_ids" widget="many2many_tags"
+                                   invisible="apply_to != 'specific_products'"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="MO Filter" name="mo_filter">
-                            <group>
-                                <group>
-                                    <field name="apply_to" widget="radio"/>
-                                </group>
-                                <group>
-                                    <field name="workcenter_ids" widget="many2many_tags"
-                                           invisible="apply_to != 'workcenter'"/>
-                                    <field name="product_category_ids" widget="many2many_tags"
-                                           invisible="apply_to != 'product_category'"/>
-                                    <field name="product_ids" widget="many2many_tags"
-                                           invisible="apply_to != 'specific_products'"/>
-                                </group>
-                            </group>
-                        </page>
-                        <page string="Yearly Rates" name="yearly_rates">
-                            <p class="text-muted">
-                                Configure the commission rate and minimum guarantee for each year.
-                                When generating commission, the rate for the MO's year is used automatically.
-                            </p>
-                            <field name="year_ids"
-                                   view_id="vpa_sales_commission.vpa_commission_scheme_year_view_list_inline"/>
-                        </page>
-                        <page string="Commission Lines" name="commission_lines">
-                            <field name="commission_line_ids" readonly="1">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="type"/>
-                                    <field name="date"/>
-                                    <field name="production_id"/>
-                                    <field name="sale_order_name"/>
-                                    <field name="item_name"/>
-                                    <field name="currency_id" column_invisible="1"/>
-                                    <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="rate"/>
-                                    <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="state" widget="badge"
-                                           decoration-info="state == 'pending'"
-                                           decoration-warning="state == 'confirmed'"
-                                           decoration-success="state == 'paid'"
-                                           decoration-danger="state == 'cancelled'"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
+                    <separator string="Yearly Rates"/>
+                    <p class="text-muted">
+                        Configure the commission rate and minimum guarantee for each year.
+                        When generating commission, the rate for the MO's year is used automatically.
+                    </p>
+                    <field name="year_ids"
+                           view_id="vpa_sales_commission.vpa_commission_scheme_year_view_list_inline"/>
                 </sheet>
             </form>
         </field>

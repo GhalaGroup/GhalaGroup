@@ -15,13 +15,15 @@
         <field name="comment">Can view their own commission records only.</field>
     </record>
 
-    <!-- Commission Manager Group - Full access to all commission data -->
+    <!-- Commission Manager Group - Full access to all commission data.
+         Implies Invoicing/Billing so the Generate Bill and Pay flows
+         (vendor bills, payments, posting) work without a separate grant. -->
     <record id="group_commission_manager" model="res.groups">
         <field name="name">Administrator</field>
         <field name="sequence">20</field>
         <field name="privilege_id" ref="res_groups_privilege_commission"/>
-        <field name="implied_ids" eval="[(4, ref('group_commission_user'))]"/>
-        <field name="comment">Full access to all commission data. Can create schemes, approve commissions, and mark as paid.</field>
+        <field name="implied_ids" eval="[(4, ref('group_commission_user')), (4, ref('account.group_account_invoice'))]"/>
+        <field name="comment">Full access to all commission data. Can create schemes, approve commissions, generate bills and payments.</field>
         <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
@@ -61,6 +63,66 @@
         <field name="perm_write" eval="True"/>
         <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Scheme Year: users see ONLY their own years (guarantee/earned are
+         compensation data); managers see all -->
+    <record id="commission_scheme_year_rule_user" model="ir.rule">
+        <field name="name">Commission Year: Own Records Only</field>
+        <field name="model_id" ref="model_vpa_commission_scheme_year"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_user'))]"/>
+    </record>
+    <record id="commission_scheme_year_rule_manager" model="ir.rule">
+        <field name="name">Commission Year: All Records (Manager)</field>
+        <field name="model_id" ref="model_vpa_commission_scheme_year"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_manager'))]"/>
+    </record>
+
+    <!-- Line materials: scope to the parent line's employee for users -->
+    <record id="commission_line_material_rule_user" model="ir.rule">
+        <field name="name">Commission Line Material: Own Records Only</field>
+        <field name="model_id" ref="model_vpa_commission_line_material"/>
+        <field name="domain_force">[('commission_line_id.employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_user'))]"/>
+    </record>
+    <record id="commission_line_material_rule_manager" model="ir.rule">
+        <field name="name">Commission Line Material: All Records (Manager)</field>
+        <field name="model_id" ref="model_vpa_commission_line_material"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_manager'))]"/>
+    </record>
+
+    <!-- SO commission report: users see only their own rows -->
+    <record id="so_commission_report_rule_user" model="ir.rule">
+        <field name="name">Commission by SO: Own Records Only</field>
+        <field name="model_id" ref="model_so_commission_report"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_user'))]"/>
+    </record>
+    <record id="so_commission_report_rule_manager" model="ir.rule">
+        <field name="name">Commission by SO: All Records (Manager)</field>
+        <field name="model_id" ref="model_so_commission_report"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_commission_manager'))]"/>
+    </record>
+
+    <!-- Multi-company isolation (applies to everyone, all groups) -->
+    <record id="commission_scheme_rule_company" model="ir.rule">
+        <field name="name">Commission Scheme: multi-company</field>
+        <field name="model_id" ref="model_vpa_commission_scheme"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="commission_scheme_year_rule_company" model="ir.rule">
+        <field name="name">Commission Year: multi-company</field>
+        <field name="model_id" ref="model_vpa_commission_scheme_year"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="commission_line_rule_company" model="ir.rule">
+        <field name="name">Commission Line: multi-company</field>
+        <field name="model_id" ref="model_vpa_commission_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
 </odoo>

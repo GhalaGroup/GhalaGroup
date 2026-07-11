@@ -19,21 +19,40 @@ class HrEmployee(models.Model):
         string='Commission Lines',
     )
     commission_count = fields.Integer(
-        string='Commission Lines',
+        string='Commission Line Count',
         compute='_compute_commission_count',
+        groups='vpa_sales_commission.group_commission_user',
     )
     commission_total = fields.Float(
         string='Total Commission',
         compute='_compute_commission_count',
+        groups='vpa_sales_commission.group_commission_user',
     )
     has_commission_scheme = fields.Boolean(
         string='Has Commission Scheme',
         compute='_compute_commission_count',
+        groups='vpa_sales_commission.group_commission_user',
     )
 
+    @api.depends_context('uid')
     def _compute_commission_count(self):
+        # Compensation data: managers see all, commission users see only their
+        # own figures, everyone else gets zeros (fields are group-gated too).
+        # depends_context('uid'): the result is user-specific — without it the
+        # cache would serve one user's figures to another.
+        is_manager = self.env.user.has_group('vpa_sales_commission.group_commission_manager')
+        is_user = self.env.user.has_group('vpa_sales_commission.group_commission_user')
+        if not (is_manager or is_user):
+            for employee in self:
+                employee.commission_count = 0
+                employee.commission_total = 0.0
+                employee.has_commission_scheme = False
+            return
+        line_domain = [('employee_id', 'in', self.ids), ('state', '!=', 'cancelled')]
+        if not is_manager:
+            line_domain.append(('employee_id.user_id', '=', self.env.uid))
         commission_data = self.env['vpa.commission.line'].sudo().read_group(
-            [('employee_id', 'in', self.ids), ('state', '!=', 'cancelled')],
+            line_domain,
             ['employee_id', 'amount'],
             ['employee_id'],
         )

@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.1.1.0',
+    'version': '19.0.2.0.0',
     'category': 'Manufacturing/Commission',
-    'summary': 'Production commission based on Manufacturing Orders (v1.1.0)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.0)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,24 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.0** - Major Release: Complete Commission Lifecycle
+  - Commission Centre: kanban dashboard per employee-year with drill-down to MOs/SOs
+  - Approval workflow: per-line Approve/Reject, bulk confirm, full timestamps & user trail
+  - Guarantee advance billing: one bill, expense spread over 12 months (prepaid accounting)
+  - Excess (true-up) billing: confirmed commission above guarantee, expense recognised
+    in the months the commission was generated, explicit guarantee offset
+  - Year-linked payments: multi-currency (USD/TZS) with live exchange rate,
+    payment-on-account with later linking, auto-reconciliation against bills
+  - Rounding write-offs: pay clean amounts, small differences booked automatically
+  - Commission Payment Voucher (VPA-styled PDF) with USD equivalents
+  - Journal transaction pre-creation for cash journals (reconcile-only workflow)
+  - Change Commission Date wizard (single/bulk, audit trail, old->new display)
+  - Close/Reopen year with mandatory reason and chatter audit log
+  - Pay ceiling: only guarantee + confirmed commission is payable
+  - Group by Client / Customer Reference; delivered flag for origin-linked MOs
+  - Security hardening: own-records rules, company isolation, field-level
+    protection of compensation data, per-user compute caching
+
 * **19.0.1.1.0** - Commission History Feature
   - Historical base amounts from past MOs for same product
   - Compare and use previous commission calculations
@@ -56,7 +74,7 @@ Support: info@vpa.co.tz
     'website': 'https://www.vpa.co.tz',
     'support': 'info@vpa.co.tz',
     'license': 'OPL-1',
-    'price': 299.00,
+    'price': 499.00,
     'currency': 'USD',
     'depends': [
         'mrp',
@@ -76,6 +94,9 @@ Support: info@vpa.co.tz
         'wizard/commission_year_summary_wizard_views.xml',
         'wizard/manual_commission_wizard_views.xml',
         'wizard/adjust_materials_wizard_views.xml',
+        'wizard/commission_change_date_wizard_views.xml',
+        'report/commission_payment_voucher.xml',
+        'wizard/commission_pay_year_wizard_views.xml',
         'report/commission_statement_report.xml',
         'report/commission_statement_template.xml',
         'views/vpa_commission_scheme_year_views.xml',
