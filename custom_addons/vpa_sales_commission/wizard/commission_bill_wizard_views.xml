@@ -31,14 +31,14 @@
                     </group>
 
                     <!-- Existing bills warning -->
-                    <div class="alert alert-info" invisible="existing_bill_count == 0">
+                    <div class="alert alert-info" role="status" invisible="existing_bill_count == 0">
                         <strong>Note:</strong>
                         <field name="existing_bill_count" nolabel="1"/> existing bill(s) already created for this period.
                         Lines already included in those bills are excluded from this new bill.
                     </div>
 
                     <!-- Advance status banner (monthly bills only) -->
-                    <div class="alert alert-success"
+                    <div class="alert alert-success" role="status"
                          invisible="bill_type != 'monthly' or advance_status != 'covered'">
                         <strong>Covered by Advance:</strong>
                         This bill (<field name="total_amount" widget="monetary" nolabel="1" readonly="1"/>)
@@ -47,14 +47,14 @@
                         <field name="advance_remaining" widget="monetary" nolabel="1" readonly="1"/>.
                         No additional payment needed for this month.
                     </div>
-                    <div class="alert alert-warning"
+                    <div class="alert alert-warning" role="alert"
                          invisible="bill_type != 'monthly' or advance_status != 'partial'">
                         <strong>Partially Covered:</strong>
                         The advance covers part of this bill.
                         Advance remaining: <field name="advance_remaining" widget="monetary" nolabel="1" readonly="1"/>.
                         Once the advance is exhausted, the remaining amount is payable to the employee.
                     </div>
-                    <div class="alert alert-danger"
+                    <div class="alert alert-danger" role="alert"
                          invisible="bill_type != 'monthly' or advance_status != 'exceeded'">
                         <strong>Advance Fully Consumed:</strong>
                         The minimum guarantee advance has been fully used up.

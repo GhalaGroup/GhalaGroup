@@ -5,6 +5,7 @@
 from . import vpa_commission_scheme
 from . import vpa_commission_scheme_year
 from . import account_move
+from . import account_payment
 from . import vpa_commission_line
 from . import product_template
 from . import mrp_production

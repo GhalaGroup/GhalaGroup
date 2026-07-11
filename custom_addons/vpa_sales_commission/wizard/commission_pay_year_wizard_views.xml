@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <record id="commission_pay_year_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.commission.pay.year.wizard.form</field>
+        <field name="model">vpa.commission.pay.year.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Pay Commission">
+                <sheet>
+                    <group>
+                        <group string="Commission Year">
+                            <field name="scheme_year_id" readonly="1"/>
+                            <field name="employee_id"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Year Status">
+                            <field name="amount_due_year" widget="monetary"/>
+                            <field name="amount_paid_cash" widget="monetary"/>
+                            <field name="outstanding_cash" widget="monetary"/>
+                        </group>
+                    </group>
+                    <group string="Payment">
+                        <group>
+                            <field name="amount" widget="monetary"/>
+                            <field name="payment_currency_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="payment_amount" widget="monetary"
+                                   invisible="payment_currency_id == currency_id"/>
+                            <field name="rate_info" invisible="not rate_info"/>
+                        </group>
+                        <group>
+                            <field name="journal_id"/>
+                            <field name="payment_date"/>
+                            <field name="memo"/>
+                            <field name="create_transaction"/>
+                            <field name="payment_difference" widget="monetary"
+                                   invisible="payment_difference &lt; 0.01 and payment_difference &gt; -0.01"/>
+                            <field name="writeoff_difference"
+                                   invisible="payment_difference &lt; 0.01 and payment_difference &gt; -0.01"/>
+                            <field name="writeoff_account_id"
+                                   invisible="not writeoff_difference"
+                                   required="writeoff_difference"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status"
+                         invisible="payment_currency_id == currency_id">
+                        Paying in a different currency: the payment is created for the
+                        <strong>Payment Amount</strong> in the selected currency, converted at the
+                        rate shown. The year's Paid figure converts it back at the payment date.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_pay" string="Create Payment" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dedicated payment list for Commission Payments (with the year column) -->
+    <record id="view_account_payment_list_commission" model="ir.ui.view">
+        <field name="name">account.payment.list.commission</field>
+        <field name="model">account.payment</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Commission Payments" create="false">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="commission_year_id" string="Commission Year"/>
+                <field name="partner_id" string="Employee"/>
+                <field name="journal_id"/>
+                <field name="memo" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'in_process'"
+                       decoration-success="state == 'paid'"
+                       decoration-danger="state in ('canceled', 'rejected')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Add Commission Year link on the payment form (for Payment on Account linking) -->
+    <record id="view_account_payment_form_commission" model="ir.ui.view">
+        <field name="name">account.payment.form.commission.year</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <field name="memo" position="after">
+                <field name="commission_year_id"
+                       invisible="payment_type != 'outbound'"
+                       groups="vpa_sales_commission.group_commission_manager"/>
+            </field>
+            <xpath expr="//header" position="inside">
+                <button name="%(action_report_commission_payment_voucher)d"
+                        string="Print Voucher" type="action" icon="fa-print"
+                        invisible="not commission_year_id"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

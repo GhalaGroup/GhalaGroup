@@ -210,8 +210,13 @@ class CommissionBillWizard(models.TransientModel):
         res = super().default_get(fields_list)
         today = fields.Date.today()
 
-        # Try to detect year and month from the active commission lines
+        # Try to detect year and month from the active commission lines.
+        # active_ids are only commission lines when the wizard is opened FROM the
+        # commission line list — from a scheme-year button they are scheme-year ids,
+        # and browsing them as lines would pull an unrelated line's year (wrong year bug).
         active_ids = self.env.context.get('active_ids', [])
+        if self.env.context.get('active_model') != 'vpa.commission.line':
+            active_ids = []
         if active_ids:
             lines = self.env['vpa.commission.line'].browse(active_ids).filtered(
                 lambda l: l.state != 'cancelled'
@@ -247,7 +252,21 @@ class CommissionBillWizard(models.TransientModel):
                         res['scheme_id'] = scheme.id
                 return res
 
-        # Fallback: use today's date
+        # Opened from a scheme-year row (or with an explicit year in context):
+        # derive the bill date from THAT year, never from today. A guarantee/base
+        # bill is dated Jan 1 of the year; anything else uses the year's last day.
+        ctx_year = res.get('year') or self.env.context.get('default_year')
+        if ctx_year:
+            year_int = int(ctx_year)
+            res['year'] = ctx_year
+            bill_type = res.get('bill_type') or self.env.context.get('default_bill_type') or 'monthly'
+            if bill_type == 'base':
+                res['bill_date'] = datetime.date(year_int, 1, 1)
+            else:
+                res['bill_date'] = datetime.date(year_int, 12, 31)
+            return res
+
+        # Fallback (no year context at all): use today's date
         res['month'] = today.strftime('%m')
         last_day = calendar.monthrange(today.year, today.month)[1]
         res['bill_date'] = datetime.date(today.year, today.month, last_day)
@@ -270,18 +289,23 @@ class CommissionBillWizard(models.TransientModel):
             account = self.scheme_id._get_expense_account_for_year(self.year)
             if account:
                 self.expense_account_id = account
-            # Set journal matching scheme currency
+            # Set journal matching scheme currency — restricted to the scheme's
+            # company (an unfiltered search can pick another company's journal
+            # in multi-company sessions and break the bill with a company mix).
             currency = self.scheme_id.currency_id
+            scheme_company = self.scheme_id.company_id
             if currency:
                 journal = self.env['account.journal'].search([
                     ('type', '=', 'purchase'),
                     ('currency_id', '=', currency.id),
+                    ('company_id', '=', scheme_company.id),
                 ], limit=1)
                 if not journal:
                     # Fallback: journal with no specific currency (uses company currency)
                     journal = self.env['account.journal'].search([
                         ('type', '=', 'purchase'),
                         ('currency_id', '=', False),
+                        ('company_id', '=', scheme_company.id),
                     ], limit=1)
                 if journal:
                     self.journal_id = journal
@@ -438,13 +462,41 @@ class CommissionBillWizard(models.TransientModel):
         if not scheme_year.minimum_amount:
             raise UserError(_('The minimum guarantee amount for %s is zero. Please configure it first.', self.year))
 
+        # The guarantee may only ever be billed ONCE per year — a second base
+        # bill would double the advance and its 12-month expense spread.
+        existing_base = self.env['account.move'].search([
+            ('commission_year_id', '=', scheme_year.id),
+            ('move_type', '=', 'in_invoice'),
+            ('ref', 'like', 'Base Commission Guarantee%'),
+            ('state', '!=', 'cancel'),
+        ], limit=1)
+        if existing_base:
+            raise UserError(_(
+                'The minimum guarantee for %(year)s is already billed (%(bill)s). '
+                'To bill confirmed commission above the guarantee, use the '
+                '"Bill Excess" button on the commission year instead.',
+                year=self.year, bill=existing_base.name or existing_base.ref,
+            ))
+
         employee_name = self.scheme_id.employee_id.name
         year_int = int(self.year)
+
+        # When the 12-month spread is configured, the bill books the guarantee to
+        # the PREPAID account; the monthly entries then move it to expense
+        # (Dr expense / Cr prepaid). Booking the bill line straight to expense
+        # would double the expense once the monthly entries post.
+        company = self.scheme_id.company_id
+        spread_active = bool(
+            company.deferred_expense_account_id and company.deferred_expense_journal_id
+        )
+        guarantee_account = (
+            company.deferred_expense_account_id if spread_active else self.expense_account_id
+        )
         invoice_lines = [(0, 0, {
             'name': _('Minimum Guarantee Commission - %s %s', employee_name, self.year),
             'quantity': 1.0,
             'price_unit': scheme_year.minimum_amount,
-            'account_id': self.expense_account_id.id,
+            'account_id': guarantee_account.id,
         })]
 
         # Optionally include unbilled MO commission lines
@@ -496,7 +548,7 @@ class CommissionBillWizard(models.TransientModel):
 
     def _create_monthly_prepaid_entries(self, scheme_year, year_int, employee_name, bill):
         """Create and post 12 monthly journal entries to spread the guarantee expense across the year."""
-        company = self.env.company
+        company = self.scheme_id.company_id
         prepaid_account = company.deferred_expense_account_id
         if not prepaid_account:
             return
