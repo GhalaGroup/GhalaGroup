@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.6',
+    'version': '19.0.2.0.7',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,11 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.7** - Manual commission auto-calculation
+  - Add Manual Commission: the rate now auto-fills from the commission year
+    matching the chosen date (respects per-year rates), and the amount is
+    calculated automatically from base x rate (still overridable)
+
 * **19.0.2.0.6** - Repair legacy MO commission statuses
   - MOs carrying obsolete status values ('blocked', 'pending') from early
     versions displayed an empty Commission badge and matched no filter;
