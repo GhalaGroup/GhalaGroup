@@ -69,8 +69,7 @@
                         <group>
                             <field name="scheme_id" readonly="1"/>
                             <field name="year" readonly="state == 'closed'"/>
-                            <field name="effective_rate"/>
-                            <field name="production_rate" string="Rate Override (%)"
+                            <field name="production_rate" string="Rate (%)"
                                    readonly="state == 'closed'"/>
                         </group>
                         <group>

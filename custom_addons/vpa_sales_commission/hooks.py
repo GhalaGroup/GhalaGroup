@@ -9,7 +9,21 @@ _logger = logging.getLogger(__name__)
 
 def migrate_guarantees_to_year_lines(env):
     """
-    Migration stub — vpa.commission.guarantee model has been removed.
-    This hook is kept to avoid errors on re-upgrade.
+    Post-migrate hook.
+
+    - Legacy: vpa.commission.guarantee model removed (nothing to migrate).
+    - v2.0.3: the rate is now an explicit per-year value (prefilled from the
+      scheme default, freely editable per year). Years created earlier stored 0
+      meaning "use the scheme default" — backfill those with the default so the
+      displayed rate is real. Idempotent: only touches rows still at 0.
     """
-    _logger.info('Commission migration hook: guarantee model removed, nothing to migrate.')
+    years = env['vpa.commission.scheme.year'].search([('production_rate', '=', 0)])
+    count = 0
+    for year in years:
+        default = year.scheme_id.production_rate
+        if default:
+            year.production_rate = default
+            count += 1
+    if count:
+        _logger.info('Commission migration: backfilled rate on %d year line(s) '
+                     'from their scheme default.', count)
