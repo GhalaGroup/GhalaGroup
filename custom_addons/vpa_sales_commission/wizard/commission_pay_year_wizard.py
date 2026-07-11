@@ -93,6 +93,13 @@ class CommissionPayYearWizard(models.TransientModel):
     memo = fields.Char(
         string='Memo',
     )
+    advance_payment = fields.Boolean(
+        string='Advance Payment',
+        help='Pay beyond what is currently payable (guarantee + confirmed '
+             'commission) — e.g. an advance on a year with no minimum guarantee '
+             'or before commissions are approved. The payment is linked to the '
+             'year and applies against future bills.',
+    )
     create_transaction = fields.Boolean(
         string='Add to Journal Transactions',
         compute='_compute_create_transaction',
@@ -238,13 +245,18 @@ class CommissionPayYearWizard(models.TransientModel):
             # Rounding allowance: paying a clean figure slightly above the exact
             # outstanding is fine — the overage is written off as rounding.
             tolerance = max(tolerance, 10000.0)
+        if self.advance_payment:
+            # Explicit manager decision: pay ahead of guarantee/approvals.
+            # The payment is year-linked and applies against future bills.
+            tolerance = float('inf')
         if self.amount > ceiling + tolerance:
             raise UserError(_(
                 'This payment (%(amt)s) exceeds what is payable for %(year)s.\n\n'
                 'Payable = max(guarantee %(guar)s, confirmed commission %(conf)s) '
                 '− already paid %(paid)s = %(ceil)s.\n\n'
                 '%(pending)d commission line(s) are still awaiting confirmation — '
-                'confirm them first to increase the payable amount.') % {
+                'confirm them first, or tick "Advance Payment" to deliberately '
+                'pay ahead.') % {
                     'amt': f'{self.amount:,.2f}',
                     'year': sy.year,
                     'guar': f'{sy.minimum_amount:,.2f}',

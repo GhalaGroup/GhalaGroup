@@ -30,7 +30,7 @@
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <button name="action_register_payment" type="object"
                             string="Register Payment" class="btn-primary"
-                            invisible="outstanding_cash &lt;= 0"
+                            invisible="state == 'closed'"
                             groups="vpa_sales_commission.group_commission_manager"/>
                     <field name="pending_count" invisible="1"/>
                     <field name="outstanding_cash" invisible="1"/>
@@ -232,7 +232,7 @@
                                         <i class="fa fa-plus-circle"/> Bill Excess
                                     </button>
                                     <button type="object" name="action_register_payment" class="btn btn-sm btn-primary flex-fill"
-                                            t-if="record.outstanding_cash.raw_value &gt; 0"
+                                            t-if="record.state.raw_value == 'open'"
                                             groups="vpa_sales_commission.group_commission_manager">
                                         <i class="fa fa-money"/> Pay
                                     </button>

@@ -69,8 +69,17 @@ class ManualCommissionWizard(models.TransientModel):
         required=True,
     )
 
+    @api.onchange('scheme_id', 'date')
+    def _onchange_scheme_date(self):
+        """Pull the rate of the commission year matching the chosen date —
+        respects per-year rates (e.g. 5% for 2023, 20% for 2025)."""
+        if self.scheme_id and self.date:
+            self.rate = self.scheme_id._get_rate_for_year(str(self.date.year))
+
     @api.onchange('base_amount', 'rate')
     def _onchange_calc_amount(self):
+        """The system computes the amount from base x rate. The amount stays
+        editable for a final manual override if ever needed."""
         if self.base_amount and self.rate:
             self.amount = self.base_amount * self.rate / 100
 

@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.4',
+    'version': '19.0.2.0.11',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,43 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.11** - Manual commission in the Generate wizard
+  - New "Manual Commission" checkbox: tick to edit the Total Commission,
+    per-employee amount or rate directly (all stay in sync, generated
+    amounts match exactly what was typed); untick resets to standard rates
+  - "Extra vs Standard" shown at the top and per employee: how much above
+    (or below) the standard year rate the commission is
+  - Rates carry full precision so manually entered amounts are exact
+
+* **19.0.2.0.10** - Change history restored on commission years
+  - Rate, Minimum Guarantee and State changes are logged again in the year's
+    chatter (old value -> new value, user, timestamp). Verified compatible
+    with commission-manager editing
+
+* **19.0.2.0.9** - Not Applicable badge shown in red
+
+* **19.0.2.0.8** - Advance payments
+  - Pay wizard: new "Advance Payment" option to deliberately pay beyond the
+    guarantee/confirmed ceiling (e.g. years without a minimum guarantee, or
+    advances before approval). No bill required - the payment is year-linked
+    and applies against future bills
+  - Pay button now available on any open year
+
+* **19.0.2.0.7** - Manual commission auto-calculation
+  - Add Manual Commission: the rate now auto-fills from the commission year
+    matching the chosen date (respects per-year rates), and the amount is
+    calculated automatically from base x rate (still overridable)
+
+* **19.0.2.0.6** - Repair legacy MO commission statuses
+  - MOs carrying obsolete status values ('blocked', 'pending') from early
+    versions displayed an empty Commission badge and matched no filter;
+    statuses are recomputed from the actual data on upgrade
+
+* **19.0.2.0.5** - Not Applicable status refresh
+  - Commission by MO: marking/unmarking Not Applicable now refreshes the list
+    immediately (the status changed in the database but the screen kept
+    showing the old value until a manual reload)
+
 * **19.0.2.0.4** - Editable per-year rate
   - The yearly Rate (%) is now a real per-year value: prefilled with the scheme
     default when adding a year, freely editable (e.g. 5% for 2023)

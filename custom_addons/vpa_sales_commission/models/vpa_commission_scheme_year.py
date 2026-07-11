@@ -59,6 +59,7 @@ class VpaCommissionSchemeYear(models.Model):
     production_rate = fields.Float(
         string='Rate (%)',
         digits=(5, 2),
+        tracking=True,
         help='Commission percentage for this year. Leave 0 to use the scheme default rate.',
     )
     effective_rate = fields.Float(
@@ -88,6 +89,7 @@ class VpaCommissionSchemeYear(models.Model):
     minimum_amount = fields.Monetary(
         string='Min. Guarantee',
         currency_field='currency_id',
+        tracking=True,
         help='Annual minimum commission guarantee for this year',
     )
     minimum_amount_usd = fields.Float(
@@ -172,7 +174,7 @@ class VpaCommissionSchemeYear(models.Model):
     state = fields.Selection([
         ('open', 'Open'),
         ('closed', 'Closed'),
-    ], string='State', default='open', required=True)
+    ], string='State', default='open', required=True, tracking=True)
 
     # Computed totals from commission lines
     total_earned = fields.Monetary(

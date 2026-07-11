@@ -34,6 +34,7 @@
                             <field name="journal_id"/>
                             <field name="payment_date"/>
                             <field name="memo"/>
+                            <field name="advance_payment"/>
                             <field name="create_transaction"/>
                             <field name="payment_difference" widget="monetary"
                                    invisible="payment_difference &lt; 0.01 and payment_difference &gt; -0.01"/>
