@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.8',
+    'version': '19.0.2.0.9',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,8 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.9** - Not Applicable badge shown in red
+
 * **19.0.2.0.8** - Advance payments
   - Pay wizard: new "Advance Payment" option to deliberately pay beyond the
     guarantee/confirmed ceiling (e.g. years without a minimum guarantee, or

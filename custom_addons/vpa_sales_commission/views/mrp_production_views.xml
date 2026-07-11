@@ -85,7 +85,8 @@
             <xpath expr="//field[@name='state']" position="before">
                 <field name="commission_status" string="Commission"
                        widget="badge" optional="hide"
-                       decoration-muted="commission_status in ('none', 'not_applicable', 'cancelled')"
+                       decoration-muted="commission_status in ('none', 'cancelled')"
+                       decoration-danger="commission_status == 'not_applicable'"
                        decoration-info="commission_status == 'applied'"
                        decoration-success="commission_status == 'paid'"/>
             </xpath>
