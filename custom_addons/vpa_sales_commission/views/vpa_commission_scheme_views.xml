@@ -63,12 +63,11 @@
                          (view_id attr) is not supported by Odoo and the default-view
                          fallback picked the read-only Commission Centre list, hiding
                          "Add a line". Embedding guarantees this exact editable list. -->
-                    <field name="year_ids">
+                    <field name="year_ids" context="{'default_production_rate': production_rate}">
                         <list string="Yearly Configuration" editable="bottom">
                             <field name="year"/>
-                            <field name="production_rate" string="Rate Override (%)"
+                            <field name="production_rate" string="Rate (%)"
                                    readonly="state == 'closed'"/>
-                            <field name="effective_rate" string="Rate (%)"/>
                             <field name="currency_id" column_invisible="1"/>
                             <field name="minimum_amount" widget="monetary"
                                    options="{'currency_field': 'currency_id'}"/>

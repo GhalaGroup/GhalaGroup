@@ -72,6 +72,19 @@ class VpaCommissionSchemeYear(models.Model):
     def _compute_effective_rate(self):
         for rec in self:
             rec.effective_rate = rec.production_rate or rec.scheme_id.production_rate
+
+    @api.model
+    def default_get(self, fields_list):
+        """Prefill the year's rate with the scheme default — the user can then
+        freely change it per year (e.g. 5% for 2023)."""
+        res = super().default_get(fields_list)
+        if not res.get('production_rate'):
+            scheme_id = res.get('scheme_id') or self.env.context.get('default_scheme_id')
+            if scheme_id:
+                res['production_rate'] = self.env['vpa.commission.scheme'].browse(
+                    scheme_id).production_rate
+        return res
+
     minimum_amount = fields.Monetary(
         string='Min. Guarantee',
         currency_field='currency_id',
