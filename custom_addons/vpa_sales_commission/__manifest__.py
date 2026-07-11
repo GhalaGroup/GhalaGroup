@@ -77,6 +77,7 @@ Support: info@vpa.co.tz
     'price': 499.00,
     'currency': 'USD',
     'depends': [
+        'mail',
         'mrp',
         'hr',
         'sale',
