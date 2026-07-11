@@ -124,32 +124,10 @@
         </field>
     </record>
 
-    <!-- Commission Scheme Year List View (inline for scheme form) -->
-    <record id="vpa_commission_scheme_year_view_list_inline" model="ir.ui.view">
-        <field name="name">vpa.commission.scheme.year.list.inline</field>
-        <field name="model">vpa.commission.scheme.year</field>
-        <field name="arch" type="xml">
-            <!-- Config-only inline list. Earned/paid/advance/shortfall and the
-                 Close/Bill actions live on the year form and the Commission Centre. -->
-            <list string="Yearly Configuration" editable="bottom">
-                <field name="year"/>
-                <field name="production_rate" string="Rate Override (%)"
-                       readonly="state == 'closed'"/>
-                <field name="effective_rate" string="Rate (%)"/>
-                <field name="currency_id" column_invisible="1"/>
-                <field name="minimum_amount" widget="monetary"
-                       options="{'currency_field': 'currency_id'}"/>
-                <field name="minimum_amount_usd" string="Min. Guarantee (USD)"
-                       readonly="state == 'closed'"/>
-                <field name="expense_account_id" optional="show"/>
-                <field name="state" widget="badge"
-                       decoration-success="state == 'open'"
-                       decoration-danger="state == 'closed'"/>
-                <button name="action_open_year" type="object" string="Open"
-                        icon="fa-arrow-right" title="Open full year record"/>
-            </list>
-        </field>
-    </record>
+    <!-- NOTE: the Yearly Rates list for the scheme form is embedded INLINE in
+         vpa_commission_scheme_views.xml (view_id on a field is not supported
+         by Odoo; a standalone view here gets ignored and the default-view
+         fallback could pick the read-only Commission Centre list). -->
 
     <!-- ============================================================= -->
     <!-- COMMISSION CENTRE: cross-employee year overview               -->
