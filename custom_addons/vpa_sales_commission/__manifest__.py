@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.3',
+    'version': '19.0.2.0.4',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,7 +29,7 @@ Key Features
 
 Version History
 ---------------
-* **19.0.2.0.3** - Editable per-year rate
+* **19.0.2.0.4** - Editable per-year rate
   - The yearly Rate (%) is now a real per-year value: prefilled with the scheme
     default when adding a year, freely editable (e.g. 5% for 2023)
   - Existing years automatically backfilled from their scheme default
@@ -131,5 +131,4 @@ Support: info@vpa.co.tz
     'installable': True,
     'application': False,
     'auto_install': False,
-    'post_migrate': 'odoo.addons.vpa_sales_commission.hooks.migrate_guarantees_to_year_lines',
 }
