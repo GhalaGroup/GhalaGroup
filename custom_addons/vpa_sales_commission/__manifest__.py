@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.5',
+    'version': '19.0.2.0.6',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,11 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.6** - Repair legacy MO commission statuses
+  - MOs carrying obsolete status values ('blocked', 'pending') from early
+    versions displayed an empty Commission badge and matched no filter;
+    statuses are recomputed from the actual data on upgrade
+
 * **19.0.2.0.5** - Not Applicable status refresh
   - Commission by MO: marking/unmarking Not Applicable now refreshes the list
     immediately (the status changed in the database but the screen kept
