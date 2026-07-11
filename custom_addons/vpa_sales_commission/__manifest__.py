@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.0',
+    'version': '19.0.2.0.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.0)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,15 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.1** - Hotfixes for fresh installations
+  - Fix: "Add a line" missing in Yearly Rates (embedded the editable list inline;
+    the previous external view reference was silently ignored by Odoo and the
+    read-only Commission Centre list was rendered instead)
+  - Fix: field tracking removed from scheme year (blocked non-admin managers
+    from editing years due to mail tracking access rights)
+  - Add explicit 'mail' dependency (chatter on commission years)
+  - Distinct internal field labels (removes duplicate-label warnings)
+
 * **19.0.2.0.0** - Major Release: Complete Commission Lifecycle
   - Commission Centre: kanban dashboard per employee-year with drill-down to MOs/SOs
   - Approval workflow: per-line Approve/Reject, bulk confirm, full timestamps & user trail

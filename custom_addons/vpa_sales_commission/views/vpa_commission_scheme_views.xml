@@ -59,8 +59,29 @@
                         Configure the commission rate and minimum guarantee for each year.
                         When generating commission, the rate for the MO's year is used automatically.
                     </p>
-                    <field name="year_ids"
-                           view_id="vpa_sales_commission.vpa_commission_scheme_year_view_list_inline"/>
+                    <!-- List embedded INLINE on purpose: an external view reference
+                         (view_id attr) is not supported by Odoo and the default-view
+                         fallback picked the read-only Commission Centre list, hiding
+                         "Add a line". Embedding guarantees this exact editable list. -->
+                    <field name="year_ids">
+                        <list string="Yearly Configuration" editable="bottom">
+                            <field name="year"/>
+                            <field name="production_rate" string="Rate Override (%)"
+                                   readonly="state == 'closed'"/>
+                            <field name="effective_rate" string="Rate (%)"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="minimum_amount" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="minimum_amount_usd" string="Min. Guarantee (USD)"
+                                   readonly="state == 'closed'"/>
+                            <field name="expense_account_id" optional="show"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'open'"
+                                   decoration-danger="state == 'closed'"/>
+                            <button name="action_open_year" type="object" string="Open"
+                                    icon="fa-arrow-right" title="Open full year record"/>
+                        </list>
+                    </field>
                 </sheet>
             </form>
         </field>
