@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.0.4',
+    'version': '19.0.2.0.5',
     'category': 'Manufacturing/Commission',
     'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
     'description': """
@@ -29,6 +29,11 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.0.5** - Not Applicable status refresh
+  - Commission by MO: marking/unmarking Not Applicable now refreshes the list
+    immediately (the status changed in the database but the screen kept
+    showing the old value until a manual reload)
+
 * **19.0.2.0.4** - Editable per-year rate
   - The yearly Rate (%) is now a real per-year value: prefilled with the scheme
     default when adding a year, freely editable (e.g. 5% for 2023)

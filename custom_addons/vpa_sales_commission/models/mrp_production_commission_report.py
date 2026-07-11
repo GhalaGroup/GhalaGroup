@@ -160,6 +160,8 @@ class MrpProductionCommissionReport(models.Model):
                 'message': '%d MO(s) marked as Not Applicable.' % len(productions),
                 'type': 'success',
                 'sticky': False,
+                # refresh the list so the new status shows immediately
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
             },
         }
 
@@ -175,5 +177,6 @@ class MrpProductionCommissionReport(models.Model):
                 'message': '%d MO(s) re-enabled for commission.' % len(productions),
                 'type': 'success',
                 'sticky': False,
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
             },
         }
