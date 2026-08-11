@@ -79,7 +79,9 @@ class AccountPayment(models.Model):
     @api.constrains('commission_year_id')
     def _check_commission_year_vs_allocations(self):
         for pay in self:
-            if pay.commission_year_id and pay.commission_allocation_ids:
+            # sudo: constraints fire on every create/write of a payment,
+            # including by users with no commission access.
+            if pay.commission_year_id and pay.sudo().commission_allocation_ids:
                 raise ValidationError(_(
                     'Payment %(payment)s has commission allocations. A payment '
                     'is either fully linked to one year (Commission Year) or '
