@@ -40,7 +40,11 @@ class VpaCommissionApplyPaymentWizard(models.TransientModel):
     )
     payment_partner_id = fields.Many2one(
         related='payment_id.partner_id', string='Paid To')
-    payment_currency_id = fields.Many2one(related='payment_id.currency_id')
+    # Explicit label: without it this inherits "Currency" from the related
+    # field and collides with currency_id above, which Odoo warns about and
+    # which makes the two indistinguishable in filters and exports.
+    payment_currency_id = fields.Many2one(
+        related='payment_id.currency_id', string='Payment Currency')
     payment_amount = fields.Monetary(
         related='payment_id.amount',
         string='Payment Total',
