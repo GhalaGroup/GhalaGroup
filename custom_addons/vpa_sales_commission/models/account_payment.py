@@ -52,7 +52,13 @@ class AccountPayment(models.Model):
     def _compute_commission_employee_partners(self):
         # Employees that have a commission scheme (any year) in the allowed
         # companies, resolved to their work-contact partner.
-        schemes = self.env['vpa.commission.scheme'].search([])
+        # sudo: this field is injected (invisible) into the STANDARD payment
+        # form, so it computes for every user who opens any payment. Only
+        # commission managers may read vpa.commission.scheme, so an unprivileged
+        # read raises AccessError and blocks the payment form entirely. Reading
+        # with sudo exposes nothing but which partners are commission employees,
+        # and only to build the vendor domain on the commission payment form.
+        schemes = self.env['vpa.commission.scheme'].sudo().search([])
         partners = schemes.employee_id.work_contact_id
         for pay in self:
             pay.commission_employee_partner_ids = partners
@@ -60,7 +66,9 @@ class AccountPayment(models.Model):
     @api.depends('amount', 'commission_allocation_ids.amount', 'commission_year_id')
     def _compute_commission_allocation(self):
         for pay in self:
-            allocated = sum(pay.commission_allocation_ids.mapped('amount'))
+            # sudo: computed on every payment form load, including for users
+            # with no commission access (see _compute_commission_employee_partners).
+            allocated = sum(pay.sudo().commission_allocation_ids.mapped('amount'))
             pay.commission_allocated_amount = allocated
             # A full-year link consumes the whole payment.
             if pay.commission_year_id:
@@ -111,7 +119,8 @@ class AccountPayment(models.Model):
         employee's work-contact (covers on-account payments awaiting
         allocation)."""
         self.ensure_one()
-        if self.commission_year_id or self.commission_allocation_ids:
+        # sudo on the allocations: this runs for every user opening a payment
+        if self.commission_year_id or self.sudo().commission_allocation_ids:
             return True
         return bool(
             self.payment_type == 'outbound'
