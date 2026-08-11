@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.1.1',
+    'version': '19.0.2.1.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.1.1)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.1.2)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,13 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.1.2** - Fix: payment form blocked for users without commission access
+  - The readonly modifier on the standard payment_type field named
+    commission_allocation_ids. The web client fetches whatever a modifier
+    references, so every user without commission rights hit AccessError when
+    opening or saving ANY payment - no server-side sudo could prevent it,
+    because the client was doing the read. Test a sudo-computed boolean instead
+
 * **19.0.2.1.1** - Distinct label for Payment Currency
   - payment_currency_id inherited "Currency" from its related field and
     collided with currency_id on the Apply Payment wizard
