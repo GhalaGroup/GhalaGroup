@@ -6,6 +6,13 @@
 # ============================================
 
 # ============================================
+# OTHER CLIENTS' MODULES (Never commit here)
+# ============================================
+# This repo serves the UDesign database of Ghala only.
+# AG Energies modules belong in Clients/AG, not here.
+/custom_addons/AG/
+
+# ============================================
 # DATA FILES (Never commit to Odoo.sh)
 # ============================================
 

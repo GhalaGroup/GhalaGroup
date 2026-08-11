@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!-- License OPL-1 - See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <record id="commission_apply_payment_wizard_form" model="ir.ui.view">
+        <field name="name">vpa.commission.apply.payment.wizard.form</field>
+        <field name="model">vpa.commission.apply.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Apply On-Account Payment">
+                <sheet>
+                    <group>
+                        <group string="Commission Year">
+                            <field name="scheme_year_id"/>
+                            <field name="employee_id"/>
+                            <field name="outstanding_cash" widget="monetary"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Payment on Account">
+                            <field name="payment_id" options="{'no_create': True}"/>
+                            <field name="payment_partner_id"/>
+                            <field name="payment_currency_id" invisible="1"/>
+                            <field name="payment_amount" widget="monetary"/>
+                            <field name="unallocated_amount" widget="monetary"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="amount_to_apply" widget="monetary"
+                                   class="oe_inline fw-bold"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status">
+                        Only part of the payment can be applied — the remainder stays
+                        <strong>on account</strong> and can be applied to another year later.
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_apply" string="Apply" type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
