@@ -130,6 +130,26 @@ class VpaCommissionLine(models.Model):
         store=True,
         readonly=False,
     )
+    product_qty = fields.Float(
+        string='Quantity',
+        related='production_id.product_qty',
+        store=True,
+        help='Quantity produced by the linked Manufacturing Order.',
+    )
+    product_uom_id = fields.Many2one(
+        'uom.uom',
+        string='Unit of Measure',
+        related='production_id.product_uom_id',
+        store=True,
+    )
+    commission_per_item = fields.Float(
+        string='Commission Per Item',
+        digits=(12, 2),
+        compute='_compute_commission_per_item',
+        store=True,
+        help='Commission Amount divided by the quantity produced — the '
+             'commission carried by each unit of the finished item.',
+    )
     partner_id = fields.Many2one(
         'res.partner',
         string='Client',
@@ -323,6 +343,15 @@ class VpaCommissionLine(models.Model):
             else:
                 line.amount = line.base_amount * line.rate / 100
 
+    @api.depends('amount', 'product_qty')
+    def _compute_commission_per_item(self):
+        for line in self:
+            if line.product_qty:
+                line.commission_per_item = line.amount / line.product_qty
+            else:
+                # Manual/sales lines have no production order, so no per-unit split
+                line.commission_per_item = 0.0
+
     @api.depends('amount', 'state')
     def _compute_amount_paid(self):
         for line in self:
@@ -460,26 +489,52 @@ class VpaCommissionLine(models.Model):
 
     @api.model
     def action_open_commission_payments(self):
-        """Open all commission payments: line-linked, year-linked and bill-matched."""
+        """Open all commission payments: line-linked, year-linked, allocated,
+        bill-matched, AND on-account payments made to a commission employee
+        (so payments created here stay visible until they are allocated)."""
         line_payment_ids = self.search([
             ('payment_id', '!=', False),
         ]).mapped('payment_id').ids
         year_payments = self.env['account.payment'].search([
             ('commission_year_id', '!=', False),
         ])
+        alloc_payments = self.env['vpa.commission.payment.allocation'].search(
+            []).mapped('payment_id')
         bill_payments = self.env['account.move'].search([
             ('commission_year_id', '!=', False),
         ]).mapped('matched_payment_ids')
-        payment_ids = list(set(line_payment_ids) | set(year_payments.ids) | set(bill_payments.ids))
+        # On-account payments to commission employees (unlinked, still to be
+        # allocated). Resolve commission employees -> work-contact partners.
+        employee_partners = self.env['vpa.commission.scheme'].search(
+            []).employee_id.work_contact_id
+        onaccount_payments = self.env['account.payment']
+        if employee_partners:
+            onaccount_payments = self.env['account.payment'].search([
+                ('payment_type', '=', 'outbound'),
+                ('partner_id', 'in', employee_partners.ids),
+                ('state', 'in', ('in_process', 'paid')),
+            ])
+        payment_ids = list(
+            set(line_payment_ids) | set(year_payments.ids)
+            | set(alloc_payments.ids) | set(bill_payments.ids)
+            | set(onaccount_payments.ids))
         list_view = self.env.ref('vpa_sales_commission.view_account_payment_list_commission')
+        form_view = self.env.ref('vpa_sales_commission.view_account_payment_form_commission_employee')
         return {
             'name': _('Commission Payments'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
             'view_mode': 'list,form',
-            'views': [(list_view.id, 'list'), (False, 'form')],
+            'views': [(list_view.id, 'list'), (form_view.id, 'form')],
             'domain': [('id', 'in', payment_ids)],
-            'context': {'create': False},
+            'context': {
+                # Native "New" on this list creates a pre-typed outbound payment
+                # on account (employee-filtered form, Send/Receive locked). The
+                # form stacks under the list, keeping the standard breadcrumb.
+                'default_payment_type': 'outbound',
+                'default_partner_type': 'supplier',
+                'commission_payment_lock_type': True,
+            },
         }
 
 
@@ -518,3 +573,17 @@ class VpaCommissionLineMaterial(models.Model):
     included = fields.Boolean(
         string='Included',
     )
+    commissionable_amount = fields.Float(
+        string='Commissionable',
+        digits=(12, 2),
+        compute='_compute_commissionable_amount',
+        store=True,
+        help='Total Cost when the line is included, otherwise zero. Summing '
+             'this column gives the base amount commission is charged on — '
+             'a plain sum of Total Cost would also count excluded lines.',
+    )
+
+    @api.depends('included', 'amount')
+    def _compute_commissionable_amount(self):
+        for line in self:
+            line.commissionable_amount = line.amount if line.included else 0.0

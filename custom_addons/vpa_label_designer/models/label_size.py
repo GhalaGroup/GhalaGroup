@@ -34,10 +34,8 @@ class LabelSize(models.Model):
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('positive_width', 'CHECK(width_mm > 0)', 'Width must be positive.'),
-        ('positive_height', 'CHECK(height_mm > 0)', 'Height must be positive.'),
-    ]
+    _positive_width = models.Constraint('CHECK(width_mm > 0)', 'Width must be positive.')
+    _positive_height = models.Constraint('CHECK(height_mm > 0)', 'Height must be positive.')
 
     @api.depends('width_mm', 'height_mm', 'dpi')
     def _compute_dots(self):

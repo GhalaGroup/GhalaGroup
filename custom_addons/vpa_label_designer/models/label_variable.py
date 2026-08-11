@@ -36,9 +36,7 @@ class LabelVariable(models.Model):
     company_id = fields.Many2one('res.company', string='Company',
                                  default=lambda self: self.env.company)
 
-    _sql_constraints = [
-        ('unique_name', 'UNIQUE(name)', 'Variable name must be unique.'),
-    ]
+    _unique_name = models.Constraint('UNIQUE(name)', 'Variable name must be unique.')
 
     def name_get(self):
         result = []

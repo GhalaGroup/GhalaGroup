@@ -13,7 +13,7 @@
                   decoration-success="commission_status == 'paid'">
                 <field name="name" string="MO Reference"/>
                 <field name="product_id" optional="show"/>
-                <field name="product_qty" optional="hide"/>
+                <field name="product_qty" optional="show"/>
                 <field name="date_finished"/>
                 <field name="state" optional="hide"/>
                 <field name="commission_status" widget="badge"
@@ -25,6 +25,8 @@
                        options="{'currency_field': 'currency_id'}" optional="hide"/>
                 <field name="total_commission_amount" widget="monetary"
                        options="{'currency_field': 'currency_id'}"/>
+                <field name="commission_per_item" string="Per Item" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
                 <field name="pending_commission_amount" widget="monetary"
                        options="{'currency_field': 'currency_id'}" optional="hide"/>
                 <field name="confirmed_commission_amount" widget="monetary"
@@ -61,6 +63,9 @@
                 <field name="date_month" type="row" interval="month"/>
                 <field name="commission_status" type="col"/>
                 <field name="total_commission_amount" type="measure"/>
+                <!-- Per-unit measure: the field aggregates as avg, since summing
+                     per-unit figures across MOs would be meaningless. -->
+                <field name="commission_per_item" type="measure"/>
             </pivot>
         </field>
     </record>

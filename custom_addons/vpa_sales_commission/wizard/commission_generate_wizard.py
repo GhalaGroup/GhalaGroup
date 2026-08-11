@@ -77,6 +77,13 @@ class CommissionGenerateWizard(models.TransientModel):
         help='Tick to enter the commission manually (total, per-employee amount '
              'or rate). Untick to reset everything to the standard year rates.',
     )
+    commission_per_item = fields.Float(
+        string='Commission Per Item',
+        compute='_compute_commission_per_item',
+        digits=(12, 2),
+        help='Total commission divided by the quantity produced — the '
+             'commission carried by each unit of the finished item.',
+    )
     total_extra_amount = fields.Float(
         string='Extra vs Standard',
         compute='_compute_total_extra_amount',
@@ -136,6 +143,16 @@ class CommissionGenerateWizard(models.TransientModel):
             wizard.total_commission_amount = sum(
                 line.estimated_amount for line in wizard.scheme_line_ids if line.selected
             )
+
+    @api.depends('total_commission_amount', 'product_qty')
+    def _compute_commission_per_item(self):
+        for wizard in self:
+            if wizard.product_qty:
+                wizard.commission_per_item = (
+                    wizard.total_commission_amount / wizard.product_qty
+                )
+            else:
+                wizard.commission_per_item = 0.0
 
     @api.depends('scheme_line_ids.selected', 'scheme_line_ids.extra_amount')
     def _compute_total_extra_amount(self):
@@ -292,6 +309,20 @@ class CommissionGenerateWizardLine(models.TransientModel):
         string='Include',
         default=True,
     )
+    commissionable_amount = fields.Float(
+        string='Commissionable',
+        digits=(12, 2),
+        compute='_compute_commissionable_amount',
+        store=True,
+        help='Total Cost when the line is included, otherwise zero. Summing '
+             'this column gives the base amount commission is charged on — '
+             'a plain sum of Total Cost would also count excluded lines.',
+    )
+
+    @api.depends('included', 'amount')
+    def _compute_commissionable_amount(self):
+        for line in self:
+            line.commissionable_amount = line.amount if line.included else 0.0
 
 
 class CommissionGenerateWizardScheme(models.TransientModel):

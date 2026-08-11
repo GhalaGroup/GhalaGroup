@@ -11,3 +11,4 @@ from . import manual_commission_wizard
 from . import adjust_materials_wizard
 from . import commission_change_date_wizard
 from . import commission_pay_year_wizard
+from . import commission_apply_payment_wizard

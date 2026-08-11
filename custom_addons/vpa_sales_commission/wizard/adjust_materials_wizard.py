@@ -134,3 +134,17 @@ class AdjustMaterialsWizardLine(models.TransientModel):
     included = fields.Boolean(
         string='Included',
     )
+    commissionable_amount = fields.Float(
+        string='Commissionable',
+        digits=(12, 2),
+        compute='_compute_commissionable_amount',
+        store=True,
+        help='Total Cost when the line is included, otherwise zero. Summing '
+             'this column gives the base amount commission is charged on — '
+             'a plain sum of Total Cost would also count excluded lines.',
+    )
+
+    @api.depends('included', 'amount')
+    def _compute_commissionable_amount(self):
+        for line in self:
+            line.commissionable_amount = line.amount if line.included else 0.0

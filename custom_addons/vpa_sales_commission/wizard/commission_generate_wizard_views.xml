@@ -25,19 +25,37 @@
                     </group>
                 </group>
                 <group>
+                    <!-- Left: what the commission is calculated FROM.
+                         Right: what is actually paid. Splitting them fills the
+                         right half of the dialog and keeps "Per Item" directly
+                         under the total it derives from. -->
                     <group>
                         <field name="total_base_amount" widget="monetary"
                                options="{'currency_field': 'currency_id'}"/>
                         <label for="cost_per_unit"/>
-                        <div class="o_row">
-                            <field name="cost_per_unit" widget="monetary" class="oe_inline"
+                        <!-- flex-grow-0/w-auto keep the unit next to the number
+                             instead of letting the value field stretch -->
+                        <div class="d-flex align-items-center gap-1">
+                            <field name="cost_per_unit" widget="monetary" class="oe_inline flex-grow-0 w-auto"
                                    options="{'currency_field': 'currency_id'}"/>
-                            <span class="oe_inline">/ <field name="product_uom_id" class="oe_inline" readonly="1" options="{'no_open': True}"/></span>
+                            <span class="text-muted">/</span>
+                            <field name="product_uom_id" class="oe_inline flex-grow-0 w-auto" readonly="1"
+                                   options="{'no_open': True}"/>
                         </div>
+                    </group>
+                    <group>
                         <field name="manual_commission"/>
                         <field name="total_commission_amount" widget="monetary"
                                options="{'currency_field': 'currency_id'}"
                                readonly="not manual_commission"/>
+                        <label for="commission_per_item" string="Per Item"/>
+                        <div class="d-flex align-items-center gap-1">
+                            <field name="commission_per_item" widget="monetary" class="oe_inline flex-grow-0 w-auto"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <span class="text-muted">/</span>
+                            <field name="product_uom_id" class="oe_inline flex-grow-0 w-auto" readonly="1"
+                                   options="{'no_open': True}"/>
+                        </div>
                         <field name="total_extra_amount" widget="monetary"
                                options="{'currency_field': 'currency_id'}"
                                invisible="total_extra_amount == 0"
@@ -110,12 +128,16 @@
                 </div>
                 <separator string="Raw Materials"/>
                 <field name="material_line_ids">
-                    <list editable="bottom">
+                    <!-- Two totals: "Total Cost" sums every line, "Commissionable"
+                         sums only included ones and equals Total Base Amount.
+                         Odoo's sum= cannot filter, hence the second column. -->
+                    <list editable="bottom" decoration-muted="not included">
                         <field name="included" string="Include"/>
                         <field name="product_id"/>
                         <field name="quantity"/>
                         <field name="unit_cost"/>
-                        <field name="amount" sum="Total"/>
+                        <field name="amount" sum="Total Cost"/>
+                        <field name="commissionable_amount" sum="Commissionable"/>
                     </list>
                 </field>
                 <footer>

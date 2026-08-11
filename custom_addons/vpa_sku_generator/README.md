@@ -4,7 +4,7 @@
 
 Version: 19.0.1.0.0 (v1.0)
 License: OPL-1 (Odoo Proprietary License)
-Copyright © 2025 VPA Software Limited
+Copyright © 2025 VPA Solutions Limited
 Price: $79.99 USD
 
 ## Overview
@@ -181,7 +181,7 @@ A: Yes, each company has separate sequences and settings.
 This is commercial software licensed under OPL-1.
 
 **License:** OPL-1 (Odoo Proprietary License v1.0)
-**Copyright:** © 2025 VPA Software Limited
+**Copyright:** © 2025 VPA Solutions Limited
 **Version:** 19.0.1.0.0
 **Compatible with:** Odoo 19.0
 
@@ -197,4 +197,4 @@ See LICENSE file for full terms and conditions.
 ---
 
 **Product Sequence Configuration** - Professional SKU Management
-© 2025 VPA Software Limited - All Rights Reserved
+© 2025 VPA Solutions Limited - All Rights Reserved

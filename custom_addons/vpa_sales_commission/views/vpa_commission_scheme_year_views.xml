@@ -32,6 +32,10 @@
                             string="Register Payment" class="btn-primary"
                             invisible="state == 'closed'"
                             groups="vpa_sales_commission.group_commission_manager"/>
+                    <button name="action_apply_payment" type="object"
+                            string="Apply On-Account Payment" class="btn-secondary"
+                            invisible="state == 'closed'"
+                            groups="vpa_sales_commission.group_commission_manager"/>
                     <field name="pending_count" invisible="1"/>
                     <field name="outstanding_cash" invisible="1"/>
                     <field name="excess_to_bill" invisible="1"/>

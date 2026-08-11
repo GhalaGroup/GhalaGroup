@@ -149,6 +149,7 @@ Support: info@vpa.co.tz
         'wizard/commission_change_date_wizard_views.xml',
         'report/commission_payment_voucher.xml',
         'wizard/commission_pay_year_wizard_views.xml',
+        'wizard/commission_apply_payment_wizard_views.xml',
         'report/commission_statement_report.xml',
         'report/commission_statement_template.xml',
         'views/vpa_commission_scheme_year_views.xml',
