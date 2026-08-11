@@ -150,6 +150,7 @@
                 <field name="pending_count"/>
                 <field name="total_pending"/>
                 <field name="confirmed_earned"/>
+                <field name="amount_due_year"/>
                 <field name="excess_to_bill"/>
                 <field name="currency_id"/>
                 <templates>
@@ -164,50 +165,107 @@
                             <div class="text-muted mb-2">
                                 <t t-esc="record.year.value"/> · Rate <field name="effective_rate" class="d-inline"/>%
                             </div>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <span class="text-muted d-block small">Guarantee</span>
-                                    <field name="minimum_amount" widget="monetary"/>
+                            <!-- The card reads as two plain sums a non-accountant
+                                 can follow: what he has earned, then what we owe
+                                 and what is left to pay. Every jargon term the old
+                                 layout relied on (Confirmed / Due / Outstanding)
+                                 is replaced by the words a user would actually use,
+                                 and the rule that picks the payable amount is
+                                 spelled out on the card instead of being implied. -->
+
+                            <!-- Figures use tabular-nums so decimal points line up
+                                 down the card; the two panels separate "what he
+                                 earned" from "what we pay", which are different
+                                 bases and were previously interleaved. -->
+
+                            <!-- 1. WHAT HE EARNED -->
+                            <div class="mt-2 px-2 py-2 rounded"
+                                 style="background:rgba(128,128,128,.07); font-variant-numeric:tabular-nums;">
+                                <div class="text-muted fw-bolder mb-1"
+                                     style="font-size:.6rem; letter-spacing:.09em;">WHAT HE EARNED</div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="small text-muted">Approved</span>
+                                    <field name="confirmed_earned" widget="monetary"/>
                                 </div>
-                                <div class="col-6">
-                                    <span class="text-muted d-block small">Earned</span>
-                                    <field name="total_earned" widget="monetary"/>
+                                <!-- t-attf-class, not t-att-class: the latter would
+                                     REPLACE the static class and strip the flex
+                                     layout, collapsing the row. -->
+                                <div t-attf-class="d-flex justify-content-between align-items-baseline #{record.pending_count.raw_value ? 'text-warning' : 'text-muted'}">
+                                    <span class="small">Not approved yet
+                                        <span class="badge rounded-pill bg-warning text-dark"
+                                              style="font-size:.6rem;"
+                                              t-if="record.pending_count.raw_value"><t t-esc="record.pending_count.value"/></span>
+                                    </span>
+                                    <field name="total_pending" widget="monetary"/>
                                 </div>
-                                <div class="col-6">
-                                    <span class="text-muted d-block small">Paid</span>
-                                    <field name="amount_paid_cash" widget="monetary"/>
-                                </div>
-                                <div class="col-6">
-                                    <span class="text-muted d-block small">Outstanding</span>
-                                    <field name="outstanding_cash" widget="monetary"/>
+                                <div class="d-flex justify-content-between align-items-baseline border-top mt-1 pt-1">
+                                    <span class="small fw-bold">Total earned</span>
+                                    <field name="total_earned" widget="monetary" class="fw-bold"/>
                                 </div>
                             </div>
-                            <!-- Approval status: click through to confirm in the table -->
+
+                            <!-- 2. WHAT WE PAY HIM -->
+                            <div class="mt-2 px-2 py-2 rounded"
+                                 style="background:rgba(128,128,128,.07); font-variant-numeric:tabular-nums;">
+                                <div class="text-muted fw-bolder mb-1"
+                                     style="font-size:.6rem; letter-spacing:.09em;">WHAT WE PAY HIM</div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="small text-muted">Minimum guarantee</span>
+                                    <field name="minimum_amount" widget="monetary" class="text-muted"/>
+                                </div>
+                                <!-- A one-word tag names which rule set the amount.
+                                     The old sentence restated numbers already on
+                                     the card and wrapped to two lines, which is
+                                     what made the cards uneven. -->
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="small fw-bold">We owe him
+                                        <span class="badge rounded-pill bg-secondary bg-opacity-25 text-muted fw-normal ms-1"
+                                              style="font-size:.6rem;">
+                                            <t t-if="record.minimum_amount.raw_value &gt; 0 and record.confirmed_earned.raw_value &lt; record.minimum_amount.raw_value">guarantee</t>
+                                            <t t-else="">approved</t>
+                                        </span>
+                                    </span>
+                                    <field name="amount_due_year" widget="monetary" class="fw-bold"/>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="small text-muted">Already paid</span>
+                                    <field name="amount_paid_cash" widget="monetary" class="text-muted"/>
+                                </div>
+                                <!-- How far the payments have got toward what we owe -->
+                                <div class="progress mt-2 mb-2" style="height:5px;">
+                                    <div class="progress-bar bg-success"
+                                         t-attf-style="width: #{record.amount_due_year.raw_value ? Math.min(100, Math.round(record.amount_paid_cash.raw_value / record.amount_due_year.raw_value * 100)) : 0}%"/>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <span class="fw-bolder">Still to pay</span>
+                                    <field name="outstanding_cash" widget="monetary"
+                                           t-attf-class="fw-bolder fs-5 #{record.outstanding_cash.raw_value &gt; 0 ? 'text-danger' : 'text-success'}"/>
+                                </div>
+                            </div>
+
+                            <!-- Always rendered (empty when nothing is pending) so
+                                 every card keeps the same height in the column. -->
+                            <div class="text-muted mt-2"
+                                 style="font-size:.68rem; line-height:1.25; min-height:1.7rem;">
+                                <t t-if="record.pending_count.raw_value">
+                                    <i class="fa fa-info-circle me-1"/>Approving the remaining
+                                    <t t-esc="record.pending_count.value"/> would raise what we owe him.
+                                </t>
+                                <t t-else="">
+                                    <i class="fa fa-check-circle me-1 text-success"/>Everything is approved.
+                                </t>
+                            </div>
+
                             <div class="d-flex gap-2 w-100 mt-2">
                                 <button type="object" name="action_view_confirmed_lines"
                                         class="btn btn-sm btn-outline-success flex-fill">
-                                    <i class="fa fa-check"/> Confirmed:
-                                    <field name="confirmed_earned" widget="monetary" class="d-inline"/>
+                                    <i class="fa fa-check me-1"/>Approved
                                 </button>
                                 <button type="object" name="action_view_pending_lines"
                                         t-attf-class="btn btn-sm flex-fill #{record.pending_count.raw_value ? 'btn-warning' : 'btn-outline-secondary'}">
-                                    <i class="fa fa-hourglass-half"/> To Approve:
+                                    <i class="fa fa-hourglass-half me-1"/>Approve
                                     <t t-esc="record.pending_count.value"/>
-                                    (<field name="total_pending" widget="monetary" class="d-inline"/>)
                                 </button>
-                            </div>
-                            <!-- Status line always rendered so every card has the same height -->
-                            <div class="small mt-2">
-                                <span t-if="record.shortfall.raw_value &gt; 0" class="text-danger">
-                                    <i class="fa fa-exclamation-triangle"/> Below guarantee by
-                                    <field name="shortfall" widget="monetary" class="d-inline"/>
-                                </span>
-                                <span t-elif="record.minimum_amount.raw_value &gt; 0" class="text-success">
-                                    <i class="fa fa-check-circle"/> Guarantee met
-                                </span>
-                                <span t-else="" class="text-muted">
-                                    <i class="fa fa-minus-circle"/> No guarantee set
-                                </span>
                             </div>
                             <footer class="pt-2 mt-2 border-top d-block">
                                 <div class="d-flex gap-2 w-100 mb-1">

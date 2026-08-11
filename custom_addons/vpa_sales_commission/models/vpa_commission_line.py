@@ -263,7 +263,43 @@ class VpaCommissionLine(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('vpa.commission.line') or _('New')
-        return super().create(vals_list)
+        lines = super().create(vals_list)
+        lines._check_year_not_closed()
+        return lines
+
+    def write(self, vals):
+        res = super().write(vals)
+        # Only a change of date or scheme can move a line into another year.
+        # Closing itself writes year_locked/state/paid_date, which must not trip
+        # this guard, so the check is deliberately narrow.
+        if 'date' in vals or 'scheme_id' in vals:
+            self._check_year_not_closed()
+        return res
+
+    def _check_year_not_closed(self):
+        """Refuse commission that lands in a year already closed.
+
+        year_locked only protects the lines that existed when the year was
+        closed; without this, commission generated later (an MO not yet
+        processed, a re-dated line) would silently land in a reconciled year
+        and move its totals.
+        """
+        Year = self.env['vpa.commission.scheme.year']
+        for line in self:
+            if not line.date or not line.scheme_id:
+                continue
+            year = Year.search([
+                ('scheme_id', '=', line.scheme_id.id),
+                ('year', '=', str(line.date.year)),
+                ('state', '=', 'closed'),
+            ], limit=1)
+            if year:
+                raise UserError(_(
+                    'The %(year)s commission year for %(employee)s is closed. '
+                    'Reopen it before adding or moving commission into it.',
+                    year=year.year,
+                    employee=line.employee_id.display_name or _('this employee'),
+                ))
 
     @api.depends('production_id', 'production_id.sale_line_id.order_id.picking_ids.state',
                  'production_id.origin')
