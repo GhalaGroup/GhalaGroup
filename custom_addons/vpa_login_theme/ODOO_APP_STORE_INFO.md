@@ -175,7 +175,7 @@ Secondary Keywords:
 ## 💬 Support Information
 
 ### Support Channels
-- **Email:** support@vpa-solutions.com
+- **Email:** info@vpa.co.tz
 - **Response Time:** Within 24 hours
 - **Documentation:** Included with module
 - **Updates:** Free forever
@@ -258,8 +258,8 @@ Before submitting to Odoo App Store:
 ## 📞 Contact Information
 
 **Developer:** VPA - Victor Professional Applications
-**Email:** support@vpa-solutions.com
-**Website:** https://www.vpa-solutions.com
+**Email:** info@vpa.co.tz
+**Website:** https://www.vpa.co.tz
 **GitHub:** (Optional - for open source community)
 
 ---

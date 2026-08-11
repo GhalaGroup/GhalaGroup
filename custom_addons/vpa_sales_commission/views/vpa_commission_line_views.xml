@@ -50,9 +50,29 @@
                         <group>
                             <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="type != 'manual'"/>
                             <field name="rate" readonly="type != 'manual'"/>
+                            <label for="product_qty" invisible="not product_qty"/>
+                            <!-- flex-grow-0/w-auto stop the value field stretching
+                                 and shoving the unit to the far right of the form -->
+                            <div class="d-flex align-items-center gap-1" invisible="not product_qty">
+                                <field name="product_qty" class="oe_inline flex-grow-0 w-auto" readonly="1"/>
+                                <field name="product_uom_id" class="oe_inline flex-grow-0 w-auto" readonly="1"
+                                       options="{'no_open': True}"/>
+                            </div>
                         </group>
                         <group>
                             <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <!-- Shows the total as a per-unit figure so the amount
+                                 reads as "per item x quantity", not a bare total.
+                                 Hidden on manual/sales lines, which have no MO qty. -->
+                            <label for="commission_per_item" string="Per Item"
+                                   invisible="not product_qty"/>
+                            <div class="d-flex align-items-center gap-1" invisible="not product_qty">
+                                <field name="commission_per_item" widget="monetary" class="oe_inline flex-grow-0 w-auto"
+                                       options="{'currency_field': 'currency_id'}"/>
+                                <span class="text-muted">/</span>
+                                <field name="product_uom_id" class="oe_inline flex-grow-0 w-auto" readonly="1"
+                                       options="{'no_open': True}"/>
+                            </div>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
@@ -88,12 +108,16 @@
                                         groups="vpa_sales_commission.group_commission_manager"/>
                             </div>
                             <field name="material_line_ids" readonly="1">
-                                <list>
+                                <!-- "Commissionable" sums only included lines and
+                                     ties back to Base Amount above; "Total Cost"
+                                     is every material regardless of inclusion. -->
+                                <list decoration-muted="not included">
                                     <field name="included"/>
                                     <field name="product_id"/>
                                     <field name="quantity"/>
                                     <field name="unit_cost"/>
-                                    <field name="amount" sum="Total"/>
+                                    <field name="amount" sum="Total Cost"/>
+                                    <field name="commissionable_amount" sum="Commissionable"/>
                                 </list>
                             </field>
                         </page>

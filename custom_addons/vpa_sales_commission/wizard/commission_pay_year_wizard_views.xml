@@ -67,7 +67,11 @@
         <field name="model">account.payment</field>
         <field name="priority">100</field>
         <field name="arch" type="xml">
-            <list string="Commission Payments" create="false">
+            <!-- Native "New" is used (create allowed). The opening action pins
+                 the commission employee form + context defaults, so New creates
+                 a pre-typed outbound payment on account AND keeps the standard
+                 "Commission Payments" breadcrumb. -->
+            <list string="Commission Payments">
                 <field name="date"/>
                 <field name="name"/>
                 <field name="commission_year_id" string="Commission Year"/>
@@ -91,15 +95,84 @@
         <field name="inherit_id" ref="account.view_account_payment_form"/>
         <field name="arch" type="xml">
             <field name="memo" position="after">
+                <!-- "Commission Year" links the WHOLE payment to one year. Hidden
+                     on the on-account flow (opened from "New Payment on Account"),
+                     which is meant to be split via the allocations table below —
+                     unless a year is already set. -->
                 <field name="commission_year_id"
-                       invisible="payment_type != 'outbound'"
+                       invisible="payment_type != 'outbound' or (context.get('commission_payment_lock_type') and not commission_year_id)"
                        groups="vpa_sales_commission.group_commission_manager"/>
             </field>
+            <!-- Commission payments are always outbound: lock Send/Receive
+                 when the form was opened from the commission "New Payment"
+                 button, or once the payment is tied to a commission year. -->
+            <field name="payment_type" position="attributes">
+                <attribute name="readonly">context.get('commission_payment_lock_type') or commission_year_id or commission_allocation_ids</attribute>
+            </field>
+            <!-- On the commission flow (opened from the commission "New Payment"
+                 button), restrict the Vendor field to work-contacts of employees
+                 who have a commission scheme. The domain only bites when the
+                 lock-context flag is set, so normal payment forms are untouched. -->
+            <xpath expr="//field[@name='partner_id'][@invisible=&quot;partner_type != 'supplier'&quot;]" position="attributes">
+                <attribute name="domain">context.get('commission_payment_lock_type') and [('id', 'in', commission_employee_partner_ids)] or []</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_id'][@invisible=&quot;partner_type != 'supplier'&quot;]" position="before">
+                <field name="commission_employee_partner_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <!-- Split a payment on account across commission years.
+                     Subview embedded INLINE (view_id on x2many is not supported). -->
+                <group string="Commission Allocations"
+                       invisible="payment_type != 'outbound' or commission_year_id"
+                       groups="vpa_sales_commission.group_commission_manager">
+                    <group>
+                        <field name="commission_allocated_amount" widget="monetary"/>
+                        <field name="commission_unallocated_amount" widget="monetary"
+                               class="fw-bold"/>
+                    </group>
+                    <field name="commission_allocation_ids" nolabel="1" colspan="2">
+                        <list editable="bottom">
+                            <field name="scheme_year_id"/>
+                            <field name="employee_id"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="amount" widget="monetary" sum="Total"/>
+                        </list>
+                    </field>
+                </group>
+            </xpath>
             <xpath expr="//header" position="inside">
                 <button name="%(action_report_commission_payment_voucher)d"
                         string="Print Voucher" type="action" icon="fa-print"
-                        invisible="not commission_year_id"
+                        invisible="not commission_is_payment"
                         groups="vpa_sales_commission.group_commission_manager"/>
+                <!-- Mirror the payment into the journal's transaction list so it
+                     can be reconciled — same as the Pay-Year wizard does. Shows
+                     for cash-journal commission payments without a transaction. -->
+                <button name="action_add_journal_transaction" type="object"
+                        string="Add to Journal Transactions" icon="fa-exchange"
+                        invisible="not commission_show_add_transaction"
+                        groups="vpa_sales_commission.group_commission_manager"/>
+                <field name="commission_is_payment" invisible="1"/>
+                <field name="commission_show_add_transaction" invisible="1"/>
+                <field name="commission_has_journal_transaction" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Primary form used ONLY by the commission "New Payment on Account"
+         action: relabels the supplier partner field to "Employee". Normal
+         payment forms keep saying "Vendor". The extension view above still
+         applies (commission year, allocations, lock), because extensions apply
+         to every view derived from the base form, including this primary one. -->
+    <record id="view_account_payment_form_commission_employee" model="ir.ui.view">
+        <field name="name">account.payment.form.commission.employee</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="mode">primary</field>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id'][@invisible=&quot;partner_type != 'supplier'&quot;]" position="attributes">
+                <attribute name="string">Employee</attribute>
             </xpath>
         </field>
     </record>

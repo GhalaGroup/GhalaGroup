@@ -28,13 +28,17 @@
                 </group>
                 <separator string="Materials"/>
                 <field name="line_ids">
-                    <list editable="bottom">
+                    <!-- "Commissionable" tracks the ticks and matches New Base
+                         Amount above; without it the footer contradicted that
+                         figure by the value of every excluded line. -->
+                    <list editable="bottom" decoration-muted="not included">
                         <field name="included"/>
                         <field name="material_line_id" column_invisible="1"/>
                         <field name="product_id" readonly="1"/>
                         <field name="quantity" readonly="1"/>
                         <field name="unit_cost" readonly="1"/>
-                        <field name="amount" readonly="1" sum="Total"/>
+                        <field name="amount" readonly="1" sum="Total Cost"/>
+                        <field name="commissionable_amount" readonly="1" sum="Commissionable"/>
                     </list>
                 </field>
                 <footer>

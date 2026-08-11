@@ -330,8 +330,8 @@ See LICENSE file for complete terms.
 
 ## Credits
 
-**Author:** VPA Software Limited
-**Copyright:** © 2025 VPA Software Limited
+**Author:** VPA Solutions Limited
+**Copyright:** © 2025 VPA Solutions Limited
 **License:** OPL-1
 **Version:** 19.0.1.0.0
 

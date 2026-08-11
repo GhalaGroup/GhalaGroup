@@ -280,6 +280,12 @@ class VpaCommissionSchemeYear(models.Model):
         'commission_year_id',
         string='Linked Payments',
     )
+    allocation_ids = fields.One2many(
+        'vpa.commission.payment.allocation',
+        'scheme_year_id',
+        string='Payment Allocations',
+        help='Portions of on-account payments applied to this year.',
+    )
     payment_count = fields.Integer(
         string='Payments',
         compute='_compute_cash_payments',
@@ -536,16 +542,34 @@ class VpaCommissionSchemeYear(models.Model):
             ))
 
     def _get_cash_payments(self):
-        """All effective outbound payments for this year (linked + via bills)."""
+        """All effective outbound payments for this year (linked, allocated
+        or matched to this year's bills)."""
         self.ensure_one()
-        payments = self.payment_ids | self.bill_ids.matched_payment_ids
+        payments = (self.payment_ids | self.allocation_ids.payment_id
+                    | self.bill_ids.matched_payment_ids)
         return payments.filtered(
             lambda p: p.payment_type == 'outbound' and p.state in ('in_process', 'paid')
         )
 
+    def _payment_contribution(self, payment):
+        """Amount of ``payment`` that counts toward this year, in the
+        payment currency. Priority: allocations > full-year link > bill match.
+        A payment allocated to OTHER years contributes nothing here even if
+        it is matched against this year's bills (it was explicitly split)."""
+        self.ensure_one()
+        allocations = payment.commission_allocation_ids.filtered(
+            lambda a: a.scheme_year_id == self)
+        if allocations:
+            return sum(allocations.mapped('amount'))
+        if payment.commission_allocation_ids:
+            return 0.0
+        return payment.amount
+
     @api.depends(
         'payment_ids', 'payment_ids.state', 'payment_ids.amount', 'payment_ids.payment_type',
         'payment_ids.currency_id',
+        'allocation_ids.amount', 'allocation_ids.payment_id.state',
+        'allocation_ids.payment_id.amount', 'allocation_ids.payment_id.date',
         'bill_ids.matched_payment_ids', 'bill_ids.matched_payment_ids.state',
         'minimum_amount',
         'scheme_id.commission_line_ids.state', 'scheme_id.commission_line_ids.amount',
@@ -554,19 +578,25 @@ class VpaCommissionSchemeYear(models.Model):
     def _compute_cash_payments(self):
         for rec in self:
             payments = rec._get_cash_payments()
-            rec.payment_count = len(payments)
             # Sum in the scheme currency — payments may be in another currency
-            # (e.g. USD): convert each at its own payment date.
+            # (e.g. USD): convert each at its own payment date. Allocated
+            # payments count only the portion applied to this year.
             total = 0.0
+            count = 0
             for p in payments:
+                contribution = rec._payment_contribution(p)
+                if rec.currency_id.is_zero(contribution):
+                    continue
+                count += 1
                 if p.currency_id and rec.currency_id and p.currency_id != rec.currency_id:
                     total += p.currency_id._convert(
-                        p.amount, rec.currency_id,
+                        contribution, rec.currency_id,
                         rec.company_id or self.env.company,
                         p.date or fields.Date.today(),
                     )
                 else:
-                    total += p.amount
+                    total += contribution
+            rec.payment_count = count
             rec.amount_paid_cash = total
             # Due follows the confirmation doctrine: only CONFIRMED commission
             # (or the contractual guarantee, whichever is higher) is owed.
@@ -778,10 +808,25 @@ class VpaCommissionSchemeYear(models.Model):
             },
         }
 
-    def action_view_payments(self):
-        """Open all cash payments for this year (linked + via bills)."""
+    def action_apply_payment(self):
+        """Open the wizard to apply an on-account payment to this year."""
         self.ensure_one()
-        payments = self.payment_ids | self.bill_ids.matched_payment_ids
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Apply Payment - %s (%s)', self.employee_id.name, self.year),
+            'res_model': 'vpa.commission.apply.payment.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_scheme_year_id': self.id,
+            },
+        }
+
+    def action_view_payments(self):
+        """Open all cash payments for this year (linked + allocated + via bills)."""
+        self.ensure_one()
+        payments = (self.payment_ids | self.allocation_ids.payment_id
+                    | self.bill_ids.matched_payment_ids)
         list_view = self.env.ref('vpa_sales_commission.view_account_payment_list_commission')
         return {
             'name': _('Payments - %s (%s)', self.employee_id.name, self.year),

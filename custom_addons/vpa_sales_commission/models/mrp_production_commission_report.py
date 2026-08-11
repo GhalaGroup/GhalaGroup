@@ -41,6 +41,12 @@ class MrpProductionCommissionReport(models.Model):
     # Financial Information
     commission_base_amount = fields.Float(string='Base Amount', readonly=True, digits=(12, 2))
     total_commission_amount = fields.Float(string='Total Commission', readonly=True, digits=(12, 2))
+    commission_per_item = fields.Float(
+        string='Commission Per Item', readonly=True, digits=(12, 2),
+        aggregator='avg',
+        help='Total commission divided by the quantity produced — the '
+             'commission carried by each unit of the finished item.',
+    )
     pending_commission_amount = fields.Float(string='Pending Commission', readonly=True, digits=(12, 2))
     confirmed_commission_amount = fields.Float(string='Confirmed Commission', readonly=True, digits=(12, 2))
     paid_commission_amount = fields.Float(string='Paid Commission', readonly=True, digits=(12, 2))
@@ -91,6 +97,13 @@ class MrpProductionCommissionReport(models.Model):
 
                     COALESCE(MAX(cl.base_amount), 0) AS commission_base_amount,
                     COALESCE(SUM(cl.amount), 0) AS total_commission_amount,
+                    -- Commission carried by each unit produced. Guarded against
+                    -- MOs with no quantity so the view never divides by zero.
+                    CASE
+                        WHEN mp.product_qty > 0
+                        THEN COALESCE(SUM(cl.amount), 0) / mp.product_qty
+                        ELSE 0
+                    END AS commission_per_item,
                     COALESCE(SUM(CASE WHEN cl.state = 'pending' THEN cl.amount ELSE 0 END), 0) AS pending_commission_amount,
                     COALESCE(SUM(CASE WHEN cl.state = 'confirmed' THEN cl.amount ELSE 0 END), 0) AS confirmed_commission_amount,
                     COALESCE(SUM(CASE WHEN cl.state = 'paid' THEN cl.amount ELSE 0 END), 0) AS paid_commission_amount,

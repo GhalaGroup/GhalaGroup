@@ -149,6 +149,47 @@
                             </table>
                         </t>
 
+                        <!-- Allocations across commission years (split payment) -->
+                        <t t-if="not sy and payment.commission_allocation_ids">
+                            <table class="cpv-summary" style="width: 100%; margin-top: 10px;">
+                                <tr class="cpv-summary-title"><td colspan="3">COMMISSION ALLOCATIONS</td></tr>
+                                <tr>
+                                    <td class="cpv-s-label" style="font-weight:700;">Commission Year</td>
+                                    <td class="cpv-s-label" style="font-weight:700;">Employee</td>
+                                    <td class="cpv-s-value" style="font-weight:700;">Amount</td>
+                                </tr>
+                                <tr t-foreach="payment.commission_allocation_ids" t-as="alloc">
+                                    <td class="cpv-s-label"><span t-esc="alloc.scheme_year_id.year or '-'"/></td>
+                                    <td class="cpv-s-label"><span t-esc="alloc.employee_id.name or ''"/></td>
+                                    <td class="cpv-s-value">
+                                        <span t-esc="'{:,.2f}'.format(alloc.amount)"/>
+                                        <t t-esc="payment.currency_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="payment.commission_unallocated_amount">
+                                    <td class="cpv-s-label" colspan="2" style="font-style:italic;">Unallocated (on account)</td>
+                                    <td class="cpv-s-value">
+                                        <span t-esc="'{:,.2f}'.format(payment.commission_unallocated_amount)"/>
+                                        <t t-esc="payment.currency_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <!-- Unallocated payment on account (no year, no allocations) -->
+                        <t t-if="not sy and not payment.commission_allocation_ids">
+                            <table class="cpv-summary" style="width: 100%; margin-top: 10px;">
+                                <tr class="cpv-summary-title"><td colspan="2">PAYMENT ON ACCOUNT</td></tr>
+                                <tr>
+                                    <td class="cpv-s-label">This payment is on account and not yet applied to a commission year.</td>
+                                    <td class="cpv-s-value">
+                                        <span t-esc="'{:,.2f}'.format(payment.amount)"/>
+                                        <t t-esc="payment.currency_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
                         <!-- Signatures -->
                         <table class="cpv-sig-table">
                             <tr>

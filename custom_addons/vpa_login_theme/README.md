@@ -111,8 +111,8 @@ See your changes before applying them
 ## Support
 
 For issues, feature requests, or questions:
-- **Email**: support@vpa-solutions.com
-- **Website**: https://www.vpa-solutions.com
+- **Email**: info@vpa.co.tz
+- **Website**: https://www.vpa.co.tz
 
 ## Version History
 
@@ -136,9 +136,9 @@ LGPL-3 - See LICENSE file for full copyright and licensing details.
 
 ## Author
 
-**VPA Software Limited**
-- Website: https://www.vpa-solutions.com
-- Email: support@vpa-solutions.com
+**VPA Solutions Limited**
+- Website: https://www.vpa.co.tz
+- Email: info@vpa.co.tz
 
 ---
 

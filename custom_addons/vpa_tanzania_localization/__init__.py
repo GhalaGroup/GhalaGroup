@@ -11,7 +11,7 @@ def _cleanup_duplicate_vrn_view(env):
     This view (base_view_partner_form_inherit) adds a duplicate VRN field
     to the partner form. The Tanzania localization already adds VRN properly.
     """
-    env.execute("""
+    env.cr.execute("""
         DELETE FROM ir_ui_view
         WHERE name = 'base_view_partner_form_inherit'
         AND model = 'res.partner'
@@ -26,8 +26,17 @@ def _fix_vrn_format(env):
     Incorrect format: NNNNNNNNN (e.g., 40123456X)
 
     This fixes VRN values entered without dashes to match Tanzania TRA format.
+    Guarded: on a fresh install the ``vrn`` column does not exist yet (the
+    pre_init_hook runs before the module's fields are created), so there is
+    nothing to fix and the update is skipped.
     """
-    env.execute("""
+    env.cr.execute("""
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'res_partner' AND column_name = 'vrn'
+    """)
+    if not env.cr.fetchone():
+        return
+    env.cr.execute("""
         UPDATE res_partner
         SET vrn = CONCAT(SUBSTRING(vrn, 1, 2), '-', SUBSTRING(vrn, 3, 6), '-', SUBSTRING(vrn, 9, 1))
         WHERE vrn IS NOT NULL
