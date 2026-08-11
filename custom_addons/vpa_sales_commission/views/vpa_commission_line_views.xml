@@ -158,10 +158,16 @@
                 <field name="customer_ref" string="Customer Ref" optional="show"
                        width="190px"/>
                 <field name="item_name" width="300px"/>
+                <field name="product_qty" string="Qty" width="80px"/>
+                <field name="product_uom_id" string="UoM" optional="hide"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="base_amount" widget="monetary" options="{'currency_field': 'currency_id'}" optional="hide"/>
                 <field name="rate" width="55px"/>
                 <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <!-- Not optional: a saved column preference would hide a newly
+                     added optional column, and this is the figure to check against. -->
+                <field name="commission_per_item" string="Per Item" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"/>
                 <field name="delivered" widget="boolean" string="Dlv" width="40px"/>
                 <field name="state" widget="badge"
                        decoration-info="state == 'pending'"
