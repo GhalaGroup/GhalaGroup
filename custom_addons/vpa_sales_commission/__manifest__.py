@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.1.0',
+    'version': '19.0.2.1.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.0.1)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.1.2)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,31 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.1.2** - Fix: payment form blocked for users without commission access
+  - The readonly modifier on the standard payment_type field named
+    commission_allocation_ids. The web client fetches whatever a modifier
+    references, so every user without commission rights hit AccessError when
+    opening or saving ANY payment - no server-side sudo could prevent it,
+    because the client was doing the read. Test a sudo-computed boolean instead
+
+* **19.0.2.1.1** - Distinct label for Payment Currency
+  - payment_currency_id inherited "Currency" from its related field and
+    collided with currency_id on the Apply Payment wizard
+
+* **19.0.2.1.0** - Commission per item, closed-year protection, clearer year card
+  - Commission Per Item on the Generate wizard, the commission line form and
+    list, and the Commission by MO report (averaged, not summed, in the pivot)
+  - Materials lists gained a Commissionable total: the plain sum counted
+    excluded lines and contradicted the Base Amount beside it
+  - Closing a year now blocks new commission from landing in it; previously
+    only the lines existing at close were locked, so an MO processed later
+    silently moved a reconciled year's totals
+  - Commission year card rewritten in plain language (what he earned / what we
+    pay him) with the payable amount tagged guarantee or approved
+  - Fix: the payment form raised AccessError for every user without commission
+    rights, because an invisible field on the standard form read the commission
+    scheme and allocations unprivileged
+
 * **19.0.2.0.11** - Manual commission in the Generate wizard
   - New "Manual Commission" checkbox: tick to edit the Total Commission,
     per-employee amount or rate directly (all stay in sync, generated

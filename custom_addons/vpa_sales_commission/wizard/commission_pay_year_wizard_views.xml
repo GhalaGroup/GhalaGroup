@@ -106,8 +106,17 @@
             <!-- Commission payments are always outbound: lock Send/Receive
                  when the form was opened from the commission "New Payment"
                  button, or once the payment is tied to a commission year. -->
+            <!-- Tests commission_has_allocations, NOT commission_allocation_ids:
+                 this readonly sits on the standard payment_type field that every
+                 user sees, and the client fetches whatever a modifier names.
+                 Naming the allocation o2m here raised AccessError for every user
+                 without commission rights - no amount of sudo in Python can help,
+                 because the client is doing the read. -->
             <field name="payment_type" position="attributes">
-                <attribute name="readonly">context.get('commission_payment_lock_type') or commission_year_id or commission_allocation_ids</attribute>
+                <attribute name="readonly">context.get('commission_payment_lock_type') or commission_year_id or commission_has_allocations</attribute>
+            </field>
+            <field name="payment_type" position="before">
+                <field name="commission_has_allocations" invisible="1"/>
             </field>
             <!-- On the commission flow (opened from the commission "New Payment"
                  button), restrict the Vendor field to work-contacts of employees

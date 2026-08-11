@@ -39,6 +39,16 @@ class AccountPayment(models.Model):
         store=True,
         help='Part of this payment not yet applied to any commission year.',
     )
+    commission_has_allocations = fields.Boolean(
+        string='Has Commission Allocations',
+        compute='_compute_commission_has_allocations',
+        help='Whether this payment is split across commission years. Exists so '
+             'the payment form can test this WITHOUT naming '
+             'commission_allocation_ids in a view expression: the standard form '
+             'is seen by every user, and the web client fetches whatever a '
+             'modifier references, which raises AccessError for anyone without '
+             'commission access. Computed with sudo, so it is safe to read.',
+    )
     commission_employee_partner_ids = fields.Many2many(
         'res.partner',
         string='Commission Employees',
@@ -47,6 +57,11 @@ class AccountPayment(models.Model):
              'Used to restrict the Vendor field to commission employees on the '
              'commission payment form.',
     )
+
+    @api.depends('commission_allocation_ids')
+    def _compute_commission_has_allocations(self):
+        for pay in self:
+            pay.commission_has_allocations = bool(pay.sudo().commission_allocation_ids)
 
     @api.depends_context('company')
     def _compute_commission_employee_partners(self):
