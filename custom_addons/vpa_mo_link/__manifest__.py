@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '19.0.1.3.1',
+    'version': '19.0.1.3.2',
     'category': 'Manufacturing',
     'summary': 'Advanced Manufacturing Order management with flexible workflows, manual linking, and lot splitting',
     'price': 199.00,
@@ -56,6 +56,7 @@ Technical Details:
 
 Version History:
 ----------------
+* **19.0.1.3.2** - Fixed MO list Reference and Start date columns being truncated on page load
 * **19.0.1.3.0** - Enhanced Split MO with automatic lot renumbering on deletion
 * **19.0.1.2.0** - Added Split MO and Create Remaining MO features
 * **19.0.1.1.0** - Added manual MO linking functionality

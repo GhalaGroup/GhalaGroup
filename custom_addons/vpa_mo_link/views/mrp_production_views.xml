@@ -33,6 +33,13 @@
             <xpath expr="//field[@name='product_qty']" position="after">
                 <field name="lot_reference" optional="show"/>
             </xpath>
+            <!-- Fixed widths so reference and start date are never truncated when columns are squeezed -->
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="width">150px</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_start']" position="attributes">
+                <attribute name="width">120px</attribute>
+            </xpath>
         </field>
     </record>
 
