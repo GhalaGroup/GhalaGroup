@@ -302,8 +302,24 @@ class VpaCommissionSchemeYear(models.Model):
         string='Paid',
         currency_field='currency_id',
         compute='_compute_cash_payments',
-        help='Actual cash paid: payments linked to this year plus payments '
-             'matched against this year\'s bills.',
+        help='Cash paid out: payments linked to this year plus payments '
+             'matched against this year\'s bills. Counts payments as soon as '
+             'they are ISSUED (in_process) — see Paid (Cleared) for the part '
+             'that has actually been reconciled at the bank.',
+    )
+    amount_paid_cleared = fields.Monetary(
+        string='Paid (Cleared)',
+        currency_field='currency_id',
+        compute='_compute_cash_payments',
+        help='The part of Paid whose payments are reconciled at the bank '
+             '(payment state = paid). The rest is issued but not yet cleared.',
+    )
+    amount_paid_in_process = fields.Monetary(
+        string='Pending Reconciliation',
+        currency_field='currency_id',
+        compute='_compute_cash_payments',
+        help='Payments issued (posted) but not yet matched against a bank '
+             'statement. Included in Paid; reconciling them moves this to zero.',
     )
     outstanding_cash = fields.Monetary(
         string='Outstanding',
@@ -318,6 +334,101 @@ class VpaCommissionSchemeYear(models.Model):
         compute='_compute_cash_payments',
         help='Rounding differences written off via the pay wizard.',
     )
+    total_to_pay = fields.Monetary(
+        string='Total to Pay',
+        currency_field='currency_id',
+        compute='_compute_cash_payments',
+        help='What this year will cost in total once everything is approved: '
+             'the greater of the minimum guarantee and TOTAL earned commission '
+             '(including lines still awaiting approval). The pay wizard still '
+             'only releases guarantee + approved commission.',
+    )
+    still_to_pay_total = fields.Monetary(
+        string='Still to Pay (Total)',
+        currency_field='currency_id',
+        compute='_compute_cash_payments',
+        help='Total to Pay minus cash paid and write-offs. Negative means '
+             'paid beyond the year\'s total (overpaid / advance).',
+    )
+
+    # On-account money waiting to be applied. Employee-level, not year-level:
+    # the same amount shows on every open year card of the employee until the
+    # payments are allocated (or year-linked), so nobody misses cash that was
+    # paid out but is not yet counted anywhere.
+    unallocated_onaccount_amount = fields.Monetary(
+        string='Not Allocated (On Account)',
+        currency_field='currency_id',
+        compute='_compute_unallocated_onaccount',
+        help='Payments made to this employee that are not linked or allocated '
+             'to any commission year yet. They count in no year\'s Paid figure '
+             'until applied via "Apply On-Account Payment".',
+    )
+    unallocated_onaccount_count = fields.Integer(
+        string='Unallocated Payments',
+        compute='_compute_unallocated_onaccount',
+    )
+
+    @api.model
+    def _onaccount_payment_domain(self, company_ids, partner_ids=None):
+        """The ONE definition of 'on-account commission payment' — used by the
+        year-card compute and by the Apply Payment wizard, so the card's badge
+        and the wizard's rows always describe the same set of payments.
+        partner_ids=None skips the partner filter (the wizard's fallback when
+        the employee has no on-account payments of their own)."""
+        domain = [
+            ('payment_type', '=', 'outbound'),
+            ('state', 'in', ('in_process', 'paid')),
+            ('commission_year_id', '=', False),
+            ('commission_unallocated_amount', '>', 0),
+            ('company_id', 'in', company_ids),
+        ]
+        if partner_ids is not None:
+            domain.append(('partner_id', 'in', partner_ids))
+        return domain
+
+    def _compute_unallocated_onaccount(self):
+        # ONE batched search for the whole recordset (a kanban page renders
+        # many year cards; per-record searches made it one query per card,
+        # identical for every card of the same employee).
+        pair_recs = {}
+        for rec in self:
+            rec.unallocated_onaccount_amount = 0.0
+            rec.unallocated_onaccount_count = 0
+            partner = rec.employee_id.work_contact_id
+            if partner:
+                pair_recs.setdefault(
+                    (partner.id, rec.company_id.id), []).append(rec)
+        if not pair_recs:
+            return
+        # sudo: commission users without accounting access must still be able
+        # to render their own year card. Exposes only totals of on-account
+        # payments made to the card's employee — and record rules already
+        # limit non-managers to their own cards.
+        payments = self.env['account.payment'].sudo().search(
+            self._onaccount_payment_domain(
+                list({c for _p, c in pair_recs}),
+                list({p for p, _c in pair_recs}),
+            ))
+        by_pair = {}
+        for p in payments:
+            by_pair.setdefault((p.partner_id.id, p.company_id.id), []).append(p)
+        for pair, recs in pair_recs.items():
+            plist = by_pair.get(pair, [])
+            for rec in recs:
+                # Sum in the scheme currency, converting each payment at its
+                # own date — the same doctrine as _compute_cash_payments.
+                total = 0.0
+                for p in plist:
+                    amount = p.commission_unallocated_amount
+                    if p.currency_id and rec.currency_id and p.currency_id != rec.currency_id:
+                        amount = p.currency_id._convert(
+                            amount, rec.currency_id,
+                            rec.company_id or self.env.company,
+                            p.date or fields.Date.today(),
+                        )
+                    total += amount
+                rec.unallocated_onaccount_amount = total
+                rec.unallocated_onaccount_count = len(plist)
 
     # Confirmation & excess (true-up) tracking
     confirmed_earned = fields.Monetary(
@@ -461,15 +572,37 @@ class VpaCommissionSchemeYear(models.Model):
         import datetime
         year_end = datetime.date(int(self.year), 12, 31)
         invoice_date = min(fields.Date.context_today(self), year_end)
+        # Number each true-up run: approvals arrive in batches, so a year
+        # accumulates several true-up bills — identical refs made them
+        # indistinguishable in lists. #1 keeps the historic un-numbered form.
+        # Counting is structural (commission_trueup flag) with a ref fallback
+        # for bills created before the flag existed — the refs are translated,
+        # so matching the English literal alone breaks in other locales.
+        # Cancelled bills keep their number (no state filter), so a number is
+        # never reused by a later run.
+        existing_trueups = self.env['account.move'].search_count([
+            ('commission_year_id', '=', self.id),
+            ('move_type', '=', 'in_invoice'),
+            '|',
+            ('commission_trueup', '=', True),
+            ('ref', 'like', 'Commission True-up%'),
+        ])
+        if existing_trueups:
+            ref = _('Commission True-up #%(num)d - %(employee)s %(year)s',
+                    num=existing_trueups + 1,
+                    employee=self.employee_id.name, year=self.year)
+        else:
+            ref = _('Commission True-up - %s %s', self.employee_id.name, self.year)
         bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': partner.id,
             'journal_id': journal.id,
             'invoice_date': invoice_date,
-            'ref': _('Commission True-up - %s %s', self.employee_id.name, self.year),
+            'ref': ref,
             'invoice_line_ids': invoice_lines,
             'commission_year_id': self.id,
             'commission_offset_amount': offset,
+            'commission_trueup': True,
         })
         lines.write({'bill_id': bill.id})
 
@@ -518,7 +651,9 @@ class VpaCommissionSchemeYear(models.Model):
                 continue
             year, month = int(key[:4]), int(key[5:])
             entry_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
-            ref = _('Commission True-up - %s %s', self.employee_id.name, key)
+            # Carry the (numbered) bill reference so entries from different
+            # true-up runs landing in the same month stay distinguishable.
+            ref = f"{bill.ref} — {key}"
             moves |= self.env['account.move'].create({
                 'move_type': 'entry',
                 'journal_id': prepaid_journal.id,
@@ -582,6 +717,7 @@ class VpaCommissionSchemeYear(models.Model):
             # (e.g. USD): convert each at its own payment date. Allocated
             # payments count only the portion applied to this year.
             total = 0.0
+            cleared = 0.0
             count = 0
             for p in payments:
                 contribution = rec._payment_contribution(p)
@@ -589,18 +725,23 @@ class VpaCommissionSchemeYear(models.Model):
                     continue
                 count += 1
                 if p.currency_id and rec.currency_id and p.currency_id != rec.currency_id:
-                    total += p.currency_id._convert(
+                    contribution = p.currency_id._convert(
                         contribution, rec.currency_id,
                         rec.company_id or self.env.company,
                         p.date or fields.Date.today(),
                     )
-                else:
-                    total += contribution
+                total += contribution
+                # 'paid' = reconciled at the bank; 'in_process' = issued only.
+                if p.state == 'paid':
+                    cleared += contribution
             rec.payment_count = count
             rec.amount_paid_cash = total
+            rec.amount_paid_cleared = cleared
+            rec.amount_paid_in_process = total - cleared
             # Due follows the confirmation doctrine: only CONFIRMED commission
             # (or the contractual guarantee, whichever is higher) is owed.
-            confirmed = sum(rec._year_commission_lines().filtered(
+            year_lines = rec._year_commission_lines()
+            confirmed = sum(year_lines.filtered(
                 lambda l: l.state in ('confirmed', 'paid')).mapped('amount'))
             rec.amount_due_year = max(confirmed, rec.minimum_amount)
             # Rounding write-offs reduce what remains payable
@@ -615,6 +756,18 @@ class VpaCommissionSchemeYear(models.Model):
                 l.debit - l.credit for m in wo_moves for l in m.line_ids
                 if l.account_id.account_type == 'liability_payable')
             rec.outstanding_cash = rec.amount_due_year - rec.amount_paid_cash - rec.writeoff_total
+            # The year's eventual total: guarantee floor or full earnings
+            # (approved + pending), whichever is higher. Payability of the
+            # pending part is still gated by approval (pay wizard ceiling).
+            # Currency-rounded: the kanban gates Pay/Close Year on >0 / ==0
+            # comparisons, and unrounded FX conversions would leave residues
+            # like 0.004 that keep a settled year showing "still to pay".
+            currency = rec.currency_id or rec.company_id.currency_id
+            total_earned_all = sum(year_lines.mapped('amount'))
+            rec.total_to_pay = currency.round(
+                max(rec.minimum_amount, total_earned_all))
+            rec.still_to_pay_total = currency.round(
+                rec.total_to_pay - rec.amount_paid_cash - rec.writeoff_total)
 
     _year_uniq = models.Constraint(
         'unique(scheme_id, year)',
@@ -711,12 +864,15 @@ class VpaCommissionSchemeYear(models.Model):
             lambda l: l.date_year == self.year and l.state != 'cancelled'
         )
         # A fully settled year marks its confirmed lines as paid — the cash went
-        # out at year level, so the line states should say so.
+        # out at year level, so the line states should say so. paid_by_close
+        # records that THIS close did the flip, so reopening can revert exactly
+        # these lines and no others.
         if self.outstanding_cash <= 0.01:
             lines.filtered(lambda l: l.state == 'confirmed').write({
                 'state': 'paid',
                 'paid_date': fields.Date.today(),
                 'paid_by': self.env.uid,
+                'paid_by_close': True,
             })
         lines.write({'year_locked': True})
         self.write({'state': 'closed'})
@@ -747,14 +903,29 @@ class VpaCommissionSchemeYear(models.Model):
         }
 
     def _do_reopen_year(self, reason):
-        """Unlock the year's lines and log who reopened it and why."""
+        """Unlock the year's lines and log who reopened it and why.
+
+        Also undoes what closing did to line states: lines the close flipped
+        from confirmed to paid (paid_by_close) go back to confirmed. Lines paid
+        any other way keep their state — the marker is the safety boundary.
+        """
         self.ensure_one()
         lines = self.scheme_id.commission_line_ids.filtered(
             lambda l: l.date_year == self.year
         )
+        flipped = lines.filtered(lambda l: l.state == 'paid' and l.paid_by_close)
+        flipped.write({
+            'state': 'confirmed',
+            'paid_date': False,
+            'paid_by': False,
+            'paid_by_close': False,
+        })
         lines.write({'year_locked': False})
         self.write({'state': 'open'})
-        self._log_year_event(_('REOPENED — reason: %s —', reason))
+        self._log_year_event(_(
+            'REOPENED — reason: %(reason)s — %(count)d line(s) reverted from '
+            'paid to confirmed (had been marked paid by the close)') % {
+                'reason': reason, 'count': len(flipped)})
 
     def action_open_year(self):
         """Open this year's full record (Commission Centre detail form)."""

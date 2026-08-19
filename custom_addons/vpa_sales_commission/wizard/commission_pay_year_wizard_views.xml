@@ -75,6 +75,9 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="commission_year_id" string="Commission Year"/>
+                <field name="commission_allocated_years" string="Allocated To" optional="show"/>
+                <field name="commission_unallocated_amount" string="On Account" widget="monetary"
+                       options="{'currency_field': 'currency_id'}" optional="show"/>
                 <field name="partner_id" string="Employee"/>
                 <field name="journal_id"/>
                 <field name="memo" optional="hide"/>
@@ -95,12 +98,15 @@
         <field name="inherit_id" ref="account.view_account_payment_form"/>
         <field name="arch" type="xml">
             <field name="memo" position="after">
-                <!-- "Commission Year" links the WHOLE payment to one year. Hidden
+                <!-- "Commission Year" links the WHOLE payment to one year. Shown
+                     only on commission payments (vendor is a commission employee,
+                     or the payment already carries a year/allocations) — a normal
+                     vendor payment must not show commission fields. Also hidden
                      on the on-account flow (opened from "New Payment on Account"),
                      which is meant to be split via the allocations table below —
                      unless a year is already set. -->
                 <field name="commission_year_id"
-                       invisible="payment_type != 'outbound' or (context.get('commission_payment_lock_type') and not commission_year_id)"
+                       invisible="payment_type != 'outbound' or not commission_is_payment or (context.get('commission_payment_lock_type') and not commission_year_id)"
                        groups="vpa_sales_commission.group_commission_manager"/>
             </field>
             <!-- Commission payments are always outbound: lock Send/Receive
@@ -130,9 +136,11 @@
             </xpath>
             <xpath expr="//sheet" position="inside">
                 <!-- Split a payment on account across commission years.
-                     Subview embedded INLINE (view_id on x2many is not supported). -->
+                     Subview embedded INLINE (view_id on x2many is not supported).
+                     Shown only on commission payments (see commission_year_id
+                     above) — never on a normal vendor payment. -->
                 <group string="Commission Allocations"
-                       invisible="payment_type != 'outbound' or commission_year_id"
+                       invisible="payment_type != 'outbound' or commission_year_id or not commission_is_payment"
                        groups="vpa_sales_commission.group_commission_manager">
                     <group>
                         <field name="commission_allocated_amount" widget="monetary"/>

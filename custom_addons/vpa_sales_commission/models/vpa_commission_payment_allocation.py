@@ -52,6 +52,15 @@ class VpaCommissionPaymentAllocation(models.Model):
         for alloc in self:
             payment = alloc.payment_id
             currency = payment.currency_id
+            if alloc.scheme_year_id.state == 'closed':
+                # A closed year is reconciled: money landing in it afterwards
+                # would silently move settled totals (same doctrine as the
+                # closed-year guard on commission lines).
+                raise ValidationError(_(
+                    'Commission year %(year)s is closed. Reopen it before '
+                    'applying payments to it.',
+                    year=alloc.scheme_year_id.display_name,
+                ))
             if currency.compare_amounts(alloc.amount, 0.0) <= 0:
                 raise ValidationError(_(
                     'The allocated amount must be positive.'))

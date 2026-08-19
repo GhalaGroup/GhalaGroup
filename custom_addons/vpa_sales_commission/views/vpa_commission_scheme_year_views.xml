@@ -116,6 +116,9 @@
                             <field name="outstanding_cash" widget="monetary" string="Outstanding (Cash)"
                                    decoration-danger="outstanding_cash &gt; 0"
                                    decoration-success="outstanding_cash &lt;= 0"/>
+                            <field name="unallocated_onaccount_amount" widget="monetary"
+                                   decoration-warning="unallocated_onaccount_amount &gt; 0"
+                                   invisible="unallocated_onaccount_amount == 0"/>
                         </group>
                     </group>
                     <separator string="Internal Notes"/>
@@ -151,7 +154,14 @@
                 <field name="total_pending"/>
                 <field name="confirmed_earned"/>
                 <field name="amount_due_year"/>
+                <field name="amount_paid_cleared"/>
+                <field name="amount_paid_in_process"/>
                 <field name="excess_to_bill"/>
+                <field name="unallocated_onaccount_amount"/>
+                <field name="unallocated_onaccount_count"/>
+                <field name="total_to_pay"/>
+                <field name="still_to_pay_total"/>
+                <field name="minimum_amount_usd"/>
                 <field name="currency_id"/>
                 <templates>
                     <t t-name="card">
@@ -163,7 +173,7 @@
                                        decoration-muted="state == 'closed'"/>
                             </div>
                             <div class="text-muted mb-2">
-                                <t t-esc="record.year.value"/> · Rate <field name="effective_rate" class="d-inline"/>%
+                                <t t-esc="record.year.value"/> · Rate <field name="effective_rate" class="d-inline"/>%<t t-if="record.minimum_amount_usd.raw_value"> · Min USD <t t-esc="Math.round(record.minimum_amount_usd.raw_value).toLocaleString()"/></t>
                             </div>
                             <!-- The card reads as two plain sums a non-accountant
                                  can follow: what he has earned, then what we owe
@@ -191,19 +201,69 @@
                                      above/below; the amber only colours the label.
                                      A computed class on this container was the one
                                      structural difference from the working rows. -->
+                                <!-- Amber call-to-action only while something actually
+                                     awaits approval; at zero it swaps to a quiet
+                                     confirmation instead of shouting "0" — same
+                                     always-rendered pattern as the reconciliation
+                                     row, so card heights stay equal. -->
                                 <div class="d-flex justify-content-between align-items-baseline">
-                                    <!-- Explicit hex, not bg-warning/text-dark: the
-                                         dark theme inverts those utilities and the
-                                         count ended up white on orange. -->
-                                    <span class="small text-truncate text-warning">Not approved yet
-                                        <span class="badge rounded-pill"
-                                              style="font-size:.62rem; background-color:#f0ad4e; color:#1c1c1c; font-weight:700;"><t t-esc="record.pending_count.value"/></span>
-                                    </span>
-                                    <field name="total_pending" widget="monetary" class="flex-shrink-0 text-nowrap ms-2"/>
+                                    <t t-if="record.pending_count.raw_value">
+                                        <!-- Explicit hex, not bg-warning/text-dark: the
+                                             dark theme inverts those utilities and the
+                                             count ended up white on orange. -->
+                                        <span class="small text-truncate text-warning">Not approved yet
+                                            <span class="badge rounded-pill"
+                                                  style="font-size:.62rem; background-color:#f0ad4e; color:#1c1c1c; font-weight:700;"><t t-esc="record.pending_count.value"/></span>
+                                        </span>
+                                        <field name="total_pending" widget="monetary" class="flex-shrink-0 text-nowrap ms-2"/>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- Invisible badge + full-size dash mirror the
+                                             if-branch's badge and monetary field, so
+                                             both variants render the same row height. -->
+                                        <span class="small text-muted text-truncate">
+                                            <i class="fa fa-check me-1"/>nothing awaiting approval
+                                            <span class="badge rounded-pill" style="font-size:.62rem; visibility:hidden;">0</span>
+                                        </span>
+                                        <span class="text-muted flex-shrink-0 ms-2">—</span>
+                                    </t>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-baseline border-top mt-1 pt-1">
                                     <span class="small fw-bold text-truncate">Total earned</span>
                                     <field name="total_earned" widget="monetary" class="fw-bold flex-shrink-0 text-nowrap ms-2"/>
+                                </div>
+                                <!-- TOTAL EARNED (approved + awaiting approval)
+                                     measured against the year's minimum guarantee:
+                                       green = earned within the guarantee,
+                                       WHITE = earned ABOVE the minimum,
+                                       red   = earnings still below the guarantee.
+                                     Scaled to max(guarantee, total earned). Non-zero
+                                     segments get a 1% floor so a real but tiny amount
+                                     never rounds to invisible; green absorbs the
+                                     difference so the bar stays at exactly 100%.
+                                     Years without a guarantee show fully green. -->
+                                <div class="progress mt-2" style="height:5px;"
+                                     t-if="Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) &gt; 0">
+                                    <div class="progress-bar bg-success"
+                                         t-attf-style="width: #{100 - ((record.minimum_amount.raw_value and record.total_earned.raw_value &gt; record.minimum_amount.raw_value) ? Math.max(1, Math.round((record.total_earned.raw_value - record.minimum_amount.raw_value) / Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) * 100)) : 0) - ((record.minimum_amount.raw_value &gt; record.total_earned.raw_value) ? Math.max(1, Math.round((record.minimum_amount.raw_value - record.total_earned.raw_value) / Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) * 100)) : 0)}%"/>
+                                    <div class="progress-bar"
+                                         t-attf-style="background-color:#ffffff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); width: #{(record.minimum_amount.raw_value and record.total_earned.raw_value &gt; record.minimum_amount.raw_value) ? Math.max(1, Math.round((record.total_earned.raw_value - record.minimum_amount.raw_value) / Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) * 100)) : 0}%"/>
+                                    <div class="progress-bar bg-danger"
+                                         t-attf-style="width: #{(record.minimum_amount.raw_value &gt; record.total_earned.raw_value) ? Math.max(1, Math.round((record.minimum_amount.raw_value - record.total_earned.raw_value) / Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) * 100)) : 0}%"/>
+                                </div>
+                                <div class="text-muted" style="font-size:.68rem; line-height:1.4;"
+                                     t-if="Math.max(record.minimum_amount.raw_value, record.total_earned.raw_value) &gt; 0">
+                                    <t t-if="record.minimum_amount.raw_value &gt; record.total_earned.raw_value">
+                                        <span class="text-danger">earnings below the minimum by
+                                            <t t-esc="Math.round(record.minimum_amount.raw_value - record.total_earned.raw_value).toLocaleString()"/></span>
+                                    </t>
+                                    <t t-elif="record.minimum_amount.raw_value">
+                                        <span>earned above the minimum by
+                                            <t t-esc="Math.round(record.total_earned.raw_value - record.minimum_amount.raw_value).toLocaleString()"/></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-success">no minimum guarantee — all earned</span>
+                                    </t>
                                 </div>
                             </div>
 
@@ -212,50 +272,143 @@
                                  style="background:rgba(128,128,128,.07); font-variant-numeric:tabular-nums;">
                                 <div class="text-muted fw-bolder mb-1"
                                      style="font-size:.6rem; letter-spacing:.09em;">WHAT WE PAY HIM</div>
+                                <!-- Info header: the contractual minimum, with its
+                                     USD reference when one was configured on the
+                                     year (guarantees are negotiated in USD). -->
                                 <div class="d-flex justify-content-between align-items-baseline">
-                                    <span class="small text-muted text-truncate">Minimum guarantee</span>
+                                    <span class="small text-muted text-truncate">Min. year commission</span>
                                     <field name="minimum_amount" widget="monetary" class="text-muted flex-shrink-0 text-nowrap ms-2"/>
                                 </div>
-                                <!-- A one-word tag names which rule set the amount.
-                                     The old sentence restated numbers already on
-                                     the card and wrapped to two lines, which is
-                                     what made the cards uneven. -->
-                                <div class="d-flex justify-content-between align-items-baseline">
-                                    <span class="small fw-bold">We owe him
-                                        <!-- Outline pill inheriting the text colour:
-                                             readable in both light and dark themes,
-                                             unlike bg-* utilities which invert. -->
-                                        <span class="badge rounded-pill fw-normal ms-1"
-                                              style="font-size:.6rem; background:transparent; border:1px solid currentColor; opacity:.75;">
-                                            <t t-if="record.minimum_amount.raw_value &gt; 0 and record.confirmed_earned.raw_value &lt; record.minimum_amount.raw_value">guarantee</t>
-                                            <t t-else="">approved</t>
-                                        </span>
-                                    </span>
-                                    <field name="amount_due_year" widget="monetary" class="fw-bold flex-shrink-0 text-nowrap ms-2"/>
+                                <!-- The headline: the year's eventual total —
+                                     max(guarantee, TOTAL earned incl. pending). -->
+                                <div class="d-flex justify-content-between align-items-baseline mt-1">
+                                    <span class="small fw-bold">Total to pay</span>
+                                    <field name="total_to_pay" widget="monetary" class="fw-bold flex-shrink-0 text-nowrap ms-2"/>
+                                </div>
+                                <!-- Always rendered (blank when nothing is pending)
+                                     so every card keeps the same height. -->
+                                <div class="text-muted text-end" style="font-size:.68rem; line-height:1.2; min-height:.85rem;">
+                                    <t t-if="record.pending_count.raw_value">
+                                        includes <t t-esc="Math.round(record.total_pending.raw_value).toLocaleString()"/> awaiting approval
+                                    </t>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-baseline">
                                     <span class="small text-muted text-truncate">Already paid</span>
                                     <field name="amount_paid_cash" widget="monetary" class="text-muted flex-shrink-0 text-nowrap ms-2"/>
                                 </div>
-                                <!-- How far the payments have got toward what we owe -->
+                                <!-- Paid counts payments the moment they are ISSUED.
+                                     This row shows the part not yet matched against
+                                     a bank statement, so nobody mistakes issued for
+                                     settled. Always rendered - swapping to a quiet
+                                     "nothing pending" state instead of disappearing -
+                                     so every card in the row keeps the same height. -->
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <t t-if="record.amount_paid_in_process.raw_value &gt; 0">
+                                        <span class="small text-warning text-truncate">
+                                            <i class="fa fa-hourglass-half me-1"/>pending reconciliation
+                                        </span>
+                                        <field name="amount_paid_in_process" widget="monetary"
+                                               class="text-warning flex-shrink-0 text-nowrap ms-2"/>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- Full-size dash mirrors the if-branch's
+                                             monetary field height. -->
+                                        <span class="small text-muted text-truncate">
+                                            <i class="fa fa-check me-1"/>nothing pending reconciliation
+                                        </span>
+                                        <span class="text-muted flex-shrink-0 ms-2">—</span>
+                                    </t>
+                                </div>
+                                <!-- Progress: green = cleared, striped amber = issued
+                                     awaiting the bank, WHITE = paid BEYOND what is due
+                                     (overpaid / advance — red is reserved for the
+                                     guarantee top-up in the earned panel). Scaled to
+                                     max(due, paid) so an overpayment shows as a white
+                                     tail instead of being silently capped at 100%.
+                                     Inset outline keeps the white segment visible on
+                                     light backgrounds. -->
                                 <div class="progress mt-2 mb-2" style="height:5px;">
                                     <div class="progress-bar bg-success"
-                                         t-attf-style="width: #{record.amount_due_year.raw_value ? Math.min(100, Math.round(record.amount_paid_cash.raw_value / record.amount_due_year.raw_value * 100)) : 0}%"/>
+                                         t-attf-style="width: #{Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) ? Math.round(Math.min(record.amount_paid_cleared.raw_value, record.total_to_pay.raw_value) / Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) * 100) : 0}%"/>
+                                    <div class="progress-bar progress-bar-striped"
+                                         t-attf-style="background-color:#f0ad4e; width: #{Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) ? Math.round((Math.min(record.amount_paid_cash.raw_value, record.total_to_pay.raw_value) - Math.min(record.amount_paid_cleared.raw_value, record.total_to_pay.raw_value)) / Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) * 100) : 0}%"/>
+                                    <div class="progress-bar"
+                                         t-attf-style="background-color:#ffffff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); width: #{Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) ? Math.round(Math.max(0, record.amount_paid_cash.raw_value - record.total_to_pay.raw_value) / Math.max(record.total_to_pay.raw_value, record.amount_paid_cash.raw_value) * 100) : 0}%"/>
                                 </div>
+                                <!-- Positive outstanding = still owed (red). Zero =
+                                     settled (green). Negative = paid beyond due: the
+                                     label switches to Overpaid in neutral bold, matching
+                                     the white bar segment (red stays reserved for the
+                                     guarantee top-up in the earned panel). -->
                                 <div class="d-flex justify-content-between align-items-baseline">
-                                    <span class="fw-bolder">Still to pay</span>
-                                    <field name="outstanding_cash" widget="monetary"
-                                           t-attf-class="fw-bolder fs-5 #{record.outstanding_cash.raw_value &gt; 0 ? 'text-danger' : 'text-success'}"/>
+                                    <span class="fw-bolder">
+                                        <t t-if="record.still_to_pay_total.raw_value &lt; 0">Overpaid (advance)</t>
+                                        <t t-else="">Still to pay</t>
+                                    </span>
+                                    <field name="still_to_pay_total" widget="monetary"
+                                           t-attf-class="fw-bolder fs-5 #{record.still_to_pay_total.raw_value &gt; 0 ? 'text-danger' : (record.still_to_pay_total.raw_value == 0 ? 'text-success' : '')}"/>
                                 </div>
                             </div>
 
-                            <!-- Always rendered (empty when nothing is pending) so
-                                 every card keeps the same height in the column. -->
+                            <!-- 3. NOT ALLOCATED: on-account money paid to this
+                                 employee but not applied to any year — it counts
+                                 in NO card's Paid figure until allocated. Rendered
+                                 on every open year so all cards keep the same
+                                 height, but the Allocate call-to-action only on
+                                 years that still NEED money — a settled year
+                                 offering "Allocate to this year" would invite
+                                 overpaying it; there the block turns muted and
+                                 the button space stays as an invisible spacer. -->
+                            <div t-if="record.unallocated_onaccount_amount.raw_value &gt; 0 and record.state.raw_value == 'open'"
+                                 class="mt-2 px-2 py-2 rounded"
+                                 t-attf-style="background:#{record.still_to_pay_total.raw_value &gt; 0 ? 'rgba(240,173,78,.14)' : 'transparent'}; font-variant-numeric:tabular-nums;">
+                                <t t-if="record.still_to_pay_total.raw_value &gt; 0">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <span class="small text-warning fw-bold text-truncate">
+                                            <i class="fa fa-exclamation-triangle me-1"/>Not allocated
+                                            <span class="badge rounded-pill"
+                                                  style="font-size:.62rem; background-color:#f0ad4e; color:#1c1c1c; font-weight:700;"><t t-esc="record.unallocated_onaccount_count.value"/></span>
+                                        </span>
+                                        <field name="unallocated_onaccount_amount" widget="monetary"
+                                               class="text-warning fw-bold flex-shrink-0 text-nowrap ms-2"/>
+                                    </div>
+                                    <div class="text-muted" style="font-size:.68rem; line-height:1.25;">
+                                        Paid to the employee but not applied to any year yet.
+                                    </div>
+                                    <button type="object" name="action_apply_payment"
+                                            class="btn btn-sm btn-warning w-100 mt-1"
+                                            groups="vpa_sales_commission.group_commission_manager">
+                                        <i class="fa fa-share me-1"/>Allocate to this year
+                                    </button>
+                                </t>
+                                <t t-else="">
+                                    <!-- Settled year: shows nothing — an exact
+                                         invisible mirror of the actionable variant
+                                         (same badge, same full-size amount line, same
+                                         caption, same button height) so the card
+                                         height stays identical. Plain div for the
+                                         button space — a div with a btn class trips
+                                         the view validator's simili-button check. -->
+                                    <div class="d-flex justify-content-between align-items-baseline" style="visibility:hidden;">
+                                        <span class="small fw-bold text-truncate">Not allocated
+                                            <span class="badge rounded-pill" style="font-size:.62rem;">0</span>
+                                        </span>
+                                        <span class="fw-bold flex-shrink-0 text-nowrap ms-2">0</span>
+                                    </div>
+                                    <div style="font-size:.68rem; line-height:1.25; visibility:hidden;">&#160;</div>
+                                    <div class="w-100 mt-1" style="height:29px; visibility:hidden;"></div>
+                                </t>
+                            </div>
+
+                            <!-- Always rendered with a FIXED height (fits max two
+                                 lines, overflow clipped) so every card keeps the
+                                 same height in the column regardless of wrapping. -->
                             <div class="text-muted mt-2"
-                                 style="font-size:.68rem; line-height:1.25; min-height:1.7rem;">
+                                 style="font-size:.68rem; line-height:1.25; height:1.7rem; overflow:hidden;">
                                 <t t-if="record.pending_count.raw_value">
-                                    <i class="fa fa-info-circle me-1"/>Approving the remaining
-                                    <t t-esc="record.pending_count.value"/> would raise what we owe him.
+                                    <i class="fa fa-info-circle me-1"/>
+                                    <t t-esc="record.pending_count.value"/> line(s) awaiting approval —
+                                    payable once approved.
                                 </t>
                                 <t t-else="">
                                     <i class="fa fa-check-circle me-1 text-success"/>Everything is approved.
@@ -269,8 +422,13 @@
                                 </button>
                                 <button type="object" name="action_view_pending_lines"
                                         t-attf-class="btn btn-sm flex-fill #{record.pending_count.raw_value ? 'btn-warning' : 'btn-outline-secondary'}">
-                                    <i class="fa fa-hourglass-half me-1"/>Approve
-                                    <t t-esc="record.pending_count.value"/>
+                                    <t t-if="record.pending_count.raw_value">
+                                        <i class="fa fa-hourglass-half me-1"/>Approve
+                                        <t t-esc="record.pending_count.value"/>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="fa fa-check me-1"/>No pending
+                                    </t>
                                 </button>
                             </div>
                             <footer class="pt-2 mt-2 border-top d-block">
@@ -299,10 +457,20 @@
                                             groups="vpa_sales_commission.group_commission_manager">
                                         <i class="fa fa-plus-circle"/> Bill Excess
                                     </button>
+                                    <!-- Pay only while money is still owed; a fully
+                                         settled year offers the actual next step —
+                                         Close Year — instead of inviting an overpay.
+                                         (An advance on a settled year is still
+                                         possible via Commission Payments → New.) -->
                                     <button type="object" name="action_register_payment" class="btn btn-sm btn-primary flex-fill"
-                                            t-if="record.state.raw_value == 'open'"
+                                            t-if="record.state.raw_value == 'open' and record.still_to_pay_total.raw_value &gt; 0"
                                             groups="vpa_sales_commission.group_commission_manager">
                                         <i class="fa fa-money"/> Pay
+                                    </button>
+                                    <button type="object" name="action_close_year" class="btn btn-sm btn-danger flex-fill"
+                                            t-if="record.state.raw_value == 'open' and record.still_to_pay_total.raw_value &lt;= 0"
+                                            groups="vpa_sales_commission.group_commission_manager">
+                                        <i class="fa fa-lock"/> Close Year
                                     </button>
                                 </div>
                             </footer>
@@ -340,6 +508,9 @@
                        options="{'currency_field': 'currency_id'}"/>
                 <field name="outstanding_cash" widget="monetary" string="Outstanding"
                        options="{'currency_field': 'currency_id'}" optional="show"/>
+                <field name="unallocated_onaccount_amount" widget="monetary" string="Not Allocated"
+                       options="{'currency_field': 'currency_id'}" optional="hide"
+                       decoration-warning="unallocated_onaccount_amount &gt; 0"/>
                 <field name="shortfall" widget="monetary"
                        options="{'currency_field': 'currency_id'}" sum="Shortfall"
                        decoration-danger="shortfall &gt; 0"/>
