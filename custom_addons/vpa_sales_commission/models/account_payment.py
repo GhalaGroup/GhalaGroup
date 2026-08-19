@@ -4,6 +4,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools.misc import formatLang
 
 
 class AccountPayment(models.Model):
@@ -49,6 +50,13 @@ class AccountPayment(models.Model):
              'modifier references, which raises AccessError for anyone without '
              'commission access. Computed with sudo, so it is safe to read.',
     )
+    commission_allocated_years = fields.Char(
+        string='Allocated To',
+        compute='_compute_commission_allocated_years',
+        help='Commission years this payment is applied to through allocations, '
+             'with the amount applied to each. Empty for payments linked to a '
+             'single year via Commission Year, and for unallocated payments.',
+    )
     commission_employee_partner_ids = fields.Many2many(
         'res.partner',
         string='Commission Employees',
@@ -62,6 +70,21 @@ class AccountPayment(models.Model):
     def _compute_commission_has_allocations(self):
         for pay in self:
             pay.commission_has_allocations = bool(pay.sudo().commission_allocation_ids)
+
+    @api.depends('commission_allocation_ids.scheme_year_id',
+                 'commission_allocation_ids.amount')
+    def _compute_commission_allocated_years(self):
+        for pay in self:
+            # sudo: same standard-form exposure as the other commission computes.
+            # formatLang: locale digits + currency symbol + correct decimal
+            # places — a hardcoded ',.2f' hid the currency entirely in the
+            # multi-currency payment list this column exists to clarify.
+            allocs = pay.sudo().commission_allocation_ids
+            pay.commission_allocated_years = ', '.join(
+                f"{a.scheme_year_id.year}: "
+                f"{formatLang(self.env, a.amount, currency_obj=a.currency_id)}"
+                for a in allocs
+            ) or False
 
     @api.depends_context('company')
     def _compute_commission_employee_partners(self):

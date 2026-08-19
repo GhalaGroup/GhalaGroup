@@ -36,6 +36,13 @@ class AccountMove(models.Model):
         help='Marks a rounding write-off entry created by the commission pay wizard.',
     )
 
+    commission_trueup = fields.Boolean(
+        string='Commission True-up Bill',
+        help='Marks an excess (true-up) bill generated from a commission year. '
+             'Used to number true-up runs structurally — the ref text is '
+             'translated and cannot be matched reliably.',
+    )
+
     def unlink(self):
         # Deleting a commission bill (guarantee or true-up) must also remove its
         # monthly spread entries — otherwise they survive as orphan expense and

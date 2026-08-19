@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.1.2',
+    'version': '19.0.2.3.1',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.1.2)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.1)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,55 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.3.1** - Cancelled MOs are automatically Not Applicable
+  - Cancelling a Manufacturing Order now cancels its PENDING commission
+    lines automatically (confirmed/paid lines stay - manager decision) and
+    the MO's commission status computes to Not Applicable by itself
+  - Generate Commission is refused on cancelled MOs
+  - Migration applies the same to MOs cancelled before the upgrade - no
+    more pressing "Mark Not Applicable" on old cancelled orders
+
+* **19.0.2.3.0** - On-account allocation workflow, Total to Pay card, hardening
+  - Year cards: amber "Not allocated" block whenever the employee has
+    on-account money not applied to any year, with a one-click Allocate
+    action (hidden on settled years; invisible spacer keeps equal heights)
+  - Apply Payment wizard rewritten as a reconciliation-style table: tick the
+    payments to apply, per-row amounts prefilled with the unallocated
+    remainder, live Total to Apply / Outstanding After, multi-apply in one
+    click. Strict validation: non-positive amounts on ticked rows are
+    rejected, never silently skipped
+  - Card redesign around plain language: Min. year commission (with USD
+    reference in the subtitle) as info, Total to Pay = max(guarantee, total
+    earned incl. pending) as the headline, Already Paid, Still to Pay.
+    Earned panel bar shows green (within guarantee) / white (above the
+    minimum) / red (below); payment bar shows cleared / pending
+    reconciliation / white overpaid tail. Fully settled years swap the Pay
+    button for Close Year
+  - Commission Payments list: "Allocated To" (years + amounts via
+    allocations) and "On Account" (unallocated remainder) columns
+  - Commission fields on the payment form now appear only for commission
+    payments (vendor is a commission employee, or the payment already
+    carries a year/allocations) - never on ordinary vendor payments
+  - True-up bills numbered per run (#2, #3...) via a structural flag -
+    stable under translation and cancellations; monthly deferral entries
+    carry the numbered ref
+  - Hardening: allocations into a closed year are blocked; reset-to-pending
+    respects the year lock and clears the close marker; migration backfills
+    paid_by_close for years closed under v2.1.x so reopening them reverts
+    correctly; card totals currency-rounded (FX residues no longer block the
+    Close Year button); Commission Centre computes batched (one payment
+    query per page instead of one per card)
+
+* **19.0.2.2.0** - Cleared vs issued payments, symmetric close/reopen
+  - Year card: "pending reconciliation" under Already Paid, and a split
+    progress bar (green = reconciled, striped amber = issued awaiting bank).
+    Paid still counts issued payments - the meaning of Outstanding is unchanged
+  - New fields Paid (Cleared) / Issued Not Cleared on the commission year
+  - Closing a settled year stamps the lines it flips to paid (paid_by_close);
+    reopening now reverts exactly those lines to confirmed. Previously reopen
+    left every line claiming paid, so an open year could carry paid lines
+    backed by a settlement that had been reopened
+
 * **19.0.2.1.2** - Fix: payment form blocked for users without commission access
   - The readonly modifier on the standard payment_type field named
     commission_allocation_ids. The web client fetches whatever a modifier

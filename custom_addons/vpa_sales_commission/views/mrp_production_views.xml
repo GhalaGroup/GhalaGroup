@@ -30,17 +30,21 @@
                         string="Commission Applied" class="btn-success"
                         invisible="state != 'done' or not commission_generated"
                         groups="vpa_sales_commission.group_commission_manager"/>
-                <!-- Not Applicable: visible when done, not blocked, not generated -->
+                <!-- Not Applicable: manual toggle — NEVER on a cancelled MO,
+                     which is Not Applicable automatically (no button to press,
+                     nothing to toggle back). -->
                 <button name="action_block_commission" type="object"
                         string="Not Applicable" class="btn-warning"
                         icon="fa-ban"
-                        invisible="commission_blocked or commission_generated"
+                        invisible="commission_blocked or commission_generated or state == 'cancel'"
                         groups="vpa_sales_commission.group_commission_user"/>
-                <!-- Remove Not Applicable: visible when blocked (manager only) -->
+                <!-- Remove Not Applicable: visible when blocked (manager only);
+                     pointless on a cancelled MO — the status stays Not
+                     Applicable regardless of the manual flag. -->
                 <button name="action_unblock_commission" type="object"
                         string="Remove Not Applicable" class="btn-danger"
                         icon="fa-unlock"
-                        invisible="not commission_blocked"
+                        invisible="not commission_blocked or state == 'cancel'"
                         groups="vpa_sales_commission.group_commission_manager"/>
             </xpath>
             <!-- Add commission tab -->

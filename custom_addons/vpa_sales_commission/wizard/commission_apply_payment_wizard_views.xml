@@ -17,27 +17,45 @@
                             <field name="company_id" invisible="1"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
-                        <group string="Payment on Account">
-                            <field name="payment_id" options="{'no_create': True}"/>
-                            <field name="payment_partner_id"/>
-                            <field name="payment_currency_id" invisible="1"/>
-                            <field name="payment_amount" widget="monetary"/>
-                            <field name="unallocated_amount" widget="monetary"/>
+                        <group string="After Applying">
+                            <field name="total_to_apply" widget="monetary" class="fw-bold"/>
+                            <field name="outstanding_after" widget="monetary"
+                                   decoration-danger="outstanding_after &gt; 0"
+                                   decoration-success="outstanding_after &lt;= 0"/>
                         </group>
                     </group>
-                    <group>
-                        <group>
+                    <separator string="On-Account Payments — tick the ones to apply"/>
+                    <field name="line_ids" nolabel="1">
+                        <list editable="bottom" create="false" delete="false"
+                              decoration-muted="not select">
+                            <!-- Plain checkbox, NOT boolean_toggle: the toggle
+                                 widget writes the value directly and skips the
+                                 row's onchange round-trip in dialogs, so the
+                                 amount prefill and the wizard totals never ran. -->
+                            <field name="select"/>
+                            <field name="payment_id" readonly="1" force_save="1"/>
+                            <field name="date"/>
+                            <field name="journal_id" optional="show"/>
+                            <field name="memo" optional="show"/>
+                            <field name="partner_id" optional="hide"/>
+                            <field name="payment_currency_id" column_invisible="1"/>
+                            <field name="payment_amount" widget="monetary"
+                                   options="{'currency_field': 'payment_currency_id'}"/>
+                            <field name="unallocated_amount" widget="monetary"
+                                   options="{'currency_field': 'payment_currency_id'}"/>
                             <field name="amount_to_apply" widget="monetary"
-                                   class="oe_inline fw-bold"/>
-                        </group>
-                    </group>
-                    <div class="alert alert-info" role="status">
-                        Only part of the payment can be applied — the remainder stays
+                                   options="{'currency_field': 'payment_currency_id'}"
+                                   class="fw-bold"/>
+                        </list>
+                    </field>
+                    <div class="alert alert-info mt-3" role="status">
+                        A payment can be applied <strong>partially</strong> — the remainder stays
                         <strong>on account</strong> and can be applied to another year later.
+                        Ticking a row prefills its full unallocated amount; adjust it as needed.
                     </div>
                 </sheet>
                 <footer>
-                    <button name="action_apply" string="Apply" type="object"
+                    <button name="action_apply" string="Apply Selected" type="object"
                             class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>

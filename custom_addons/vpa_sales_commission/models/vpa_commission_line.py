@@ -243,6 +243,15 @@ class VpaCommissionLine(models.Model):
         ('paid', 'Paid'),
     ], string='Bill Status', compute='_compute_bill_state', store=True)
 
+    paid_by_close = fields.Boolean(
+        string='Marked Paid by Year Close',
+        default=False,
+        copy=False,
+        help='Set when closing a settled year flipped this line from confirmed '
+             'to paid. Reopening the year reverts exactly these lines — lines '
+             'paid any other way (per-line payment, bill) are never touched.',
+    )
+
     # Year lock
     year_locked = fields.Boolean(
         string='Year Locked',
@@ -461,6 +470,10 @@ class VpaCommissionLine(models.Model):
 
     def action_reset_to_pending(self):
         """Reset confirmed, paid, or cancelled lines back to pending."""
+        # Lines of a closed year must be reopened first — resetting them would
+        # desync the year's settled totals (and leave a stale paid_by_close
+        # marker for the next reopen to mis-revert).
+        self._check_year_locked()
         for line in self:
             if line.state not in ('confirmed', 'paid', 'cancelled'):
                 raise UserError(_('Only confirmed, paid, or cancelled commission lines can be reset to pending.'))
@@ -471,6 +484,7 @@ class VpaCommissionLine(models.Model):
                 'paid_date': False,
                 'paid_by': False,
                 'payment_id': False,
+                'paid_by_close': False,
             })
 
     def action_view_bill(self):

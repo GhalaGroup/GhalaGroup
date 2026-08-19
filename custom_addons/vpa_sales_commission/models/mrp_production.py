@@ -62,22 +62,25 @@ class MrpProduction(models.Model):
         for production in self:
             production.commission_generated = bool(production.commission_line_ids)
 
-    @api.depends('commission_line_ids', 'commission_line_ids.state', 'commission_blocked')
+    @api.depends('commission_line_ids', 'commission_line_ids.state', 'commission_blocked', 'state')
     def _compute_commission_status(self):
         for production in self:
+            states = set(production.commission_line_ids.mapped('state'))
+            active_states = states - {'cancelled'}
             if production.commission_blocked:
+                production.commission_status = 'not_applicable'
+            elif production.state == 'cancel' and not active_states:
+                # A cancelled MO produces nothing — no commission applies,
+                # automatically, without anyone pressing "Mark Not Applicable".
                 production.commission_status = 'not_applicable'
             elif not production.commission_line_ids:
                 production.commission_status = 'none'
+            elif not active_states:
+                production.commission_status = 'cancelled'
+            elif active_states == {'paid'}:
+                production.commission_status = 'paid'
             else:
-                states = set(production.commission_line_ids.mapped('state'))
-                active_states = states - {'cancelled'}
-                if not active_states:
-                    production.commission_status = 'cancelled'
-                elif active_states == {'paid'}:
-                    production.commission_status = 'paid'
-                else:
-                    production.commission_status = 'applied'
+                production.commission_status = 'applied'
 
     @api.depends('move_raw_ids', 'move_raw_ids.state', 'move_raw_ids.product_id', 'move_raw_ids.quantity')
     def _compute_commission_base_amount(self):
@@ -105,9 +108,29 @@ class MrpProduction(models.Model):
             'target': 'self',
         }
 
+    def action_cancel(self):
+        """Cancelling an MO drops its pending commission automatically.
+
+        Pending lines of a cancelled production would otherwise linger as
+        payable commission for work that will never happen. Confirmed or paid
+        lines are NOT touched — those were manager decisions and need an
+        explicit manager reversal.
+        """
+        res = super().action_cancel()
+        # sudo: the user cancelling the MO may have no commission access at
+        # all (commission_line_ids is manager-gated); the cleanup must still
+        # happen. Year-locked lines stay — closed years are immutable.
+        pending = self.sudo().commission_line_ids.filtered(
+            lambda l: l.state == 'pending' and not l.year_locked)
+        if pending:
+            pending.write({'state': 'cancelled'})
+        return res
+
     def action_generate_commission(self):
         """Create and open the commission generation wizard."""
         self.ensure_one()
+        if self.state == 'cancel':
+            raise UserError(_('This Manufacturing Order is cancelled — no commission applies.'))
         if self.commission_blocked:
             raise UserError(_('Commission generation is blocked for this Manufacturing Order.'))
 
