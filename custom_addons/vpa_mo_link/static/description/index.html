@@ -511,7 +511,7 @@
 
     <!-- Badges -->
     <div class="badge-container">
-        <span class="badge badge-version">Version 19.0.1.3.0</span>
+        <span class="badge badge-version">Version 19.0.1.3.2</span>
         <span class="badge badge-odoo">Odoo 19.0 Enterprise</span>
         <span class="badge badge-license">OPL-1 Licensed</span>
         <span class="badge badge-price">💰 $199 USD</span>
@@ -863,7 +863,34 @@
             <h2>📅 Version History</h2>
 
             <div class="info-box">
-                <h3>Version 19.0.1.3.0 (Latest)</h3>
+                <h3>Version 19.0.1.3.2 (Latest)</h3>
+                <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> August 2026</p>
+                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">Bug Fixes</h4>
+                <ul>
+                    <li><strong>MO List Column Widths:</strong> Reference and Start date columns no longer truncated when the Manufacturing Orders list is loaded or refreshed</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>Version 19.0.1.3.1</h3>
+                <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> February 2026</p>
+                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">New Features</h4>
+                <ul>
+                    <li><strong>Order-Specific BOM Linking:</strong> Link a BOM to a specific Sales Order for custom production</li>
+                    <li><strong>Copy from BOM Wizard:</strong> Quickly create a new BOM by copying an existing one</li>
+                </ul>
+                <h4 style="color: #DC143C; margin-top: 20px; margin-bottom: 10px;">Bug Fixes</h4>
+                <ul>
+                    <li><strong>MO-to-Delivery Move Linking:</strong> Fixed finished goods moves not linking to delivery moves</li>
+                    <li><strong>MO Quantity Preserved:</strong> MO quantity no longer reset when a BOM is assigned</li>
+                    <li><strong>Production Summary:</strong> Fixed summary showing all MOs for every Sales Order line</li>
+                    <li><strong>Draft MO Reservations:</strong> Removed MTO chain linking so draft MOs no longer block delivery reservations</li>
+                    <li><strong>Chatter Rendering:</strong> Fixed HTML rendering in chatter messages</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>Version 19.0.1.3.0</h3>
                 <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> February 2026</p>
                 <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">New Features</h4>
                 <ul>
