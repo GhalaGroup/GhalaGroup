@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.3.0',
+    'version': '19.0.2.3.1',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.0)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.1)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,14 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.3.1** - Cancelled MOs are automatically Not Applicable
+  - Cancelling a Manufacturing Order now cancels its PENDING commission
+    lines automatically (confirmed/paid lines stay - manager decision) and
+    the MO's commission status computes to Not Applicable by itself
+  - Generate Commission is refused on cancelled MOs
+  - Migration applies the same to MOs cancelled before the upgrade - no
+    more pressing "Mark Not Applicable" on old cancelled orders
+
 * **19.0.2.3.0** - On-account allocation workflow, Total to Pay card, hardening
   - Year cards: amber "Not allocated" block whenever the employee has
     on-account money not applied to any year, with a one-click Allocate
