@@ -1,0 +1,749 @@
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Unit of Measure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.7;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path fill="rgba(255,255,255,0.05)" d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25"/><path fill="rgba(255,255,255,0.05)" d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5"/><path fill="rgba(255,255,255,0.1)" d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"/></svg>') center bottom no-repeat;
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            margin: 0 0 20px 0;
+            font-size: 3.5em;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.4em;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .badge-container {
+            text-align: center;
+            padding: 25px 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px 8px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .badge-version {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .badge-odoo {
+            background: linear-gradient(135deg, #875A7B, #6b4862);
+            color: white;
+        }
+
+        .badge-license {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .badge-price {
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            font-size: 1.15em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section h2 {
+            color: #1e293b;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #DC143C, #B22222);
+            border-radius: 2px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #DC143C, #ff6b6b, #875A7B);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            border-color: #DC143C;
+        }
+
+        .feature-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+            filter: grayscale(0.2);
+        }
+
+        .feature-card h3 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .workflow-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .workflow-step {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #DC143C;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            margin: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.2);
+            background: white;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #DC143C;
+            font-weight: bold;
+        }
+
+        .workflow-step:last-child::after {
+            content: '';
+        }
+
+        .workflow-step strong {
+            display: block;
+            color: #DC143C;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .pricing-box {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 50px 0;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pricing-box h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-box h2::after {
+            display: none;
+        }
+
+        .price {
+            font-size: 4em;
+            font-weight: 800;
+            margin: 25px 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .price-details {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 15px 0 15px 40px;
+            position: relative;
+            font-size: 1.1em;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .benefits-list li:hover {
+            color: #1e293b;
+            transform: translateX(5px);
+        }
+
+        .benefits-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.5em;
+            background: #d1fae5;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            top: 12px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #fdf2f4 0%, #fce8ec 100%);
+            border-left: 5px solid #DC143C;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.1);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .comparison-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: #1e293b;
+            width: 35%;
+        }
+
+        .comparison-table tr:hover td {
+            background: #fdf2f4;
+            color: #1e293b;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .footer a {
+            color: #ff6b6b;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #fda4af;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .section h2 {
+                font-size: 2em;
+            }
+
+            .workflow {
+                flex-direction: column;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -35px;
+                transform: translateX(50%);
+            }
+
+            .price {
+                font-size: 3em;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background: #DC143C;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>📏 VPA Unit of Measure</h1>
+        <p>Product-Specific Alternative Units of Measure for Odoo 19</p>
+    </div>
+
+    <!-- Badges -->
+    <div class="badge-container">
+        <span class="badge badge-version">Version 19.0.1.1.0</span>
+        <span class="badge badge-odoo">Odoo 19.0 Enterprise</span>
+        <span class="badge badge-license">OPL-1 Licensed</span>
+        <span class="badge badge-price">💰 $79 USD</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>📋 Overview</h2>
+            <p style="font-size: 1.2em; line-height: 1.8; color: #555;">
+                <strong>VPA Unit of Measure</strong> provides product-specific alternative units of measure with
+                custom conversion factors. Similar to SAP's Alternative Unit of Measure (AUoM) functionality,
+                this module allows you to define <strong>different conversion factors for the same UoM across
+                different products</strong> — something standard Odoo cannot do.
+            </p>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #666; margin-top: 20px;">
+                For example: 1 Board = <strong>2.9768 m²</strong> for MDF 18mm, but 1 Board = <strong>2.88 m²</strong> for OSB.
+                Store your stock in the base unit, then sell, buy, transfer, and manufacture in the units your
+                customers and suppliers actually use — with automatic conversion everywhere.
+            </p>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #666; margin-top: 20px;">
+                VPA Unit of Measure is also the <strong>foundation module</strong> of the VPA suite, used by
+                VPA SKU Generator and other VPA apps.
+            </p>
+        </div>
+
+        <!-- Key Features -->
+        <div class="section">
+            <h2>✨ Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">📐</span>
+                    <h3>Product-Specific Conversions</h3>
+                    <p>Define unique conversion factors per product, like SAP AUoM. 1 Board = 2.9768 m² for MDF, but 2.88 m² for OSB — each product keeps its own factor.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🛒</span>
+                    <h3>Sales Integration</h3>
+                    <p>Sell in alternative UoM with automatic conversion to the base UoM. The customer sees Boards, your stock stays in m².</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📦</span>
+                    <h3>Purchase Integration</h3>
+                    <p>Buy in alternative UoM (pallets, boxes, packs). Order and invoice in the supplier's unit while stock is kept in yours.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🏭</span>
+                    <h3>Stock &amp; Manufacturing</h3>
+                    <p>Transfer inventory using any configured UoM and use alternative UoM in BOMs and production orders for flexible unit handling.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Enhanced Stock Views</h3>
+                    <p>See stock on hand in both base and alternative UoM across list, kanban, and stock reports — all alternative UoMs displayed.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔖</span>
+                    <h3>Barcode Support</h3>
+                    <p>Assign unique barcodes to each alternative UoM. Scan in stock operations and auto-fill with the correct conversion.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📦</span>
+                    <h3>Packaging Fields</h3>
+                    <p>Qty per package and packaging name fields on each conversion, with barcode uniqueness validation across products and packagings.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚙️</span>
+                    <h3>Configurable Rounding</h3>
+                    <p>Set decimal precision per conversion with 4-decimal accuracy (16, 4) for exact factors like 2.9768.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">💾</span>
+                    <h3>Backup &amp; Restore</h3>
+                    <p>Export and import conversions at any time, with automatic backup before uninstall. Multi-company support with separate factors per company.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section">
+            <h2>🔄 How It Works</h2>
+
+            <div class="workflow-container">
+                <h3 style="color: #DC143C; margin-top: 0;">Get Started in 3 Simple Steps</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Install &amp; Configure<br>
+                        <span style="font-size: 0.9em; color: #64748b;">Install "VPA Unit of Measure" and configure via Inventory → Configuration</span>
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Define Conversions<br>
+                        <span style="font-size: 0.9em; color: #64748b;">Open the product form → Alternative UoM tab and add e.g. 1 Board = 2.9768 m²</span>
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Use Everywhere<br>
+                        <span style="font-size: 0.9em; color: #64748b;">Sell in Boards, stock adjusts in m² — view stock in both UoMs in reports</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #B22222;">💡 Typical Use Cases</h3>
+                <ul style="font-size: 1.05em; line-height: 1.9; margin-left: 20px;">
+                    <li><strong>🪵 Sheet Materials:</strong> Plywood, MDF — store in m², sell in Boards</li>
+                    <li><strong>🧪 Liquids:</strong> Store in liters, sell in bottles/containers</li>
+                    <li><strong>🧵 Textiles:</strong> Store in meters, sell in rolls</li>
+                    <li><strong>🔩 Hardware:</strong> Store in units, sell in boxes/packs</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Technical Specifications -->
+        <div class="section">
+            <h2>⚙️ Technical Specifications</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Module Information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Module Name</td>
+                        <td>VPA Unit of Measure</td>
+                    </tr>
+                    <tr>
+                        <td>Technical Name</td>
+                        <td>vpa_uom</td>
+                    </tr>
+                    <tr>
+                        <td>Version</td>
+                        <td>19.0.1.1.0</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>Inventory/Inventory</td>
+                    </tr>
+                    <tr>
+                        <td>License</td>
+                        <td>OPL-1 (Odoo Proprietary License)</td>
+                    </tr>
+                    <tr>
+                        <td>Author</td>
+                        <td>VPA Solutions Limited</td>
+                    </tr>
+                    <tr>
+                        <td>Odoo Version</td>
+                        <td>19.0 Enterprise</td>
+                    </tr>
+                    <tr>
+                        <td>Dependencies</td>
+                        <td>product, stock, sale_stock, purchase_stock, mrp, uom</td>
+                    </tr>
+                    <tr>
+                        <td>Decimal Precision</td>
+                        <td>4 decimal places (16, 4)</td>
+                    </tr>
+                    <tr>
+                        <td>Price</td>
+                        <td>$79.00 USD (one-time purchase)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- What's Included -->
+        <div class="section">
+            <h2>📦 What's Included</h2>
+            <ul class="benefits-list">
+                <li><strong>Product-Specific UoM Conversions:</strong> Unlimited conversions per product with custom factors</li>
+                <li><strong>Full Integration:</strong> Sales, Purchase, Stock Transfers, and Manufacturing (MRP)</li>
+                <li><strong>Enhanced Stock Views:</strong> Alternative UoM quantities in list, kanban, and stock reports</li>
+                <li><strong>Barcode Field with Scanning:</strong> Unique barcodes per alternative UoM for stock operations</li>
+                <li><strong>Packaging Display:</strong> Qty per package and packaging name fields</li>
+                <li><strong>Multi-Company Support:</strong> Each company can have its own conversion factors</li>
+                <li><strong>Role-Based Security:</strong> User, Manager, and Administrator access levels</li>
+                <li><strong>Backup &amp; Restore:</strong> Export/import conversions, auto-backup before uninstall</li>
+                <li><strong>4-Decimal Precision:</strong> Configurable rounding per conversion</li>
+                <li><strong>Professional Support:</strong> Email support from VPA Solutions Limited</li>
+            </ul>
+        </div>
+
+        <!-- Version History -->
+        <div class="section">
+            <h2>📅 Version History</h2>
+
+            <div class="info-box">
+                <h3>Version 19.0.1.1.0 (Latest)</h3>
+                <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> December 31, 2025 — Barcode &amp; Packaging Integration</p>
+                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">New Features</h4>
+                <ul style="margin-left: 20px;">
+                    <li>Added barcode field to alternative UoM conversions</li>
+                    <li>Added qty_per_package and packaging_name fields</li>
+                    <li>Barcode uniqueness validation across products and packagings</li>
+                    <li>Stock barcode scanning integration (optional)</li>
+                    <li>All alternative UoMs display in stock reports</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3>Version 19.0.1.0.0</h3>
+                <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> December 29, 2025 — Initial release for Odoo 19</p>
+                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">Core Features</h4>
+                <ul style="margin-left: 20px;">
+                    <li>Product-specific UoM conversions with custom factors</li>
+                    <li>Sales integration - sell in alternative UoM</li>
+                    <li>Purchase integration - buy in alternative UoM</li>
+                    <li>Stock transfers using any configured UoM</li>
+                    <li>Manufacturing support - use alternative UoM in BOMs</li>
+                    <li>Enhanced stock views with alternative UoM display</li>
+                </ul>
+                <h4 style="color: #856404; margin-top: 20px; margin-bottom: 10px;">Configuration Options</h4>
+                <ul style="margin-left: 20px;">
+                    <li>Configurable rounding precision per conversion</li>
+                    <li>Multi-company support with separate factors</li>
+                    <li>Role-based security (User, Manager, Admin)</li>
+                    <li>Backup &amp; restore for conversions</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="pricing-box">
+            <h2>💰 Pricing</h2>
+            <div class="price">$79 USD</div>
+            <div class="price-details">
+                <p><strong>One-Time Purchase</strong> • No Monthly Fees</p>
+                <p>✓ Lifetime Updates for Purchased Version</p>
+                <p>✓ Email Support Included</p>
+                <p>✓ No User Limits — All Features Included</p>
+                <p>✓ Multi-Company Support</p>
+            </div>
+        </div>
+
+        <!-- Support & Contact -->
+        <div class="section">
+            <h2>💬 Support &amp; Contact</h2>
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #B22222;">VPA Solutions Limited</h3>
+                <p style="font-size: 1.1em;"><strong>Email:</strong> <a href="mailto:info@vpa.co.tz" style="color: #DC143C;">info@vpa.co.tz</a></p>
+                <p style="font-size: 1.1em;"><strong>Website:</strong> <a href="https://www.vpa.co.tz" style="color: #DC143C;">www.vpa.co.tz</a></p>
+                <p style="font-size: 1.1em;"><strong>Response Time:</strong> Within 24 hours (business days)</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>VPA Unit of Measure</h3>
+        <p>Professional Odoo Module Development by VPA Solutions Limited</p>
+        <p style="margin: 20px 0;">
+            <a href="mailto:info@vpa.co.tz">info@vpa.co.tz</a> |
+            <a href="https://www.vpa.co.tz">www.vpa.co.tz</a>
+        </p>
+        <p style="font-size: 0.9em; opacity: 0.8; margin-top: 25px;">
+            Copyright © 2025 VPA Solutions Limited. All rights reserved. | Licensed under OPL-1
+        </p>
+        <p style="font-size: 0.85em; opacity: 0.7; margin-top: 10px;">
+            Odoo and the Odoo logo are registered trademarks of Odoo S.A.
+        </p>
+    </div>
+
+</body>
+</html>
