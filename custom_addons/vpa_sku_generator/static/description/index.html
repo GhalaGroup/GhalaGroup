@@ -246,6 +246,40 @@
     </div>
 </section>
 
+<!-- Version History -->
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#875A7B;">Version History</h2>
+        <div class="oe_span12">
+            <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:10px 0;">
+                <h4 style="color:#875A7B;">19.0.1.2.0 (Latest) — July 2026</h4>
+                <ul style="font-size:15px; line-height:1.8;">
+                    <li>Critical sequence integrity fix: sequences no longer restart low and produce duplicate SKUs after a sequence-code rename</li>
+                    <li>Sequences now self-heal — next number is always past the highest existing SKU for the prefix</li>
+                    <li>Prefix-based max-SKU detection (covers archived and re-categorised products)</li>
+                    <li>Migration reconciles all existing category sequences on upgrade</li>
+                    <li>Fixed variant SKUs: correct -001/-002 numbering and no more blank variant codes when creating a product together with its variants</li>
+                </ul>
+            </div>
+            <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:10px 0;">
+                <h4 style="color:#875A7B;">19.0.1.1.0 — July 2026</h4>
+                <ul style="font-size:15px; line-height:1.8;">
+                    <li>New SKU Audit feature: Inventory → Configuration → SKU Audit to scan and fix SKU integrity issues</li>
+                    <li>Detects template/variant code mismatch, duplicate codes, missing codes, and multi-variant irregularities</li>
+                    <li>Fix by aligning variant to template or regenerating from category sequence</li>
+                    <li>Freed codes sent to the recycle pool; old→new reference logged on product chatter for traceability</li>
+                </ul>
+            </div>
+            <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin:10px 0;">
+                <h4 style="color:#875A7B;">19.0.1.0.7 — February 2026</h4>
+                <ul style="font-size:15px; line-height:1.8;">
+                    <li>Internal Reference field always readonly (auto-generated SKUs cannot be manually edited)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- License & Copyright -->
 <section class="oe_container">
     <div class="oe_row">
@@ -254,7 +288,7 @@
             <div class="text-center" style="color:#666;">
                 <p><strong>License:</strong> OPL-1 (Odoo Proprietary License)</p>
                 <p><strong>Copyright:</strong> © 2025 VPA Solutions Limited</p>
-                <p><strong>Version:</strong> 19.0.1.0.7</p>
+                <p><strong>Version:</strong> 19.0.1.2.0</p>
                 <p><strong>Price:</strong> $79.99 USD</p>
                 <p style="margin-top:20px;">
                     This is commercial software. Purchase required for use.

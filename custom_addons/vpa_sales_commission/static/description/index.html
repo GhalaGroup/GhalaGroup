@@ -158,7 +158,7 @@
     </tr>
     <tr style="border-bottom: 1px solid #DC143C;">
         <td style="padding: 12px 15px; font-weight: bold;">Version</td>
-        <td style="padding: 12px 15px;">19.0.2.0.11</td>
+        <td style="padding: 12px 15px;">19.0.2.3.1</td>
     </tr>
     <tr style="border-bottom: 1px solid #DC143C;">
         <td style="padding: 12px 15px; font-weight: bold;">License</td>
@@ -239,7 +239,55 @@
 <h2 style="color: #DC143C; border-bottom: 2px solid #DC143C; padding-bottom: 10px;">Version History</h2>
 
 <div style="border-left: 4px solid #DC143C; padding-left: 20px; margin-bottom: 25px;">
-    <h3 style="color: #DC143C; margin-bottom: 5px;">Version 19.0.2.0.11</h3>
+    <h3 style="color: #DC143C; margin-bottom: 5px;">Version 19.0.2.3.1 (Latest)</h3>
+    <p style="margin: 5px 0; font-weight: bold;">Cancelled MOs are automatically Not Applicable (August 2026)</p>
+    <ul style="margin: 5px 0;">
+        <li><b>Automatic cancellation</b>: cancelling a Manufacturing Order cancels its pending commission lines (confirmed/paid lines stay - manager decision)</li>
+        <li><b>Not Applicable by itself</b>: the MO's commission status computes to Not Applicable for cancelled MOs</li>
+        <li><b>Generate Commission refused</b> on cancelled MOs</li>
+        <li><b>Migration</b> applies the same to MOs cancelled before the upgrade</li>
+    </ul>
+</div>
+
+<div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin-bottom: 15px;">
+    <h3 style="color: #B22222; margin-bottom: 5px;">Version 19.0.2.3.0</h3>
+    <p style="margin: 5px 0; font-weight: bold;">On-account allocation workflow, Total to Pay card, hardening (August 2026)</p>
+    <ul style="margin: 5px 0;">
+        <li><b>Not allocated block</b> on year cards whenever the employee has on-account money not applied to any year, with a one-click Allocate action</li>
+        <li><b>Apply Payment wizard</b> rewritten as a reconciliation-style multi-select table: tick payments to apply, prefilled per-row amounts, live totals, strict validation</li>
+        <li><b>Card redesign</b>: Total to Pay headline (max of guarantee and total earned), Min. year commission with USD reference, Already Paid, Still to Pay; earned and payment bars with above-minimum and overpaid segments; settled years swap Pay for Close Year</li>
+        <li><b>Allocated To / On Account</b> columns in the Commission Payments list</li>
+        <li><b>Payment form</b>: commission fields appear only on commission payments, never on ordinary vendor payments</li>
+        <li><b>True-up bills numbered per run</b> (#2, #3...) - stable under translation and cancellations</li>
+        <li><b>Hardening</b>: closed-year allocation guard, reset respects the year lock, currency-rounded card totals, batched Commission Centre computes</li>
+    </ul>
+</div>
+
+<div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin-bottom: 15px;">
+    <h3 style="color: #B22222; margin-bottom: 5px;">Version 19.0.2.2.0</h3>
+    <p style="margin: 5px 0; font-weight: bold;">Cleared vs issued payments, symmetric close/reopen (August 2026)</p>
+    <ul style="margin: 5px 0;">
+        <li><b>Pending reconciliation</b> shown under Already Paid, with a split progress bar (reconciled vs issued awaiting bank)</li>
+        <li><b>New fields</b> Paid (Cleared) / Issued Not Cleared on the commission year</li>
+        <li><b>Symmetric close/reopen</b>: closing a settled year stamps the lines it flips to paid; reopening reverts exactly those lines to confirmed</li>
+    </ul>
+</div>
+
+<div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin-bottom: 15px;">
+    <h3 style="color: #B22222; margin-bottom: 5px;">Version 19.0.2.1.0</h3>
+    <p style="margin: 5px 0; font-weight: bold;">Commission per item, closed-year protection, clearer year card (August 2026)</p>
+    <ul style="margin: 5px 0;">
+        <li><b>Commission Per Item</b> on the Generate wizard, commission line form and list, and the Commission by MO report</li>
+        <li><b>Commissionable total</b> on materials lists - the plain sum counted excluded lines and contradicted the Base Amount</li>
+        <li><b>Closed-year protection</b>: closing a year now blocks new commission from landing in it (generate wizard, manual wizard, imports and direct ORM alike)</li>
+        <li><b>Year card rewritten</b> in plain language (what he earned / what we pay him) with the payable amount tagged guarantee or approved</li>
+        <li><b>Fix (2.1.2)</b>: payment form no longer blocked for users without commission access</li>
+        <li><b>Fix (2.1.1)</b>: distinct label for Payment Currency on the Apply Payment wizard</li>
+    </ul>
+</div>
+
+<div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #B22222; margin-bottom: 15px;">
+    <h3 style="color: #B22222; margin-bottom: 5px;">Version 19.0.2.0.11</h3>
     <p style="margin: 5px 0; font-weight: bold;">Stabilisation &amp; usability wave (July 2026)</p>
     <ul style="margin: 5px 0;">
         <li><b>Manual Commission</b> in the Generate wizard: tick to type the total, per-employee amount or rate directly; Extra vs Standard displayed</li>

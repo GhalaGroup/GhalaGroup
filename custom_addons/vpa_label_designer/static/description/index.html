@@ -1,0 +1,793 @@
+<!-- Copyright (C) 2025 VPA Solutions Limited -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPA Label Designer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.7;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 60%, #8B0000 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+            animation: shimmer 15s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(20%, 20%) rotate(180deg); }
+        }
+
+        .header h1 {
+            margin: 0 0 20px 0;
+            font-size: 3.5em;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.4em;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .badge-container {
+            text-align: center;
+            padding: 25px 20px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px 8px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .badge-version {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .badge-odoo {
+            background: linear-gradient(135deg, #875A7B, #6B4868);
+            color: white;
+        }
+
+        .badge-license {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .badge-price {
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            color: white;
+            font-size: 1.15em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section h2 {
+            color: #1e293b;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #DC143C, #ff6b6b);
+            border-radius: 2px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #DC143C, #ff6b6b, #875A7B);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(220, 20, 60, 0.15);
+            border-color: #DC143C;
+        }
+
+        .feature-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+            filter: grayscale(0.2);
+        }
+
+        .feature-card h3 {
+            color: #1e293b;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            margin: 0;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .workflow-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .workflow-step {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #DC143C;
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            margin: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.2);
+            background: white;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #DC143C;
+            font-weight: bold;
+        }
+
+        .workflow-step:last-child::after {
+            content: '';
+        }
+
+        .workflow-step strong {
+            display: block;
+            color: #DC143C;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .pricing-box {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 60%, #8B0000 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 50px 0;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pricing-box h2 {
+            color: white;
+            border: none;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-box h2::after {
+            display: none;
+        }
+
+        .price {
+            font-size: 4em;
+            font-weight: 800;
+            margin: 25px 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .price-details {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 15px 0 15px 40px;
+            position: relative;
+            font-size: 1.1em;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .benefits-list li:hover {
+            color: #1e293b;
+            transform: translateX(5px);
+        }
+
+        .benefits-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.5em;
+            background: #d1fae5;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            top: 12px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #fdeef1 0%, #fbdce3 100%);
+            border-left: 5px solid #DC143C;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.08);
+        }
+
+        .specs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .specs-table th {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .specs-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .specs-table td:first-child {
+            font-weight: 600;
+            color: #1e293b;
+            width: 35%;
+        }
+
+        .specs-table tr:hover td {
+            background: #fdf5f6;
+            color: #1e293b;
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .footer a {
+            color: #ff8fa3;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #ffb3c1;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .section h2 {
+                font-size: 2em;
+            }
+
+            .workflow {
+                flex-direction: column;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -35px;
+                transform: translateX(50%);
+            }
+
+            .price {
+                font-size: 3em;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background: #DC143C;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🏷️ VPA Label Designer</h1>
+        <p>Design &amp; Print ZPL Labels to Zebra Printers from Odoo 19</p>
+    </div>
+
+    <!-- Badges -->
+    <div class="badge-container">
+        <span class="badge badge-version">Version 19.0.1.0.0</span>
+        <span class="badge badge-odoo">Odoo 19.0 Enterprise</span>
+        <span class="badge badge-license">OPL-1 Licensed</span>
+        <span class="badge badge-price">💰 $299 USD</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Overview Section -->
+        <div class="section">
+            <h2>📋 Overview</h2>
+            <p style="font-size: 1.2em; line-height: 1.8; color: #555;">
+                <strong>VPA Label Designer</strong> brings professional thermal label design and printing to Odoo 19 Enterprise.
+                Design labels on a visual canvas with text, barcodes, QR codes, dynamic variables, lines, boxes, and images —
+                then print directly to Zebra printers over the network or through the Zebra Browser Print SDK.
+                The module generates native ZPL II code for every element, so labels print pixel-perfect at true printer resolution.
+            </p>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #666; margin-top: 20px;">
+                Print product labels from <strong>Products, Purchase Orders, Manufacturing Orders, Stock Pickings, and Lots</strong>,
+                with quantities pre-filled from document lines and fully editable before printing. Dynamic variables resolve real
+                record data — including product variants, packaging, prices with automatic VAT notes, and alternative Units of
+                Measure — at print time.
+            </p>
+        </div>
+
+        <!-- Key Features -->
+        <div class="section">
+            <h2>✨ Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🎨</span>
+                    <h3>Visual Template Designer</h3>
+                    <p>Design labels on an interactive drag-and-drop canvas with a grid overlay. Position text, barcodes, QR codes, variables, lines, boxes, and images exactly where you want them.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📐</span>
+                    <h3>Label Size Management</h3>
+                    <p>Create custom label sizes with automatic millimeter-to-dots conversion for your printer's resolution, including RFID-capable label formats.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3>Native ZPL II Engine</h3>
+                    <p>Every element is compiled to Zebra Programming Language (ZPL II) — the printer's native language — for crisp, fast, reliable output on any Zebra thermal printer.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔤</span>
+                    <h3>Dynamic Variables</h3>
+                    <p>Resolve any field with dot-notation paths (e.g. product_id.categ_id.name). Built-in variables cover product data, variants, packaging, prices with automatic Incl./Excl. VAT notes, and more.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">👁️</span>
+                    <h3>Live Label Preview</h3>
+                    <p>See a rendered preview of your label — including barcodes — while designing, so what you approve on screen is exactly what prints on the roll.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🖨️</span>
+                    <h3>Direct Network Printing</h3>
+                    <p>Send ZPL straight to Zebra printers over TCP (port 9100), or print client-side via the Zebra Browser Print SDK. Per-printer X/Y offsets fine-tune physical alignment.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📦</span>
+                    <h3>Multi-Source Printing</h3>
+                    <p>Print labels from Products, Purchase Orders, Manufacturing Orders, Stock Pickings, and Lots. Quantities are pre-filled from document lines and editable before printing.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚖️</span>
+                    <h3>Alternative UoM Support</h3>
+                    <p>Switch the label's Unit of Measure using VPA UoM alternative conversions — print carton labels, pack labels, and unit labels from the same template.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📡</span>
+                    <h3>RFID Encoding</h3>
+                    <p>Encode EPC Gen2 / UHF RFID tags at print time via the ZPL ^RFW command — combine printed content and RFID data on a single label.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📋</span>
+                    <h3>Copy &amp; Reuse Elements</h3>
+                    <p>Copy elements from one template to another with automatic scaling to the target label size — build new formats in minutes, not hours.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">💾</span>
+                    <h3>Backup &amp; Restore</h3>
+                    <p>Export label templates to a file and restore them on any database — move designs between test and production, or share them across companies.</p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🏢</span>
+                    <h3>Multi-Company &amp; Security</h3>
+                    <p>Full multi-company support with record rules, plus dedicated User and Manager access groups to control who designs and who prints.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section">
+            <h2>🔄 How It Works</h2>
+
+            <div class="workflow-container">
+                <h3 style="color: #DC143C; margin-top: 0;">From Design to Printed Label</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Define Label Size (mm auto-converted to dots)
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Design Template on the Visual Canvas
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Preview the Rendered Label Live
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Print to Zebra (Network or Browser Print)
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-container">
+                <h3 style="color: #875A7B; margin-top: 0;">Printing from Documents</h3>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <strong>Step 1</strong>
+                        Open a Product, PO, MO, Picking, or Lot
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 2</strong>
+                        Launch the Print Labels Wizard
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 3</strong>
+                        Review Quantities &amp; Choose UoM
+                    </div>
+                    <div class="workflow-step">
+                        <strong>Step 4</strong>
+                        Labels Print with Live Record Data
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Specifications -->
+        <div class="section">
+            <h2>⚙️ Technical Specifications</h2>
+            <table class="specs-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Module Information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Module Name</td>
+                        <td>VPA Label Designer</td>
+                    </tr>
+                    <tr>
+                        <td>Technical Name</td>
+                        <td>vpa_label_designer</td>
+                    </tr>
+                    <tr>
+                        <td>Version</td>
+                        <td>19.0.1.0.0</td>
+                    </tr>
+                    <tr>
+                        <td>Odoo Version</td>
+                        <td>19.0 Enterprise Edition</td>
+                    </tr>
+                    <tr>
+                        <td>Category</td>
+                        <td>Inventory/Inventory</td>
+                    </tr>
+                    <tr>
+                        <td>License</td>
+                        <td>OPL-1 (Odoo Proprietary License)</td>
+                    </tr>
+                    <tr>
+                        <td>Dependencies</td>
+                        <td>product, stock, purchase, mrp, mail, vpa_uom</td>
+                    </tr>
+                    <tr>
+                        <td>Printer Language</td>
+                        <td>ZPL II (Zebra Programming Language)</td>
+                    </tr>
+                    <tr>
+                        <td>Printing Methods</td>
+                        <td>Direct TCP/IP (port 9100) · Zebra Browser Print SDK (localhost 9101, HTTP/HTTPS)</td>
+                    </tr>
+                    <tr>
+                        <td>RFID Support</td>
+                        <td>EPC Gen2 / UHF encoding via ZPL ^RFW</td>
+                    </tr>
+                    <tr>
+                        <td>Print Sources</td>
+                        <td>Products, Purchase Orders, Manufacturing Orders, Stock Pickings, Lots/Serials</td>
+                    </tr>
+                    <tr>
+                        <td>Access Groups</td>
+                        <td>Label Designer User, Label Designer Manager</td>
+                    </tr>
+                    <tr>
+                        <td>Multi-Company</td>
+                        <td>Yes, with per-company record rules</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #B22222;">🔧 Requirements</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Odoo Version:</strong> 19.0 Enterprise Edition</li>
+                    <li><strong>VPA UoM:</strong> Required for alternative Unit of Measure label printing</li>
+                    <li><strong>Printers:</strong> Zebra (or ZPL-compatible) thermal printers</li>
+                    <li><strong>Optional:</strong> Zebra Browser Print installed on client workstations for local printing</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- What's Included -->
+        <div class="section">
+            <h2>📦 What's Included</h2>
+            <ul class="benefits-list">
+                <li>Visual label template designer with drag-and-drop canvas and grid</li>
+                <li>Label size management with mm-to-dots conversion and RFID formats</li>
+                <li>ZPL II generation engine for text, barcodes, QR codes, variables, lines, boxes, and images</li>
+                <li>Live label preview with barcode rendering while designing</li>
+                <li>Dynamic variable system with dot-notation field paths, variant and packaging variables</li>
+                <li>Automatic Incl./Excl. VAT notes on price variables</li>
+                <li>Print Labels wizard for Products, Purchase Orders, Manufacturing Orders, Pickings, and Lots</li>
+                <li>Direct network printing (TCP 9100) and Zebra Browser Print integration</li>
+                <li>Printer configuration with per-printer X/Y label offsets</li>
+                <li>Copy Elements wizard with automatic scaling between label sizes</li>
+                <li>Template backup (export) and restore (import) wizards</li>
+                <li>User and Manager security groups with multi-company record rules</li>
+                <li>Comprehensive documentation and professional support</li>
+            </ul>
+        </div>
+
+        <!-- Version History -->
+        <div class="section">
+            <h2>📅 Version History</h2>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Version 19.0.1.0.0 (Latest)</h3>
+                <p style="color: #666; margin-bottom: 15px;"><strong>Released:</strong> February 2026</p>
+                <h4 style="color: #155724; margin-top: 20px; margin-bottom: 10px;">Initial Release</h4>
+                <ul style="margin-left: 20px;">
+                    <li>Label size management with mm-to-dots conversion and RFID support</li>
+                    <li>Visual label template designer (text, barcodes, QR codes, variables, lines, boxes, images)</li>
+                    <li>ZPL II generation engine for Zebra thermal printers</li>
+                    <li>Dynamic variable system with dot-notation field resolution</li>
+                    <li>Live label preview with barcode rendering</li>
+                    <li>Direct network printing (TCP 9100) and Zebra Browser Print (9101)</li>
+                    <li>Print wizard for Products, Purchase Orders, Manufacturing Orders, Pickings, and Lots</li>
+                    <li>Variant and packaging variables, VAT note support</li>
+                    <li>Alternative UoM label printing via VPA UoM</li>
+                    <li>Copy Elements wizard with scaling, template backup and restore</li>
+                    <li>Multi-company support with dedicated security groups</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="pricing-box">
+            <h2>💰 Pricing</h2>
+            <div class="price">$299 USD</div>
+            <div class="price-details">
+                <p><strong>One-Time Payment</strong> • Per Odoo Version</p>
+                <p>✓ Free Updates for Purchased Version</p>
+                <p>✓ Email Support Included</p>
+                <p>✓ Comprehensive Documentation</p>
+                <p>✓ Multi-Company Support</p>
+                <p>✓ No User Limits</p>
+            </div>
+        </div>
+
+        <!-- Support & Contact -->
+        <div class="section">
+            <h2>💬 Support &amp; Contact</h2>
+            <div class="info-box">
+                <h3 style="margin-top: 0;">We're Here to Help</h3>
+                <p><strong>Email:</strong> <a href="mailto:info@vpa.co.tz" style="color: #DC143C; font-weight: 600;">info@vpa.co.tz</a></p>
+                <p><strong>Website:</strong> <a href="https://www.vpa.co.tz" style="color: #DC143C; font-weight: 600;">www.vpa.co.tz</a></p>
+                <p><strong>Response Time:</strong> Within 24 hours on business days</p>
+                <p><strong>Documentation:</strong> Installation and user guide included</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>VPA Label Designer</h3>
+        <p>Professional Odoo Module Development by VPA Solutions Limited</p>
+        <p style="margin: 20px 0;">
+            <a href="mailto:info@vpa.co.tz">info@vpa.co.tz</a> |
+            <a href="https://www.vpa.co.tz">www.vpa.co.tz</a>
+        </p>
+        <p style="font-size: 0.9em; opacity: 0.8; margin-top: 25px;">
+            Copyright © 2025 VPA Solutions Limited. All rights reserved. | Licensed under OPL-1
+        </p>
+        <p style="font-size: 0.85em; opacity: 0.7; margin-top: 10px;">
+            Odoo and the Odoo logo are registered trademarks of Odoo S.A. Zebra and ZPL are trademarks of Zebra Technologies.
+        </p>
+    </div>
+
+</body>
+</html>
