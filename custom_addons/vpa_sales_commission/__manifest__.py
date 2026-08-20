@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.3.2',
+    'version': '19.0.2.4.0',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.2)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.4.0)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,20 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.4.0** - Payment manager dialog: allocate and revert in one place
+  - Year cards gained a Payments button opening one dialog with BOTH
+    directions: payments applied to the year (tick Revert to pull them back
+    on account - works for whole-payment links and allocations alike) and
+    on-account payments (tick to apply). One Apply Changes button executes
+    reverts first, then applications - payments can be swapped in one step
+  - Ticking an on-account row now prefills what the YEAR still needs (capped,
+    factoring in ticked reverts) instead of the payment's full amount - the
+    one-click overpay through the Allocate path is gone; bigger amounts must
+    be typed deliberately
+  - Per-row Revert button in the year's payments list (opened from the year
+    form) for the same one-click detach
+  - All reverts logged in the year's chatter; closed years refuse changes
+
 * **19.0.2.3.2** - Pay wizard caps at the year's outstanding; unassign payments
   - Paying more than the year needs no longer overpays it: the payment is
     created on account and an allocation applies exactly the outstanding;

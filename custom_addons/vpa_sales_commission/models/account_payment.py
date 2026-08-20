@@ -164,6 +164,50 @@ class AccountPayment(models.Model):
                     ))
         return super().write(vals)
 
+    def action_commission_revert_from_year(self):
+        """One-click revert from the year's payments list: pull this payment
+        back OUT of the year it was opened from (context carries the year).
+
+        Handles both attachment kinds: clears a full-year link, deletes the
+        allocation(s) to that year. Chatter logging and the closed-year guard
+        apply through the normal write/unlink paths. Manager-only (button
+        group), and the money returns on account for re-allocation."""
+        year_id = self.env.context.get('commission_revert_year_id')
+        if not year_id:
+            raise ValidationError(_(
+                'Open the payments from a commission year to revert from it.'))
+        year = self.env['vpa.commission.scheme.year'].browse(year_id)
+        reverted = self.env['account.payment']
+        for pay in self:
+            touched = False
+            if pay.commission_year_id.id == year_id:
+                pay.commission_year_id = False
+                touched = True
+            allocs = pay.sudo().commission_allocation_ids.filtered(
+                lambda a: a.scheme_year_id.id == year_id)
+            if allocs:
+                allocs.unlink()
+                touched = True
+            if touched:
+                reverted |= pay
+        if not reverted:
+            raise ValidationError(_(
+                'This payment is not assigned to %(year)s — nothing to revert.',
+                year=year.display_name))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'title': _('Payment Reverted'),
+                'message': _(
+                    '%(count)d payment(s) removed from %(year)s — the money '
+                    'is back on account and can be allocated again.',
+                    count=len(reverted), year=year.display_name),
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+            },
+        }
+
     # ---- Journal transaction (bank statement line) for easy reconciliation ----
     commission_has_journal_transaction = fields.Boolean(
         string='Journal Transaction Created',

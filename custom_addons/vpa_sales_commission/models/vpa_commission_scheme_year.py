@@ -980,11 +980,12 @@ class VpaCommissionSchemeYear(models.Model):
         }
 
     def action_apply_payment(self):
-        """Open the wizard to apply an on-account payment to this year."""
+        """Open the payment manager for this year: applied payments (tick to
+        revert) and on-account payments (tick to allocate) in one dialog."""
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Apply Payment - %s (%s)', self.employee_id.name, self.year),
+            'name': _('Payments - %s (%s)', self.employee_id.name, self.year),
             'res_model': 'vpa.commission.apply.payment.wizard',
             'view_mode': 'form',
             'target': 'new',
@@ -994,7 +995,10 @@ class VpaCommissionSchemeYear(models.Model):
         }
 
     def action_view_payments(self):
-        """Open all cash payments for this year (linked + allocated + via bills)."""
+        """Open all cash payments for this year (linked + allocated + via bills).
+
+        Carries the year in context so the list's per-row "Revert" button can
+        pull a payment back out of THIS year in one click (manager only)."""
         self.ensure_one()
         payments = (self.payment_ids | self.allocation_ids.payment_id
                     | self.bill_ids.matched_payment_ids)
@@ -1006,7 +1010,7 @@ class VpaCommissionSchemeYear(models.Model):
             'view_mode': 'list,form',
             'views': [(list_view.id, 'list'), (False, 'form')],
             'domain': [('id', 'in', payments.ids)],
-            'context': {'create': False},
+            'context': {'create': False, 'commission_revert_year_id': self.id},
         }
 
     def action_view_mos(self):

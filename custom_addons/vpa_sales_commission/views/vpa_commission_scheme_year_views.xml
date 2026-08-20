@@ -149,6 +149,7 @@
                 <field name="mo_count"/>
                 <field name="so_count"/>
                 <field name="bill_count"/>
+                <field name="payment_count"/>
                 <field name="shortfall"/>
                 <field name="pending_count"/>
                 <field name="total_pending"/>
@@ -438,6 +439,14 @@
                                     </button>
                                     <button type="object" name="action_view_sos" class="btn btn-sm btn-light flex-fill">
                                         <i class="fa fa-shopping-cart"/> <t t-esc="record.so_count.value"/> SOs
+                                    </button>
+                                    <!-- Opens the payment manager dialog: applied
+                                         payments (tick to revert) and on-account
+                                         payments (tick to allocate) in one screen. -->
+                                    <button type="object" name="action_apply_payment"
+                                            class="btn btn-sm btn-light flex-fill"
+                                            groups="vpa_sales_commission.group_commission_manager">
+                                        <i class="fa fa-money"/> <t t-esc="record.payment_count.value"/> Pmts
                                     </button>
                                 </div>
                                 <div class="d-flex gap-2 w-100">

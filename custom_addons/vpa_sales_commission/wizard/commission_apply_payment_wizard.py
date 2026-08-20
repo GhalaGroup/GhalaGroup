@@ -40,6 +40,11 @@ class VpaCommissionApplyPaymentWizard(models.TransientModel):
         'wizard_id',
         string='On-Account Payments',
     )
+    applied_line_ids = fields.One2many(
+        'vpa.commission.apply.payment.wizard.applied',
+        'wizard_id',
+        string='Applied Payments',
+    )
     total_to_apply = fields.Monetary(
         string='Total to Apply',
         currency_field='currency_id',
@@ -47,12 +52,19 @@ class VpaCommissionApplyPaymentWizard(models.TransientModel):
         help='Sum of the ticked rows, converted to the commission currency '
              'at each payment\'s date.',
     )
+    total_to_revert = fields.Monetary(
+        string='Total to Revert',
+        currency_field='currency_id',
+        compute='_compute_totals',
+        help='Sum of the applied payments ticked for revert — pulled back on '
+             'account when you apply the changes.',
+    )
     outstanding_after = fields.Monetary(
         string='Outstanding After',
         currency_field='currency_id',
         compute='_compute_totals',
-        help='The year\'s outstanding once the ticked amounts are applied. '
-             'Negative means the year ends up overpaid (advance).',
+        help='The year\'s outstanding once the ticked applications and '
+             'reverts are done. Negative means overpaid (advance).',
     )
 
     @api.model
@@ -90,32 +102,66 @@ class VpaCommissionApplyPaymentWizard(models.TransientModel):
             scheme_year = self.env['vpa.commission.scheme.year'].browse(year_id)
             res['line_ids'] = [(0, 0, {'payment_id': p.id})
                                for p in self._get_eligible_payments(scheme_year)]
+            # Payments already applied to this year, both attachment kinds —
+            # each can be ticked for a one-click revert in the same dialog.
+            applied = [(0, 0, {
+                'payment_id': p.id,
+                'kind': 'year',
+                'amount_applied': p.amount,
+            }) for p in scheme_year.payment_ids]
+            applied += [(0, 0, {
+                'payment_id': a.payment_id.id,
+                'kind': 'alloc',
+                'allocation_id': a.id,
+                'amount_applied': a.amount,
+            }) for a in scheme_year.allocation_ids]
+            res['applied_line_ids'] = applied
         return res
 
+    def _to_scheme_currency(self, amount, payment):
+        """Convert a payment-currency amount to the scheme currency at the
+        payment's own date — the doctrine used everywhere in this module."""
+        self.ensure_one()
+        if (payment.currency_id and self.currency_id
+                and payment.currency_id != self.currency_id):
+            return payment.currency_id._convert(
+                amount, self.currency_id,
+                self.company_id or self.env.company,
+                payment.date or fields.Date.today(),
+            )
+        return amount
+
     @api.depends('line_ids.select', 'line_ids.amount_to_apply',
-                 'line_ids.payment_id', 'scheme_year_id')
+                 'line_ids.payment_id', 'applied_line_ids.remove',
+                 'scheme_year_id')
     def _compute_totals(self):
         for wiz in self:
-            total = 0.0
-            for line in wiz.line_ids.filtered('select'):
-                amount = line.amount_to_apply
-                if (line.payment_currency_id and wiz.currency_id
-                        and line.payment_currency_id != wiz.currency_id):
-                    amount = line.payment_currency_id._convert(
-                        amount, wiz.currency_id,
-                        wiz.company_id or self.env.company,
-                        line.payment_id.date or fields.Date.today(),
-                    )
-                total += amount
+            total = sum(
+                wiz._to_scheme_currency(l.amount_to_apply, l.payment_id)
+                for l in wiz.line_ids.filtered('select'))
+            revert = sum(
+                wiz._to_scheme_currency(l.amount_applied, l.payment_id)
+                for l in wiz.applied_line_ids.filtered('remove'))
             wiz.total_to_apply = total
-            wiz.outstanding_after = (wiz.scheme_year_id.still_to_pay_total or 0.0) - total
+            wiz.total_to_revert = revert
+            wiz.outstanding_after = (
+                (wiz.scheme_year_id.still_to_pay_total or 0.0) - total + revert)
 
     def action_apply(self):
         self.ensure_one()
         lines = self.line_ids.filtered('select')
-        if not lines:
+        removals = self.applied_line_ids.filtered('remove')
+        if not lines and not removals:
             raise UserError(_(
-                'Tick at least one payment and set the amount to apply.'))
+                'Tick at least one payment to apply, or one applied payment '
+                'to revert.'))
+        # Reverts first: pulled-back money is immediately re-applicable and
+        # the closed-year guards fire through the normal write/unlink paths.
+        for line in removals:
+            if line.kind == 'alloc' and line.allocation_id:
+                line.allocation_id.unlink()
+            elif line.kind == 'year':
+                line.payment_id.commission_year_id = False
         # Validate and create in ONE pass over exactly the ticked rows — a
         # ticked row with a zero/negative amount must raise, never be silently
         # skipped, or the preview totals and the created allocations disagree.
@@ -144,15 +190,20 @@ class VpaCommissionApplyPaymentWizard(models.TransientModel):
                 'scheme_year_id': self.scheme_year_id.id,
                 'amount': line.amount_to_apply,
             })
+        parts = []
+        if lines:
+            parts.append(_('%(count)d payment(s) applied', count=len(lines)))
+        if removals:
+            parts.append(_('%(count)d reverted on account', count=len(removals)))
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'type': 'success',
-                'title': _('Payments Applied'),
+                'title': _('Payments Updated'),
                 'message': _(
-                    '%(count)d payment(s) applied to %(year)s.',
-                    count=len(lines),
+                    '%(what)s for %(year)s.',
+                    what=' — '.join(parts),
                     year=self.scheme_year_id.display_name,
                 ),
                 'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
@@ -204,11 +255,27 @@ class VpaCommissionApplyPaymentWizardLine(models.TransientModel):
 
     @api.onchange('select')
     def _onchange_select(self):
-        """Ticking a row prefills the full unallocated remainder; unticking
-        clears the amount so the totals always reflect the ticked rows."""
+        """Ticking a row prefills what the YEAR still needs, capped at the
+        payment's unallocated remainder — never more. Applying beyond the
+        year's outstanding must be a deliberate act (type the amount by
+        hand), not the default: the prefill used to offer the full payment
+        and one click overpaid the year. Unticking clears the amount so the
+        totals always reflect the ticked rows."""
         for line in self:
             if line.select and not line.amount_to_apply:
-                line.amount_to_apply = line.unallocated_amount
+                wiz = line.wizard_id
+                # Remaining need in the scheme currency: the year's still-to-
+                # pay minus what the OTHER ticked rows already cover
+                # (outstanding_after excludes this line while its amount is 0).
+                remaining = max(0.0, wiz.outstanding_after)
+                if (line.payment_currency_id and wiz.currency_id
+                        and line.payment_currency_id != wiz.currency_id):
+                    remaining = wiz.currency_id._convert(
+                        remaining, line.payment_currency_id,
+                        wiz.company_id or self.env.company,
+                        line.payment_id.date or fields.Date.today(),
+                    )
+                line.amount_to_apply = min(line.unallocated_amount, remaining)
             elif not line.select:
                 line.amount_to_apply = 0.0
 
@@ -218,3 +285,43 @@ class VpaCommissionApplyPaymentWizardLine(models.TransientModel):
         for line in self:
             if line.amount_to_apply and not line.select:
                 line.select = True
+
+
+class VpaCommissionApplyPaymentWizardApplied(models.TransientModel):
+    """A payment already applied to the year — tickable for one-click revert."""
+    _name = 'vpa.commission.apply.payment.wizard.applied'
+    _description = 'Applied Payment (Revert Candidate)'
+    _order = 'id'
+
+    wizard_id = fields.Many2one(
+        'vpa.commission.apply.payment.wizard',
+        string='Wizard',
+        required=True,
+        ondelete='cascade',
+    )
+    remove = fields.Boolean(string='Revert')
+    payment_id = fields.Many2one(
+        'account.payment',
+        string='Payment',
+        required=True,
+        readonly=True,
+    )
+    date = fields.Date(related='payment_id.date', string='Date')
+    memo = fields.Char(related='payment_id.memo', string='Memo')
+    journal_id = fields.Many2one(related='payment_id.journal_id', string='Journal')
+    payment_currency_id = fields.Many2one(
+        related='payment_id.currency_id', string='Payment Currency')
+    kind = fields.Selection([
+        ('year', 'Whole payment'),
+        ('alloc', 'Allocation'),
+    ], string='Applied As', readonly=True)
+    allocation_id = fields.Many2one(
+        'vpa.commission.payment.allocation',
+        string='Allocation',
+        readonly=True,
+    )
+    amount_applied = fields.Monetary(
+        string='Applied Amount',
+        currency_field='payment_currency_id',
+        readonly=True,
+    )
