@@ -107,6 +107,12 @@ class VpaCommissionPaymentAllocation(models.Model):
 
     def unlink(self):
         for alloc in self:
+            if alloc.scheme_year_id.state == 'closed':
+                raise ValidationError(_(
+                    'Commission year %(year)s is closed. Reopen it before '
+                    'removing payment allocations from it.',
+                    year=alloc.scheme_year_id.display_name,
+                ))
             alloc.scheme_year_id.message_post(body=_(
                 'Payment allocation removed: %(amount)s from payment %(payment)s.',
                 amount=f'{alloc.amount:,.2f} {alloc.currency_id.name}',

@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.3.1',
+    'version': '19.0.2.3.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.1)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.2)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,18 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.3.2** - Pay wizard caps at the year's outstanding; unassign payments
+  - Paying more than the year needs no longer overpays it: the payment is
+    created on account and an allocation applies exactly the outstanding;
+    the remainder stays unallocated ("Not allocated" block), applicable to
+    any year later. Exception: "Write Off the Difference" still applies the
+    full amount (close-it-clean path). Advances on a covered year go fully
+    on account
+  - Unassigning: clearing a payment's Commission Year (or deleting an
+    allocation) is logged in the year's chatter with payment and amount
+  - Closed-year protection both ways: payments cannot be assigned to or
+    unassigned from a closed year without reopening it
+
 * **19.0.2.3.1** - Cancelled MOs are automatically Not Applicable
   - Cancelling a Manufacturing Order now cancels its PENDING commission
     lines automatically (confirmed/paid lines stay - manager decision) and

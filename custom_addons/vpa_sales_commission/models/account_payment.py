@@ -126,6 +126,43 @@ class AccountPayment(models.Model):
                     'split via allocations — not both.',
                     payment=pay.display_name,
                 ))
+            if pay.commission_year_id and pay.sudo().commission_year_id.state == 'closed':
+                raise ValidationError(_(
+                    'Commission year %(year)s is closed. Reopen it before '
+                    'assigning payments to it.',
+                    year=pay.commission_year_id.display_name,
+                ))
+
+    def write(self, vals):
+        # Assigning/unassigning a payment to a commission year is a money
+        # movement between year cards: log it on the year(s) and refuse to
+        # quietly pull cash out of a CLOSED (reconciled) year.
+        if 'commission_year_id' in vals:
+            Year = self.env['vpa.commission.scheme.year'].sudo()
+            new_year = Year.browse(vals['commission_year_id']) if vals.get('commission_year_id') else Year
+            for pay in self:
+                old_year = pay.sudo().commission_year_id
+                if old_year and old_year != new_year:
+                    if old_year.state == 'closed':
+                        raise ValidationError(_(
+                            'Payment %(payment)s is linked to the closed '
+                            'commission year %(year)s. Reopen the year before '
+                            'unassigning the payment.',
+                            payment=pay.display_name,
+                            year=old_year.display_name,
+                        ))
+                    old_year.message_post(body=_(
+                        'Payment %(payment)s (%(amount)s) unassigned from this year.',
+                        payment=pay.display_name,
+                        amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
+                    ))
+                if new_year and old_year != new_year:
+                    new_year.message_post(body=_(
+                        'Payment %(payment)s (%(amount)s) assigned to this year.',
+                        payment=pay.display_name,
+                        amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
+                    ))
+        return super().write(vals)
 
     # ---- Journal transaction (bank statement line) for easy reconciliation ----
     commission_has_journal_transaction = fields.Boolean(
