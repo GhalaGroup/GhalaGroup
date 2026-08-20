@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.4.0',
+    'version': '19.0.2.5.0',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.4.0)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.0)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,28 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.5.0** - Accounting mirror: payments auto-reconcile with the year's bills
+  - Applying a payment to a year now matches it against the year's POSTED
+    bills (guarantee and true-up, oldest first) in accounting - capped at
+    exactly the applied amount, never more. Partial applications carve an
+    exact partial match at the payment's own rate (correct in both
+    currencies); full coverage uses standard Odoo reconciliation
+  - Fully symmetric: reverting a payment (or editing/deleting an
+    allocation, or clearing the Commission Year) removes exactly those
+    matches and rebuilds from what remains. Only matches between that
+    payment and that year's commission bills are ever touched
+  - Every mutation path is synced: allocation create/edit/delete, year
+    link set/clear, bill posted later, payment posted later, bill moved
+    between years, bill reset to draft
+  - Posting a commission bill into a CLOSED year is refused
+  - Rounding write-offs are NOT auto-unwound on revert - the year's
+    chatter gets an explicit review reminder instead
+  - Instant per-row Revert button in the payment manager dialog; ticking
+    a payment on a fully covered year warns immediately instead of
+    failing at Apply
+  - The pay wizard's old blanket bill-matching (full payment, uncapped)
+    is removed in favour of the capped sync
+
 * **19.0.2.4.0** - Payment manager dialog: allocate and revert in one place
   - Year cards gained a Payments button opening one dialog with BOTH
     directions: payments applied to the year (tick Revert to pull them back

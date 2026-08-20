@@ -323,9 +323,8 @@ class CommissionPayYearWizard(models.TransientModel):
                 'outstanding to apply; allocate it when commission comes due.',
                 payment=payment.display_name))
 
-        # Match the payment against the year's open posted bills (oldest first)
-        # so the employee's payable ledger stays clean automatically.
-        self._auto_reconcile_with_bills(payment, sy)
+        # Bill matching happens in the allocation-create hook above, capped
+        # at the allocated amount.
 
         # Rounding write-off: close the small remainder so nothing stays open.
         if self.writeoff_difference:
@@ -344,22 +343,6 @@ class CommissionPayYearWizard(models.TransientModel):
             'res_id': payment.id,
             'target': 'current',
         }
-
-    def _auto_reconcile_with_bills(self, payment, scheme_year):
-        """Reconcile the payment's payable line against the year's open bills."""
-        pay_lines = payment.move_id.line_ids.filtered(
-            lambda l: l.account_id.account_type == 'liability_payable' and not l.reconciled
-        ) if payment.move_id else self.env['account.move.line']
-        if not pay_lines:
-            return
-        bill_lines = scheme_year.bill_ids.filtered(
-            lambda b: b.state == 'posted' and b.move_type == 'in_invoice'
-        ).line_ids.filtered(
-            lambda l: l.account_id.account_type == 'liability_payable'
-            and not l.reconciled and l.amount_residual
-        ).sorted('date')
-        if bill_lines:
-            (pay_lines | bill_lines).reconcile()
 
     def _create_writeoff(self, scheme_year, partner, payment):
         """Write off the rounding difference in either direction.

@@ -17,23 +17,23 @@
                             <field name="company_id" invisible="1"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
-                        <group string="After Applying Changes">
+                        <group string="After Applying">
                             <field name="total_to_apply" widget="monetary" class="fw-bold"/>
-                            <field name="total_to_revert" widget="monetary"
-                                   invisible="total_to_revert == 0"/>
                             <field name="outstanding_after" widget="monetary"
                                    decoration-danger="outstanding_after &gt; 0"
                                    decoration-success="outstanding_after &lt;= 0"/>
                         </group>
                     </group>
 
-                    <separator string="Applied to this year — tick Revert to pull a payment back on account"
+                    <separator string="Applied to this year — click Revert to pull a payment back on account"
                                invisible="not applied_line_ids"/>
                     <field name="applied_line_ids" nolabel="1"
                            invisible="not applied_line_ids">
-                        <list editable="bottom" create="false" delete="false"
-                              decoration-danger="remove">
-                            <field name="remove"/>
+                        <list editable="bottom" create="false" delete="false">
+                            <!-- Instant revert: executes immediately and reopens
+                                 the dialog fresh — the fastest path out. -->
+                            <button name="action_revert_now" type="object"
+                                    string="Revert" icon="fa-undo" class="text-danger"/>
                             <field name="payment_id" readonly="1" force_save="1"/>
                             <field name="date"/>
                             <field name="journal_id" optional="show"/>

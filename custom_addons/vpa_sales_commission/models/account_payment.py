@@ -135,13 +135,18 @@ class AccountPayment(models.Model):
 
     def write(self, vals):
         # Assigning/unassigning a payment to a commission year is a money
-        # movement between year cards: log it on the year(s) and refuse to
-        # quietly pull cash out of a CLOSED (reconciled) year.
+        # movement between year cards: log it on the year(s), refuse to
+        # quietly pull cash out of a CLOSED (reconciled) year, and keep the
+        # accounting matches against the year's bills in sync (built on
+        # assign, removed on unassign).
+        year_moves = []
         if 'commission_year_id' in vals:
             Year = self.env['vpa.commission.scheme.year'].sudo()
             new_year = Year.browse(vals['commission_year_id']) if vals.get('commission_year_id') else Year
-            for pay in self:
-                old_year = pay.sudo().commission_year_id
+            sudo_self = self.sudo()
+            for pay, sudo_pay in zip(self, sudo_self):
+                old_year = sudo_pay.commission_year_id
+                year_moves.append((pay, old_year))
                 if old_year and old_year != new_year:
                     if old_year.state == 'closed':
                         raise ValidationError(_(
@@ -162,7 +167,48 @@ class AccountPayment(models.Model):
                         payment=pay.display_name,
                         amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
                     ))
-        return super().write(vals)
+        res = super().write(vals)
+        if year_moves:
+            Allocation = self.env['vpa.commission.payment.allocation'].sudo()
+            for pay, old_year in year_moves:
+                new_year = pay.sudo().commission_year_id
+                if old_year == new_year:
+                    continue
+                if old_year:
+                    Allocation._sync_payment_year_reconciliation(pay, old_year)
+                if new_year:
+                    Allocation._sync_payment_year_reconciliation(pay, new_year)
+        return res
+
+    def _commission_revert_from_year(self, year):
+        """THE revert rule, in one place (used by the list button and the
+        year dialog): detach this payment from ``year`` whichever way it is
+        attached. Chatter, closed-year guards and the accounting un-match run
+        through the normal write/unlink paths. Returns True if anything was
+        detached. Reminds about write-offs, which are NOT auto-unwound."""
+        self.ensure_one()
+        touched = False
+        if self.commission_year_id == year:
+            self.commission_year_id = False
+            touched = True
+        allocs = self.sudo().commission_allocation_ids.filtered(
+            lambda a: a.scheme_year_id == year)
+        if allocs:
+            allocs.unlink()
+            touched = True
+        if touched:
+            writeoffs = self.env['account.move'].sudo().search_count([
+                ('commission_year_id', '=', year.id),
+                ('commission_writeoff', '=', True),
+                ('state', '=', 'posted'),
+            ])
+            if writeoffs:
+                year.sudo().message_post(body=_(
+                    'Note: %(count)d posted rounding write-off entr(y/ies) '
+                    'exist for this year and were NOT reverted with payment '
+                    '%(payment)s — review them if this settlement is undone.',
+                    count=writeoffs, payment=self.display_name))
+        return touched
 
     def action_commission_revert_from_year(self):
         """One-click revert from the year's payments list: pull this payment
@@ -179,16 +225,7 @@ class AccountPayment(models.Model):
         year = self.env['vpa.commission.scheme.year'].browse(year_id)
         reverted = self.env['account.payment']
         for pay in self:
-            touched = False
-            if pay.commission_year_id.id == year_id:
-                pay.commission_year_id = False
-                touched = True
-            allocs = pay.sudo().commission_allocation_ids.filtered(
-                lambda a: a.scheme_year_id.id == year_id)
-            if allocs:
-                allocs.unlink()
-                touched = True
-            if touched:
+            if pay._commission_revert_from_year(year):
                 reverted |= pay
         if not reverted:
             raise ValidationError(_(
