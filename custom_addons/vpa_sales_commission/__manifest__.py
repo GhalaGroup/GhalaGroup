@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.5.1',
+    'version': '19.0.2.5.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.1)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.2)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,11 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.5.2** - Payment dialog column polish
+  - Compact column labels (Total / Unallocated / To Apply / Applied) so
+    amounts render without truncation; Memo column hidden by default
+    (available via the column selector)
+
 * **19.0.2.5.1** - Dialog and card polish
   - Instant Revert works on the first click (the payment manager dialog now
     opens on a pre-created record - no save-then-click-again dance)

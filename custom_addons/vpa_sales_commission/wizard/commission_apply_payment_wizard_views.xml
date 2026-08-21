@@ -47,6 +47,7 @@
                             <field name="allocation_id" column_invisible="1" force_save="1"/>
                             <field name="payment_currency_id" column_invisible="1"/>
                             <field name="amount_applied" widget="monetary" force_save="1"
+                                   string="Applied"
                                    options="{'currency_field': 'payment_currency_id'}"/>
                         </list>
                     </field>
@@ -63,14 +64,20 @@
                             <field name="payment_id" readonly="1" force_save="1"/>
                             <field name="date"/>
                             <field name="journal_id" optional="show"/>
-                            <field name="memo" optional="show"/>
+                            <!-- Memo hidden by default: it crowded the amount
+                                 columns into truncation; still one click away
+                                 via the column selector. -->
+                            <field name="memo" optional="hide"/>
                             <field name="partner_id" optional="hide"/>
                             <field name="payment_currency_id" column_invisible="1"/>
                             <field name="payment_amount" widget="monetary"
+                                   string="Total"
                                    options="{'currency_field': 'payment_currency_id'}"/>
                             <field name="unallocated_amount" widget="monetary"
+                                   string="Unallocated"
                                    options="{'currency_field': 'payment_currency_id'}"/>
                             <field name="amount_to_apply" widget="monetary"
+                                   string="To Apply"
                                    options="{'currency_field': 'payment_currency_id'}"
                                    class="fw-bold"/>
                         </list>
