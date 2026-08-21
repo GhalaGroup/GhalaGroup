@@ -87,6 +87,14 @@
                        decoration-info="state == 'in_process'"
                        decoration-success="state == 'paid'"
                        decoration-danger="state in ('canceled', 'rejected')"/>
+                <!-- One-click revert, only when this list was opened FROM a
+                     commission year (context carries the year id): pulls the
+                     payment back out of that year — clears the year link or
+                     deletes the allocation — and the money returns on account. -->
+                <button name="action_commission_revert_from_year" type="object"
+                        string="Revert" icon="fa-undo" class="text-danger"
+                        column_invisible="not context.get('commission_revert_year_id')"
+                        groups="vpa_sales_commission.group_commission_manager"/>
             </list>
         </field>
     </record>

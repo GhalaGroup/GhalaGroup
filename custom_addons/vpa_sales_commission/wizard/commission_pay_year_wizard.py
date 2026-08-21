@@ -280,6 +280,14 @@ class CommissionPayYearWizard(models.TransientModel):
                 sy.employee_id.name,
             ))
 
+        # The payment is created ON ACCOUNT and applied to the year through an
+        # ALLOCATION capped at the year's outstanding — paying more than the
+        # year needs leaves the remainder unallocated (visible in the cards'
+        # "Not allocated" block, applicable to any year later) instead of
+        # overpaying this year. The old full-year link pushed the WHOLE
+        # payment into the year. Exception: with "Write Off the Difference"
+        # the user wants the year closed clean, so the full amount applies
+        # and the small difference is written off.
         payment = self.env['account.payment'].create({
             'payment_type': 'outbound',
             'partner_type': 'supplier',
@@ -289,13 +297,34 @@ class CommissionPayYearWizard(models.TransientModel):
             'journal_id': self.journal_id.id,
             'date': self.payment_date,
             'memo': self.memo,
-            'commission_year_id': sy.id,
         })
         payment.action_post()
 
-        # Match the payment against the year's open posted bills (oldest first)
-        # so the employee's payable ledger stays clean automatically.
-        self._auto_reconcile_with_bills(payment, sy)
+        outstanding = max(0.0, sy.outstanding_cash)
+        if self.writeoff_difference:
+            alloc_amount = self.payment_amount
+        else:
+            settle = min(self.amount, outstanding)
+            alloc_amount = min(
+                self.payment_amount,
+                self._convert(settle, self.currency_id, self.payment_currency_id),
+            )
+        if self.payment_currency_id.compare_amounts(alloc_amount, 0.0) > 0:
+            self.env['vpa.commission.payment.allocation'].create({
+                'payment_id': payment.id,
+                'scheme_year_id': sy.id,
+                'amount': self.payment_currency_id.round(alloc_amount),
+            })
+        else:
+            # Nothing to settle (e.g. an advance on a covered year): the whole
+            # payment stays on account, awaiting allocation.
+            sy.message_post(body=_(
+                'Advance payment %(payment)s created on account — nothing '
+                'outstanding to apply; allocate it when commission comes due.',
+                payment=payment.display_name))
+
+        # Bill matching happens in the allocation-create hook above, capped
+        # at the allocated amount.
 
         # Rounding write-off: close the small remainder so nothing stays open.
         if self.writeoff_difference:
@@ -314,22 +343,6 @@ class CommissionPayYearWizard(models.TransientModel):
             'res_id': payment.id,
             'target': 'current',
         }
-
-    def _auto_reconcile_with_bills(self, payment, scheme_year):
-        """Reconcile the payment's payable line against the year's open bills."""
-        pay_lines = payment.move_id.line_ids.filtered(
-            lambda l: l.account_id.account_type == 'liability_payable' and not l.reconciled
-        ) if payment.move_id else self.env['account.move.line']
-        if not pay_lines:
-            return
-        bill_lines = scheme_year.bill_ids.filtered(
-            lambda b: b.state == 'posted' and b.move_type == 'in_invoice'
-        ).line_ids.filtered(
-            lambda l: l.account_id.account_type == 'liability_payable'
-            and not l.reconciled and l.amount_residual
-        ).sorted('date')
-        if bill_lines:
-            (pay_lines | bill_lines).reconcile()
 
     def _create_writeoff(self, scheme_year, partner, payment):
         """Write off the rounding difference in either direction.

@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.3.1',
+    'version': '19.0.2.5.2',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.3.1)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.2)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,65 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.5.2** - Payment dialog column polish
+  - Compact column labels (Total / Unallocated / To Apply / Applied) so
+    amounts render without truncation; Memo column hidden by default
+    (available via the column selector)
+
+* **19.0.2.5.1** - Dialog and card polish
+  - Instant Revert works on the first click (the payment manager dialog now
+    opens on a pre-created record - no save-then-click-again dance)
+  - Closed/settled year cards keep the same height as open ones while
+    unallocated money exists (invisible spacer instead of a missing block)
+
+* **19.0.2.5.0** - Accounting mirror: payments auto-reconcile with the year's bills
+  - Applying a payment to a year now matches it against the year's POSTED
+    bills (guarantee and true-up, oldest first) in accounting - capped at
+    exactly the applied amount, never more. Partial applications carve an
+    exact partial match at the payment's own rate (correct in both
+    currencies); full coverage uses standard Odoo reconciliation
+  - Fully symmetric: reverting a payment (or editing/deleting an
+    allocation, or clearing the Commission Year) removes exactly those
+    matches and rebuilds from what remains. Only matches between that
+    payment and that year's commission bills are ever touched
+  - Every mutation path is synced: allocation create/edit/delete, year
+    link set/clear, bill posted later, payment posted later, bill moved
+    between years, bill reset to draft
+  - Posting a commission bill into a CLOSED year is refused
+  - Rounding write-offs are NOT auto-unwound on revert - the year's
+    chatter gets an explicit review reminder instead
+  - Instant per-row Revert button in the payment manager dialog; ticking
+    a payment on a fully covered year warns immediately instead of
+    failing at Apply
+  - The pay wizard's old blanket bill-matching (full payment, uncapped)
+    is removed in favour of the capped sync
+
+* **19.0.2.4.0** - Payment manager dialog: allocate and revert in one place
+  - Year cards gained a Payments button opening one dialog with BOTH
+    directions: payments applied to the year (tick Revert to pull them back
+    on account - works for whole-payment links and allocations alike) and
+    on-account payments (tick to apply). One Apply Changes button executes
+    reverts first, then applications - payments can be swapped in one step
+  - Ticking an on-account row now prefills what the YEAR still needs (capped,
+    factoring in ticked reverts) instead of the payment's full amount - the
+    one-click overpay through the Allocate path is gone; bigger amounts must
+    be typed deliberately
+  - Per-row Revert button in the year's payments list (opened from the year
+    form) for the same one-click detach
+  - All reverts logged in the year's chatter; closed years refuse changes
+
+* **19.0.2.3.2** - Pay wizard caps at the year's outstanding; unassign payments
+  - Paying more than the year needs no longer overpays it: the payment is
+    created on account and an allocation applies exactly the outstanding;
+    the remainder stays unallocated ("Not allocated" block), applicable to
+    any year later. Exception: "Write Off the Difference" still applies the
+    full amount (close-it-clean path). Advances on a covered year go fully
+    on account
+  - Unassigning: clearing a payment's Commission Year (or deleting an
+    allocation) is logged in the year's chatter with payment and amount
+  - Closed-year protection both ways: payments cannot be assigned to or
+    unassigned from a closed year without reopening it
+
 * **19.0.2.3.1** - Cancelled MOs are automatically Not Applicable
   - Cancelling a Manufacturing Order now cancels its PENDING commission
     lines automatically (confirmed/paid lines stay - manager decision) and

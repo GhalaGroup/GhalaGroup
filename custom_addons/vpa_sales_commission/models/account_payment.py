@@ -126,6 +126,124 @@ class AccountPayment(models.Model):
                     'split via allocations — not both.',
                     payment=pay.display_name,
                 ))
+            if pay.commission_year_id and pay.sudo().commission_year_id.state == 'closed':
+                raise ValidationError(_(
+                    'Commission year %(year)s is closed. Reopen it before '
+                    'assigning payments to it.',
+                    year=pay.commission_year_id.display_name,
+                ))
+
+    def write(self, vals):
+        # Assigning/unassigning a payment to a commission year is a money
+        # movement between year cards: log it on the year(s), refuse to
+        # quietly pull cash out of a CLOSED (reconciled) year, and keep the
+        # accounting matches against the year's bills in sync (built on
+        # assign, removed on unassign).
+        year_moves = []
+        if 'commission_year_id' in vals:
+            Year = self.env['vpa.commission.scheme.year'].sudo()
+            new_year = Year.browse(vals['commission_year_id']) if vals.get('commission_year_id') else Year
+            sudo_self = self.sudo()
+            for pay, sudo_pay in zip(self, sudo_self):
+                old_year = sudo_pay.commission_year_id
+                year_moves.append((pay, old_year))
+                if old_year and old_year != new_year:
+                    if old_year.state == 'closed':
+                        raise ValidationError(_(
+                            'Payment %(payment)s is linked to the closed '
+                            'commission year %(year)s. Reopen the year before '
+                            'unassigning the payment.',
+                            payment=pay.display_name,
+                            year=old_year.display_name,
+                        ))
+                    old_year.message_post(body=_(
+                        'Payment %(payment)s (%(amount)s) unassigned from this year.',
+                        payment=pay.display_name,
+                        amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
+                    ))
+                if new_year and old_year != new_year:
+                    new_year.message_post(body=_(
+                        'Payment %(payment)s (%(amount)s) assigned to this year.',
+                        payment=pay.display_name,
+                        amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
+                    ))
+        res = super().write(vals)
+        if year_moves:
+            Allocation = self.env['vpa.commission.payment.allocation'].sudo()
+            for pay, old_year in year_moves:
+                new_year = pay.sudo().commission_year_id
+                if old_year == new_year:
+                    continue
+                if old_year:
+                    Allocation._sync_payment_year_reconciliation(pay, old_year)
+                if new_year:
+                    Allocation._sync_payment_year_reconciliation(pay, new_year)
+        return res
+
+    def _commission_revert_from_year(self, year):
+        """THE revert rule, in one place (used by the list button and the
+        year dialog): detach this payment from ``year`` whichever way it is
+        attached. Chatter, closed-year guards and the accounting un-match run
+        through the normal write/unlink paths. Returns True if anything was
+        detached. Reminds about write-offs, which are NOT auto-unwound."""
+        self.ensure_one()
+        touched = False
+        if self.commission_year_id == year:
+            self.commission_year_id = False
+            touched = True
+        allocs = self.sudo().commission_allocation_ids.filtered(
+            lambda a: a.scheme_year_id == year)
+        if allocs:
+            allocs.unlink()
+            touched = True
+        if touched:
+            writeoffs = self.env['account.move'].sudo().search_count([
+                ('commission_year_id', '=', year.id),
+                ('commission_writeoff', '=', True),
+                ('state', '=', 'posted'),
+            ])
+            if writeoffs:
+                year.sudo().message_post(body=_(
+                    'Note: %(count)d posted rounding write-off entr(y/ies) '
+                    'exist for this year and were NOT reverted with payment '
+                    '%(payment)s — review them if this settlement is undone.',
+                    count=writeoffs, payment=self.display_name))
+        return touched
+
+    def action_commission_revert_from_year(self):
+        """One-click revert from the year's payments list: pull this payment
+        back OUT of the year it was opened from (context carries the year).
+
+        Handles both attachment kinds: clears a full-year link, deletes the
+        allocation(s) to that year. Chatter logging and the closed-year guard
+        apply through the normal write/unlink paths. Manager-only (button
+        group), and the money returns on account for re-allocation."""
+        year_id = self.env.context.get('commission_revert_year_id')
+        if not year_id:
+            raise ValidationError(_(
+                'Open the payments from a commission year to revert from it.'))
+        year = self.env['vpa.commission.scheme.year'].browse(year_id)
+        reverted = self.env['account.payment']
+        for pay in self:
+            if pay._commission_revert_from_year(year):
+                reverted |= pay
+        if not reverted:
+            raise ValidationError(_(
+                'This payment is not assigned to %(year)s — nothing to revert.',
+                year=year.display_name))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'title': _('Payment Reverted'),
+                'message': _(
+                    '%(count)d payment(s) removed from %(year)s — the money '
+                    'is back on account and can be allocated again.',
+                    count=len(reverted), year=year.display_name),
+                'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'},
+            },
+        }
 
     # ---- Journal transaction (bank statement line) for easy reconciliation ----
     commission_has_journal_transaction = fields.Boolean(

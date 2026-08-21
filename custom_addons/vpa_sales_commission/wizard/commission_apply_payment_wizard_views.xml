@@ -7,7 +7,7 @@
         <field name="name">vpa.commission.apply.payment.wizard.form</field>
         <field name="model">vpa.commission.apply.payment.wizard</field>
         <field name="arch" type="xml">
-            <form string="Apply On-Account Payment">
+            <form string="Payments — Allocate &amp; Revert">
                 <sheet>
                     <group>
                         <group string="Commission Year">
@@ -24,7 +24,35 @@
                                    decoration-success="outstanding_after &lt;= 0"/>
                         </group>
                     </group>
-                    <separator string="On-Account Payments — tick the ones to apply"/>
+
+                    <separator string="Applied to this year — click Revert to pull a payment back on account"
+                               invisible="not applied_line_ids"/>
+                    <field name="applied_line_ids" nolabel="1"
+                           invisible="not applied_line_ids">
+                        <list editable="bottom" create="false" delete="false">
+                            <!-- Instant revert: executes immediately and reopens
+                                 the dialog fresh — the fastest path out. -->
+                            <button name="action_revert_now" type="object"
+                                    string="Revert" icon="fa-undo" class="text-danger"/>
+                            <field name="payment_id" readonly="1" force_save="1"/>
+                            <field name="date"/>
+                            <field name="journal_id" optional="show"/>
+                            <field name="memo" optional="hide"/>
+                            <!-- force_save: these are readonly display fields, but
+                                 their values ARRIVE via default_get and must be
+                                 saved with the row — without force_save the client
+                                 drops readonly values on save and the revert loses
+                                 its allocation/kind target (silent no-op). -->
+                            <field name="kind" force_save="1"/>
+                            <field name="allocation_id" column_invisible="1" force_save="1"/>
+                            <field name="payment_currency_id" column_invisible="1"/>
+                            <field name="amount_applied" widget="monetary" force_save="1"
+                                   string="Applied"
+                                   options="{'currency_field': 'payment_currency_id'}"/>
+                        </list>
+                    </field>
+
+                    <separator string="On account — tick the ones to apply"/>
                     <field name="line_ids" nolabel="1">
                         <list editable="bottom" create="false" delete="false"
                               decoration-muted="not select">
@@ -36,26 +64,34 @@
                             <field name="payment_id" readonly="1" force_save="1"/>
                             <field name="date"/>
                             <field name="journal_id" optional="show"/>
-                            <field name="memo" optional="show"/>
+                            <!-- Memo hidden by default: it crowded the amount
+                                 columns into truncation; still one click away
+                                 via the column selector. -->
+                            <field name="memo" optional="hide"/>
                             <field name="partner_id" optional="hide"/>
                             <field name="payment_currency_id" column_invisible="1"/>
                             <field name="payment_amount" widget="monetary"
+                                   string="Total"
                                    options="{'currency_field': 'payment_currency_id'}"/>
                             <field name="unallocated_amount" widget="monetary"
+                                   string="Unallocated"
                                    options="{'currency_field': 'payment_currency_id'}"/>
                             <field name="amount_to_apply" widget="monetary"
+                                   string="To Apply"
                                    options="{'currency_field': 'payment_currency_id'}"
                                    class="fw-bold"/>
                         </list>
                     </field>
                     <div class="alert alert-info mt-3" role="status">
-                        A payment can be applied <strong>partially</strong> — the remainder stays
-                        <strong>on account</strong> and can be applied to another year later.
-                        Ticking a row prefills its full unallocated amount; adjust it as needed.
+                        Ticking an on-account row prefills <strong>what the year still needs</strong>
+                        (never more — type a bigger amount deliberately for an advance).
+                        A payment can be applied <strong>partially</strong>; the remainder stays
+                        <strong>on account</strong>. Reverted payments return on account and are
+                        logged in the year's history.
                     </div>
                 </sheet>
                 <footer>
-                    <button name="action_apply" string="Apply Selected" type="object"
+                    <button name="action_apply" string="Apply Changes" type="object"
                             class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
