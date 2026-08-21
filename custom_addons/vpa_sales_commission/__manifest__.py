@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.5.0',
+    'version': '19.0.2.5.1',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.0)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.1)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,12 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.5.1** - Dialog and card polish
+  - Instant Revert works on the first click (the payment manager dialog now
+    opens on a pre-created record - no save-then-click-again dance)
+  - Closed/settled year cards keep the same height as open ones while
+    unallocated money exists (invisible spacer instead of a missing block)
+
 * **19.0.2.5.0** - Accounting mirror: payments auto-reconcile with the year's bills
   - Applying a payment to a year now matches it against the year's POSTED
     bills (guarantee and true-up, oldest first) in accounting - capped at

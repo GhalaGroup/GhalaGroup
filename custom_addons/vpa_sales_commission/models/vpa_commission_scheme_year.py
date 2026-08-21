@@ -980,18 +980,23 @@ class VpaCommissionSchemeYear(models.Model):
         }
 
     def action_apply_payment(self):
-        """Open the payment manager for this year: applied payments (tick to
-        revert) and on-account payments (tick to allocate) in one dialog."""
+        """Open the payment manager for this year: applied payments (instant
+        Revert) and on-account payments (tick to allocate) in one dialog.
+
+        The wizard record is PRE-CREATED (same pattern as the Generate
+        Commission wizard): on an unsaved dialog record, a button inside a
+        list row costs one click to save and a second to execute — the
+        instant Revert must work on the first click."""
         self.ensure_one()
+        wizard = self.env['vpa.commission.apply.payment.wizard'].with_context(
+            default_scheme_year_id=self.id).create({})
         return {
             'type': 'ir.actions.act_window',
             'name': _('Payments - %s (%s)', self.employee_id.name, self.year),
             'res_model': 'vpa.commission.apply.payment.wizard',
             'view_mode': 'form',
+            'res_id': wizard.id,
             'target': 'new',
-            'context': {
-                'default_scheme_year_id': self.id,
-            },
         }
 
     def action_view_payments(self):

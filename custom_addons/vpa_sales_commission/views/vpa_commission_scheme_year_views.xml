@@ -360,10 +360,15 @@
                                  offering "Allocate to this year" would invite
                                  overpaying it; there the block turns muted and
                                  the button space stays as an invisible spacer. -->
-                            <div t-if="record.unallocated_onaccount_amount.raw_value &gt; 0 and record.state.raw_value == 'open'"
+                            <!-- Rendered whenever unallocated money exists — on
+                                 CLOSED or settled years as an invisible spacer —
+                                 so all cards keep equal heights; the block only
+                                 disappears everywhere at once, when the money is
+                                 fully allocated. -->
+                            <div t-if="record.unallocated_onaccount_amount.raw_value &gt; 0"
                                  class="mt-2 px-2 py-2 rounded"
-                                 t-attf-style="background:#{record.still_to_pay_total.raw_value &gt; 0 ? 'rgba(240,173,78,.14)' : 'transparent'}; font-variant-numeric:tabular-nums;">
-                                <t t-if="record.still_to_pay_total.raw_value &gt; 0">
+                                 t-attf-style="background:#{record.still_to_pay_total.raw_value &gt; 0 and record.state.raw_value == 'open' ? 'rgba(240,173,78,.14)' : 'transparent'}; font-variant-numeric:tabular-nums;">
+                                <t t-if="record.still_to_pay_total.raw_value &gt; 0 and record.state.raw_value == 'open'">
                                     <div class="d-flex justify-content-between align-items-baseline">
                                         <span class="small text-warning fw-bold text-truncate">
                                             <i class="fa fa-exclamation-triangle me-1"/>Not allocated
