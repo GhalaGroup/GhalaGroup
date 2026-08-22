@@ -107,9 +107,15 @@ class VpaCommissionPaymentAllocation(models.Model):
         # year's posted bills, NEVER beyond the allocated amount. One sync per
         # unique (payment, year) pair — _applied_amount_pc reads ALL of the
         # payment's allocations, so duplicates in the batch add nothing.
-        for payment, year in {(a.payment_id, a.scheme_year_id)
-                              for a in allocations}:
-            self._sync_payment_year_reconciliation(payment, year)
+        # _skip_commission_resync: the change came FROM accounting (manual
+        # reconcile hook) — the matches already are the truth, rebuilding them
+        # mid-flight would delete records core is still holding.
+        if not self.env.context.get('_skip_commission_resync'):
+            for payment, year in {(a.payment_id, a.scheme_year_id)
+                                  for a in allocations}:
+                self._sync_payment_year_reconciliation(payment, year)
+        for year in {a.scheme_year_id for a in allocations}:
+            year._refresh_line_settlement()
         return allocations
 
     def write(self, vals):
@@ -145,8 +151,11 @@ class VpaCommissionPaymentAllocation(models.Model):
                     amount=f'{alloc.amount:,.2f} {alloc.currency_id.name}',
                     payment=alloc.payment_id.display_name,
                 ))
-            for payment, year in pairs_before | pairs_after:
-                self._sync_payment_year_reconciliation(payment, year)
+            if not self.env.context.get('_skip_commission_resync'):
+                for payment, year in pairs_before | pairs_after:
+                    self._sync_payment_year_reconciliation(payment, year)
+            for year in {y for _p, y in pairs_before | pairs_after}:
+                year._refresh_line_settlement()
         return res
 
     def unlink(self):
@@ -167,8 +176,11 @@ class VpaCommissionPaymentAllocation(models.Model):
         # Re-sync accounting AFTER the allocation is gone: all matches between
         # the payment and that year's bills are rebuilt from the remaining
         # allocations (usually none -> fully unreconciled).
-        for payment, year in resync:
-            self._sync_payment_year_reconciliation(payment, year)
+        if not self.env.context.get('_skip_commission_resync'):
+            for payment, year in resync:
+                self._sync_payment_year_reconciliation(payment, year)
+        for year in {y for _p, y in resync}:
+            year._refresh_line_settlement()
         return res
 
     # ------------------------------------------------------------------
@@ -218,8 +230,9 @@ class VpaCommissionPaymentAllocation(models.Model):
     @api.model
     def _sync_payment_year_reconciliation(self, payment, year):
         """Rebuild the accounting matches between one payment and one year's
-        posted bills so they equal the applied amount. Idempotent (wipe and
-        rebuild for this pair only); no-ops for unposted payments.
+        posted bills so they equal the applied amount, then settle any
+        sub-cent FX rounding residue. Idempotent (wipe and rebuild for this
+        pair only); the match rebuild no-ops for unposted payments.
 
         sudo throughout: this runs from triggers available to users without
         commission or full accounting rights (posting a bill, editing a
@@ -228,25 +241,62 @@ class VpaCommissionPaymentAllocation(models.Model):
         payment = payment.sudo()
         year = year.sudo()
         pay_lines = self._payment_payable_lines(payment)
-        if not pay_lines:
-            # Unposted payment: core already dropped any reconciliation when
-            # the move left 'posted'; nothing to clean, nothing to build.
+        if pay_lines:
+            # 1. Drop every existing partial between this payment and ANY bill
+            #    of the year — including draft ones (a posted bill can be reset
+            #    to draft with its matches intact; scoping cleanup to posted
+            #    bills would make those stale matches invisible forever).
+            #    partial.unlink() is the widget's "unreconcile": it also removes
+            #    full-reconciles and their exchange-difference entries.
+            #    _vpa_commission_sync: our own mutations must not re-trigger the
+            #    manual-reconcile mirror hooks on account.partial.reconcile.
+            all_bill_moves = year.bill_ids
+            partials = (pay_lines.matched_credit_ids | pay_lines.matched_debit_ids
+                        ).filtered(
+                lambda p: p.credit_move_id.move_id in all_bill_moves
+                or p.debit_move_id.move_id in all_bill_moves)
+            if partials:
+                partials.sudo().with_context(_vpa_commission_sync=True).unlink()
+            # 2. Rebuild against POSTED bills, oldest first, capped at the
+            #    applied amount.
+            self._rebuild_payment_year_matches(payment, year, pay_lines)
+        # 3. Order-independence: the absorption lives in the CARVE of a
+        #    cross-currency payment, so it only fires when that payment is
+        #    the one closing the bill. Applied the other way round (foreign
+        #    payment first — gap still real money — then a same-currency
+        #    payment that matches exactly), the sliver survives. Re-run the
+        #    foreign payment's rebuild in that case; its carve absorbs now.
+        self._absorb_terminal_sliver(year)
+
+    @api.model
+    def _absorb_terminal_sliver(self, year):
+        if self.env.context.get('_vpa_absorb_pass'):
             return
-        # 1. Drop every existing partial between this payment and ANY bill
-        #    of the year — including draft ones (a posted bill can be reset
-        #    to draft with its matches intact; scoping cleanup to posted
-        #    bills would make those stale matches invisible forever).
-        #    partial.unlink() is the widget's "unreconcile": it also removes
-        #    full-reconciles and their exchange-difference entries.
-        all_bill_moves = year.bill_ids
-        partials = (pay_lines.matched_credit_ids | pay_lines.matched_debit_ids
-                    ).filtered(
-            lambda p: p.credit_move_id.move_id in all_bill_moves
-            or p.debit_move_id.move_id in all_bill_moves)
-        if partials:
-            partials.sudo().unlink()
-        # 2. Rebuild against POSTED bills, oldest first, capped at the
-        #    applied amount.
+        year = year.sudo()
+        company = year.company_id or self.env.company
+        cc = company.currency_id
+        self.env['account.move.line'].flush_model()
+        residual = -sum(self._year_bill_payable_lines(year)
+                        .mapped('amount_residual'))
+        if cc.compare_amounts(residual, 0.0) <= 0:
+            return
+        candidates = (year.payment_ids | year.allocation_ids.payment_id
+                      ).sudo().filtered(
+            lambda p: p.currency_id and p.currency_id != cc
+            and p.state in ('in_process', 'paid'))
+        for cand in candidates:
+            tolerance = cand.currency_id._convert(
+                cand.currency_id.rounding, cc, company,
+                cand.date or fields.Date.today())
+            if residual <= tolerance:
+                self.with_context(
+                    _vpa_absorb_pass=True
+                )._sync_payment_year_reconciliation(cand, year)
+                return
+
+    @api.model
+    def _rebuild_payment_year_matches(self, payment, year, pay_lines):
+        """The match-building loop of the sync (see caller for the doctrine)."""
         pc = payment.currency_id
         budget_pc = self._applied_amount_pc(payment, year)
         if pc.is_zero(budget_pc):
@@ -258,6 +308,15 @@ class VpaCommissionPaymentAllocation(models.Model):
         # cash-basis tax transfer. Commission bills carry no taxes today,
         # but stay conservative: only full (core) matches are made there.
         carve_allowed = not company.tax_exigibility
+        # One payment-currency rounding unit in company currency: a bill
+        # residue below this can NEVER be paid in this payment's currency
+        # (one USD cent is worth many TZS), so the carved match absorbs it
+        # — the same thing core's reconcile() does when these lines are
+        # matched by hand. No write-off entry, no open sliver.
+        absorb_tol_cc = 0.0
+        if pc != cc:
+            absorb_tol_cc = pc._convert(
+                pc.rounding, cc, company, payment.date or fields.Date.today())
         self.env['account.move.line'].flush_model()
 
         def _residual_pc(line):
@@ -285,7 +344,8 @@ class VpaCommissionPaymentAllocation(models.Model):
                     # cash basis — all core-handled). Decrement the budget by
                     # the MEASURED consumption, not a computed guess.
                     before_pc = _residual_pc(pay_line)
-                    (pay_line | bill_line).sudo().reconcile()
+                    (pay_line | bill_line).sudo().with_context(
+                        _vpa_commission_sync=True).reconcile()
                     self.env['account.move.line'].flush_model()
                     (pay_line | bill_line).invalidate_recordset(
                         ['amount_residual', 'amount_residual_currency',
@@ -297,30 +357,45 @@ class VpaCommissionPaymentAllocation(models.Model):
                     # partial for just the budget. Amount fields follow
                     # core's contract: each *_amount_currency is expressed in
                     # ITS line's currency, derived from that line's own
-                    # residual ratio. Neither line is exhausted (strict
-                    # compare above), so no full-reconcile is due.
+                    # residual ratio.
                     if not carve_allowed or cc.is_zero(budget_cc):
                         # Too small to represent, or cash-basis company:
                         # leave the remainder unmatched rather than risk an
                         # inconsistent partial.
                         return
+                    # FX granularity absorption: when the budget stops less
+                    # than one payment-currency cent short of the bill's open
+                    # remainder, that sliver is physically unpayable in the
+                    # payment currency — so consume the bill remainder IN
+                    # FULL for the same payment-currency amount, exactly what
+                    # core's reconcile() books on a manual match. No sliver
+                    # left open, no write-off entry needed.
+                    absorb = bool(
+                        absorb_tol_cc
+                        and cc.compare_amounts(natural_cc, bill_res_cc) == 0
+                        and (natural_cc - budget_cc) <= absorb_tol_cc)
+                    match_cc = bill_res_cc if absorb else budget_cc
                     debit_amount_currency = (
                         pc.round(budget_pc) if pay_line.currency_id
-                        else budget_cc)
+                        else match_cc)
                     if bill_line.currency_id:
                         bill_res_bc = abs(bill_line.amount_residual_currency)
-                        credit_amount_currency = bill_line.currency_id.round(
-                            budget_cc * bill_res_bc / bill_res_cc)
+                        if absorb:
+                            credit_amount_currency = bill_res_bc
+                        else:
+                            credit_amount_currency = bill_line.currency_id.round(
+                                match_cc * bill_res_bc / bill_res_cc)
                         if bill_line.currency_id.is_zero(credit_amount_currency):
                             return
                     else:
-                        credit_amount_currency = budget_cc
+                        credit_amount_currency = match_cc
                     if pay_line.currency_id and pc.is_zero(debit_amount_currency):
                         return
-                    self.env['account.partial.reconcile'].sudo().create({
+                    self.env['account.partial.reconcile'].sudo().with_context(
+                        _vpa_commission_sync=True).create({
                         'debit_move_id': pay_line.id,
                         'credit_move_id': bill_line.id,
-                        'amount': budget_cc,
+                        'amount': match_cc,
                         'debit_amount_currency': debit_amount_currency,
                         'credit_amount_currency': credit_amount_currency,
                     })
@@ -329,3 +404,103 @@ class VpaCommissionPaymentAllocation(models.Model):
                         ['amount_residual', 'amount_residual_currency',
                          'reconciled'])
                     return
+
+    # ------------------------------------------------------------------
+    # Reverse mirror: manual accounting actions flow back into commission
+    # ------------------------------------------------------------------
+
+    @api.model
+    def _follow_manual_unreconcile(self, payment, year, amount_pc):
+        """An accountant unreconciled ``amount_pc`` (payment currency) of this
+        payment from one of ``year``'s bills: make the commission layer follow.
+        The accounting change IS the new truth, so allocations are adjusted
+        with _skip_commission_resync (no wipe-and-rebuild)."""
+        payment = payment.sudo()
+        year = year.sudo()
+        pc = payment.currency_id
+        if payment.commission_year_id == year:
+            # Full-year link: what is STILL matched against the year's bills
+            # survives as an explicit allocation; the unreconciled part goes
+            # back on account.
+            remaining = 0.0
+            for line in self._payment_payable_lines(payment):
+                for partial in (line.matched_credit_ids | line.matched_debit_ids):
+                    if partial.debit_move_id == line:
+                        other, matched = (partial.credit_move_id,
+                                          partial.debit_amount_currency)
+                    else:
+                        other, matched = (partial.debit_move_id,
+                                          partial.credit_amount_currency)
+                    if other.move_id in year.bill_ids:
+                        remaining += matched
+            payment.with_context(_skip_commission_resync=True).write(
+                {'commission_year_id': False})
+            if pc.compare_amounts(remaining, 0.0) > 0:
+                self.sudo().with_context(_skip_commission_resync=True).create({
+                    'payment_id': payment.id,
+                    'scheme_year_id': year.id,
+                    'amount': pc.round(remaining),
+                })
+            year.message_post(body=_(
+                'Payment %(payment)s was unreconciled from a bill of this '
+                'year in accounting: the full-year link was released; '
+                '%(rest)s remains applied.',
+                payment=payment.display_name,
+                rest=f'{remaining:,.2f} {pc.name}'))
+        else:
+            # Consume the unreconciled amount from this year's allocations,
+            # newest first. The allocation model's own chatter documents
+            # each reduction/removal.
+            remaining_cut = amount_pc
+            allocs = payment.commission_allocation_ids.filtered(
+                lambda a: a.scheme_year_id == year).sorted('id', reverse=True)
+            for alloc in allocs:
+                if pc.compare_amounts(remaining_cut, 0.0) <= 0:
+                    break
+                cut = min(alloc.amount, remaining_cut)
+                remaining_cut -= cut
+                alloc = alloc.with_context(_skip_commission_resync=True)
+                if pc.compare_amounts(cut, alloc.amount) >= 0:
+                    alloc.unlink()
+                else:
+                    alloc.write({'amount': pc.round(alloc.amount - cut)})
+        year._refresh_line_settlement()
+
+    @api.model
+    def _follow_manual_reconcile(self, payment, year, amount_pc):
+        """An accountant manually matched ``amount_pc`` (payment currency) of
+        this payment against one of ``year``'s bills (e.g. standard Register
+        Payment, or the outstanding-credits widget): mirror it as an
+        allocation so the commission layer counts exactly what accounting
+        matched."""
+        payment = payment.sudo()
+        year = year.sudo()
+        pc = payment.currency_id
+        if payment.commission_year_id:
+            # Fully linked payments already count in full; a match against the
+            # linked year adds nothing, and one against ANOTHER year is a
+            # conflict the sync doctrine resolves in favour of the commission
+            # data on its next run.
+            return
+        cap = payment.commission_unallocated_amount
+        amount = min(amount_pc, cap)
+        if pc.compare_amounts(amount, 0.0) <= 0:
+            year.message_post(body=_(
+                'Payment %(payment)s was manually reconciled against a bill '
+                'of this year, but it has nothing left on account — the '
+                'match is not reflected in commission and will be undone by '
+                'the next sync. Revert its other applications first.',
+                payment=payment.display_name))
+            return
+        existing = payment.commission_allocation_ids.filtered(
+            lambda a: a.scheme_year_id == year)[:1]
+        if existing:
+            existing.with_context(_skip_commission_resync=True).write(
+                {'amount': pc.round(existing.amount + amount)})
+        else:
+            self.sudo().with_context(_skip_commission_resync=True).create({
+                'payment_id': payment.id,
+                'scheme_year_id': year.id,
+                'amount': pc.round(amount),
+            })
+        year._refresh_line_settlement()

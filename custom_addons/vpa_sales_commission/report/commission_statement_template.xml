@@ -190,6 +190,43 @@
                 </t>
             </table>
 
+            <!-- Year Cash Settlement: what the year owes vs the cash that
+                 actually went out — the same figures as the Commission Centre
+                 card. The per-line "Paid" above is each line's proportional
+                 share of this settlement. -->
+            <t t-if="year_settlements">
+                <t t-foreach="year_settlements" t-as="ys">
+                    <table class="cs-summary o_ignore_layout_styling" style="margin-top: 6px;">
+                        <tr class="cs-summary-title"><td colspan="2">Year Cash Settlement — <t t-out="ys.year"/></td></tr>
+                        <tr>
+                            <td class="cs-summary-label">Minimum Guarantee</td>
+                            <td class="cs-summary-value"><t t-out="ys.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(ys.minimum_amount)"/></td>
+                        </tr>
+                        <tr>
+                            <td class="cs-summary-label">Total to Pay (greater of guarantee / earned)</td>
+                            <td class="cs-summary-value"><t t-out="ys.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(ys.total_to_pay)"/></td>
+                        </tr>
+                        <tr>
+                            <td class="cs-summary-label">Cash Paid</td>
+                            <td class="cs-summary-value"><t t-out="ys.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(ys.amount_paid_cash)"/></td>
+                        </tr>
+                        <t t-if="ys.writeoff_total">
+                            <tr>
+                                <td class="cs-summary-label">Rounding Written Off</td>
+                                <td class="cs-summary-value"><t t-out="ys.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(ys.writeoff_total)"/></td>
+                            </tr>
+                        </t>
+                        <tr class="cs-summary-highlight">
+                            <td class="cs-summary-label" style="font-weight: 800 !important;">
+                                <t t-if="ys.still_to_pay_total >= 0">Still to Pay</t>
+                                <t t-else="">Overpaid (Advance)</t>
+                            </td>
+                            <td class="cs-summary-value" style="font-weight: 800 !important;"><t t-out="ys.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(abs(ys.still_to_pay_total))"/></td>
+                        </tr>
+                    </table>
+                </t>
+            </t>
+
             <!-- Signatures -->
             <table class="cs-sig-table o_ignore_layout_styling">
                 <tr>
@@ -357,19 +394,32 @@
                             </t>
                         </table>
 
-                        <!-- Summary -->
+                        <!-- Summary: cash truth at year level — payment happens
+                             per year (guarantee or earned, whichever is higher),
+                             so Paid/Still-to-Pay are the year's CASH figures,
+                             identical to the Commission Centre card. -->
                         <table class="cs-summary o_ignore_layout_styling">
                             <tr class="cs-summary-title"><td colspan="2">Statement Summary</td></tr>
                             <tr><td class="cs-summary-label">A. Total Commission Earned</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned)"/></td></tr>
-                            <tr><td class="cs-summary-label">B. Total Paid</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_paid)"/></td></tr>
-                            <tr class="cs-summary-highlight"><td class="cs-summary-label">C. Outstanding (A - B)</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(outstanding)"/></td></tr>
+                            <tr><td class="cs-summary-label">B. Minimum Guarantee</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(minimum_amount)"/></td></tr>
+                            <tr><td class="cs-summary-label">C. Total to Pay (greater of A / B)</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.total_to_pay)"/></td></tr>
+                            <tr><td class="cs-summary-label">D. Cash Paid</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.amount_paid_cash)"/></td></tr>
+                            <t t-if="doc.writeoff_total">
+                                <tr><td class="cs-summary-label">E. Rounding Written Off</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.writeoff_total)"/></td></tr>
+                            </t>
+                            <tr class="cs-summary-highlight">
+                                <td class="cs-summary-label" style="font-weight: 800;">
+                                    <t t-if="doc.still_to_pay_total >= 0">Still to Pay</t>
+                                    <t t-else="">Overpaid (Advance)</t>
+                                </td>
+                                <td class="cs-summary-value" style="font-weight: 800;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(abs(doc.still_to_pay_total))"/></td>
+                            </tr>
                             <t t-if="minimum_amount">
-                                <tr><td class="cs-summary-label">D. Minimum Guarantee</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(minimum_amount)"/></td></tr>
                                 <t t-if="shortfall > 0">
-                                    <tr class="cs-summary-danger"><td class="cs-summary-label">E. Shortfall (D - A)</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(shortfall)"/></td></tr>
+                                    <tr class="cs-summary-danger"><td class="cs-summary-label">Earned Below Guarantee By</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(shortfall)"/></td></tr>
                                 </t>
                                 <t t-else="">
-                                    <tr class="cs-summary-success"><td class="cs-summary-label">E. Above Guarantee</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned - minimum_amount)"/></td></tr>
+                                    <tr class="cs-summary-success"><td class="cs-summary-label">Earned Above Guarantee By</td><td class="cs-summary-value"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(total_earned - minimum_amount)"/></td></tr>
                                 </t>
                             </t>
                         </table>
@@ -524,8 +574,8 @@
                         <table style="width:50%; margin-left:auto; border-collapse:collapse; margin-bottom:16px;">
                             <tr style="background-color:#DC143C !important; -webkit-print-color-adjust:exact;"><td colspan="2" style="color:#fff !important; text-align:center; padding:7px; font-size:12px; font-weight:700; border:none;">Performance Summary</td></tr>
                             <tr><td style="font-weight:600; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px; width:58%; border-bottom:1px solid #e0e0e0;">Total Commission Earned</td><td style="text-align:right; padding:7px 10px; border-bottom:1px solid #e0e0e0;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.total_earned)"/></td></tr>
-                            <tr><td style="font-weight:600; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px; border-bottom:1px solid #e0e0e0;">Total Paid</td><td style="text-align:right; padding:7px 10px; border-bottom:1px solid #e0e0e0;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.total_paid)"/></td></tr>
-                            <tr style="border-top:2px solid #2d3436; border-bottom:2px solid #2d3436;"><td style="font-weight:800; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px;">Outstanding</td><td style="text-align:right; padding:7px 10px; font-weight:800; font-size:11px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.outstanding)"/></td></tr>
+                            <tr><td style="font-weight:600; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px; border-bottom:1px solid #e0e0e0;">Cash Paid</td><td style="text-align:right; padding:7px 10px; border-bottom:1px solid #e0e0e0;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.amount_paid_cash)"/></td></tr>
+                            <tr style="border-top:2px solid #2d3436; border-bottom:2px solid #2d3436;"><td style="font-weight:800; background-color:#f5f6fa !important; -webkit-print-color-adjust:exact; padding:7px 10px;">Still to Pay</td><td style="text-align:right; padding:7px 10px; font-weight:800; font-size:11px;"><t t-out="sym"/>&#160;<t t-out="'{:,.2f}'.format(doc.still_to_pay_total)"/></td></tr>
                         </table>
 
                         <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
@@ -592,8 +642,8 @@
                                     <td class="cs-td cs-td-bold"><t t-out="yl.employee_id.name"/></td>
                                     <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.minimum_amount)"/></td>
                                     <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.total_earned)"/></td>
-                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.total_paid)"/></td>
-                                    <td class="cs-td cs-td-right cs-td-bold"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.outstanding)"/></td>
+                                    <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.amount_paid_cash)"/></td>
+                                    <td class="cs-td cs-td-right cs-td-bold"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.still_to_pay_total)"/></td>
                                     <td class="cs-td cs-td-right"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.advance_consumed)"/></td>
                                     <td class="cs-td cs-td-right" style="color:#27ae60;"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.advance_remaining)"/></td>
                                     <td class="cs-td cs-td-right" style="color:#e74c3c;"><t t-out="yl.currency_id.symbol"/>&#160;<t t-out="'{:,.2f}'.format(yl.payable_to_employee)"/></td>
@@ -634,6 +684,7 @@
                     <t t-set="shortfall" t-value="0"/>
                     <t t-set="lines" t-value="all_lines"/>
                     <t t-set="payment_lines" t-value="all_lines.filtered(lambda l: l.state == 'paid').sorted(key=lambda l: l.paid_date or l.date)"/>
+                    <t t-set="year_settlements" t-value="doc.get_year_settlements()"/>
                     <t t-call="vpa_sales_commission.report_commission_statement_body"/>
                 </t>
             </t>
@@ -735,8 +786,9 @@
                                         <td class="cs-td"><t t-out="doc.product_id.display_name or ''"/></td>
                                         <td class="cs-td"><t t-out="doc.date_finished.strftime('%d/%m/%Y') if doc.date_finished else ''"/></td>
                                         <td class="cs-td">
-                                            <t t-if="doc.commission_status == 'pending_generation'"><span class="badge-pending">Pending</span></t>
-                                            <t t-elif="doc.commission_status == 'applied'"><span class="badge-applied">Applied</span></t>
+                                            <t t-if="doc.commission_status == 'pending_generation'"><span class="badge-pending">To Generate</span></t>
+                                            <t t-elif="doc.commission_status == 'pending_approval'"><span class="badge-pending">To Approve</span></t>
+                                            <t t-elif="doc.commission_status == 'applied'"><span class="badge-applied">Approved</span></t>
                                             <t t-elif="doc.commission_status == 'paid'"><span class="badge-paid">Paid</span></t>
                                             <t t-else=""><span class="badge-na">N/A</span></t>
                                         </td>
@@ -797,6 +849,7 @@
         <t t-set="period_label" t-value="doc.get_period_label()"/>
         <t t-set="employee_name" t-value="doc.employee_id.name"/>
         <t t-set="currency_symbol" t-value="doc.currency_id.symbol or ''"/>
+        <t t-set="year_settlements" t-value="doc.get_year_settlements()"/>
 
         <style>
             .cs-page { font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif; font-size: 10px; color: #2d3436; }
@@ -843,21 +896,23 @@
             <!-- SO Table -->
             <table class="cs-table o_ignore_layout_styling">
                 <tr class="cs-table-title">
-                    <td colspan="7">Commission by Sales Order</td>
+                    <td colspan="8">Commission by Sales Order</td>
                 </tr>
                 <tr>
-                    <th class="cs-th" style="width: 14%;">SO Number</th>
-                    <th class="cs-th" style="width: 26%;">Client</th>
-                    <th class="cs-th cs-th-center" style="width: 8%;"># MOs</th>
-                    <th class="cs-th cs-th-right" style="width: 8%;">Rate %</th>
-                    <th class="cs-th cs-th-right" style="width: 15%;">Commission Amt</th>
-                    <th class="cs-th cs-th-right" style="width: 15%;">Paid</th>
+                    <th class="cs-th" style="width: 12%;">SO Number</th>
+                    <th class="cs-th" style="width: 20%;">Client</th>
+                    <th class="cs-th" style="width: 12%;">Customer Ref</th>
+                    <th class="cs-th cs-th-center" style="width: 7%;"># MOs</th>
+                    <th class="cs-th cs-th-right" style="width: 7%;">Rate %</th>
+                    <th class="cs-th cs-th-right" style="width: 14%;">Commission Amt</th>
+                    <th class="cs-th cs-th-right" style="width: 14%;">Paid</th>
                     <th class="cs-th cs-th-right" style="width: 14%;">Outstanding</th>
                 </tr>
                 <t t-foreach="so_lines" t-as="sol">
                     <tr t-attf-class="#{sol_index % 2 == 0 and 'cs-row-alt' or ''}">
                         <td class="cs-td cs-td-bold"><t t-out="sol['so_name']"/></td>
                         <td class="cs-td"><t t-out="sol['client_name']"/></td>
+                        <td class="cs-td"><t t-out="sol.get('customer_ref', '—')"/></td>
                         <td class="cs-td cs-td-center"><t t-out="sol['mo_count']"/></td>
                         <td class="cs-td cs-td-right"><t t-out="'{:.2f}%'.format(sol['rate'])"/></td>
                         <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sol['total_amount'])"/></td>
@@ -869,7 +924,7 @@
                 </t>
                 <!-- Totals row -->
                 <tr class="cs-totals">
-                    <td colspan="2" class="cs-td cs-td-bold">TOTALS</td>
+                    <td colspan="3" class="cs-td cs-td-bold">TOTALS</td>
                     <td class="cs-td cs-td-center"><t t-out="sum(s['mo_count'] for s in so_lines)"/></td>
                     <td class="cs-td"></td>
                     <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(totals['total_earned'])"/></td>
@@ -902,6 +957,40 @@
                     <td class="cs-td cs-summary-value"><t t-out="currency_symbol"/> <t t-out="'{:,.2f}'.format(totals['outstanding'])"/></td>
                 </tr>
             </table>
+
+            <!-- Year Cash Settlement — same figures as the Commission Centre card -->
+            <t t-if="year_settlements">
+                <t t-foreach="year_settlements" t-as="ys">
+                    <table class="cs-summary o_ignore_layout_styling" style="margin-top: 6px;">
+                        <tr class="cs-summary-title"><td colspan="2">Year Cash Settlement — <t t-out="ys.year"/></td></tr>
+                        <tr>
+                            <td class="cs-td cs-summary-label">Minimum Guarantee</td>
+                            <td class="cs-td cs-summary-value"><t t-out="ys.currency_id.symbol"/> <t t-out="'{:,.2f}'.format(ys.minimum_amount)"/></td>
+                        </tr>
+                        <tr>
+                            <td class="cs-td cs-summary-label">Total to Pay (greater of guarantee / earned)</td>
+                            <td class="cs-td cs-summary-value"><t t-out="ys.currency_id.symbol"/> <t t-out="'{:,.2f}'.format(ys.total_to_pay)"/></td>
+                        </tr>
+                        <tr>
+                            <td class="cs-td cs-summary-label">Cash Paid</td>
+                            <td class="cs-td cs-summary-value cs-summary-success"><t t-out="ys.currency_id.symbol"/> <t t-out="'{:,.2f}'.format(ys.amount_paid_cash)"/></td>
+                        </tr>
+                        <t t-if="ys.writeoff_total">
+                            <tr>
+                                <td class="cs-td cs-summary-label">Rounding Written Off</td>
+                                <td class="cs-td cs-summary-value"><t t-out="ys.currency_id.symbol"/> <t t-out="'{:,.2f}'.format(ys.writeoff_total)"/></td>
+                            </tr>
+                        </t>
+                        <tr class="cs-summary-highlight">
+                            <td class="cs-td cs-summary-label" style="font-weight: 800;">
+                                <t t-if="ys.still_to_pay_total >= 0">Still to Pay</t>
+                                <t t-else="">Overpaid (Advance)</t>
+                            </td>
+                            <td class="cs-td cs-summary-value" style="font-weight: 800;"><t t-out="ys.currency_id.symbol"/> <t t-out="'{:,.2f}'.format(abs(ys.still_to_pay_total))"/></td>
+                        </tr>
+                    </table>
+                </t>
+            </t>
 
             <div class="cs-footer-note">Computer generated document. Printed: <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></div>
 
@@ -970,11 +1059,12 @@
 
                     <table class="cs-table o_ignore_layout_styling">
                         <t t-set="table_title" t-value="rpt_subtitle or 'Sales Order Commission Summary'"/>
-                        <tr class="cs-table-title"><td colspan="8"><t t-out="table_title"/></td></tr>
+                        <tr class="cs-table-title"><td colspan="9"><t t-out="table_title"/></td></tr>
                         <tr>
-                            <th class="cs-th" style="width:10%;">Sales Order</th>
-                            <th class="cs-th" style="width:25%;">Client</th>
-                            <th class="cs-th" style="width:18%;">Employee</th>
+                            <th class="cs-th" style="width:9%;">Sales Order</th>
+                            <th class="cs-th" style="width:17%;">Client</th>
+                            <th class="cs-th" style="width:10%;">Customer Ref</th>
+                            <th class="cs-th" style="width:15%;">Employee</th>
                             <th class="cs-th cs-th-center" style="width:7%;"># MOs</th>
                             <th class="cs-th cs-th-right" style="width:7%;">Rate %</th>
                             <th class="cs-th cs-th-right" style="width:11%;">Commission</th>
@@ -985,7 +1075,7 @@
                         <t t-foreach="sorted(year_groups.keys())" t-as="yr">
                             <!-- Year header: only show when multiple years OR always for clarity -->
                             <tr>
-                                <td colspan="8" style="background-color:#f0f0f0 !important; -webkit-print-color-adjust:exact; padding:6px 5px; font-size:11px; font-weight:800; color:#2d3436; border-bottom:2px solid #DC143C; border-top:2px solid #DC143C;">
+                                <td colspan="9" style="background-color:#f0f0f0 !important; -webkit-print-color-adjust:exact; padding:6px 5px; font-size:11px; font-weight:800; color:#2d3436; border-bottom:2px solid #DC143C; border-top:2px solid #DC143C;">
                                     FY <t t-out="yr"/>
                                 </td>
                             </tr>
@@ -998,7 +1088,7 @@
                                 <!-- Month sub-header (only if more than one month in this year) -->
                                 <t t-if="multi_month">
                                     <tr>
-                                        <td colspan="8" style="background-color:#f8f8f8 !important; -webkit-print-color-adjust:exact; padding:4px 5px 4px 15px; font-size:10px; font-weight:700; color:#555; border-bottom:1px solid #ddd;">
+                                        <td colspan="9" style="background-color:#f8f8f8 !important; -webkit-print-color-adjust:exact; padding:4px 5px 4px 15px; font-size:10px; font-weight:700; color:#555; border-bottom:1px solid #ddd;">
                                             <t t-out="mo_name"/>
                                         </td>
                                     </tr>
@@ -1009,6 +1099,7 @@
                                     <tr t-att-class="row_class">
                                         <td class="cs-td cs-td-bold"><t t-out="doc.sale_order_name or ''"/></td>
                                         <td class="cs-td"><t t-out="doc.partner_id.name or '—'"/></td>
+                                        <td class="cs-td"><t t-out="doc.customer_ref or '—'"/></td>
                                         <td class="cs-td"><t t-out="doc.employee_id.name or ''"/></td>
                                         <td class="cs-td cs-td-center"><t t-out="doc.mo_count"/></td>
                                         <td class="cs-td cs-td-right"><t t-out="'{:.2f}'.format(doc.rate)"/></td>
@@ -1021,7 +1112,7 @@
                                 <!-- Month subtotal (only if multiple months) -->
                                 <t t-if="multi_month">
                                     <tr style="background-color:#ececec !important; -webkit-print-color-adjust:exact;">
-                                        <td colspan="3" class="cs-td cs-td-bold" style="padding-left:15px; font-size:9px; color:#555;">
+                                        <td colspan="4" class="cs-td cs-td-bold" style="padding-left:15px; font-size:9px; color:#555;">
                                             <t t-out="mo_name"/> Subtotal (<t t-out="len(mo_docs)"/> orders)
                                         </td>
                                         <td class="cs-td cs-td-center" style="font-weight:700;"><t t-out="sum(d.mo_count for d in mo_docs)"/></td>
@@ -1036,7 +1127,7 @@
 
                         <!-- Grand Total -->
                         <tr class="cs-totals">
-                            <td colspan="3" class="cs-td cs-td-bold">GRAND TOTAL (<t t-out="len(docs)"/> orders)</td>
+                            <td colspan="4" class="cs-td cs-td-bold">GRAND TOTAL (<t t-out="len(docs)"/> orders)</td>
                             <td class="cs-td cs-td-center"><t t-out="sum(docs.mapped('mo_count'))"/></td>
                             <td class="cs-td"></td>
                             <td class="cs-td cs-td-right"><t t-out="'{:,.2f}'.format(sum(docs.mapped('total_amount')))"/></td>

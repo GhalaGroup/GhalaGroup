@@ -768,6 +768,70 @@ class VpaCommissionSchemeYear(models.Model):
                 max(rec.minimum_amount, total_earned_all))
             rec.still_to_pay_total = currency.round(
                 rec.total_to_pay - rec.amount_paid_cash - rec.writeoff_total)
+            # FX granularity snap: cross-currency payments can only move in
+            # steps of one payment-currency cent (~28.5 TZS for USD), so the
+            # commission figures can be off by less than one such step in
+            # EITHER direction (7.50 under, 5.95 over) — amounts nobody can
+            # pay or refund in those currencies. Snap them to settled, unless
+            # a posted bill genuinely still has an open remainder (a real
+            # debt must never be hidden).
+            tolerance = rec._fx_granularity_tolerance(payments)
+            if tolerance:
+                open_posted = rec.bill_ids.filtered(
+                    lambda b: b.state == 'posted'
+                    and b.move_type == 'in_invoice'
+                    and not currency.is_zero(b.amount_residual))
+                if not open_posted:
+                    if abs(rec.still_to_pay_total) <= tolerance:
+                        rec.still_to_pay_total = 0.0
+                    if abs(rec.outstanding_cash) <= tolerance:
+                        rec.outstanding_cash = 0.0
+
+    def _settlement_ratio(self):
+        """How settled this year is, 0.0..1.0: cash paid (plus write-offs)
+        over the year's total to pay. A year whose Still to Pay is zero
+        (including the FX granularity snap) is fully settled. Lines use this
+        to show their PROPORTIONAL paid share — cash moves at year level,
+        so a line's 'paid' is its slice of the year's settlement."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        total = self.total_to_pay
+        if currency.is_zero(total) or total <= 0:
+            return 0.0
+        if self.still_to_pay_total <= 0 or currency.is_zero(self.still_to_pay_total):
+            return 1.0
+        paid = self.amount_paid_cash + self.writeoff_total
+        return max(0.0, min(1.0, paid / total))
+
+    def _refresh_line_settlement(self):
+        """Recompute the lines' stored amount_paid/amount_due. Year cash
+        (payments, allocations, write-offs) is OUTSIDE the lines' compute
+        dependency graph, so every payment-side mutation point calls this
+        explicitly — the SQL analysis views aggregate the stored columns
+        and must never go stale."""
+        Line = self.env['vpa.commission.line']
+        for rec in self.sudo():
+            lines = rec._year_commission_lines()
+            if lines:
+                self.env.add_to_compute(Line._fields['amount_paid'], lines)
+                self.env.add_to_compute(Line._fields['amount_due'], lines)
+
+    def _fx_granularity_tolerance(self, payments):
+        """The largest amount that cannot be represented in the currencies of
+        the year's payments: one rounding unit of each foreign payment
+        currency, converted at that payment's date. Zero when every payment
+        is in the scheme currency (exact settlement is always possible)."""
+        self.ensure_one()
+        currency = self.currency_id or self.company_id.currency_id
+        tolerance = 0.0
+        for p in payments:
+            if p.currency_id and p.currency_id != currency:
+                tolerance = max(tolerance, p.currency_id._convert(
+                    p.currency_id.rounding, currency,
+                    self.company_id or self.env.company,
+                    p.date or fields.Date.today(),
+                ))
+        return tolerance
 
     _year_uniq = models.Constraint(
         'unique(scheme_id, year)',
@@ -955,14 +1019,17 @@ class VpaCommissionSchemeYear(models.Model):
         }
 
     def action_view_bills(self):
-        """Open vendor bills for this year."""
+        """Open vendor bills for this year — BILLS only, matching bill_count:
+        write-off/journal entries carrying the year link are not bills and
+        only clutter this list."""
         self.ensure_one()
         return {
             'name': _('Bills - %s (%s)', self.employee_id.name, self.year),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
             'view_mode': 'list,form',
-            'domain': [('commission_year_id', '=', self.id)],
+            'domain': [('commission_year_id', '=', self.id),
+                       ('move_type', '=', 'in_invoice')],
         }
 
     def action_register_payment(self):

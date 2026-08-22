@@ -34,7 +34,8 @@ class MrpProductionCommissionReport(models.Model):
     commission_status = fields.Selection([
         ('not_applicable', 'Not Applicable'),
         ('pending_generation', 'Pending Generation'),
-        ('applied', 'Applied'),
+        ('pending_approval', 'Pending Approval'),
+        ('applied', 'Approved'),
         ('paid', 'Paid'),
     ], string='Commission Status', readonly=True)
 
@@ -87,11 +88,18 @@ class MrpProductionCommissionReport(models.Model):
                         ELSE false
                     END AS commission_generated,
 
-                    -- Commission Status Logic
+                    -- Commission Status Logic — a work queue, in order:
+                    --   pending_generation: no commission lines yet
+                    --   pending_approval:   at least one line awaits approval
+                    --   paid:               every line settled ('paid' state,
+                    --                       or amount_due ~0 via the year's
+                    --                       proportional cash settlement)
+                    --   applied (Approved): approved, waiting for payment
                     CASE
                         WHEN mp.commission_blocked = true THEN 'not_applicable'
                         WHEN COUNT(cl.id) = 0 THEN 'pending_generation'
-                        WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'paid') = COUNT(cl.id) THEN 'paid'
+                        WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'pending') > 0 THEN 'pending_approval'
+                        WHEN COUNT(cl.id) FILTER (WHERE cl.state = 'paid' OR cl.amount_due <= 0.01) = COUNT(cl.id) THEN 'paid'
                         ELSE 'applied'
                     END AS commission_status,
 

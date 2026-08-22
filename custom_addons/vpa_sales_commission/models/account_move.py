@@ -78,6 +78,8 @@ class AccountMove(models.Model):
                     pairs.add((payment, year))
         for payment, year in pairs:
             Allocation._sync_payment_year_reconciliation(payment, year)
+        for year in {y for _p, y in pairs}:
+            year._refresh_line_settlement()
         return posted
 
     def write(self, vals):
@@ -102,7 +104,7 @@ class AccountMove(models.Model):
                     lambda p: p.debit_move_id.move_id.origin_payment_id
                     or p.credit_move_id.move_id.origin_payment_id)
                 if partials:
-                    partials.unlink()
+                    partials.with_context(_vpa_commission_sync=True).unlink()
                 for payment in (old_year.payment_ids
                                 | old_year.allocation_ids.payment_id):
                     resync.add((payment.sudo(), old_year))
@@ -118,6 +120,15 @@ class AccountMove(models.Model):
             for payment, year in resync:
                 Allocation._sync_payment_year_reconciliation(payment, year)
         return res
+
+    def button_draft(self):
+        """Resetting a move to draft tears down its reconciliation as a
+        LIFECYCLE side effect, not as a user decision to detach payments from
+        commission years: flag it so the partial-reconcile mirror hooks leave
+        the commission allocations alone (the _post hook rebuilds the matches
+        from them when the document is posted again)."""
+        return super(AccountMove, self.with_context(
+            _vpa_commission_lifecycle=True)).button_draft()
 
     def unlink(self):
         # Deleting a commission bill (guarantee or true-up) must also remove its

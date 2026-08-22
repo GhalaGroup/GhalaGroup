@@ -9,6 +9,7 @@
             <list string="Commission by MO" create="false" delete="false" edit="false"
                   decoration-danger="commission_status == 'not_applicable'"
                   decoration-warning="commission_status == 'pending_generation'"
+                  decoration-primary="commission_status == 'pending_approval'"
                   decoration-info="commission_status == 'applied'"
                   decoration-success="commission_status == 'paid'">
                 <field name="name" string="MO Reference"/>
@@ -19,6 +20,7 @@
                 <field name="commission_status" widget="badge"
                        decoration-danger="commission_status == 'not_applicable'"
                        decoration-warning="commission_status == 'pending_generation'"
+                       decoration-primary="commission_status == 'pending_approval'"
                        decoration-info="commission_status == 'applied'"
                        decoration-success="commission_status == 'paid'"/>
                 <field name="commission_base_amount" widget="monetary"
@@ -90,7 +92,9 @@
         <field name="arch" type="xml">
             <search string="Search MO Commission">
                 <searchpanel>
-                    <field name="commission_status" string="Commission Status" icon="fa-tasks" select="multi" enable_counters="1"/>
+                    <!-- expand: show EVERY status, even with zero records —
+                         an empty "Pending Approval" queue is information too. -->
+                    <field name="commission_status" string="Commission Status" icon="fa-tasks" select="multi" enable_counters="1" expand="1"/>
                     <field name="state" string="MO Status" icon="fa-cog" select="multi" enable_counters="1"/>
                 </searchpanel>
                 <field name="name" string="MO"/>
@@ -102,7 +106,9 @@
                 <filter string="Not Applicable" name="filter_not_applicable" domain="[('commission_status', '=', 'not_applicable')]"/>
                 <filter string="Pending Generation" name="filter_pending_generation"
                         domain="[('commission_status', '=', 'pending_generation')]"/>
-                <filter string="Applied" name="filter_applied"
+                <filter string="Pending Approval" name="filter_pending_approval"
+                        domain="[('commission_status', '=', 'pending_approval')]"/>
+                <filter string="Approved" name="filter_applied"
                         domain="[('commission_status', '=', 'applied')]"/>
                 <filter string="Paid" name="filter_paid"
                         domain="[('commission_status', '=', 'paid')]"/>

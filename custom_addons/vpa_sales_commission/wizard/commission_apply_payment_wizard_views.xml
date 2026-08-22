@@ -76,6 +76,11 @@
                             <field name="unallocated_amount" widget="monetary"
                                    string="Unallocated"
                                    options="{'currency_field': 'payment_currency_id'}"/>
+                            <!-- Split payments: Total 10,000 / Unallocated 858.95
+                                 begs "where is the rest?" — this column answers
+                                 (e.g. "2024: TZS 26,051,992.50"). -->
+                            <field name="allocated_years" string="Allocated To"
+                                   optional="show"/>
                             <field name="amount_to_apply" widget="monetary"
                                    string="To Apply"
                                    options="{'currency_field': 'payment_currency_id'}"

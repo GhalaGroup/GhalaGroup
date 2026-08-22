@@ -4,8 +4,8 @@
 {
     'name': 'VPA Effective Date Change',
     'author': 'VPA Solutions Limited',
-    'version': '19.0.1.2.2',
-    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.2.2)',
+    'version': '19.0.1.2.3',
+    'summary': 'Change effective dates for stock transfers and manufacturing orders (v1.2.3)',
     'license': 'OPL-1',
     'sequence': 10,
     'description': """
@@ -34,6 +34,10 @@ Key Features
 
 Version History
 ---------------
+* **19.0.1.2.3** - Bug fix: Sales Order date-change chatter message
+  - The "Order Date Changed" note now renders as formatted text (bold labels,
+    line breaks) instead of showing literal HTML tags
+
 * **19.0.1.2.2** - Bug fix: Multi-company access error on validation
   - Fixed AccessError ("no read access to Companies") when validating transfers
     that reference another company (e.g. inter-company purchases)

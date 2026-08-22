@@ -2,7 +2,7 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, tools
+from odoo import api, fields, models, tools
 
 QUARTER_SELECTION = [
     ('Q1', 'Q1 (Jan–Mar)'),
@@ -27,13 +27,27 @@ class SoCommissionReport(models.Model):
 
     # Sales Order info
     sale_order_name = fields.Char(string='Sales Order', readonly=True)
+    sale_order_id = fields.Many2one('sale.order', string='Sales Order Ref', readonly=True)
     partner_id = fields.Many2one('res.partner', string='Client', readonly=True)
+    customer_ref = fields.Char(
+        string='Customer Ref', readonly=True,
+        help='The customer/project reference of the Sales Order '
+             '(Customer Reference field) — identifies which project the '
+             'commission belongs to.')
     employee_id = fields.Many2one('hr.employee', string='Employee', readonly=True)
     company_id = fields.Many2one('res.company', string='Company', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True)
 
-    # Date fields for filtering/grouping
-    date_year = fields.Char(string='Year', readonly=True)
+    @api.model
+    def _get_year_selection(self):
+        current_year = fields.Date.today().year
+        return [(str(y), str(y)) for y in range(2020, current_year + 3)]
+
+    # Date fields for filtering/grouping. Year is a SELECTION (values match
+    # the stored 'YYYY' strings) so it can live in the searchpanel — char
+    # fields cannot.
+    date_year = fields.Selection(
+        selection='_get_year_selection', string='Year', readonly=True)
     date_quarter = fields.Selection(QUARTER_SELECTION, string='Quarter', readonly=True)
     date_month = fields.Selection(MONTH_SELECTION, string='Month', readonly=True)
     date = fields.Date(string='Date', readonly=True)
@@ -52,6 +66,28 @@ class SoCommissionReport(models.Model):
     # Status summary
     pending_amount = fields.Float(string='Pending', readonly=True, digits=(12, 2))
     confirmed_amount = fields.Float(string='Confirmed', readonly=True, digits=(12, 2))
+
+    def action_open_sale_order(self):
+        """Open the Sales Order behind this row."""
+        self.ensure_one()
+        if not self.sale_order_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'warning',
+                    'title': 'No Sales Order',
+                    'message': 'This commission is not linked to a Sales Order '
+                               '(manual or MO-only commission).',
+                },
+            }
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'view_mode': 'form',
+            'res_id': self.sale_order_id.id,
+            'target': 'current',
+        }
 
     def action_print_pdf(self):
         """Print PDF for all currently displayed records (respects active filters)."""
@@ -75,15 +111,20 @@ class SoCommissionReport(models.Model):
                 SELECT
                     ROW_NUMBER() OVER (ORDER BY
                         COALESCE(cl.sale_order_name, 'No SO'),
+                        cl.date_year,
                         cl.employee_id,
                         rc.id
                     ) AS id,
                     COALESCE(cl.sale_order_name, 'No SO') AS sale_order_name,
+                    COALESCE(so_via_line.id, so_via_origin.id) AS sale_order_id,
                     COALESCE(so_via_line.partner_id, so_via_origin.partner_id) AS partner_id,
+                    COALESCE(so_via_line.client_order_ref, so_via_origin.client_order_ref) AS customer_ref,
                     cl.employee_id AS employee_id,
                     rc.id AS company_id,
                     rc.currency_id AS currency_id,
-                    MAX(cl.date_year) AS date_year,
+                    -- One row per SO *per year*: commission settles per year,
+                    -- so an SO spanning years must not merge across them.
+                    cl.date_year AS date_year,
                     CASE EXTRACT(QUARTER FROM MAX(cl.date))
                         WHEN 1 THEN 'Q1'
                         WHEN 2 THEN 'Q2'
@@ -111,7 +152,10 @@ class SoCommissionReport(models.Model):
                 WHERE cl.state != 'cancelled'
                 GROUP BY
                     COALESCE(cl.sale_order_name, 'No SO'),
+                    COALESCE(so_via_line.id, so_via_origin.id),
                     COALESCE(so_via_line.partner_id, so_via_origin.partner_id),
+                    COALESCE(so_via_line.client_order_ref, so_via_origin.client_order_ref),
+                    cl.date_year,
                     cl.employee_id,
                     rc.id,
                     rc.currency_id
