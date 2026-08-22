@@ -10,6 +10,8 @@
         <field name="arch" type="xml">
             <form string="Commission Statement">
                 <group>
+                    <!-- company_id feeds the employee domain (scheme in company) -->
+                    <field name="company_id" invisible="1"/>
                     <field name="employee_id"/>
                     <field name="year"/>
                     <field name="month"/>

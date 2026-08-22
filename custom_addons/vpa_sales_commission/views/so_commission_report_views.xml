@@ -16,8 +16,15 @@
                             class="btn-primary"/>
                 </control>
                 <field name="sale_order_name" string="Sales Order"/>
+                <!-- One click straight to the Sales Order form -->
+                <button name="action_open_sale_order" type="object"
+                        icon="fa-external-link" title="Open Sales Order"
+                        invisible="not sale_order_id"/>
+                <field name="sale_order_id" column_invisible="1"/>
                 <field name="partner_id" string="Client"/>
+                <field name="customer_ref" string="Customer Ref" optional="show"/>
                 <field name="employee_id" string="Employee"/>
+                <field name="date_year" string="Year" optional="show"/>
                 <field name="mo_count" string="# MOs"/>
                 <field name="rate" string="Rate %" widget="float" digits="[5,2]"/>
                 <field name="base_amount" string="Base Amount" widget="monetary"
@@ -34,7 +41,6 @@
                        options="{'currency_field': 'currency_id'}"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="company_id" column_invisible="1"/>
-                <field name="date_year" column_invisible="1"/>
                 <field name="date_quarter" column_invisible="1"/>
                 <field name="date_month" column_invisible="1"/>
                 <field name="date" column_invisible="1"/>
@@ -64,10 +70,13 @@
         <field name="arch" type="xml">
             <search string="Search Commission by SO">
                 <searchpanel>
+                    <field name="date_year" string="Year" icon="fa-calendar"
+                           select="multi" enable_counters="1"/>
                     <field name="employee_id" string="Employee" icon="fa-user"
                            select="multi" enable_counters="1" limit="20"/>
                 </searchpanel>
                 <field name="sale_order_name" string="Sales Order"/>
+                <field name="customer_ref" string="Customer Ref"/>
                 <field name="partner_id" string="Client"/>
                 <field name="employee_id"/>
                 <separator/>
@@ -103,7 +112,7 @@
                 <filter string="Client" name="group_partner"
                         context="{'group_by': 'partner_id'}"/>
                 <filter string="Year" name="group_year"
-                        context="{'group_by': 'date:year'}"/>
+                        context="{'group_by': 'date_year'}"/>
                 <filter string="Quarter" name="group_quarter"
                         context="{'group_by': 'date:quarter'}"/>
                 <filter string="Month" name="group_month"
@@ -139,7 +148,9 @@ action = env.ref('vpa_sales_commission.action_report_so_commission_report').repo
         <field name="res_model">so.commission.report</field>
         <field name="view_mode">list,pivot</field>
         <field name="search_view_id" ref="so_commission_report_view_search"/>
-        <field name="context">{}</field>
+        <!-- Opens grouped by year: commission settles per year, so the list
+             separates years by default (ungroup any time via the search bar). -->
+        <field name="context">{'search_default_group_year': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No commission data found

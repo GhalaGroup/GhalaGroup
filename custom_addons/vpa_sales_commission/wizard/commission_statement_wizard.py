@@ -31,6 +31,9 @@ class CommissionStatementWizard(models.TransientModel):
         'hr.employee',
         string='Employee',
         required=True,
+        domain="[('commission_scheme_ids.company_id', '=', company_id)]",
+        help='Only employees with a commission scheme in the selected '
+             'company — a statement is meaningless for anyone else.',
     )
 
     @api.model
@@ -113,12 +116,17 @@ class CommissionStatementWizard(models.TransientModel):
         return self.env['vpa.commission.line'].search(domain, order='date asc')
 
     def get_totals(self, lines):
-        """Compute totals from commission lines."""
+        """Compute totals from commission lines.
+
+        Paid uses the lines' PROPORTIONAL settlement (amount_paid), not the
+        line state: cash moves at year level, and line state only flips to
+        'paid' when a year closes — state-based totals showed Paid 0.00 on
+        fully-paid open years."""
         self.ensure_one()
         total_earned = sum(lines.mapped('amount'))
         total_confirmed = sum(lines.filtered(lambda l: l.state in ('confirmed', 'paid')).mapped('amount'))
         total_pending = sum(lines.filtered(lambda l: l.state == 'pending').mapped('amount'))
-        total_paid = sum(lines.filtered(lambda l: l.state == 'paid').mapped('amount'))
+        total_paid = sum(lines.mapped('amount_paid'))
         return {
             'total_earned': total_earned,
             'total_confirmed': total_confirmed,
@@ -127,6 +135,19 @@ class CommissionStatementWizard(models.TransientModel):
             'outstanding': max(0.0, total_earned - total_paid),
         }
 
+    def get_year_settlements(self):
+        """The scheme-year settlement records behind this statement — the
+        same cash figures the Commission Centre card shows (guarantee, total
+        to pay, cash paid, write-offs, still to pay). Printed alongside the
+        earned-commission detail so the employee gets the FULL picture:
+        performance AND money actually received."""
+        self.ensure_one()
+        return self.env['vpa.commission.scheme.year'].search([
+            ('employee_id', '=', self.employee_id.id),
+            ('company_id', '=', self.company_id.id),
+            ('year', '=', self.year),
+        ])
+
     def get_so_lines(self, lines):
         """Group commission lines by Sales Order for SO-consolidated report."""
         so_groups = {}
@@ -134,11 +155,15 @@ class CommissionStatementWizard(models.TransientModel):
             so_key = line.sale_order_name or 'No SO'
             if so_key not in so_groups:
                 partner_name = False
+                customer_ref = False
                 if line.production_id and line.production_id.sale_line_id:
-                    partner_name = line.production_id.sale_line_id.order_id.partner_id.name
+                    order = line.production_id.sale_line_id.order_id
+                    partner_name = order.partner_id.name
+                    customer_ref = order.client_order_ref
                 so_groups[so_key] = {
                     'so_name': so_key,
                     'client_name': partner_name or '\u2014',
+                    'customer_ref': customer_ref or '\u2014',
                     'mo_count': 0,
                     'total_amount': 0.0,
                     'total_paid': 0.0,

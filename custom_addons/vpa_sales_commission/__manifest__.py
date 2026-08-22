@@ -3,9 +3,9 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA Production Commission',
-    'version': '19.0.2.5.2',
+    'version': '19.0.2.6.0',
     'category': 'Manufacturing/Commission',
-    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.5.2)',
+    'summary': 'Complete production commission lifecycle: approval, guarantee & true-up billing, multi-currency payments (v2.6.0)',
     'description': """
 VPA Production Commission
 =========================
@@ -29,6 +29,28 @@ Key Features
 
 Version History
 ---------------
+* **19.0.2.6.0** - Cash-truth reports, FX absorption & two-way payment mirror
+  - Cross-currency payment matches absorb unpayable sub-cent slivers inside
+    the reconciliation itself (no 7.50-TZS stuck years, no write-off journal
+    entries), with the same result whichever order payments are applied in
+  - Two-way mirror: unreconciling or reconciling a commission bill in
+    accounting updates the commission allocations automatically
+    (lifecycle-safe on reset-to-draft; closed years stay guarded)
+  - Year cards snap sub-cent FX noise to settled; the Apply dialog prefill
+    floors to the payment currency so it can never overpay a year; split
+    payments show an aggregated "Allocated To"
+  - Reports tell the cash truth: line Paid = the year's proportional
+    settlement everywhere (statements, SO/MO analyses); statements gained a
+    "Year Cash Settlement" section; year summary / annual statement /
+    monthly billing summary show cash paid and still-to-pay
+  - Commission by SO: one row per SO per year, Year in the side panel with
+    default year grouping, Customer Reference column (list and PDFs),
+    one-click open of the Sales Order
+  - Commission by MO: new "Pending Approval" status completes the work
+    queue; the side panel always shows every status
+  - Commission Statement wizard lists only employees that have a
+    commission scheme
+
 * **19.0.2.5.2** - Payment dialog column polish
   - Compact column labels (Total / Unallocated / To Apply / Applied) so
     amounts render without truncation; Memo column hidden by default

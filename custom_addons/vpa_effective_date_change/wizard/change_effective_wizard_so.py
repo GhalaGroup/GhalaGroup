@@ -2,6 +2,8 @@
 # Copyright (C) 2025 VPA Solutions Limited
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 
+from markupsafe import Markup
+
 from odoo import models, fields, api
 
 
@@ -73,12 +75,14 @@ class ChangeEffectiveWizardSO(models.TransientModel):
         if draft_invoices:
             updated_docs.append(f"Invoices: {', '.join(draft_invoices.mapped('name'))}")
 
-        body = f"<b>Order Date Changed</b><br/>" \
-               f"<b>From:</b> {old_str}<br/>" \
-               f"<b>To:</b> {new_str}<br/>"
+        body = Markup(
+            "<b>Order Date Changed</b><br/>"
+            "<b>From:</b> %s<br/>"
+            "<b>To:</b> %s<br/>"
+        ) % (old_str, new_str)
         if updated_docs:
-            body += f"<br/><b>Related documents updated:</b><br/>" \
-                    + "<br/>".join(updated_docs)
+            body += Markup("<br/><b>Related documents updated:</b><br/>") \
+                    + Markup("<br/>").join(updated_docs)
 
         so.message_post(body=body, subtype_xmlid='mail.mt_note')
 

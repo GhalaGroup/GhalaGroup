@@ -79,11 +79,16 @@ class AccountPayment(models.Model):
             # formatLang: locale digits + currency symbol + correct decimal
             # places — a hardcoded ',.2f' hid the currency entirely in the
             # multi-currency payment list this column exists to clarify.
-            allocs = pay.sudo().commission_allocation_ids
+            # Aggregated PER YEAR: a payment applied to the same year in
+            # several steps holds several allocation rows, and listing each
+            # ("2025: $426.72, 2025: $54.02, ...") reads as noise.
+            totals = {}
+            for a in pay.sudo().commission_allocation_ids:
+                totals[a.scheme_year_id] = totals.get(a.scheme_year_id, 0.0) + a.amount
             pay.commission_allocated_years = ', '.join(
-                f"{a.scheme_year_id.year}: "
-                f"{formatLang(self.env, a.amount, currency_obj=a.currency_id)}"
-                for a in allocs
+                f"{y.year}: "
+                f"{formatLang(self.env, amount, currency_obj=pay.currency_id)}"
+                for y, amount in sorted(totals.items(), key=lambda t: t[0].year)
             ) or False
 
     @api.depends_context('company')
@@ -168,7 +173,9 @@ class AccountPayment(models.Model):
                         amount=formatLang(self.env, pay.amount, currency_obj=pay.currency_id),
                     ))
         res = super().write(vals)
-        if year_moves:
+        # _skip_commission_resync: the link change came FROM accounting (the
+        # manual-unreconcile mirror) — the matches already are the truth.
+        if year_moves and not self.env.context.get('_skip_commission_resync'):
             Allocation = self.env['vpa.commission.payment.allocation'].sudo()
             for pay, old_year in year_moves:
                 new_year = pay.sudo().commission_year_id
@@ -178,6 +185,10 @@ class AccountPayment(models.Model):
                     Allocation._sync_payment_year_reconciliation(pay, old_year)
                 if new_year:
                     Allocation._sync_payment_year_reconciliation(pay, new_year)
+        if year_moves:
+            for pay, old_year in year_moves:
+                (old_year | pay.sudo().commission_year_id
+                 )._refresh_line_settlement()
         return res
 
     def _commission_revert_from_year(self, year):

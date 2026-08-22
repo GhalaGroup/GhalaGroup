@@ -329,6 +329,8 @@ class CommissionPayYearWizard(models.TransientModel):
         # Rounding write-off: close the small remainder so nothing stays open.
         if self.writeoff_difference:
             self._create_writeoff(sy, partner, payment)
+            # The write-off changes the year's settlement ratio too.
+            sy._refresh_line_settlement()
 
         # Optionally pre-create the journal transaction so the user only has to
         # reconcile it once the money movement is confirmed.

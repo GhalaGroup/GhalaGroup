@@ -397,13 +397,30 @@ class VpaCommissionLine(models.Model):
                 # Manual/sales lines have no production order, so no per-unit split
                 line.commission_per_item = 0.0
 
-    @api.depends('amount', 'state')
+    @api.depends('amount', 'state', 'date_year', 'scheme_id')
     def _compute_amount_paid(self):
+        """Cash is paid at YEAR level (allocations / year-linked payments),
+        not per line — so a line's paid amount is its PROPORTIONAL share of
+        how settled its year is: a fully paid year shows every line paid
+        (even below the guarantee: the guarantee covered them), a half-paid
+        year shows every line 50% paid. Lines flipped to 'paid' by a year
+        close stay fully paid regardless.
+
+        Year cash is outside this compute's dependency graph; the payment-
+        side mutation points call scheme_year._refresh_line_settlement()."""
+        ratios = {}
         for line in self:
+            key = (line.scheme_id.id, line.date_year)
+            if key not in ratios:
+                sy = line.scheme_id.year_ids.filtered(
+                    lambda y: y.year == line.date_year)[:1]
+                ratios[key] = sy._settlement_ratio() if sy else 0.0
             if line.state == 'paid':
                 line.amount_paid = line.amount
             else:
-                line.amount_paid = 0.0
+                paid = line.amount * ratios[key]
+                line.amount_paid = (line.currency_id.round(paid)
+                                    if line.currency_id else round(paid, 2))
             line.amount_due = line.amount - line.amount_paid
 
     @api.depends('bill_id', 'bill_id.payment_state')

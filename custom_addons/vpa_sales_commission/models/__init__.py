@@ -5,6 +5,7 @@
 from . import vpa_commission_scheme
 from . import vpa_commission_scheme_year
 from . import account_move
+from . import account_partial_reconcile
 from . import account_payment
 from . import vpa_commission_payment_allocation
 from . import vpa_commission_line

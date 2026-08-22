@@ -4,6 +4,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_round
 
 
 class VpaCommissionApplyPaymentWizard(models.TransientModel):
@@ -220,6 +221,13 @@ class VpaCommissionApplyPaymentWizardLine(models.TransientModel):
         string='Still Unallocated',
         currency_field='payment_currency_id',
     )
+    allocated_years = fields.Char(
+        related='payment_id.commission_allocated_years',
+        string='Allocated To',
+        help='Where the rest of this payment already went: the commission '
+             'years it is applied to, with the amount per year. Explains a '
+             'split payment whose Total and Unallocated differ.',
+    )
     amount_to_apply = fields.Monetary(
         string='Amount to Apply',
         currency_field='payment_currency_id',
@@ -253,7 +261,18 @@ class VpaCommissionApplyPaymentWizardLine(models.TransientModel):
                         remaining, line.payment_currency_id,
                         wiz.company_id or self.env.company,
                         line.payment_id.date or fields.Date.today(),
+                        round=False,
                     )
+                    # FLOOR to the payment currency, never round up: half-up
+                    # rounding overpaid the year by up to one cent's worth
+                    # (e.g. +5.95 TZS on a USD cent). Rounding down leaves at
+                    # most an unpayable sub-cent sliver, which the match
+                    # absorption and the card's granularity snap treat as
+                    # settled.
+                    remaining = float_round(
+                        remaining,
+                        precision_rounding=line.payment_currency_id.rounding,
+                        rounding_method='DOWN')
                 line.amount_to_apply = min(line.unallocated_amount, remaining)
                 if line.payment_currency_id.is_zero(line.amount_to_apply):
                     # Say it NOW, not as a cryptic error on Apply: the year
