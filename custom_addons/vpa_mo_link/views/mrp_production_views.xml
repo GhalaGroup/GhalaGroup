@@ -24,6 +24,186 @@
         </field>
     </record>
 
+    <!-- Add "Sales Order" group-by option to MO search view -->
+    <record id="view_mrp_production_filter_so_group" model="ir.ui.view">
+        <field name="name">mrp.production.search.so.group</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.view_mrp_production_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="inside">
+                <filter string="Sales Order" name="group_vpa_so" domain="[]" context="{'group_by': 'vpa_so_group'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sales Orders section: one card per Sales Order with MOs, plus an "Other Orders" card -->
+    <record id="view_vpa_mo_so_group_kanban" model="ir.ui.view">
+        <field name="name">vpa.mo.so.group.kanban</field>
+        <field name="model">vpa.mo.so.group</field>
+        <field name="arch" type="xml">
+            <kanban action="action_view_mos" type="object" create="false" quick_create="false" default_order="sort_key, name">
+                <field name="sale_id"/>
+                <field name="currency_id"/>
+                <field name="progress"/>
+                <field name="sort_key"/>
+                <field name="start_overdue"/>
+                <templates>
+                    <t t-name="card" class="p-2">
+                        <!-- Sales Order card -->
+                        <main t-if="!record.sort_key.raw_value">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="min-w-0">
+                                    <field class="fw-bold fs-5" name="name"/>
+                                    <field t-if="record.partner_id.raw_value" name="partner_id" class="d-block text-truncate fw-medium"/>
+                                </div>
+                                <button t-if="record.sale_id.raw_value"
+                                        type="object" name="action_view_sale_order"
+                                        class="btn btn-sm btn-secondary ms-2 flex-shrink-0"
+                                        title="Open Sales Order">SO</button>
+                            </div>
+                            <div t-if="record.client_order_ref.raw_value" class="text-muted small text-truncate">
+                                <i class="fa fa-tag me-1" title="Customer Reference"/><field name="client_order_ref"/>
+                            </div>
+                            <div t-if="record.user_id.raw_value" class="text-muted small">
+                                <i class="fa fa-user me-1" title="Salesperson"/><field name="user_id"/>
+                            </div>
+                            <div t-if="record.amount_total.raw_value" class="small fw-bold mt-1"
+                                 groups="sales_team.group_sale_salesman">
+                                <field name="amount_total" widget="monetary"/>
+                            </div>
+                            <div t-if="record.commitment_date.raw_value" class="small d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-muted"><i class="fa fa-calendar me-1" title="Delivery Date"/>Delivery</span>
+                                <span class="text-nowrap"><field name="commitment_date"/></span>
+                            </div>
+                            <div t-if="record.next_date_start.raw_value" class="small d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-muted"><i class="fa fa-clock-o me-1" title="Planned start of the next open Manufacturing Order"/>Planned start</span>
+                                <span t-if="!record.start_overdue.raw_value" class="text-nowrap"><field name="next_date_start"/></span>
+                                <span t-else="" class="o_vpa_overdue_chip text-nowrap" title="Overdue — the planned start date has passed">
+                                    <i class="fa fa-exclamation-triangle me-1"/><field name="next_date_start"/>
+                                </span>
+                            </div>
+                            <div t-if="record.progress.raw_value" class="progress mt-2" style="height: 6px;"
+                                 t-att-title="record.progress.raw_value + '% produced'">
+                                <div class="progress-bar bg-success" t-attf-style="width: {{ record.progress.raw_value }}%"/>
+                            </div>
+                            <div class="mt-2 d-flex align-items-center">
+                                <span class="badge rounded-pill text-bg-primary me-1"><field name="mo_count"/> MOs</span>
+                                <span t-if="record.mo_todo_count.raw_value" class="badge rounded-pill text-bg-warning me-1"><field name="mo_todo_count"/> to do</span>
+                                <span t-if="record.mo_done_count.raw_value" class="badge rounded-pill text-bg-success me-1"><field name="mo_done_count"/> done</span>
+                                <span class="ms-auto text-muted small text-nowrap">Qty: <field name="qty_total" widget="float" options="{'digits': [16, 0]}"/></span>
+                            </div>
+                        </main>
+                        <!-- Other Orders: full-width section with stat tiles -->
+                        <main t-else="" class="o_vpa_oo_main">
+                            <div class="o_vpa_oo_head">
+                                <span class="o_vpa_oo_icon">
+                                    <i class="fa fa-inbox" title="Not linked to a Sales Order"/>
+                                </span>
+                                <div>
+                                    <div class="fw-bold fs-5">Other Orders</div>
+                                    <div class="text-muted small">Open manufacturing orders not linked to any sales order</div>
+                                </div>
+                            </div>
+                            <div class="o_vpa_oo_stats">
+                                <div class="o_vpa_stat">
+                                    <div class="o_vpa_stat_label">Open orders</div>
+                                    <div class="o_vpa_stat_value"><field name="mo_count"/></div>
+                                </div>
+                                <div class="o_vpa_stat">
+                                    <div class="o_vpa_stat_label">Quantity</div>
+                                    <div class="o_vpa_stat_value"><field name="qty_total" widget="float" options="{'digits': [16, 0]}"/></div>
+                                </div>
+                                <div class="o_vpa_stat">
+                                    <div class="o_vpa_stat_label">Oldest created</div>
+                                    <div class="o_vpa_stat_value"><field name="oldest_mo_date"/></div>
+                                </div>
+                                <div class="o_vpa_stat">
+                                    <div class="o_vpa_stat_label">Newest created</div>
+                                    <div class="o_vpa_stat_value"><field name="newest_mo_date"/></div>
+                                </div>
+                                <div t-if="record.next_date_start.raw_value" class="o_vpa_stat">
+                                    <div class="o_vpa_stat_label">Next planned start</div>
+                                    <div class="o_vpa_stat_value">
+                                        <span t-if="!record.start_overdue.raw_value"><field name="next_date_start"/></span>
+                                        <span t-else="" class="o_vpa_overdue_chip" title="Overdue — the planned start date has passed">
+                                            <i class="fa fa-exclamation-triangle me-1"/><field name="next_date_start"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_vpa_mo_so_group_search" model="ir.ui.view">
+        <field name="name">vpa.mo.so.group.search</field>
+        <field name="model">vpa.mo.so.group</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Sales Order"/>
+                <field name="partner_id" string="Customer"/>
+                <filter string="Pending" name="pending" domain="[('mo_todo_count', '>', 0)]"
+                        help="Orders that still have Manufacturing Orders to produce"/>
+                <filter string="Completed" name="completed" domain="[('mo_todo_count', '=', 0)]"
+                        help="Orders with all Manufacturing Orders done"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_mrp_production_by_sale_order" model="ir.actions.act_window">
+        <field name="name">Sales Orders</field>
+        <field name="res_model">vpa.mo.so.group</field>
+        <field name="view_mode">kanban</field>
+        <field name="search_view_id" ref="view_vpa_mo_so_group_search"/>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No manufacturing orders found.
+            </p>
+            <p>
+                Each card is a Sales Order with its Manufacturing Orders.
+                Orders without a Sales Order appear under "Other Orders".
+                Click a card to see its Manufacturing Orders.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mrp_production_by_sale_order"
+              name="Sales Orders"
+              parent="mrp.menu_mrp_manufacturing"
+              action="action_mrp_production_by_sale_order"
+              sequence="2"
+              groups="mrp.group_mrp_user"/>
+
+    <!-- Other Orders: MOs not linked to any Sales Order, pending ones by default -->
+    <record id="action_mrp_production_other_orders" model="ir.actions.act_window">
+        <field name="name">Other Orders</field>
+        <field name="res_model">mrp.production</field>
+        <field name="view_mode">list,kanban,form,calendar</field>
+        <field name="search_view_id" ref="mrp.view_mrp_production_filter"/>
+        <field name="domain">[('vpa_so_group', '=', 'Other Orders')]</field>
+        <field name="context">{'search_default_todo': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No unlinked manufacturing orders.
+            </p>
+            <p>
+                Manufacturing Orders that are not linked to any Sales Order appear here.
+                Remove the "To Do" filter to also see finished ones.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_mrp_production_other_orders"
+              name="Other Orders"
+              parent="mrp.menu_mrp_manufacturing"
+              action="action_mrp_production_other_orders"
+              sequence="3"
+              groups="mrp.group_mrp_user"/>
+
     <!-- Add lot_reference to MO tree view -->
     <record id="view_mrp_production_tree_lot_reference" model="ir.ui.view">
         <field name="name">mrp.production.tree.lot.reference</field>

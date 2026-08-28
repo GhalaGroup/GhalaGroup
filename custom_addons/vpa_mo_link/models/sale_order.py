@@ -5,6 +5,37 @@ from odoo import models, api, _
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        orders = super().create(vals_list)
+        orders._vpa_recompute_mo_so_groups()
+        return orders
+
+    def write(self, vals):
+        old_names = self.mapped('name') if 'name' in vals else []
+        res = super().write(vals)
+        if 'name' in vals:
+            self._vpa_recompute_mo_so_groups(extra_names=old_names)
+        return res
+
+    def _vpa_recompute_mo_so_groups(self, extra_names=None):
+        """
+        Recompute the Sales Order grouping on MOs whose Source matches this SO.
+
+        Needed because vpa_so_group only depends on the MO's origin field:
+        an MO created before its SO (manual workflow) would otherwise stay
+        in 'Other Orders' until its origin is rewritten.
+        """
+        names = set(self.mapped('name')) | set(extra_names or [])
+        names.discard(False)
+        if not names:
+            return
+        productions = self.env['mrp.production'].sudo().search([
+            ('origin', 'in', list(names))
+        ])
+        if productions:
+            productions._compute_vpa_so_group()
+
     def action_create_remaining_mo(self):
         """
         Create Manufacturing Orders for remaining quantities.

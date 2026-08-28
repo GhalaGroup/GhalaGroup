@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Multi-company: users only see order cards of their allowed companies -->
+    <record id="rule_vpa_mo_so_group_company" model="ir.rule">
+        <field name="name">Manufacturing Orders by Sales Order: multi-company</field>
+        <field name="model_id" ref="model_vpa_mo_so_group"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+</odoo>

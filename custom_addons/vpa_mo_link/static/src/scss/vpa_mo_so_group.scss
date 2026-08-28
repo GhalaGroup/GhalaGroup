@@ -1,0 +1,92 @@
+// Other Orders: full-width stat section at the end of the Sales Orders kanban.
+// The card root is targeted via :has() so no dynamic class on the root is needed.
+.o_kanban_ungrouped .o_kanban_record:has(.o_vpa_oo_main) {
+    position: relative;
+    width: calc(100% - var(--KanbanRecord-margin-h, 8px) * 2);
+    margin-top: 44px;
+    border-left: 4px solid #f0ad4e !important;
+
+    // thin neutral separator line above the section
+    &::before {
+        content: "";
+        position: absolute;
+        top: -22px;
+        left: 0;
+        right: 0;
+        border-top: 1px solid rgba(128, 128, 128, 0.3);
+    }
+}
+
+// Soft red pill for overdue planned-start dates (SO cards + Other Orders stats)
+.o_vpa_overdue_chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(220, 53, 69, 0.16);
+    color: #e4737c;
+    font-weight: 600;
+
+    .fa {
+        font-size: 0.8em;
+    }
+}
+
+.o_vpa_oo_main {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+    row-gap: 1rem;
+    padding: 0.75rem 0.5rem;
+
+    .o_vpa_oo_head {
+        display: flex;
+        align-items: center;
+        margin-right: auto;
+        padding-right: 1.5rem;
+    }
+
+    .o_vpa_oo_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        margin-right: 0.75rem;
+        border-radius: 8px;
+        background: rgba(240, 173, 78, 0.18);
+        color: #f0ad4e;
+        font-size: 1.05rem;
+    }
+
+    .o_vpa_oo_stats {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        row-gap: 1rem;
+    }
+
+    .o_vpa_stat {
+        min-width: 6.5rem;
+        padding: 0 1.5rem;
+        border-left: 1px solid rgba(128, 128, 128, 0.25);
+        text-align: left;
+    }
+
+    .o_vpa_stat_label {
+        font-size: 0.75rem;
+        opacity: 0.65;
+        margin-bottom: 0.125rem;
+        white-space: nowrap;
+    }
+
+    .o_vpa_stat_value {
+        font-size: 1.15rem;
+        font-weight: 600;
+        line-height: 1.25;
+        white-space: nowrap;
+    }
+}

@@ -3,7 +3,7 @@
 # License OPL-1 - See LICENSE file for full copyright and licensing details.
 {
     'name': 'VPA - Manufacturing Order Link',
-    'version': '19.0.1.3.2',
+    'version': '19.0.1.4.0',
     'category': 'Manufacturing',
     'summary': 'Advanced Manufacturing Order management with flexible workflows, manual linking, and lot splitting',
     'price': 199.00,
@@ -23,6 +23,9 @@ Key Features:
 5. **Manufacture - Draft MO Route**: Dedicated route that creates MOs in draft state
 6. **Split MO**: Divide one MO into multiple production lots with custom quantities and automatic renumbering
 7. **Create Remaining MO**: Automatically create MOs for remaining SO quantities
+8. **Sales Orders Dashboard**: Card view of Sales Orders with their MOs (customer, reference, amount, planned start, progress)
+9. **Other Orders Section**: Full-width overview of open MOs not linked to any Sales Order, plus dedicated menu
+10. **Manufacturing Home**: Per-user preference for the Manufacturing app landing page
 
 Workflows Supported:
 --------------------
@@ -56,6 +59,7 @@ Technical Details:
 
 Version History:
 ----------------
+* **19.0.1.4.0** - Sales Orders dashboard (cards with customer, reference, amount, planned start, overdue flag, progress), Other Orders section and dedicated menu for unlinked MOs, group-by Sales Order in MO views, per-user Manufacturing Home preference, multi-company support
 * **19.0.1.3.2** - Fixed MO list Reference and Start date columns being truncated on page load
 * **19.0.1.3.0** - Enhanced Split MO with automatic lot renumbering on deletion
 * **19.0.1.2.0** - Added Split MO and Create Remaining MO features
@@ -77,16 +81,25 @@ Copyright (C) 2025 VPA Software Limited
     'support': 'support@vpasoftware.com',
     'images': ['static/description/icon.png'],
     'depends': ['sale_mrp', 'mrp', 'stock'],
+    'assets': {
+        'web.assets_backend': [
+            'vpa_mo_link/static/src/scss/vpa_mo_so_group.scss',
+        ],
+    },
     'data': [
         'security/ir.model.access.csv',
+        'security/vpa_mo_so_group_security.xml',
         'views/mo_link_wizard_views.xml',
         'views/mo_split_wizard_views.xml',
         'views/mrp_production_views.xml',
         'views/sale_order_views.xml',
+        'views/res_users_views.xml',
         'data/stock_route_data.xml',
         'data/ir_actions_server.xml',
+        'data/vpa_mrp_home_data.xml',
     ],
     'post_init_hook': 'post_init_hook',
+    'uninstall_hook': 'uninstall_hook',
     'installable': True,
     'application': False,
     'auto_install': False,

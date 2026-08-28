@@ -17,6 +17,32 @@ class MrpProduction(models.Model):
         help="The specific SO line that triggered creation of this MO.",
         index=True,
     )
+    vpa_so_group = fields.Char(
+        string='Sales Order',
+        compute='_compute_vpa_so_group',
+        store=True,
+        help="Sales Order this MO is linked to (via the Source document), "
+             "or 'Other Orders' when not linked to any Sales Order.",
+    )
+
+    @api.depends('origin')
+    def _compute_vpa_so_group(self):
+        """
+        Group label for the 'Sales Orders' menu: the linked SO name when the
+        Source document matches an existing Sales Order, otherwise 'Other Orders'.
+        """
+        origins = {p.origin for p in self if p.origin}
+        so_names = set()
+        if origins:
+            # sudo: stored compute must not depend on the triggering user's record rules
+            so_names = set(
+                self.env['sale.order'].sudo().search([('name', 'in', list(origins))]).mapped('name')
+            )
+        for production in self:
+            if production.origin and production.origin in so_names:
+                production.vpa_so_group = production.origin
+            else:
+                production.vpa_so_group = 'Other Orders'
 
     def action_split_mo(self):
         """Open wizard to split this MO into multiple lots."""

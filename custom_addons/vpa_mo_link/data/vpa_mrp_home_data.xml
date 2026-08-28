@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Router: opens each user's preferred Manufacturing page (Preferences > Manufacturing Home) -->
+    <record id="action_vpa_mrp_home" model="ir.actions.server">
+        <field name="name">Manufacturing</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">
+xmlids = {
+    'overview': 'mrp.mrp_workcenter_kanban_action',
+    'mo': 'mrp.mrp_production_action',
+    'so': 'vpa_mo_link.action_mrp_production_by_sale_order',
+    'other': 'vpa_mo_link.action_mrp_production_other_orders',
+}
+try:
+    action = env['ir.actions.act_window']._for_xml_id(xmlids.get(env.user.vpa_mrp_home) or xmlids['overview'])
+except Exception:
+    action = env['ir.actions.act_window']._for_xml_id(xmlids['overview'])
+        </field>
+    </record>
+
+    <!-- Clicking the Manufacturing app now goes through the router instead of the first menu -->
+    <record id="mrp.menu_mrp_root" model="ir.ui.menu">
+        <field name="action" eval="'ir.actions.server,' + str(ref('action_vpa_mrp_home'))"/>
+    </record>
+
+</odoo>

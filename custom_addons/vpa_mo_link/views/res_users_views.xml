@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Let every user pick their Manufacturing landing page from Preferences (avatar > Preferences) -->
+    <record id="view_users_preferences_home_action" model="ir.ui.view">
+        <field name="name">res.users.preferences.mrp.home</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='other_preferences']" position="inside">
+                <field name="vpa_mrp_home" readonly="0" groups="mrp.group_mrp_user"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
